@@ -1,34 +1,28 @@
 {
-  "name": "adonis-fullstack-app",
-  "version": "4.1.0",
-  "adonis-version": "4.1.0",
-  "description": "The fullstack application boilerplate for Adonisjs",
-  "main": "index.js",
-  "scripts": {
-    "start": "node server.js",
-    "test": "node ace test"
-  },
-  "keywords": [
-    "adonisjs",
-    "adonis-app"
-  ],
-  "author": "",
-  "license": "UNLICENSED",
+  "name": "apirest",
+  "version": "1.0.0",
   "private": true,
-  "dependencies": {
-    "@adonisjs/ace": "^5.0.8",
-    "@adonisjs/auth": "^3.0.7",
-    "@adonisjs/bodyparser": "~2.0.9",
-    "@adonisjs/cors": "^1.0.7",
-    "@adonisjs/fold": "^4.0.9",
-    "@adonisjs/framework": "^5.0.9",
-    "@adonisjs/ignitor": "^2.0.8",
-    "@adonisjs/lucid": "^6.1.3",
-    "@adonisjs/session": "^1.0.27",
-    "@adonisjs/shield": "^1.0.8"
+  "scripts": {
+    "dev": "node ace serve --watch",
+    "build": "node ace build --production",
+    "start": "node server.js"
   },
-  "devDependencies": {},
-  "autoload": {
-    "App": "./app"
+  "devDependencies": {
+    "@adonisjs/assembler": "^5.4.2",
+    "adonis-preset-ts": "^2.1.0",
+    "pino-pretty": "^7.5.3",
+    "typescript": "^4.5.5",
+    "youch": "^3.1.1",
+    "youch-terminal": "^2.1.3"
+  },
+  "dependencies": {
+    "@adonisjs/core": "^5.5.3",
+    "@adonisjs/lucid": "^17.1.0",
+    "@adonisjs/repl": "^3.1.9",
+    "luxon": "^2.3.1",
+    "mysql": "^2.18.1",
+    "proxy-addr": "^2.0.7",
+    "reflect-metadata": "^0.1.13",
+    "source-map-support": "^0.5.21"
   }
 }
