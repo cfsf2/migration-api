@@ -86,7 +86,6 @@ export default class Farmacia extends BaseModel {
   @column.dateTime()
   public f_ultimo_acceso: DateTime;
 
-
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 

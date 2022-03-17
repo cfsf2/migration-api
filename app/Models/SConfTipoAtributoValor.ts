@@ -7,9 +7,6 @@ export default class SConfTipoAtributoValor extends BaseModel {
   public id: number;
 
   @column()
-  public id_tipo_atributo: number;
-
-  @column()
   public valor: string;
 
   @column()
@@ -22,4 +19,9 @@ export default class SConfTipoAtributoValor extends BaseModel {
     foreignKey: "id",
   })
   public id_conf: HasOne<typeof SConf>;
+
+  @hasOne(() => STipoAtributo, {
+    foreignKey: "id",
+  })
+  public id_tipo_atributo: HasOne<typeof STipoAtributo>;
 }
