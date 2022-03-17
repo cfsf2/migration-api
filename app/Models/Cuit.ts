@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
-import Usuario from "./Usuario";
+import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
 
 export default class Cuit extends BaseModel {
   public static table = "_cuit";
@@ -17,19 +16,15 @@ export default class Cuit extends BaseModel {
   @column()
   public cuit: number;
 
+  @column()
+  public id_usuario_creacion: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
+  @column()
+  public id_usuario_modificacion: number;
+
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
-
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-  })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
-
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-  })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
 }
