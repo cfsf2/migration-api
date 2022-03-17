@@ -27,9 +27,6 @@ export default class Farmacia extends BaseModel {
   public cuit: string;
 
   @column()
-  public id_localidad: number;
-
-  @column()
   public calle: string;
 
   @column()
@@ -89,8 +86,6 @@ export default class Farmacia extends BaseModel {
   @column.dateTime()
   public f_ultimo_acceso: DateTime;
 
-  @column()
-  public id_usuario_creacion: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -106,4 +101,19 @@ export default class Farmacia extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+  })
+  public id_usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Localidad, {
+      foreignKey: 'id',
+  })
+  public id_localidad: HasOne<typeof Localidad>;
+
+  @hasOne(() => Perfil_Farmageo, {
+    foreignKey: 'id',
+})
+public farmacia_id_perfil_farmageo: HasOne<typeof Perfil-Farmageo>;
 }
