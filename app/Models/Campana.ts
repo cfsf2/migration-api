@@ -1,12 +1,17 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import CampanaRequerimiento from "./CampanaRequerimiento";
+import CampanaResponsable from "./CampanaResponsable";
 import Usuario from "./Usuario";
 
-export default class Publicidad extends BaseModel {
-  public static table = "tbl_publicidad";
+export default class PedidoProductoPack extends BaseModel {
+  public static table = "tbl_campana";
 
   @column({ isPrimary: true })
   public id: number;
+
+  @column()
+  public nombre: string;
 
   @column()
   public titulo: string;
@@ -15,10 +20,7 @@ export default class Publicidad extends BaseModel {
   public descripcion: string;
 
   @column()
-  public link: string;
-
-  @column()
-  public imagen: string;
+  public funcion_callback: string;
 
   @column.dateTime()
   public fecha_inicio: DateTime;
@@ -27,7 +29,28 @@ export default class Publicidad extends BaseModel {
   public fecha_fin: DateTime;
 
   @column()
+  public url_imagen_banner: string;
+
+  @column()
+  public url_imagen_miniatura: string;
+
+  @column()
+  public url_imagen_fondo: string;
+
+  @column()
+  public url_imagen_principal: string;
+
+  @column()
+  public condiciones_terminos: string;
+
+  @column()
   public habilitado: string;
+
+  @column()
+  public texto_dinamico: string;
+
+  @column()
+  public max_req: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -44,15 +67,9 @@ export default class Publicidad extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
-  
-  @hasOne(() => PublicidadTipo, {
-    foreignKey: "id",
-  })
-  public id_publicidad_tipo: HasOne<typeof PublicidadTipo>;
 
-  @hasOne(() => PublicidadColor, {
+  @hasOne(() => CampanaResponsable, {
     foreignKey: "id",
   })
-  public id_color: HasOne<typeof PublicidadColor>;
-}
+  public id_campana_responsable: HasOne<typeof CampanaResponsable>;
 }
