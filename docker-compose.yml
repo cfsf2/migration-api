@@ -1,0 +1,8 @@
+version: "3.2"
+services:
+  app:
+    container_name: farmageo-api
+    restart: always
+    image: farmageoapi:latest
+    ports:
+      - "3001:3001"
