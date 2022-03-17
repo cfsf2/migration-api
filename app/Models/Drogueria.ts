@@ -3,6 +3,8 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
 export default class Drogueria extends BaseModel {
+  public static table = "tbl_drogueria";
+
   @column({ isPrimary: true })
   public id: number;
 
