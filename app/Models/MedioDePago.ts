@@ -11,14 +11,8 @@ export default class MedioDePago extends BaseModel {
   @column()
   public nombre: string;
 
-  @column()
-  public id_usuario_creacion: number;
-
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
-
-  @column()
-  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
@@ -27,10 +21,10 @@ export default class MedioDePago extends BaseModel {
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public mediodepago_id_usuario_creacion: HasOne<typeof Usuario>;
+  public id_usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public mediodepago_id_usuario_modificacion: HasOne<typeof Usuario>;
+  public id_usuario_modificacion: HasOne<typeof Usuario>;
 }

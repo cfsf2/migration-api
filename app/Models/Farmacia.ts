@@ -63,9 +63,6 @@ export default class Farmacia extends BaseModel {
   public web: string;
 
   @column()
-  public id_perfil_farmageo: number;
-
-  @column()
   public descubrir: string;
 
   @column()
@@ -114,5 +111,5 @@ export default class Farmacia extends BaseModel {
   @hasOne(() => Perfil_Farmageo, {
     foreignKey: 'id',
 })
-public farmacia_id_perfil_farmageo: HasOne<typeof Perfil-Farmageo>;
+public id_perfil_farmageo: HasOne<typeof Perfil-Farmageo>;
 }

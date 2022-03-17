@@ -10,9 +10,6 @@ export default class SolicitudProveeduria extends BaseModel {
   public id: number;
 
   @column()
-  public id_farmacia: number;
-
-  @column()
   public id_entidad: number;
 
   @column.dateTime({ autoCreate: true })
@@ -27,14 +24,8 @@ export default class SolicitudProveeduria extends BaseModel {
   @column()
   public productos_solicitados: string;
 
-  @column()
-  public id_usuario_creacion: number;
-
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
-
-  @column()
-  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
@@ -43,20 +34,20 @@ export default class SolicitudProveeduria extends BaseModel {
   @hasOne(() => Entidad, {
     foreignKey: "id",
   })
-  public solicitud_proveeduria_id_entidad: HasOne<typeof Entidad>;
+  public id_entidad: HasOne<typeof Entidad>;
 
   @hasOne(() => Farmacia, {
     foreignKey: "id",
   })
-  public solicitud_proveeduria_id_farmacia: HasOne<typeof Farmacia>;
+  public id_farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public solicitud_proveeduria_id_usuario_modificacion: HasOne<typeof Usuario>;
+  public id_usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public solicitud_proveeduria_id_usuario_creacion: HasOne<typeof Usuario>;
+  public id_usuario_creacion: HasOne<typeof Usuario>;
 }

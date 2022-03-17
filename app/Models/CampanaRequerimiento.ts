@@ -10,15 +10,6 @@ export default class CampanaRequerimiento extends BaseModel {
   public id: number;
 
   @column()
-  public id_campana: number;
-
-  @column()
-  public id_usuario: number;
-
-  @column()
-  public id_farmacia: number;
-
-  @column()
   public finalizado: string;
 
   @column()
@@ -46,15 +37,15 @@ export default class CampanaRequerimiento extends BaseModel {
   @hasOne(() => Campana, {
     foreignKey: "id",
   })
-  public campana_requerimiento_id_campana: HasOne<typeof Campana>;
+  public id_campana: HasOne<typeof Campana>;
 
   @hasOne(() => Farmacia, {
     foreignKey: "id",
   })
-  public campana_requerimiento_id_farmacia: HasOne<typeof Farmacia>;
+  public id_farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public campana_requerimiento_id_usuario: HasOne<typeof Usuario>;
+  public id_usuario: HasOne<typeof Usuario>;
 }

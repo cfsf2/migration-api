@@ -18,12 +18,6 @@ export default class ProductoPack extends BaseModel {
   public descripcion: string;
 
   @column()
-  public id_categoria: number;
-
-  @column()
-  public id_entidad: number;
-
-  @column()
   public en_papelera: string;
 
   @column()
@@ -41,14 +35,8 @@ export default class ProductoPack extends BaseModel {
   @column()
   public rentabilidad: number;
 
-  @column()
-  public id_usuario_creacion: number;
-
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
-
-  @column()
-  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
@@ -57,20 +45,20 @@ export default class ProductoPack extends BaseModel {
   @hasOne(() => Categoria, {
     foreignKey: "id",
   })
-  public producto_pack_id_categoria: HasOne<typeof Categoria>;
+  public id_categoria: HasOne<typeof Categoria>;
 
   @hasOne(() => Entidad, {
     foreignKey: "id",
   })
-  public producto_pack_id_entidad: HasOne<typeof Entidad>;
+  public id_entidad: HasOne<typeof Entidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public producto_pack_id_usuario_creacion: HasOne<typeof Usuario>;
+  public id_usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public producto_pack_id_usuario_modificacion: HasOne<typeof Usuario>;
+  public id_usuario_modificacion: HasOne<typeof Usuario>;
 }
