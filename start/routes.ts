@@ -1,9 +1,8 @@
-import Route from '@ioc:Adonis/Core/Route'
+import Route from "@ioc:Adonis/Core/Route";
 
+import "../routes/usuario";
+import "../routes/farmacia";
 
-import '../routes/usuario';
-
-
-Route.get('/', async () => {
-  return { hello: 'world' }
-})
+Route.get("/", async () => {
+  return { hello: "world" };
+});

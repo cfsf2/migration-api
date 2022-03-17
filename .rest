@@ -1,0 +1,9 @@
+
+GET http://localhost:3110/farmacia HTTP/1.1
+
+####
+
+
+GET http://localhost:3110/usuarios HTTP/1.1
+
+####
