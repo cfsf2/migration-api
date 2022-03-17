@@ -1,6 +1,5 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
-import CampanaRequerimiento from "./CampanaRequerimiento";
 import CampanaResponsable from "./CampanaResponsable";
 import Usuario from "./Usuario";
 
