@@ -1008,7 +1008,7 @@ const tbl_publicidades = async () => {
 
   const publicidades = await Publicidad.find({});
 
-  publicidades.forEach(async (publicidad, indx) => {
+  const queries = publicidades.map(async (publicidad, indx) => {
     const id_tipo = tipos.find((t) => t.n === publicidad.tipo).i;
 
     const id_color = colores.find((t) => t.n === publicidad.color)
@@ -1032,8 +1032,13 @@ const tbl_publicidades = async () => {
     )}, ${id_tipo}, ${id_color}, ${fecha_inicio}, ${fecha_fin}, 
     "${habilitado}", 1, 1 )`;
 
-    await queryPromise(con, sql);
-    console.log((100 * ((indx + 1) / publicidades.length)).toFixed(2) + "%");
+    return queryPromise(con, sql);
+    //console.log((100 * ((indx + 1) / publicidades.length)).toFixed(2) + "%");
+  });
+
+  Promise.all(queries).then(() => {
+    console.log("publicidades migradas " + publicidades.length);
+    resolve();
   });
 };
 

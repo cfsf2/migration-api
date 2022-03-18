@@ -31,7 +31,7 @@ connectToDatabase = async () => {
     await migracion.tbl_producto_pack();
     await migracion.tbl_laboratorio();
     await migracion.tbl_transfer_productos();
-    migracion.tbl_publicidades();
+    await migracion.tbl_publicidades();
     resolve();
   });
 })()
