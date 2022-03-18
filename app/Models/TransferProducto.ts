@@ -9,9 +9,6 @@ export default class PedidoProductoPack extends BaseModel {
   public id: number;
 
   @column()
-  public id_laboratorio: number;
-
-  @column()
   public nombre: string;
 
   @column()
