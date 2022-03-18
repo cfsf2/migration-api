@@ -25,9 +25,9 @@ const Publicidad_Institucion = require("../models/publicidad_institucion");
 
 const con = mysql.createConnection({
   host: "localhost",
-  user: "root",
-  password: "pass",
-  database: "farmageo",
+  user: "apifarmageotest_migracion",
+  password: "4Yi^&eUCXcwe",
+  database: "apifarmageotest_bd",
   charset: "utf8mb4",
 });
 con.query("SET GLOBAL connect_timeout=28800");
