@@ -3,7 +3,7 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import CampanaResponsable from "./CampanaResponsable";
 import Usuario from "./Usuario";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class Campana extends BaseModel {
   public static table = "tbl_campana";
 
   @column({ isPrimary: true })

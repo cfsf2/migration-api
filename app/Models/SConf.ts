@@ -1,7 +1,7 @@
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import STipo from "./STipo";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class SConf extends BaseModel {
   public static table = "s_conf";
 
   @column({ isPrimary: true })

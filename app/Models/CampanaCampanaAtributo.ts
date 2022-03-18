@@ -2,7 +2,7 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Campana from "./Campana";
 import CampanaAtributo from "./CampanaAtributo";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class CampanaCampanaAtributo extends BaseModel {
   public static table = "tbl_campana_campana_atributo";
 
   @column({ isPrimary: true })

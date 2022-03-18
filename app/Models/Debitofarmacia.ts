@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class DebitoFarmacia extends BaseModel {
   public static table = "tbl_debitofarmacia";
 
   @column({ isPrimary: true })

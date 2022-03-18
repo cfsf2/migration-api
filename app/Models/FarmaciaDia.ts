@@ -3,7 +3,7 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class FarmaciaDia extends BaseModel {
   public static table = "tbl_farmacia_dia";
 
   @column({ isPrimary: true })

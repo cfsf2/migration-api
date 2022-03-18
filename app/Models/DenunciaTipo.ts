@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class DenunciaTipo extends BaseModel {
   public static table = "tbl_denuncia_tipo";
 
   @column({ isPrimary: true })

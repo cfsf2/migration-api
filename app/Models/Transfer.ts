@@ -4,7 +4,7 @@ import Usuario from "./Usuario";
 import Farmacia from "./Farmacia";
 import Drogueria from "./Drogueria";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";
 
   @column({ isPrimary: true })

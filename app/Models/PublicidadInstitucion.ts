@@ -4,7 +4,7 @@ import Usuario from "./Usuario";
 import Publicidad from "./Publicidad";
 import Institucion from "./Institucion";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class PublicidadInstitucion extends BaseModel {
   public static table = "tbl_publicidad_institucion";
 
   @column({ isPrimary: true })

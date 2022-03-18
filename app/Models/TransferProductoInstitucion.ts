@@ -4,7 +4,7 @@ import TransferProducto from "./TransferProducto";
 import Usuario from "./Usuario";
 import Institucion from "./Institucion";
 
-export default class PedidoProductoPack extends BaseModel {
+export default class TransferProductoInstitucion extends BaseModel {
   public static table = "tbl_transfer_producto_institucion";
 
   @column({ isPrimary: true })
