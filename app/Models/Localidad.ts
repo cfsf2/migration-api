@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Departamento from "./Departamento";
 
