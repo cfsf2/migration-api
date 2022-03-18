@@ -1,5 +1,3 @@
-var mysql = require("mysql");
-
 const Permiso = require("../models/permisos");
 const Perfil = require("../models/perfiles");
 const Farmacia = require("../models/farmacia");
@@ -23,16 +21,7 @@ const Provincia = require("../models/provincia");
 const Farmacia_Institucion = require("../models/farmacia_institucion");
 const Publicidad_Institucion = require("../models/publicidad_institucion");
 
-const con = mysql.createConnection({
-  host: "localhost",
-  user: "apifarmageotest_migracion",
-  password: "migracion_2309",
-  database: "apifarmageotest_bd",
-  charset: "utf8mb4",
-});
-con.query("SET GLOBAL connect_timeout=28800");
-con.query("SET GLOBAL interactive_timeout=28800");
-con.query("SET GLOBAL wait_timeout=28800");
+const con = require("./mysqlCon");
 
 const farmacia_asignar_usuario_idsql = async () => {
   const farmacias = await Farmacia.find({ idsql_usuario: null });
