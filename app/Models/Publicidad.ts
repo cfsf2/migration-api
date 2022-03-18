@@ -46,7 +46,7 @@ export default class Publicidad extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
-  
+
   @hasOne(() => PublicidadTipo, {
     foreignKey: "id",
   })
@@ -56,5 +56,4 @@ export default class Publicidad extends BaseModel {
     foreignKey: "id",
   })
   public id_color: HasOne<typeof PublicidadColor>;
-}
 }

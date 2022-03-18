@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import Localidad from "./Localidad";
+import PerfilFarmageo from "./PerfilFarmageo";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -104,12 +106,12 @@ export default class Farmacia extends BaseModel {
   public id_usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Localidad, {
-      foreignKey: 'id',
+    foreignKey: "id",
   })
   public id_localidad: HasOne<typeof Localidad>;
 
-  @hasOne(() => Perfil_Farmageo, {
-    foreignKey: 'id',
-})
-public id_perfil_farmageo: HasOne<typeof Perfil-Farmageo>;
+  @hasOne(() => PerfilFarmageo, {
+    foreignKey: "id",
+  })
+  public id_perfil_farmageo: HasOne<typeof PerfilFarmageo>;
 }

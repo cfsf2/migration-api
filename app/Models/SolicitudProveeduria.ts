@@ -2,15 +2,13 @@ import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
+import Entidad from "./Entidad";
 
 export default class SolicitudProveeduria extends BaseModel {
   public static table = "tbl_solicitud_proveeduria";
 
   @column({ isPrimary: true })
   public id: number;
-
-  @column()
-  public id_entidad: number;
 
   @column.dateTime({ autoCreate: true })
   public fecha: DateTime;

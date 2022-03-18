@@ -1,4 +1,6 @@
 import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
+import SConf from "./SConf";
+import STipoAtributo from "./STipoAtributo";
 
 export default class SConfTipoAtributoValor extends BaseModel {
   public static table = "s_conf_tipo_atributo_valor";

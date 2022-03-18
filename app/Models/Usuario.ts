@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import Localidad from "./Localidad";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -17,7 +18,7 @@ export default class Usuario extends BaseModel {
   public apellido: string;
 
   @column()
-  public dni: Number;
+  public dni: number;
 
   @column()
   public fecha_nac: Date;

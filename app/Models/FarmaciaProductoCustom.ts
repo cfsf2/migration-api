@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
+import ProductoCustom from "./ProductoCustom";
 
 export default class FarmaciaProductoCustom extends BaseModel {
   public static table = "tbl_farmacia_producto_custom";

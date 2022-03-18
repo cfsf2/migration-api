@@ -3,6 +3,8 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Farmacia from "./Farmacia";
 import Drogueria from "./Drogueria";
+import EstadoTransfer from "./EstadoTransfer";
+import Laboratorio from "./Laboratorio";
 
 export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";

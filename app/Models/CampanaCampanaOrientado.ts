@@ -1,6 +1,6 @@
-import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Campana from "./Campana";
+import CampanaOrientado from "./CampanaOrientado";
 
 export default class CampanaCampanaOrientado extends BaseModel {
   public static table = "tbl_campana_campana_orientado";

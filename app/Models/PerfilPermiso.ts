@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Perfil from "./Perfil";
 import Usuario from "./Usuario";
+import Permiso from "./Permiso";
 
 export default class PerfilPermiso extends BaseModel {
   public static table = "tbl_perfil_permiso";

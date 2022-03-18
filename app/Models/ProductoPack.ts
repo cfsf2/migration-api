@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import Categoria from "./Categoria";
+import Entidad from "./Entidad";
 
 export default class ProductoPack extends BaseModel {
   public static table = "tbl_producto_pack";
