@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import PublicidadColor from "./PublicidadColor";
+import PublicidadTipo from "./PublicidadTipo";
 
 export default class Publicidad extends BaseModel {
   public static table = "tbl_publicidad";
