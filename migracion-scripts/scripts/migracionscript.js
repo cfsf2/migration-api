@@ -26,7 +26,7 @@ const Publicidad_Institucion = require("../models/publicidad_institucion");
 const con = mysql.createConnection({
   host: "localhost",
   user: "apifarmageotest_migracion",
-  password: "4Yi^&eUCXcwe",
+  password: "migracion_2309",
   database: "apifarmageotest_bd",
   charset: "utf8mb4",
 });
