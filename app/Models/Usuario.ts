@@ -1,5 +1,10 @@
 import { DateTime } from "luxon";
+<<<<<<< HEAD
 import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+=======
+import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import Localidad from "./Localidad";
+>>>>>>> models
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -17,6 +22,7 @@ export default class Usuario extends BaseModel {
   public apellido: string;
 
   @column()
+<<<<<<< HEAD
   public dni: Number;
 
   @column()
@@ -24,6 +30,12 @@ export default class Usuario extends BaseModel {
 
   @column()
   public id_localidad: number;
+=======
+  public dni: number;
+
+  @column()
+  public fecha_nac: Date;
+>>>>>>> models
 
   @column()
   public email: string;
@@ -51,6 +63,7 @@ export default class Usuario extends BaseModel {
 
   @column.dateTime()
   public f_ultimo_acceso: DateTime;
+<<<<<<< HEAD
 
   @column()
   public deleted: string;
@@ -75,4 +88,39 @@ export default class Usuario extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+=======
+
+  @column()
+  public deleted: string;
+
+  @column()
+  public demolab: string;
+
+  @column()
+  public id_wp: string;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
+
+  @column()
+  public celular: string;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+  })
+  public id_usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Localidad, {
+    foreignKey: "id",
+  })
+  public id_localidad: HasOne<typeof Localidad>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+  })
+  public id_usuario_modificacion: HasOne<typeof Usuario>;
+>>>>>>> models
 }
