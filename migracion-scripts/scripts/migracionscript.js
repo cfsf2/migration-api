@@ -989,7 +989,7 @@ const tbl_farmacia_institucion = async () => {
 };
 
 const tbl_publicidades = async () => {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const tipos = [
       { n: "novedadesadmin", i: 1 },
       { n: "comunicadoTransfers", i: 2 },
