@@ -16,11 +16,13 @@
     "youch-terminal": "^2.1.3"
   },
   "dependencies": {
+    "@adonisjs/auth": "^8.0.12",
     "@adonisjs/core": "^5.5.3",
     "@adonisjs/lucid": "^17.1.0",
     "@adonisjs/repl": "^3.1.9",
     "luxon": "^2.3.1",
     "mysql": "^2.18.1",
+    "phc-bcrypt": "^1.0.7",
     "proxy-addr": "^2.0.7",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.21"
