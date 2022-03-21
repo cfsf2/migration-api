@@ -4,12 +4,12 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class PublicidadsController {
   public async index({ request }: HttpContextContract) {
-    return await Database.from("tbl_publicidad as p")
+    const query = await Database.from("tbl_publicidad as p")
       .select(
         "p.*",
         "tp.nombre as tipo",
         "cp.nombre as color",
-        "i.nombre as institucion"
+        Database.raw("GROUP_CONCAT(i.id) as instituciones")
       )
       .leftJoin(
         "tbl_publicidad_tipo as tp",
@@ -24,6 +24,13 @@ export default class PublicidadsController {
         "=",
         "p.id"
       )
-      .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id");
+      .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
+      .groupBy("p.id");
+
+    return await Publicidad.query()
+      .preload("instituciones")
+      .preload("tipo")
+      .select("*")
+      .where("id_publicidad_tipo", "=", "1");
   }
 }

@@ -16,17 +16,23 @@ export default class PublicidadInstitucion extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_publicidad: Number;
+
   //foreing keys
 
-  @hasOne(() => Publicidad, {
-    foreignKey: "id",
-  })
-  public id_publicidad: HasOne<typeof Publicidad>;
+  // @hasOne(() => Publicidad, {
+  //   foreignKey: "id",
+  // })
+  // public id_publicidad: HasOne<typeof Publicidad>;
+
+  @column()
+  public id_institucion: Number;
 
   @hasOne(() => Institucion, {
     foreignKey: "id",
   })
-  public id_institucion: HasOne<typeof Institucion>;
+  public institucion: HasOne<typeof Institucion>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",

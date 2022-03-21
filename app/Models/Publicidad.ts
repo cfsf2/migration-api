@@ -1,8 +1,19 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  hasMany,
+  HasMany,
+  hasManyThrough,
+  HasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import PublicidadColor from "./PublicidadColor";
 import PublicidadTipo from "./PublicidadTipo";
+import Institucion from "./Institucion";
+import PublicidadInstitucion from "./PublicidadInstitucion";
 
 export default class Publicidad extends BaseModel {
   public static table = "tbl_publicidad";
@@ -31,6 +42,9 @@ export default class Publicidad extends BaseModel {
   @column()
   public habilitado: string;
 
+  @column()
+  public id_publicidad_tipo: Number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -49,11 +63,21 @@ export default class Publicidad extends BaseModel {
 
   @hasOne(() => PublicidadTipo, {
     foreignKey: "id",
+    localKey: "id_publicidad_tipo",
   })
-  public id_publicidad_tipo: HasOne<typeof PublicidadTipo>;
+  public tipo: HasOne<typeof PublicidadTipo>;
 
   @hasOne(() => PublicidadColor, {
     foreignKey: "id",
   })
-  public id_color: HasOne<typeof PublicidadColor>;
+  public color: HasOne<typeof PublicidadColor>;
+
+  @hasManyThrough([() => Institucion, () => PublicidadInstitucion], {
+    foreignKey: "id_publicidad",
+    localKey: "id",
+    throughForeignKey: "id",
+    throughLocalKey: "id_institucion",
+    serializeAs: "Institucion_",
+  })
+  public instituciones: HasManyThrough<typeof Institucion>;
 }
