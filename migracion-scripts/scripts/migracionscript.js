@@ -989,56 +989,58 @@ const tbl_farmacia_institucion = async () => {
 };
 
 const tbl_publicidades = async () => {
-  const tipos = [
-    { n: "novedadesadmin", i: 1 },
-    { n: "comunicadoTransfers", i: 2 },
-    { n: "mutual", i: 3 },
-    { n: "infointeres", i: 4 },
-    { n: "banners_admin", i: 5 },
-    { n: "banners_ecommerce_home_col", i: 6 },
-    { n: "banners_ecommerce_home_mut", i: 7 },
-    { n: "banners_ecommerce_slider", i: 8 },
-  ];
+  return new Promise((resolve, reject) => {
+    const tipos = [
+      { n: "novedadesadmin", i: 1 },
+      { n: "comunicadoTransfers", i: 2 },
+      { n: "mutual", i: 3 },
+      { n: "infointeres", i: 4 },
+      { n: "banners_admin", i: 5 },
+      { n: "banners_ecommerce_home_col", i: 6 },
+      { n: "banners_ecommerce_home_mut", i: 7 },
+      { n: "banners_ecommerce_slider", i: 8 },
+    ];
 
-  const colores = [
-    { n: "verde", i: 1 },
-    { n: "rojo", i: 2 },
-    { n: "amarillo", i: 3 },
-  ];
+    const colores = [
+      { n: "verde", i: 1 },
+      { n: "rojo", i: 2 },
+      { n: "amarillo", i: 3 },
+    ];
 
-  const publicidades = await Publicidad.find({});
+    const publicidades = await Publicidad.find({});
 
-  const queries = publicidades.map(async (publicidad, indx) => {
-    const id_tipo = tipos.find((t) => t.n === publicidad.tipo).i;
+    const queries = publicidades.map(async (publicidad, indx) => {
+      const id_tipo = tipos.find((t) => t.n === publicidad.tipo).i;
 
-    const id_color = colores.find((t) => t.n === publicidad.color)
-      ? colores.find((t) => t.n === publicidad.color).i
-      : null;
+      const id_color = colores.find((t) => t.n === publicidad.color)
+        ? colores.find((t) => t.n === publicidad.color).i
+        : null;
 
-    const fecha_inicio = publicidad.fechainicio
-      ? `"${publicidad.fechainicio.toISOString().split("T")[0]}"`
-      : null;
-    const fecha_fin = publicidad.fechafin
-      ? `"${publicidad.fechafin.toISOString().split("T")[0]}"`
-      : null;
-    const habilitado = publicidad.habilitado ? "s" : "n";
+      const fecha_inicio = publicidad.fechainicio
+        ? `"${publicidad.fechainicio.toISOString().split("T")[0]}"`
+        : null;
+      const fecha_fin = publicidad.fechafin
+        ? `"${publicidad.fechafin.toISOString().split("T")[0]}"`
+        : null;
+      const habilitado = publicidad.habilitado ? "s" : "n";
 
-    const sql = `INSERT INTO tbl_publicidad 
+      const sql = `INSERT INTO tbl_publicidad 
    (titulo, descripcion, link, imagen, id_publicidad_tipo, id_color, fecha_inicio, fecha_fin, habilitado, id_usuario_creacion, id_usuario_modificacion)
     VALUES (${stringOnull(publicidad.titulo)},${stringOnull(
-      mysql_real_escape_string(publicidad.descripcion)
-    )},${stringOnull(publicidad.link)}, ${stringOnull(
-      publicidad.imagen
-    )}, ${id_tipo}, ${id_color}, ${fecha_inicio}, ${fecha_fin}, 
+        mysql_real_escape_string(publicidad.descripcion)
+      )},${stringOnull(publicidad.link)}, ${stringOnull(
+        publicidad.imagen
+      )}, ${id_tipo}, ${id_color}, ${fecha_inicio}, ${fecha_fin}, 
     "${habilitado}", 1, 1 )`;
 
-    return queryPromise(con, sql);
-    //console.log((100 * ((indx + 1) / publicidades.length)).toFixed(2) + "%");
-  });
+      return queryPromise(con, sql);
+      //console.log((100 * ((indx + 1) / publicidades.length)).toFixed(2) + "%");
+    });
 
-  Promise.all(queries).then(() => {
-    console.log("publicidades migradas " + publicidades.length);
-    resolve();
+    Promise.all(queries).then(() => {
+      console.log("publicidades migradas " + publicidades.length);
+      resolve();
+    });
   });
 };
 
