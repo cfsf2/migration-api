@@ -17,6 +17,12 @@ export default class Categoria extends BaseModel {
   @column()
   public destacada: string;
 
+  @column()
+  public id_usuario_creacion: Number;
+
+  @column()
+  public id_usuario_modificacion: Number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -25,11 +31,13 @@ export default class Categoria extends BaseModel {
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }
