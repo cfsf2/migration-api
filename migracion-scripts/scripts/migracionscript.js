@@ -786,6 +786,16 @@ const tbl_farmacia_dia = async () => {
 
   const dias = await queryPromise(con, `SELECT * FROM tbl_dia`);
 
+  const diatabla = [
+    { id: 2, nombre: "lunes" },
+    { id: 3, nombre: "martes" },
+    { id: 4, nombre: "miercoles" },
+    { id: 5, nombre: "jueves" },
+    { id: 6, nombre: "viernes" },
+    { id: 7, nombre: "sabado" },
+    { id: 1, nombre: "domingo" },
+  ];
+
   farmaciasConHorarios.forEach((farmacia) => {
     farmacia.horarios.forEach((dia) => {
       const dia_sql = dias.find((d) => {
@@ -799,7 +809,8 @@ const tbl_farmacia_dia = async () => {
       });
 
       if (!dia.habilitado) {
-        const sql = `INSERT INTO tbl_farmacia_dia (id_farmacia, habilitado, id_usuario_creacion, id_usuario_modificacion) VALUES (${farmacia.idsql}, 'n', 1, 1)`;
+        const sql = `INSERT INTO tbl_farmacia_dia (id_dia, id_farmacia, habilitado, id_usuario_creacion, id_usuario_modificacion) 
+        VALUES (${dia_sql.id},${farmacia.idsql}, 'n', 1, 1)`;
         return con.query(sql, function (err, res) {
           if (err) throw err;
         });
