@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, NumberUnitLength } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Farmacia from "./Farmacia";
@@ -19,23 +19,31 @@ export default class FarmaciaServicio extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-  })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  @column()
+  public id_farmacia: Number;
+
+  @column()
+  public id_servicio: Number;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Farmacia, {
     foreignKey: "id",
+    localKey: "id_farmacia",
   })
-  public id_farmacia: HasOne<typeof Farmacia>;
+  public farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => Servicio, {
     foreignKey: "id",
+    localKey: "id_servicio",
   })
-  public id_servicio: HasOne<typeof Servicio>;
+  public servicio: HasOne<typeof Servicio>;
 }

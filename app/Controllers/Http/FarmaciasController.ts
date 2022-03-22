@@ -4,16 +4,14 @@ import Farmacia from "../../Models/Farmacia";
 
 export default class FarmaciasController {
   public async index({ request }: HttpContextContract) {
-    const { page = 1, limit = 10 } = request.qs();
     return await Farmacia.query()
-      .select("tbl_farmacia.*", "tbl_usuario.usuario")
-      .join("tbl_usuario", "tbl_farmacia.id_usuario", "tbl_usuario.id")
-      .orderBy("tbl_farmacia.id", "asc")
-      .paginate(page, limit);
+      .preload("servicios", (servicio) => {
+        servicio.where("tbl_servicio.habilitado", "s");
+      })
+      .preload("localidad");
   }
 
-  public async usuario({ request }: HttpContextContract) {
-    const { page = 1, limit = 10 } = request.qs();
-    return await Farmacia.query().select("*").paginate(page, limit);
+  public async mig_index() {
+    return await Farmacia.traerFarmacias();
   }
 }

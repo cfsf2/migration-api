@@ -2,8 +2,6 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   column,
-  hasMany,
-  HasMany,
   hasManyThrough,
   HasManyThrough,
   hasOne,
