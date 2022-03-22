@@ -17,10 +17,19 @@ import PublicidadInstitucion from "./PublicidadInstitucion";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Publicidad extends BaseModel {
-  static traerPublicidades() {
-    const query = Database.from("tbl_publicidad as p")
+  static async traerPublicidades() {
+    const resultado = await Database.from("tbl_publicidad as p")
       .select(
-        "p.*",
+        //"p.*",
+        "p.id",
+        "p.titulo",
+        "p.descripcion",
+        "p.link",
+        "p.habilitado",
+        "p.imagen",
+        "p.fecha_inicio",
+        "p.fecha_fin",
+        "p.ts_creacion",
         "tp.nombre as tipo",
         "cp.nombre as color",
         Database.raw("GROUP_CONCAT(i.id) as instituciones")
@@ -39,7 +48,20 @@ export default class Publicidad extends BaseModel {
         "p.id"
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
-      .groupBy("p.id");
+      .groupBy("p.id")
+      .orderBy("ts_creacion", "desc");
+
+    function arrayzar(modelo, key) {
+      modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
+
+      let res = modelo;
+
+      return res;
+    }
+
+    const result = resultado.map((r) => arrayzar(r, "instituciones"));
+
+    return result;
   }
   public static table = "tbl_publicidad";
 
