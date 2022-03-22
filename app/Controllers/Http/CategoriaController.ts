@@ -10,11 +10,6 @@ export default class CategoriaController {
     //   "ca.nombre",
     //   "ca.ts_creacion",
     //   "ca.id");
-    return await Categoria.query().select(
-      "habilitado",
-      "destacada",
-      "nombre",
-      "id"
-    );
+    return await Categoria.aBoleanos();
   }
 }

@@ -1,8 +1,37 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Categoria extends BaseModel {
+  static async aBoleanos() {
+    const datos = await Database.from("tbl_categoria as ca").select(
+      "ca.habilitado",
+      "ca.destacada",
+      "ca.nombre",
+      "ca.id"
+    );
+
+    const arrNuevo = datos.map((e) => {
+      //ingreso al primer objeto
+      //identifico sus keys
+      const claves = Object.keys(e);
+      //y luego ingreso al segundo a partir de sus propias keys
+      claves.forEach((k) => {
+        if (e[k] === "s") {
+          e[k] = true;
+        }
+        if (e[k] === "n") {
+          e[k] = false;
+        }
+      });
+      //return de arrNuevo()
+      return e;
+    });
+    //return aBoleanos()
+    return arrNuevo;
+  }
+
   public static table = "tbl_categoria";
 
   @column({ isPrimary: true })

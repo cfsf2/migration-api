@@ -1,8 +1,28 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Entidad extends BaseModel {
+  static async traerEntidades() {
+    const datos = await Database.from("tbl_entidad").select("*");
+
+    const arrNuevo = datos.map((e) => {
+      const claves = Object.keys(e);
+      claves.forEach((k) => {
+        if (e[k] === "s") {
+          e[k] = true;
+        }
+        if (e[k] === "n") {
+          e[k] = false;
+        }
+      });
+
+      return e;
+    });
+    return arrNuevo;
+  }
+
   public static table = "tbl_entidad";
 
   @column({ isPrimary: true })
