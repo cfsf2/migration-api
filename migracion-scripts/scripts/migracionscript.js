@@ -1253,6 +1253,19 @@ const tbl_farmacia = () => {
   return new Promise(async (resolve, reject) => {
     const farmacias = await Farmacia.find({});
 
+    const perfilFarmageo = (perfil) => {
+      switch (perfil) {
+        case "vender_online":
+          return 1;
+        case "solo_visible":
+          return 2;
+        case "no_visible":
+          return 3;
+        case "demo":
+          return 4;
+      }
+    };
+
     const queries = farmacias.map((f) => {
       const sql = `INSERT INTO tbl_farmacia (id, id_usuario, password, nombre, nombrefarmaceutico, matricula, cufe, cuit, id_localidad, calle, numero, direccioncompleta, longitud, latitud, habilitado,imagen, email, telefono, whatsapp, facebook, instagram, web, id_perfil_farmageo, descubrir, envios, costoenvio, tiempotardanza, visita_comercial, telefonofijo, f_ultimo_acceso)
       VALUES (${f.idsql}, ${f.idsql_usuario}, ${stringOnull(
@@ -1265,21 +1278,33 @@ const tbl_farmacia = () => {
         f.id_localidad
       )},${stringOnull(f.calle)},${stringOnull(f.numero)}, ${stringOnull(
         f.direccioncompleta
-      )}, ${stringOnull(f.longitud)}, ${stringOnull(f.latitud)},${stringOnull(
+      )}, ${stringOnull(f.log)}, ${stringOnull(f.lat)},${stringOnull(
         f.habilitado ? "s" : "n"
       )},${stringOnull(f.imagen)}, ${stringOnull(f.email)}, ${stringOnull(
         f.telefono
       )}, ${stringOnull(f.whatsapp)}, ${stringOnull(
         f.facebook?.slice(0, 120)
       )}, ${stringOnull(f.instagram)}, ${stringOnull(f.web)}, ${stringOnull(
-        f.id_perfil_farmageo
+        perfilFarmageo(f.perfil_farmageo)
       )}, ${stringOnull(f.descubrir ? "s" : "n")}, ${stringOnull(
         f.envios ? "s" : "n"
       )}, ${stringOnull(f.costoenvio)}, ${stringOnull(
         f.tiempotardanza
       )}, ${stringOnull(f.visita_comercial ? "s" : "n")},${stringOnull(
         f.telefonofijo
-      )}, ${stringOnull(f.f_ultimo_acceso)})`;
+      )}, ${stringOnull(
+        f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "")
+      )}) ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
+        f.log ? f.log : null
+      }, latitud=${f.lat ? f.lat : null}, id_perfil_farmageo=${perfilFarmageo(
+        f.perfil_farmageo
+      )}, f_ultimo_acceso=${
+        f.ultimoacceso
+          ? "'" +
+            f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "") +
+            "'"
+          : null
+      }`;
 
       return queryPromise(con, sql);
     });
