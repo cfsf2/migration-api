@@ -18,11 +18,85 @@ import Database from "@ioc:Adonis/Lucid/Database";
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
 
-  static traerFarmacias() {
-    return Database.rawQuery(`SELECT f.id, f.nombre, f.nombrefarmaceutico, f.matricula, f.cufe, f.cuit, f.calle, f.numero, f.direccioncompleta, f.longitud, f.latitud, f.habilitado, f.imagen, f.email, f.telefono, f.whatsapp, f.facebook, f.instagram, f.web, f.descubrir, f.envios, f.tiempotardanza, f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso,
-    l.nombre AS localidad, u.usuario AS usuario  FROM tbl_farmacia AS f
-    LEFT JOIN tbl_localidad AS l ON f.id_localidad = l.id
-    LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id`);
+  static async traerFarmacias() {
+    let farmacias =
+      await Database.rawQuery(`SELECT f.id, f.nombre, f.nombrefarmaceutico, f.matricula, f.cufe, f.cuit, f.calle, f.numero, f.direccioncompleta, f.longitud AS log, f.latitud AS lat, f.habilitado, f.imagen, f.email, f.telefono, f.whatsapp, f.facebook, f.instagram, f.web, f.descubrir, f.envios, f.tiempotardanza, f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
+      l.nombre AS localidad, u.usuario AS usuario , 
+      p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
+      GROUP_CONCAT(mp.nombre) AS mediospagos
+      FROM tbl_farmacia AS f
+      LEFT JOIN tbl_localidad AS l ON f.id_localidad = l.id
+      LEFT JOIN tbl_departamento AS d ON l.id_departamento = d.id
+      LEFT JOIN tbl_provincia AS p ON d.id_provincia = p.id
+      LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id
+      LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
+      LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia
+      LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id
+      GROUP BY f.id`);
+
+    let servicios =
+      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia  FROM tbl_farmacia_servicio AS fs
+    LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s"`);
+
+    let dias = await Database.rawQuery(
+      `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia FROM tbl_farmacia_dia AS fd LEFT JOIN tbl_dia AS d ON fd.id_dia = d.id  `
+    );
+
+    function arrayzar(modelo, key) {
+      modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
+      let res = modelo;
+      return res;
+    }
+
+    function dameloshorarios(f, horarios) {
+      const dias = horarios.filter((h) => h.id_farmacia === f.id);
+
+      const semana = [
+        "lunes",
+        "martes",
+        "miercoles",
+        "jueves",
+        "viernes",
+        "sabado",
+        "domingo",
+      ];
+      interface bloque {
+        bloques: [];
+        habilitado: Boolean;
+        dia: String;
+      }
+      let bloqu: [bloque] = [] as unknown as [bloque];
+
+      semana.forEach((dia) => {
+        let d2 = dias.filter((d) => d.dia === dia);
+
+        const bloquecitos = d2.map((bloque, i) => {
+          return {
+            desde: bloque.inicio,
+            hasta: bloque.fin,
+            bloq: i + 1,
+          };
+        });
+
+        const horarioFarmageo = {
+          bloques: bloquecitos,
+          habilitado: bloquecitos.length > 0 ? true : false,
+          dia: dia,
+        };
+        return bloqu.push(horarioFarmageo);
+      });
+
+      return bloqu;
+    }
+
+    farmacias = farmacias[0].map((f, ix) => {
+      f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
+      f.mediospagos = f.mediospagos?.split(",");
+      f.horarios = dameloshorarios(f, dias[0]);
+      return f;
+    });
+
+    return farmacias;
   }
 
   @column({ isPrimary: true })

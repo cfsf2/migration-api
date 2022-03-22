@@ -45,5 +45,5 @@ export default class FarmaciaServicio extends BaseModel {
     foreignKey: "id",
     localKey: "id_servicio",
   })
-  public servicio: HasOne<typeof Servicio>;
+  public servicios: HasOne<typeof Servicio>;
 }
