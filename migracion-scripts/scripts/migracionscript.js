@@ -1336,15 +1336,19 @@ const tbl_producto_pack = () => {
         p.idsql
       }, ${stringOnull(p.nombre)}, ${stringOnull(p.sku)}, ${stringOnull(
         p.descripcion ? mysql_real_escape_string(p.descripcion) : null
-      )}, ${stringOnull(p.id_categoria)}, ${stringOnull(
-        p.id_entidad
+      )}, ${stringOnull(p.idsql_categoria)}, ${stringOnull(
+        p.idsql_entidad
       )},${stringOnull(p.en_papelera ? "s" : "n")}, ${stringOnull(
         p.imagen
       )}, ${stringOnull(p.habilitado ? "s" : "n")}, ${stringOnull(
         p.precio
       )}, ${stringOnull(p.precio_con_iva)}, ${stringOnull(
         p.rentabilidad
-      )}, 1, 1) ON DUPLICATE KEY UPDATE tbl_producto_pack.id = ${p.idsql}`;
+      )}, 1, 1) ON DUPLICATE KEY UPDATE tbl_producto_pack.id = ${
+        p.idsql
+      }, tbl_producto_pack.id_categoria = ${
+        p.idsql_categoria
+      }, tbl_producto_pack.id_entidad = ${p.idsql_entidad}`;
 
       return queryPromise(con, sql);
     });
