@@ -34,6 +34,10 @@ var schema = new mongoose.Schema(
     inventario: {
       type: "String",
     },
+    esPromocion: {
+      type: "Boolean",
+      default: false,
+    },
 
     //migracion
     idsql: { type: Number, default: null },
