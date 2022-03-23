@@ -1,3 +1,3 @@
 import Route from "@ioc:Adonis/Core/Route";
 
-Route.get("/productopack", "ProdructoPackController.index");
+Route.get("/productopack", "ProductoPackController.index");

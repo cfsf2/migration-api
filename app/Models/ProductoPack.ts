@@ -3,8 +3,28 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Categoria from "./Categoria";
 import Entidad from "./Entidad";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class ProductoPack extends BaseModel {
+  static async traerProductosPacks() {
+    const datos = await Database.from("tbl_producto_pack").select("*");
+
+    const arrNuevo = datos.map((e) => {
+      const claves = Object.keys(e);
+      claves.forEach((k) => {
+        if (e[k] === "s") {
+          e[k] = true;
+        }
+        if (e[k] === "n") {
+          e[k] = false;
+        }
+      });
+
+      return e;
+    });
+    return arrNuevo;
+  }
+
   public static table = "tbl_producto_pack";
 
   @column({ isPrimary: true })
@@ -43,24 +63,39 @@ export default class ProductoPack extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
-  //foreing key
+  @column()
+  public id_entidad: Number;
+
+  @column()
+  public id_categoria: Number;
+
+  @column()
+  public id_usuario_creacion: Number;
+
+  @column()
+  public id_usuario_modificacion: Number; //foreing key
+
   @hasOne(() => Categoria, {
     foreignKey: "id",
+    localKey: "categoria",
   })
-  public id_categoria: HasOne<typeof Categoria>;
+  public categoria: HasOne<typeof Categoria>;
 
   @hasOne(() => Entidad, {
     foreignKey: "id",
+    localKey: "entidad",
   })
-  public id_entidad: HasOne<typeof Entidad>;
+  public entidad: HasOne<typeof Entidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }
