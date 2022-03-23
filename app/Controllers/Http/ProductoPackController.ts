@@ -1,0 +1,93 @@
+import { DateTime } from "luxon";
+import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import Usuario from "App/Models/Usuario";
+import Entidad from "App/Models//Entidad";
+import Categoria from "App/Models/Categoria";
+import Database from "@ioc:Adonis/Lucid/Database";
+
+export default class ProductoPack extends BaseModel {
+  static async traerProductosPacks() {
+    const datos = await Database.from("tbl_producto_pack").select("*");
+
+    const arrNuevo = datos.map((e) => {
+      const claves = Object.keys(e);
+      claves.forEach((k) => {
+        if (e[k] === "s") {
+          e[k] = true;
+        }
+        if (e[k] === "n") {
+          e[k] = false;
+        }
+      });
+
+      return e;
+    });
+    return arrNuevo;
+  }
+
+  public static table = "tbl_producto_pack";
+  @column({ isPrimary: true })
+  public id: number;
+  @column()
+  public nombre: string;
+  @column()
+  public sku: string;
+  @column()
+  public descripcion: string;
+  @column()
+  public en_papelera: string;
+  @column()
+  public imagen: string;
+  @column()
+  public habilitado: string;
+
+  @column()
+  public precio: number;
+
+  @column()
+  public precio_con_iva: number;
+
+  @column()
+  public rentabilidad: number;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
+
+  @column()
+  public id_entidad: Number;
+
+  @column()
+  public id_categoria: Number;
+
+  @column()
+  public id_usuario_creacion: Number;
+
+  @column()
+  public id_usuario_modificacion: Number;
+
+  //foreing key
+  @hasOne(() => Categoria, {
+    foreignKey: "id",
+    localKey: "categoria",
+  })
+  public categoria: HasOne<typeof Categoria>;
+
+  @hasOne(() => Entidad, {
+    foreignKey: "id",
+    localKey: "entidad",
+  })
+  public entidad: HasOne<typeof Entidad>;
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "usuario_creacion",
+  })
+  public usuario_creacion: HasOne<typeof Usuario>;
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
+}
