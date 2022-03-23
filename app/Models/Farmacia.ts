@@ -23,7 +23,7 @@ export default class Farmacia extends BaseModel {
       await Database.rawQuery(`SELECT f.id, f.nombre, f.nombrefarmaceutico, 
       f.matricula, f.cufe, f.cuit, f.calle, f.numero, 
       f.direccioncompleta, f.longitud AS log, 
-      f.latitud AS lat, 
+      f.latitud AS lat, f.costoenvio,
       f.habilitado, f.imagen, f.email, f.telefono, 
       f.whatsapp, f.facebook, f.instagram, f.web, 
       f.descubrir, f.envios, f.tiempotardanza, 
@@ -112,20 +112,23 @@ export default class Farmacia extends BaseModel {
       return f;
     }
 
-    farmacias = farmacias[0].map((f) => {
-      f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
-      f.mediospagos = f.mediospagos?.split(",");
-      f.horarios = dameloshorarios(f, dias[0]);
-      f.productos = [];
-      f.excepcionesProdFarmageo = [];
-      f.excepcionesEntidadesFarmageo = [];
-      f.imagen = f.imagen ? f.imagen : "";
-      f = stringAbooleano(f);
+    farmacias = Promise.all(
+      farmacias[0].map(async (f) => {
+        f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
+        f.mediospagos = f.mediospagos?.split(",");
+        f.horarios = dameloshorarios(f, dias[0]);
+        f.productos = [];
+        f.excepcionesProdFarmageo = [];
+        f.excepcionesEntidadesFarmageo = [];
+        f.imagen = f.imagen ? f.imagen : "";
+        f = stringAbooleano(f);
+        return f;
+      })
+    );
 
-      return f;
-    });
-
-    if (farmacias.length === 1) return farmacias[0];
+    if (farmacias.length === 1) {
+      return farmacias[0];
+    }
     return farmacias;
   }
 
