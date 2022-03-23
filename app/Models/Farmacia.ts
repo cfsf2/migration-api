@@ -112,12 +112,19 @@ export default class Farmacia extends BaseModel {
       return f;
     }
 
-    farmacias = Promise.all(
+    farmacias = await Promise.all(
       farmacias[0].map(async (f) => {
+        const productosCustom =
+          await Database.rawQuery(`SELECT pc.* FROM tbl_farmacia_producto_custom AS fpc 
+        LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
+        WHERE fpc.id_farmacia =265
+        AND pc.habilitado = 's' 
+        AND pc.en_papelera = 'n'`);
+
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
         f.mediospagos = f.mediospagos?.split(",");
         f.horarios = dameloshorarios(f, dias[0]);
-        f.productos = [];
+        f.productos = productosCustom[0];
         f.excepcionesProdFarmageo = [];
         f.excepcionesEntidadesFarmageo = [];
         f.imagen = f.imagen ? f.imagen : "";
@@ -129,6 +136,7 @@ export default class Farmacia extends BaseModel {
     if (farmacias.length === 1) {
       return farmacias[0];
     }
+
     return farmacias;
   }
 
