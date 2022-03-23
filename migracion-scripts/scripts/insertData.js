@@ -28,10 +28,11 @@ connectToDatabase = async () => {
     await connectToDatabase();
     // await migracion.tbl_usuario();
     // await migracion.tbl_farmacia();
-    await migracion.tbl_producto_pack();
+    //  await migracion.tbl_producto_pack();
     // await migracion.tbl_laboratorio();
     // await migracion.tbl_transfer_productos();
     // await migracion.tbl_publicidades();
+    await migracion.tbl_producto_custom();
     resolve();
   });
 })()

@@ -415,20 +415,45 @@ const ProductosCustom = async () => {
   let count = 0;
   let i = 1;
   productos.forEach(async (producto) => {
-    const p = new ProductoCustom({
-      _id: producto._id,
-      descripcion: producto.descripcion,
-      nombre: producto.nombre,
-      imagen: producto.imagen,
-      habilitado: producto.habilitado,
-      favorito: producto.favorito,
-      precio: producto.precio,
-      sku: producto.sku,
-      en_papelera: producto.en_papelera,
-      inventario: producto.inventario,
-      idsql: i,
-    });
+    let exists = await ProductoCustom.countDocuments({ _id: producto._id });
+
+    if (exists > 0) {
+      ProductoCustom.findOneAndUpdate(
+        { _id: producto._id },
+        {
+          descripcion: producto.descripcion,
+          nombre: producto.nombre,
+          imagen: producto.imagen,
+          habilitado: producto.habilitado,
+          favorito: producto.favorito,
+          precio: producto.precio,
+          sku: producto.sku,
+          en_papelera: producto.en_papelera,
+          inventario: producto.inventario,
+          esPromocion: producto.esPromocion ? producto.esPromocion : false,
+        }
+      ).then((r) => {
+        if (producto.esPromocion) console.log(r);
+      });
+      return;
+    } else {
+      p = new ProductoCustom({
+        _id: producto._id,
+        descripcion: producto.descripcion,
+        nombre: producto.nombre,
+        imagen: producto.imagen,
+        habilitado: producto.habilitado,
+        favorito: producto.favorito,
+        precio: producto.precio,
+        sku: producto.sku,
+        en_papelera: producto.en_papelera,
+        inventario: producto.inventario,
+        esPromocion: producto.esPromocion,
+        idsql: i,
+      });
+    }
     i = i + 1;
+
     try {
       await p.save();
       count = count + 1;
@@ -1383,11 +1408,78 @@ const tbl_laboratorio = () => {
   });
 };
 
+const tbl_producto_custom = () => {
+  return new Promise(async (resolve, reject) => {
+    const productoCustoms = await ProductoCustom.find({});
+
+    const inventario = (i) => {
+      switch (i) {
+        case "hayexistencias":
+          return 1;
+        case "pocasexistencias":
+          return 2;
+        case "sinexistencias":
+          return 3;
+      }
+    };
+
+    const queries = productoCustoms.map((p) => {
+      const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
+      VALUES (${p.idsql}, ${
+        p.descripcion && p.descripcion !== ""
+          ? stringOnull(mysql_real_escape_string(p.descripcion))
+          : '""'
+      }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
+        p.imagen
+      )}, ${stringOnull(p.habilitado ? "s" : "n")}, ${stringOnull(
+        p.favorito ? "s" : "n"
+      )}, ${p.precio}, ${
+        p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+      }, ${inventario(p.inventario)},${stringOnull(
+        p.esPromocion ? "s" : "n"
+      )}, ${stringOnull(p.en_papelera ? "s" : "n")}, ${
+        p.idsql_categoria
+      }) ON DUPLICATE KEY UPDATE tbl_producto_custom.id = ${p.idsql}
+       , tbl_producto_custom.descripcion =${
+         p.descripcion && p.descripcion !== ""
+           ? stringOnull(mysql_real_escape_string(p.descripcion))
+           : '""'
+       }, tbl_producto_custom.nombre = ${stringOnull(
+        mysql_real_escape_string(p.nombre)
+      )}, tbl_producto_custom.imagen =  ${stringOnull(
+        p.imagen
+      )}, tbl_producto_custom.habilitado =${stringOnull(
+        p.habilitado ? "s" : "n"
+      )}, tbl_producto_custom.favorito = ${stringOnull(
+        p.favorito ? "s" : "n"
+      )}, tbl_producto_custom.precio = ${
+        p.precio
+      }, tbl_producto_custom.sku =  ${
+        p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+      }, tbl_producto_custom.inventario = ${inventario(
+        p.inventario
+      )}, tbl_producto_custom.esPromocion = ${stringOnull(
+        p.esPromocion ? "s" : "n"
+      )}, tbl_producto_custom.en_papelera = ${stringOnull(
+        p.en_papelera ? "s" : "n"
+      )}, tbl_producto_custom.id_categoria = ${p.idsql_categoria}
+       `;
+
+      return queryPromise(con, sql);
+    });
+    Promise.all(queries).then(() => {
+      console.log("productoCustoms migradas " + productoCustoms.length);
+      resolve();
+    });
+  });
+};
+
 module.exports = {
   tbl_usuario,
   tbl_farmacia,
   tbl_producto_pack,
   tbl_laboratorio,
+  tbl_producto_custom,
   farmacia_asignar_usuario_idsql,
   instituciones_asignar_idsql_institucion_madre,
   usuario_asignar_id_localidad,
