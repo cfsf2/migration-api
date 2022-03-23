@@ -1431,9 +1431,7 @@ const tbl_producto_custom = () => {
           : '""'
       }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
         p.imagen
-      )}, ${stringOnull(p.habilitado ? "s" : "n")}, ${stringOnull(
-        p.favorito ? "s" : "n"
-      )}, ${p.precio}, ${
+      )}, "s", ${stringOnull(p.favorito ? "s" : "n")}, ${p.precio}, ${
         p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
       }, ${inventario(p.inventario)},${stringOnull(
         p.esPromocion ? "s" : "n"
@@ -1448,9 +1446,7 @@ const tbl_producto_custom = () => {
         mysql_real_escape_string(p.nombre)
       )}, tbl_producto_custom.imagen =  ${stringOnull(
         p.imagen
-      )}, tbl_producto_custom.habilitado =${stringOnull(
-        p.habilitado ? "s" : "n"
-      )}, tbl_producto_custom.favorito = ${stringOnull(
+      )}, habilitado = "s", tbl_producto_custom.favorito = ${stringOnull(
         p.favorito ? "s" : "n"
       )}, tbl_producto_custom.precio = ${
         p.precio
