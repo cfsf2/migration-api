@@ -17,12 +17,31 @@ import CampanaOrientado from "./CampanaOrientado";
 import CampanaCampanaOrientado from "./CampanaCampanaOrientado";
 
 export default class Campana extends BaseModel {
-  static async traerCampanasActivas() {
+  public static async traerCampanasActivas() {
     const campanasActivas = await Database.rawQuery(
       `SELECT * FROM tbl_campana AS c WHERE  c.habilitado = "s"`
     );
     return campanasActivas[0];
   }
+
+  public static forUser = scope<typeof Campana>(
+    async (query, { idUsuario }: { idUsuario: number }) => {
+      const altQuery = Database.from("tbl_campana")
+        .select("tbl_campana.id")
+        .joinRaw(
+          "left join tbl_campana_requerimiento as cr ON cr.id_campana = tbl_campana.id and cr.id_usuario = ?",
+          [idUsuario]
+        )
+        .groupBy("tbl_campana.id")
+        .having(
+          Database.raw(
+            `tbl_campana.max_req = 0 or count(distinct cr.id) < tbl_campana.max_req`
+          )
+        );
+
+      query.whereIn("id", altQuery);
+    }
+  );
 
   public static table = "tbl_campana";
 
