@@ -17,31 +17,46 @@ import CampanaOrientado from "./CampanaOrientado";
 import CampanaCampanaOrientado from "./CampanaCampanaOrientado";
 
 export default class Campana extends BaseModel {
-  public static async traerCampanasActivas() {
-    const campanasActivas = await Database.rawQuery(
-      `SELECT * FROM tbl_campana AS c WHERE  c.habilitado = "s"`
-    );
-    return campanasActivas[0];
-  }
-
   public static forUser = scope<typeof Campana>(
-    async (query, { idUsuario }: { idUsuario: number }) => {
-      const altQuery = Database.from("tbl_campana")
-        .select("tbl_campana.id")
-        .joinRaw(
-          "left join tbl_campana_requerimiento as cr ON cr.id_campana = tbl_campana.id and cr.id_usuario = ?",
-          [idUsuario]
-        )
-        .groupBy("tbl_campana.id")
-        .having(
-          Database.raw(
-            `tbl_campana.max_req = 0 or count(distinct cr.id) < tbl_campana.max_req`
+    (query, { idUsuario }: { idUsuario?: number }) => {
+      query.if(idUsuario, (query) => {
+        const sinRequerimientoDeUsuario = Database.from("tbl_campana")
+          .select("tbl_campana.id")
+          .joinRaw(
+            "left join tbl_campana_requerimiento as cr ON cr.id_campana = tbl_campana.id and cr.id_usuario = ?",
+            [<number>idUsuario]
           )
-        );
+          .groupBy("tbl_campana.id")
+          .having(
+            Database.raw(
+              `tbl_campana.max_req = 0 or count(distinct cr.id) < tbl_campana.max_req`
+            )
+          );
 
-      query.whereIn("id", altQuery);
+        query.whereIn("id", sinRequerimientoDeUsuario);
+      });
     }
   );
+
+  public static habilitado = scope<typeof Campana>(
+    (query, habilitado = "s") => {
+      const habilitadas = Database.from("tbl_campana")
+        .select("id")
+        .where("habilitado", habilitado);
+      query.whereIn("id", habilitadas);
+    }
+  );
+
+  public static vigente = scope<typeof Campana>((query) => {
+    const hoy = new Date();
+
+    const vigentes = Database.from("tbl_campana")
+      .select("id")
+      .where("fecha_inicio", "<", hoy)
+      .andWhere("fecha_fin", ">=", hoy);
+
+    query.whereIn("id", vigentes);
+  });
 
   public static table = "tbl_campana";
 

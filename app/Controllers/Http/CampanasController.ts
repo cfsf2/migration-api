@@ -8,14 +8,12 @@ export default class CampanasController {
   }
 
   public async activas({ request }: HttpContextContract) {
-    return await Campana.query().preload("orientados").preload("atributos");
-  }
-
-  public async activas_usuario({ request }: HttpContextContract) {
-    const { idUsuario } = request.params();
+    const { idUsuario, habilitado } = request.params();
     return await Campana.query()
       .preload("orientados")
       .preload("atributos")
-      .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }));
+      .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
+      .apply((scopes) => scopes.habilitado(habilitado))
+      .apply((scopes) => scopes.vigente());
   }
 }
