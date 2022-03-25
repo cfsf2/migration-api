@@ -6,6 +6,7 @@ import "../routes/publicidad";
 import "../routes/categoria";
 import "../routes/entidad";
 import "../routes/productopack";
+import "../routes/campana";
 
 Route.get("/", async () => {
   return { hello: "world" };

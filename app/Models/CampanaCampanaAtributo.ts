@@ -17,13 +17,16 @@ export default class CampanaCampanaAtributo extends BaseModel {
   @column()
   public sql: string;
 
+  @column()
+  public id_campana: number;
+
   @hasOne(() => Campana, {
     foreignKey: "id",
   })
-  public id_campana: HasOne<typeof Campana>;
+  public campana: HasOne<typeof Campana>;
 
   @hasOne(() => CampanaAtributo, {
     foreignKey: "id",
   })
-  public id_usuario_creacion: HasOne<typeof CampanaAtributo>;
+  public usuario_creacion: HasOne<typeof CampanaAtributo>;
 }

@@ -1,9 +1,29 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasManyThrough,
+  hasManyThrough,
+  hasOne,
+  HasOne,
+  manyToMany,
+} from "@ioc:Adonis/Lucid/Orm";
 import CampanaResponsable from "./CampanaResponsable";
 import Usuario from "./Usuario";
+import Database from "@ioc:Adonis/Lucid/Database";
+import CampanaAtributo from "./CampanaAtributo";
+import CampanaCampanaAtributo from "./CampanaCampanaAtributo";
+import CampanaOrientado from "./CampanaOrientado";
+import CampanaCampanaOrientado from "./CampanaCampanaOrientado";
 
 export default class Campana extends BaseModel {
+  static async traerCampanasActivas() {
+    const campanasActivas = await Database.rawQuery(
+      `SELECT * FROM tbl_campana AS c WHERE  c.habilitado = "s"`
+    );
+    return campanasActivas[0];
+  }
+
   public static table = "tbl_campana";
 
   @column({ isPrimary: true })
@@ -71,4 +91,20 @@ export default class Campana extends BaseModel {
     foreignKey: "id",
   })
   public id_campana_responsable: HasOne<typeof CampanaResponsable>;
+
+  @hasManyThrough([() => CampanaAtributo, () => CampanaCampanaAtributo], {
+    localKey: "id",
+    foreignKey: "id_campana",
+    throughLocalKey: "id_campana_atributo",
+    throughForeignKey: "id",
+  })
+  public atributos: HasManyThrough<typeof CampanaAtributo>;
+
+  @hasManyThrough([() => CampanaOrientado, () => CampanaCampanaOrientado], {
+    localKey: "id",
+    foreignKey: "id_campana",
+    throughLocalKey: "id_campana_orientado",
+    throughForeignKey: "id",
+  })
+  public orientados: HasManyThrough<typeof CampanaOrientado>;
 }

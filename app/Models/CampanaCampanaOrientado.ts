@@ -8,13 +8,19 @@ export default class CampanaCampanaOrientado extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
+  @column()
+  public id_campana: number;
+
+  @column()
+  public id_campana_orientado: number;
+
   @hasOne(() => Campana, {
     foreignKey: "id",
   })
-  public id_campana: HasOne<typeof Campana>;
+  public campana: HasOne<typeof Campana>;
 
   @hasOne(() => CampanaOrientado, {
     foreignKey: "id",
   })
-  public id_campana_orientado: HasOne<typeof CampanaOrientado>;
+  public campana_orientado: HasOne<typeof CampanaOrientado>;
 }
