@@ -6,10 +6,12 @@ import EstadoPedido from "./EstadoPedido";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Pedido extends BaseModel {
-  static async traerPedidos() {
-    const datos = await Database.from("tbl_pedido").select("*");
+  static async traerPedidos({ usuarioNombre }: { usuarioNombre: String }) {
+    const datos = await Database.from("tbl_pedido")
+      .select(Database.raw(`*, ts_modificacion as fechamodificacion`))
+      .where("username", usuarioNombre.toString());
 
-    const arrNuevo = datos[0].map((e) => {
+    const arrNuevo = datos.map((e) => {
       const claves = Object.keys(e);
       claves.forEach((k) => {
         if (e[k] === "s") {
@@ -22,6 +24,7 @@ export default class Pedido extends BaseModel {
 
       return e;
     });
+
     return arrNuevo;
   }
   public static table = "tbl_pedido";

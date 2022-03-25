@@ -1,3 +1,3 @@
 import Route from "@ioc:Adonis/Core/Route";
 
-Route.get("/pedido", "PedidoController.index");
+Route.get("/pedidos/:usuarioNombre", "PedidoController.mig_usuario");
