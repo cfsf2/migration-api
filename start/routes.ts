@@ -7,6 +7,7 @@ import "../routes/categoria";
 import "../routes/entidad";
 import "../routes/productopack";
 import "../routes/campana";
+import "../routes/pedido";
 
 Route.get("/", async () => {
   return { hello: "world" };
