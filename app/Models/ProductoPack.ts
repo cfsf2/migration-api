@@ -7,9 +7,11 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class ProductoPack extends BaseModel {
   static async traerProductosPacks() {
-    const datos = await Database.from("tbl_producto_pack").select("*");
+    const datos = await Database.rawQuery(
+      "SELECT pp.*,   IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, pp.id_entidad as entidad_id FROM tbl_producto_pack as pp"
+    );
 
-    const arrNuevo = datos.map((e) => {
+    const arrNuevo = datos[0].map((e) => {
       const claves = Object.keys(e);
       claves.forEach((k) => {
         if (e[k] === "s") {

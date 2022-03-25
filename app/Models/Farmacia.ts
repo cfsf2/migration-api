@@ -38,9 +38,9 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id
       LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
       LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia
-      LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id
-      WHERE 1=1
-      ${usuario ? `AND u.usuario = "${usuario}"` : ""}
+      LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id 
+      WHERE f.nombre IS NOT NULL 
+      ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       GROUP BY f.id`);
 
     let servicios =
