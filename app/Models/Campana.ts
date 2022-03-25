@@ -6,7 +6,7 @@ import {
   hasManyThrough,
   hasOne,
   HasOne,
-  manyToMany,
+  scope,
 } from "@ioc:Adonis/Lucid/Orm";
 import CampanaResponsable from "./CampanaResponsable";
 import Usuario from "./Usuario";

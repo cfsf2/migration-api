@@ -1,6 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasMany,
+  hasMany,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Localidad from "./Localidad";
+import CampanaRequerimiento from "./CampanaRequerimiento";
+import CampanaOrientado from "./CampanaOrientado";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -82,4 +91,9 @@ export default class Usuario extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
+
+  @hasMany(() => CampanaRequerimiento, {
+    foreignKey: "id_usuario",
+  })
+  public requerimientos: HasMany<typeof CampanaRequerimiento>;
 }
