@@ -15,7 +15,7 @@ export default class UsuariosController {
   public async mig_perfilUsuario({ request }: HttpContextContract) {
     const { usuarioNombre } = request.params();
     console.log(usuarioNombre);
-    return Usuario.traerPerfilDeUsuario({usuarioNombre});
+    return Usuario.traerPerfilDeUsuario({ usuarioNombre });
     // return Usuario.query().where("usuario", usuarioNombre.toString());
   }
 }

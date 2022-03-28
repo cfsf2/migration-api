@@ -9,6 +9,12 @@ export default class AuthController {
     try {
       await auth.attempt(username, password);
       const usuario = await Usuario.query().where("usuario", username);
+      usuario[0].f_ultimo_acceso = new Date()
+        .toISOString()
+        .replace("T", " ")
+        .replace("Z", "");
+
+      await usuario[0].save();
       usuario[0].user_display_name = usuario[0].give_user_display_name();
 
       const response = usuario[0];
@@ -16,10 +22,7 @@ export default class AuthController {
         expiresIn: process.env.JWTEXPIRESIN,
       });
       response.user_email = response.email;
-      usuario[0].f_ultimo_acceso = new Date()
-        .toISOString()
-        .replace("T", " ")
-        .replace("Z", "");
+
       return response;
     } catch (error) {
       console.log(error);
@@ -33,7 +36,8 @@ export default class AuthController {
     auth,
   }: HttpContextContract) {
     const body = request.body();
-    const token = request.header("authentication");
+    console.log(request.headers());
+    const token = request.header("authorization");
 
     const nuevoUsuario = {
       usuario: body.usuario,

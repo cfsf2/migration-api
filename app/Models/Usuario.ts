@@ -76,7 +76,7 @@ export default class Usuario extends BaseModel {
       return e;
     });
 
-    return formateo;
+    return formateo[0];
   }
 
   public static table = "tbl_usuario";
