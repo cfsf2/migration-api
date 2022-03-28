@@ -1,5 +1,4 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { schema, rules } from "@ioc:Adonis/Core/Validator";
 import jwt from "jsonwebtoken";
 import Usuario from "App/Models/Usuario";
 

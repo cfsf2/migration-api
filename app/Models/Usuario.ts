@@ -93,7 +93,7 @@ export default class Usuario extends BaseModel {
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
-      id_localidad: schema.string.optional(),
+      id_localidad: schema.number.optional(),
       esfarmacia: schema.string.optional(),
       admin: schema.string.optional(),
       demolab: schema.string.optional(),
@@ -176,23 +176,23 @@ export default class Usuario extends BaseModel {
   @column()
   public id_wp: string;
 
-  @column.dateTime({ autoCreate: true })
-  public ts_creacion: DateTime;
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public ts_modificacion: DateTime;
-
   @column()
   public celular: string;
 
   @column()
-  public id_localidad: Number;
+  public id_localidad?: Number;
 
   @column()
   public permisos: String;
 
   @column()
   public perfil: Number;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
