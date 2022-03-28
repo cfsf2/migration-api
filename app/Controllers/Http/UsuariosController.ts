@@ -12,7 +12,10 @@ export default class UsuariosController {
       .paginate(page, limit);
   }
 
-  public async pass({ request }: HttpContextContract) {
-    return { data: "Metodo passsss" };
+  public async mig_perfilUsuario({ request }: HttpContextContract) {
+    const { usuarioNombre } = request.params();
+    console.log(usuarioNombre);
+    return Usuario.traerPerfilDeUsuario({usuarioNombre});
+    // return Usuario.query().where("usuario", usuarioNombre.toString());
   }
 }

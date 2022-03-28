@@ -14,8 +14,57 @@ import {
 import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Usuario extends BaseModel {
+  static async traerPerfilDeUsuario({
+    usuarioNombre,
+  }: {
+    usuarioNombre: String;
+  }) {
+    const usuario = await Database.from("tbl_usuario")
+      .select(
+        Database.raw(
+          `tbl_usuario.*, 
+          tbl_usuario.nombre as name, 
+          tbl_usuario.fecha_nac as fechaNac, 
+          tbl_usuario.telefono as telephone, 
+          tbl_usuario.f_ultimo_acceso as ultimoacceso, 
+          tbl_usuario.ts_creacion as fecha_alta, 
+          tbl_usuario.ts_modificacion as fecha_modificacion,
+          tbl_localidad.nombre as localidad,
+          tbl_usuario_perfil.id_perfil as perfil
+          `
+        )
+      )
+      .leftJoin(`tbl_localidad`, `tbl_usuario.id_localidad`, `tbl_localidad.id`)
+      .leftJoin(
+        `tbl_usuario_perfil`,
+        `tbl_usuario.id`,
+        `tbl_usuario_perfil.id_usuario`
+      )
+      .where("usuario", usuarioNombre.toString());
+
+    let permisos = await Database.from("tbl_perfil_permiso")
+      .select(Database.raw(`tipo`))
+      .leftJoin(
+        `tbl_permiso`,
+        `tbl_perfil_permiso.id_permiso`,
+        `tbl_permiso.id`
+      )
+      .where("tbl_perfil_permiso.id_perfil", usuario[0].perfil)
+      .groupBy("tipo");
+
+    let arrNuevo: string[] = [];
+    permisos.forEach((i) => {
+      arrNuevo.push(i.tipo);
+      return arrNuevo;
+    });
+
+    usuario[0].permisos = arrNuevo;
+    return usuario;
+  }
+
   public static table = "tbl_usuario";
 
   public static async registrarUsuarioWeb(usuario: {
@@ -136,6 +185,15 @@ export default class Usuario extends BaseModel {
   @column()
   public celular: string;
 
+  @column()
+  public id_localidad: Number;
+
+  @column()
+  public permisos: String;
+
+  @column()
+  public perfil: Number;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
@@ -144,7 +202,7 @@ export default class Usuario extends BaseModel {
   @hasOne(() => Localidad, {
     foreignKey: "id",
   })
-  public id_localidad: HasOne<typeof Localidad>;
+  public localidad: HasOne<typeof Localidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
