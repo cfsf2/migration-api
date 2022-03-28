@@ -15,58 +15,58 @@ export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id: Number;
 
   @column()
-  public usuario: string;
+  public usuario: String;
 
   @column()
-  public nombre: string;
+  public nombre: String;
 
   @column()
-  public apellido: string;
+  public apellido: String;
 
   @column()
-  public dni: number;
+  public dni: Number;
 
   @column()
   public fecha_nac: Date;
 
   @column()
-  public email: string;
+  public email: String;
 
   @column({ serializeAs: null })
-  public password: string;
+  public password: String;
 
   @column()
-  public newsletter: string;
+  public newsletter: String;
 
   @column()
-  public habilitado: string;
+  public habilitado: String;
 
   @column()
-  public esfarmacia: string;
+  public esfarmacia: String;
 
   @column()
-  public admin: string;
+  public admin: String;
 
   @column()
-  public confirmado: string;
+  public confirmado: String;
 
   @column()
-  public telefono: string;
+  public telefono: String;
 
   @column.dateTime()
   public f_ultimo_acceso: DateTime;
 
   @column()
-  public deleted: string;
+  public deleted: String;
 
   @column()
-  public demolab: string;
+  public demolab: String;
 
   @column()
-  public id_wp: string;
+  public id_wp: String;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -75,7 +75,7 @@ export default class Usuario extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public celular: string;
+  public celular: String;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
@@ -96,4 +96,17 @@ export default class Usuario extends BaseModel {
     foreignKey: "id_usuario",
   })
   public requerimientos: HasMany<typeof CampanaRequerimiento>;
+
+  // Campos locos especificamente diseñados para que siga funcionando la aplicacion sin cambiar el frontend
+  public give_user_display_name() {
+    return this.nombre + " " + this.apellido;
+  }
+  @column()
+  public user_display_name: String;
+
+  @column()
+  public user_email: String;
+
+  @column()
+  public token: String;
 }
