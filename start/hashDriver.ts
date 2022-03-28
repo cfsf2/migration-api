@@ -29,7 +29,7 @@ class CustomBcryptDriver implements HashDriverContract {
   }
 
   public async make(value: string): Promise<string> {
-    return "";
+    return bcrypt.hashSync(value, this.config.saltRounds);
   }
 
   /**

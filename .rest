@@ -4,6 +4,35 @@ GET http://localhost:3111/farmacias/F0639804 HTTP/1.1
 ####
 
 
-GET http://localhost:3111/entidades HTTP/1.1
+GET http://localhost:3111/pedidos/josemariagelabert@gmail.com HTTP/1.1
 
 ####
+
+GET http://localhost:3111/productospack/ HTTP/1.1
+
+####
+
+GET http://localhost:3111/productospack/entidad/1 HTTP/1.1
+
+####
+
+GET http://api.testingdev.ml/campana/activas/ HTTP/1.1
+
+####
+
+POST http://localhost:3111/users/alta-usuario-web HTTP/1.1
+content-type: "application/json"
+{
+    "username":"juanloco",
+    "password": "123123123",
+    "name": "Juan",
+    "apellido": "Locardo",
+    "email": "locardo@gmail.com",
+    "usuario": "locardo@gmail.com",
+    "telefono": "2292261",
+    "caracteristica": "341",
+}
+
+###
+
+GET http://localhost:3111/users/logout HTTP/1.1

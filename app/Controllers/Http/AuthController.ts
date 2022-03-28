@@ -17,10 +17,46 @@ export default class AuthController {
         expiresIn: process.env.JWTEXPIRESIN,
       });
       response.user_email = response.email;
+      usuario[0].f_ultimo_acceso = new Date()
+        .toISOString()
+        .replace("T", " ")
+        .replace("Z", "");
       return response;
     } catch (error) {
       console.log(error);
       response.send(error);
     }
+  }
+
+  public async mig_alta_usuario({
+    request,
+    response,
+    auth,
+  }: HttpContextContract) {
+    const body = request.body();
+    const token = request.header("authentication");
+
+    const nuevoUsuario = {
+      usuario: body.usuario,
+      nombre: body.name,
+      apellido: body.apellido,
+      email: body.email,
+      telefono: body.caracteristica + body.telefono,
+      celular: body.caracteristica + body.telefono,
+      password: body.password,
+    };
+    try {
+      Usuario.registrarUsuarioWeb(nuevoUsuario);
+    } catch (error) {
+      console.log(error);
+      return response.send(error);
+    }
+
+    return nuevoUsuario;
+  }
+
+  public async logout({ response, auth }: HttpContextContract) {
+    await auth.logout();
+    return response.redirect("/");
   }
 }
