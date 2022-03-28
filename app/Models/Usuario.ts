@@ -10,7 +10,6 @@ import {
 import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Database from "@ioc:Adonis/Lucid/Database";
-import Permiso from "./Permiso";
 
 export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
@@ -58,7 +57,21 @@ export default class Usuario extends BaseModel {
     });
     
     usuario[0].permisos = arrNuevo
-    return usuario;
+    const formateo = usuario.map( (e) => {
+        const claves = Object.keys(e);
+        claves.forEach((k) => {
+          if (e[k] === "s") {
+            e[k] = true;
+          }
+          if (e[k] === "n") {
+            e[k] = false;
+          }
+        });
+  
+        return e;
+    })
+
+    return formateo;
   }
 
   public static table = "tbl_usuario";
