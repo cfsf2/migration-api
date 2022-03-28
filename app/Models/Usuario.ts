@@ -9,9 +9,43 @@ import {
 } from "@ioc:Adonis/Lucid/Orm";
 import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
-import CampanaOrientado from "./CampanaOrientado";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Usuario extends BaseModel {
+  static async traerPerfilDeUsuario({
+    usuarioNombre,
+  }: {
+    usuarioNombre: String;
+  }) {
+    const datos = await Database.from("tbl_usuario")
+      .select(
+        Database.raw(
+          `tbl_usuario.*, 
+          tbl_usuario.nombre as name, 
+          tbl_usuario.fecha_nac as fechaNac, 
+          tbl_usuario.telefono as telephone, 
+          tbl_usuario.f_ultimo_acceso as ultimoacceso, 
+          tbl_usuario.ts_creacion as fecha_alta, 
+          tbl_usuario.ts_modificacion as fecha_modificacion,
+          tbl_localidad.nombre as localidad,
+          tbl_usuario_perfil.id_perfil as perfil`
+        )
+      )
+      .leftJoin(`tbl_localidad`, `tbl_usuario.id_localidad`, `tbl_localidad.id`)
+      .leftJoin(`tbl_usuario_perfil`, `tbl_usuario.id`, `tbl_usuario_perfil.id_usuario` )
+      .where("usuario", usuarioNombre.toString());
+      
+      // const permisos = await Database.from('tbl_perfil_permiso')
+      // .select(
+      //   Database.raw(
+      //     ``
+      //   )
+      // )
+
+    return datos;
+  }
+
+
   public static table = "tbl_usuario";
 
   @column({ isPrimary: true })
@@ -77,6 +111,9 @@ export default class Usuario extends BaseModel {
   @column()
   public celular: string;
 
+  @column()
+  public id_localidad: Number;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
@@ -85,7 +122,7 @@ export default class Usuario extends BaseModel {
   @hasOne(() => Localidad, {
     foreignKey: "id",
   })
-  public id_localidad: HasOne<typeof Localidad>;
+  public localidad: HasOne<typeof Localidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",

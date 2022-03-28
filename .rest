@@ -1,9 +1,14 @@
 
-GET http://localhost:3111/farmacias/F0639804 HTTP/1.1
+GET http://localhost:3110/users/josemariagelabert@gmail.com HTTP/1.1
 
 ####
 
 
-GET http://localhost:3111/entidades HTTP/1.1
+GET http://localhost:3111/users/josemariagelabert@gmail.com HTTP/1.1
+
+####
+
+
+GET http://api.testingdev.ml/users/2 HTTP/1.1
 
 ####
