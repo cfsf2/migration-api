@@ -22,42 +22,34 @@ export default class CampanasController {
   }
 
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
-    const { id_campana, id_usuario, id_farmacia, celular } =
-      request.body();
 
-      const requerimientoSchema = schema.create({
-        id_campana: schema.number(),
-        id_usuario: schema.number.nullable(),
-        id_farmacia: schema.number.nullable(),
-        celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
-      });
-
-   
+    const requerimientoSchema = schema.create({
+      id_campana: schema.number(),
+      id_usuario: schema.number.nullable(),
+      id_farmacia: schema.number.nullable(),
+      celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
+    });
 
     let random = () => {
-      return Math.random().toString(36).slice(2,10)
-    }
+      return Math.random().toString(36).slice(2, 10).toUpperCase();
+    };
 
     const requerimiento = new CampanaRequerimiento();
-    
-    
 
     try {
-      await request.validate({schema: requerimientoSchema})
-      requerimiento.fill(request.body())
+      await request.validate({ schema: requerimientoSchema });
+      requerimiento.fill(request.body());
       requerimiento.codigo_promo = random();
-    
+
       await requerimiento.save();
-      console.log(request.body())
-      return response.status(201).send(
-        {
-          msg: "El Requerimiento se genero con exito",
-          codigo: requerimiento.codigo_promo
-        }
-      )
+
+      return response.status(201).send({
+        msg: "El Requerimiento se genero con exito",
+        codigo: requerimiento.codigo_promo,
+      });
     } catch (error) {
       console.log(error);
       return response.status(501).send(error);
     }
   }
-
+}
