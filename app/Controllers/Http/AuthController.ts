@@ -32,7 +32,7 @@ export default class AuthController {
 
   public async mig_alta_usuario({ request, response }: HttpContextContract) {
     const body = request.body();
-    console.log(body);
+
     const nuevoUsuario = {
       usuario: body.usuario,
       nombre: body.name,
@@ -44,8 +44,8 @@ export default class AuthController {
     };
 
     const res = await Usuario.registrarUsuarioWeb(nuevoUsuario, response);
-
-    return res;
+    console.log(res);
+    return response.send(res);
   }
 
   public async logout({ response, auth }: HttpContextContract) {

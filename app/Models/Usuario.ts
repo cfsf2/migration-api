@@ -108,6 +108,7 @@ export default class Usuario extends BaseModel {
         rules.unique({ table: "tbl_usuario", column: "email" }),
       ]),
       telefono: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
+      celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
@@ -138,7 +139,18 @@ export default class Usuario extends BaseModel {
         .replace("Z", "");
 
       const nuevoUsuario = new Usuario();
-      await nuevoUsuario.fill(usuarioValidado).save();
+      const usuarioGuardado = await nuevoUsuario.fill(usuarioValidado).save();
+
+      const usuarioRegistrado = await Usuario.query().where(
+        "id",
+        usuarioGuardado.$attributes.id
+      );
+      usuarioRegistrado[0].id_usuario_creacion = usuarioRegistrado[0].id;
+      usuarioRegistrado[0].id_usuario_modificacion = usuarioRegistrado[0].id;
+      await usuarioRegistrado[0].save();
+
+      response.status(201);
+      return usuarioRegistrado[0];
     } catch (err) {
       console.log(err);
       response.status(409);
@@ -218,10 +230,16 @@ export default class Usuario extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Localidad, {
     foreignKey: "id",
@@ -231,7 +249,7 @@ export default class Usuario extends BaseModel {
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasMany(() => CampanaRequerimiento, {
     foreignKey: "id_usuario",
