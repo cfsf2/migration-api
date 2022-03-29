@@ -112,6 +112,7 @@ export default class Usuario extends BaseModel {
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
+      fecha_nac: schema.date.optional(),
       id_localidad: schema.number.optional(),
       esfarmacia: schema.string.optional(),
       admin: schema.string.optional(),

@@ -30,6 +30,8 @@ export default class UsuariosController {
       nombre: body.name,
       apellido: body.apellido,
       email: body.email,
+      fecha_nac: body.fecha_nac,
+      dni: body.dni,
       telefono: body.caracteristica + body.telefono,
       celular: body.caracteristica + body.telefono,
       password: body.password,
