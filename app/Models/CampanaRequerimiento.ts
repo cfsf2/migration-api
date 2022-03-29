@@ -21,10 +21,13 @@ export default class CampanaRequerimiento extends BaseModel {
 
   @column()
   public texto_mensaje: string;
+
   @column()
   public id_campana: number;
+
   @column()
   public id_usuario: number;
+  
   @column()
   public id_farmacia: number;
 

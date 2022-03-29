@@ -16,4 +16,37 @@ export default class CampanasController {
       .apply((scopes) => scopes.habilitado(habilitado))
       .apply((scopes) => scopes.vigente());
   }
+
+  public async mig_nuevoReq({ request, response }: HttpContextContract) {
+    const { id_campana, id_usuario, id_farmacia, celular, codigo_promo } =
+      request.body();
+
+    const requerimiento = new CampanaRequerimiento();
+
+    
+    let random = () => {
+      return Math.random().toString(36).slice(2,10)
+    }
+    
+    requerimiento.id_campana = id_campana;
+    requerimiento.id_usuario = id_usuario;
+    requerimiento.id_farmacia = id_farmacia;
+    requerimiento.celular = celular;
+    requerimiento.codigo_promo = random().toUpperCase();
+    ;
+
+    try {
+      await requerimiento.save();
+      console.log(request.body())
+      return response.status(201).send(
+        {
+          msg: "El Requerimiento se genero con exito",
+          codigo: requerimiento.codigo_promo
+        }
+      )
+    } catch (error) {
+      console.log(error)
+      return response.status(501).send(error);
+    }
+  }
 }
