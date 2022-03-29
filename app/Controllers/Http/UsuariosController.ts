@@ -18,4 +18,22 @@ export default class UsuariosController {
     return Usuario.traerPerfilDeUsuario({ usuarioNombre });
     // return Usuario.query().where("usuario", usuarioNombre.toString());
   }
+
+  public async mig_alta_usuario({ request, response }: HttpContextContract) {
+    const body = request.body();
+
+    const nuevoUsuario = {
+      usuario: body.usuario,
+      nombre: body.name,
+      apellido: body.apellido,
+      email: body.email,
+      telefono: body.caracteristica + body.telefono,
+      celular: body.caracteristica + body.telefono,
+      password: body.password,
+    };
+
+    const res = await Usuario.registrarUsuarioWeb(nuevoUsuario, response);
+    console.log(res);
+    return response.send(res);
+  }
 }
