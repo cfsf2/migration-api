@@ -7,7 +7,8 @@ export default class AuthController {
     const { username, password } = request.only(["username", "password"]);
 
     try {
-      await auth.attempt(username, password);
+      await auth.use("web").attempt(username, password);
+
       const usuario = await Usuario.query().where("usuario", username);
       usuario[0].f_ultimo_acceso = new Date()
         .toISOString()

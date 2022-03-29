@@ -11,15 +11,14 @@ export default class CampanasController {
   }
 
   public async activas({ request }: HttpContextContract) {
-    const { idUsuario, habilitado } = request.params();
-    let campanas = await Campana.query()
+    const { idUsuario, habilitado } = request.qs();
+    return await Campana.query()
       .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
       .preload("orientados")
       .preload("atributos")
       .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
       .apply((scopes) => scopes.habilitado(habilitado))
       .apply((scopes) => scopes.vigente());
-    return campanas;
   }
 
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
@@ -57,7 +56,7 @@ export default class CampanasController {
         }
       )
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return response.status(501).send(error);
     }
   }

@@ -23,14 +23,12 @@ export default class Campana extends BaseModel {
         const sinRequerimientoDeUsuario = Database.from("tbl_campana")
           .select("tbl_campana.id")
           .joinRaw(
-            "left join tbl_campana_requerimiento as cr ON cr.id_campana = tbl_campana.id and cr.id_usuario = ?",
+            "left join tbl_campana_requerimiento as cr ON cr.id_campana = tbl_campana.id AND cr.id_usuario = ?",
             [<number>idUsuario]
           )
           .groupBy("tbl_campana.id")
-          .having(
-            Database.raw(
-              `tbl_campana.max_req = 0 or count(distinct cr.id) < tbl_campana.max_req`
-            )
+          .havingRaw(
+            `tbl_campana.max_req = 0 OR count(distinct cr.id) < tbl_campana.max_req`
           );
 
         query.whereIn("id", sinRequerimientoDeUsuario);

@@ -1,5 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-
+import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Usuario from "App/Models/Usuario";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
@@ -58,9 +58,27 @@ export default class UsuariosController {
     return response.send(res);
   }
 
-  public mig_actualizar_usuarioWeb({
+  public async mig_actualizar_usuarioWeb({
     request,
     response,
-    auth,
-  }: HttpContextContract) {}
+    bouncer,
+  }: HttpContextContract) {
+    const usuarioData = request.body().data;
+    const token = request.header("authorization")?.split(" ")[1];
+
+    bouncer
+      .authorize("actualizarUsuarioWeb", usuarioData.id)
+      .then(() => {
+        Usuario.actualizarTelefonoUsuarioWeb({
+          id: usuarioData.id,
+          usuarioData: usuarioData,
+          response,
+          request,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        response.status(401);
+      });
+  }
 }
