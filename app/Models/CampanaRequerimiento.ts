@@ -1,11 +1,14 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
+
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
 import Campana from "./Campana";
 
 export default class CampanaRequerimiento extends BaseModel {
   public static table = "tbl_campana_requerimiento";
+
+
 
   @column({ isPrimary: true })
   public id: number;
@@ -27,7 +30,7 @@ export default class CampanaRequerimiento extends BaseModel {
 
   @column()
   public id_usuario: number;
-  
+
   @column()
   public id_farmacia: number;
 

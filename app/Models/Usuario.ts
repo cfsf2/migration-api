@@ -122,6 +122,8 @@ export default class Usuario extends BaseModel {
       id_usuario_modificacion: schema.number.optional(),
       f_ultimo_acceso: schema.string.optional(),
     });
+
+    
     try {
       const usuarioValidado = await validator.validate({
         schema: usuarioSchema,

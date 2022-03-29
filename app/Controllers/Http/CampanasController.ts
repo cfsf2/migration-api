@@ -1,5 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { ResponseContract } from "@ioc:Adonis/Core/Response";
+import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 
@@ -21,24 +23,31 @@ export default class CampanasController {
   }
 
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
-    const { id_campana, id_usuario, id_farmacia, celular, codigo_promo } =
+    const { id_campana, id_usuario, id_farmacia, celular } =
       request.body();
 
-    const requerimiento = new CampanaRequerimiento();
+      const requerimientoSchema = schema.create({
+        id_campana: schema.number(),
+        id_usuario: schema.number.nullable(),
+        id_farmacia: schema.number.nullable(),
+        celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
+      });
 
-    
+   
+
     let random = () => {
       return Math.random().toString(36).slice(2,10)
     }
+
+    const requerimiento = new CampanaRequerimiento();
     
-    requerimiento.id_campana = id_campana;
-    requerimiento.id_usuario = id_usuario;
-    requerimiento.id_farmacia = id_farmacia;
-    requerimiento.celular = celular;
-    requerimiento.codigo_promo = random().toUpperCase();
-    ;
+    
 
     try {
+      await request.validate({schema: requerimientoSchema})
+      requerimiento.fill(request.body())
+      requerimiento.codigo_promo = random();
+    
       await requerimiento.save();
       console.log(request.body())
       return response.status(201).send(
@@ -52,4 +61,4 @@ export default class CampanasController {
       return response.status(501).send(error);
     }
   }
-}
+
