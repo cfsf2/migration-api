@@ -15,6 +15,7 @@ import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { ResponseContract } from "@ioc:Adonis/Core/Response";
 
 export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
@@ -81,14 +82,17 @@ export default class Usuario extends BaseModel {
 
   public static table = "tbl_usuario";
 
-  public static async registrarUsuarioWeb(usuario: {
-    usuario: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-    telefono: number;
-    celular: string;
-  }) {
+  public static async registrarUsuarioWeb(
+    usuario: {
+      usuario: string;
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: number;
+      celular: string;
+    },
+    response: ResponseContract
+  ) {
     const usuarioSchema = schema.create({
       usuario: schema.string({ trim: true }, [
         rules.unique({
@@ -116,23 +120,29 @@ export default class Usuario extends BaseModel {
       f_ultimo_acceso: schema.string.optional(),
     });
     try {
-      const data = await validator.validate({
+      const usuarioValidado = await validator.validate({
         schema: usuarioSchema,
         data: usuario,
+        messages: {
+          "email.unique": "El email ya esta en uso",
+          "email.required": "Un email es requerido",
+        },
       });
 
-      data.admin = "n";
-      data.esfarmacia = "n";
-      data.demolab = "n";
-      data.f_ultimo_acceso = new Date()
+      usuarioValidado.admin = "n";
+      usuarioValidado.esfarmacia = "n";
+      usuarioValidado.demolab = "n";
+      usuarioValidado.f_ultimo_acceso = new Date()
         .toISOString()
         .replace("T", " ")
         .replace("Z", "");
 
       const nuevoUsuario = new Usuario();
-      await nuevoUsuario.fill(data).save();
+      await nuevoUsuario.fill(usuarioValidado).save();
     } catch (err) {
       console.log(err);
+      response.status(409);
+      return "El email ya esta en uso";
     }
   }
 

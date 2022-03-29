@@ -30,15 +30,9 @@ export default class AuthController {
     }
   }
 
-  public async mig_alta_usuario({
-    request,
-    response,
-    auth,
-  }: HttpContextContract) {
+  public async mig_alta_usuario({ request, response }: HttpContextContract) {
     const body = request.body();
-    console.log(request.headers());
-    const token = request.header("authorization");
-
+    console.log(body);
     const nuevoUsuario = {
       usuario: body.usuario,
       nombre: body.name,
@@ -48,14 +42,10 @@ export default class AuthController {
       celular: body.caracteristica + body.telefono,
       password: body.password,
     };
-    try {
-      Usuario.registrarUsuarioWeb(nuevoUsuario);
-    } catch (error) {
-      console.log(error);
-      return response.send(error);
-    }
 
-    return nuevoUsuario;
+    const res = await Usuario.registrarUsuarioWeb(nuevoUsuario, response);
+
+    return res;
   }
 
   public async logout({ response, auth }: HttpContextContract) {
