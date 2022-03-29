@@ -34,7 +34,8 @@ export default class Usuario extends BaseModel {
           tbl_usuario.ts_creacion as fecha_alta, 
           tbl_usuario.ts_modificacion as fecha_modificacion,
           tbl_localidad.nombre as localidad,
-          tbl_usuario_perfil.id_perfil as perfil
+          tbl_usuario_perfil.id_perfil as perfil,
+          tbl_usuario.id as _id
           `
         )
       )
@@ -112,7 +113,7 @@ export default class Usuario extends BaseModel {
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
-      fecha_nac: schema.date.optional(),
+      fecha_nac: schema.string.optional(),
       id_localidad: schema.number.optional(),
       esfarmacia: schema.string.optional(),
       admin: schema.string.optional(),
@@ -159,6 +160,10 @@ export default class Usuario extends BaseModel {
     }
   }
 
+  public static async actualizarUsuarioWeb(usuario: Usuario) {
+    console.log(usuario);
+  }
+
   @column({ isPrimary: true })
   public id: number;
 
@@ -175,7 +180,7 @@ export default class Usuario extends BaseModel {
   public dni: number;
 
   @column()
-  public fecha_nac?: Date;
+  public fecha_nac?: string;
 
   @column()
   public email: string;

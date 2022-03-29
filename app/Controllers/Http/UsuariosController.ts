@@ -22,7 +22,7 @@ export default class UsuariosController {
     // return Usuario.query().where("usuario", usuarioNombre.toString());
   }
 
-  public async mig_alta_usuario({ request, response }: HttpContextContract) {
+  public async mig_alta_usuarioWeb({ request, response }: HttpContextContract) {
     const body = request.body();
 
     const nuevoUsuario = {
@@ -57,4 +57,10 @@ export default class UsuariosController {
     }
     return response.send(res);
   }
+
+  public mig_actualizar_usuarioWeb({
+    request,
+    response,
+    auth,
+  }: HttpContextContract) {}
 }

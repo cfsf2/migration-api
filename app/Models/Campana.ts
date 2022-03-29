@@ -141,4 +141,10 @@ export default class Campana extends BaseModel {
     throughForeignKey: "id",
   })
   public orientados: HasManyThrough<typeof CampanaOrientado>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id,
+    };
+  }
 }
