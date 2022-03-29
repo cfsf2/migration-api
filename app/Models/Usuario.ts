@@ -16,6 +16,7 @@ import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { ResponseContract } from "@ioc:Adonis/Core/Response";
+import { RequestContract } from "@ioc:Adonis/Core/Request";
 
 export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
@@ -160,8 +161,30 @@ export default class Usuario extends BaseModel {
     }
   }
 
-  public static async actualizarUsuarioWeb(usuario: Usuario) {
-    console.log(usuario);
+  public static async actualizarTelefonoUsuarioWeb({
+    id,
+    usuarioData,
+    request,
+    response,
+  }: {
+    id: number;
+    usuarioData: any;
+    request: RequestContract;
+    response: ResponseContract;
+  }) {
+    const usuario = await Usuario.find(id);
+
+    try {
+      if (usuario) {
+        usuario.telefono = usuarioData.telephone;
+        usuario.celular = usuarioData.telephone;
+        usuario.save();
+        return response.status(202);
+      }
+    } catch (err) {
+      console.log(err);
+      return response.status(409);
+    }
   }
 
   @column({ isPrimary: true })
