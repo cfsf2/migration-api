@@ -164,7 +164,6 @@ export default class Usuario extends BaseModel {
   public static async actualizarTelefonoUsuarioWeb({
     id,
     usuarioData,
-    request,
     response,
   }: {
     id: number;

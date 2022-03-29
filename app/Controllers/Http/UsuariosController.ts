@@ -61,16 +61,24 @@ export default class UsuariosController {
   public async mig_actualizar_usuarioWeb({
     request,
     response,
-    auth,
+    bouncer,
   }: HttpContextContract) {
     const usuarioData = request.body().data;
     const token = request.header("authorization")?.split(" ")[1];
 
-    Usuario.actualizarTelefonoUsuarioWeb({
-      id: usuarioData.id,
-      usuarioData: usuarioData,
-      response,
-      request,
-    });
+    bouncer
+      .authorize("actualizarUsuarioWeb", usuarioData.id)
+      .then(() => {
+        Usuario.actualizarTelefonoUsuarioWeb({
+          id: usuarioData.id,
+          usuarioData: usuarioData,
+          response,
+          request,
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        response.status(401);
+      });
   }
 }
