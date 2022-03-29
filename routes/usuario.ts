@@ -6,4 +6,4 @@ Route.get("/users/logout", "AuthController.logout");
 
 Route.get("/users/:usuarioNombre", "UsuariosController.mig_perfilUsuario");
 Route.post("/users/loginwp", "AuthController.mig_loginwp");
-Route.post("/users/alta-usuario-web", "UsuarioController.mig_alta_usuario");
+Route.post("/users/alta-usuario-web", "UsuariosController.mig_alta_usuario");
