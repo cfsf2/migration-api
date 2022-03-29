@@ -15,6 +15,7 @@ import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { ResponseContract } from "@ioc:Adonis/Core/Response";
 
 export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
@@ -33,7 +34,8 @@ export default class Usuario extends BaseModel {
           tbl_usuario.ts_creacion as fecha_alta, 
           tbl_usuario.ts_modificacion as fecha_modificacion,
           tbl_localidad.nombre as localidad,
-          tbl_usuario_perfil.id_perfil as perfil
+          tbl_usuario_perfil.id_perfil as perfil,
+          tbl_usuario.id as _id
           `
         )
       )
@@ -81,14 +83,17 @@ export default class Usuario extends BaseModel {
 
   public static table = "tbl_usuario";
 
-  public static async registrarUsuarioWeb(usuario: {
-    usuario: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-    telefono: number;
-    celular: string;
-  }) {
+  public static async registrarUsuarioWeb(
+    usuario: {
+      usuario: string;
+      nombre: string;
+      apellido: string;
+      email: string;
+      telefono: number;
+      celular: string;
+    },
+    response: ResponseContract
+  ) {
     const usuarioSchema = schema.create({
       usuario: schema.string({ trim: true }, [
         rules.unique({
@@ -104,9 +109,11 @@ export default class Usuario extends BaseModel {
         rules.unique({ table: "tbl_usuario", column: "email" }),
       ]),
       telefono: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
+      celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
+      fecha_nac: schema.string.optional(),
       id_localidad: schema.number.optional(),
       esfarmacia: schema.string.optional(),
       admin: schema.string.optional(),
@@ -116,24 +123,45 @@ export default class Usuario extends BaseModel {
       f_ultimo_acceso: schema.string.optional(),
     });
     try {
-      const data = await validator.validate({
+      const usuarioValidado = await validator.validate({
         schema: usuarioSchema,
         data: usuario,
+        messages: {
+          "email.unique": "El email ya esta en uso",
+          "email.required": "Un email es requerido",
+        },
       });
 
-      data.admin = "n";
-      data.esfarmacia = "n";
-      data.demolab = "n";
-      data.f_ultimo_acceso = new Date()
+      usuarioValidado.admin = "n";
+      usuarioValidado.esfarmacia = "n";
+      usuarioValidado.demolab = "n";
+      usuarioValidado.f_ultimo_acceso = new Date()
         .toISOString()
         .replace("T", " ")
         .replace("Z", "");
 
       const nuevoUsuario = new Usuario();
-      await nuevoUsuario.fill(data).save();
+      const usuarioGuardado = await nuevoUsuario.fill(usuarioValidado).save();
+
+      const usuarioRegistrado = await Usuario.query().where(
+        "id",
+        usuarioGuardado.$attributes.id
+      );
+      usuarioRegistrado[0].id_usuario_creacion = usuarioRegistrado[0].id;
+      usuarioRegistrado[0].id_usuario_modificacion = usuarioRegistrado[0].id;
+      await usuarioRegistrado[0].save();
+
+      response.status(201);
+      return usuarioRegistrado[0];
     } catch (err) {
       console.log(err);
+      response.status(409);
+      return "El email ya esta en uso";
     }
+  }
+
+  public static async actualizarUsuarioWeb(usuario: Usuario) {
+    console.log(usuario);
   }
 
   @column({ isPrimary: true })
@@ -152,7 +180,7 @@ export default class Usuario extends BaseModel {
   public dni: number;
 
   @column()
-  public fecha_nac?: Date;
+  public fecha_nac?: string;
 
   @column()
   public email: string;
@@ -208,10 +236,16 @@ export default class Usuario extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Localidad, {
     foreignKey: "id",
@@ -221,7 +255,7 @@ export default class Usuario extends BaseModel {
   @hasOne(() => Usuario, {
     foreignKey: "id",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasMany(() => CampanaRequerimiento, {
     foreignKey: "id_usuario",

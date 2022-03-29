@@ -30,34 +30,6 @@ export default class AuthController {
     }
   }
 
-  public async mig_alta_usuario({
-    request,
-    response,
-    auth,
-  }: HttpContextContract) {
-    const body = request.body();
-    console.log(request.headers());
-    const token = request.header("authorization");
-
-    const nuevoUsuario = {
-      usuario: body.usuario,
-      nombre: body.name,
-      apellido: body.apellido,
-      email: body.email,
-      telefono: body.caracteristica + body.telefono,
-      celular: body.caracteristica + body.telefono,
-      password: body.password,
-    };
-    try {
-      Usuario.registrarUsuarioWeb(nuevoUsuario);
-    } catch (error) {
-      console.log(error);
-      return response.send(error);
-    }
-
-    return nuevoUsuario;
-  }
-
   public async logout({ response, auth }: HttpContextContract) {
     await auth.logout();
     return response.redirect("/");
