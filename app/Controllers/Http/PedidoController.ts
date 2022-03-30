@@ -7,4 +7,7 @@ export default class PedidoController {
 
     return await Pedido.traerPedidos({ usuarioNombre });
   }
+  public async mig_confirmarPedido({ request }: HttpContextContract) {
+    return request.body();
+  }
 }

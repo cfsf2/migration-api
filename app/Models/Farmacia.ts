@@ -13,7 +13,6 @@ import PerfilFarmageo from "./PerfilFarmageo";
 import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
-
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Farmacia extends BaseModel {
@@ -125,7 +124,7 @@ export default class Farmacia extends BaseModel {
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
         f.mediospagos = f.mediospagos?.split(",");
         f.horarios = dameloshorarios(f, dias[0]);
-        f.productos = productosCustom[0];
+        f.productos = productosCustom[0].map((pc) => stringAbooleano(pc));
         f.excepcionesProdFarmageo = [];
         f.excepcionesEntidadesFarmageo = [];
         f.imagen = f.imagen ? f.imagen : "";
