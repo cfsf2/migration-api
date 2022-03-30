@@ -8,8 +8,6 @@ import Campana from "./Campana";
 export default class CampanaRequerimiento extends BaseModel {
   public static table = "tbl_campana_requerimiento";
 
-
-
   @column({ isPrimary: true })
   public id: number;
 
