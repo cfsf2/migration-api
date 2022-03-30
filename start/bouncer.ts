@@ -33,8 +33,8 @@ import Usuario from "App/Models/Usuario";
 
 export const { actions } = Bouncer.define(
   "actualizarUsuarioWeb",
-  (usuario: Usuario, usuarioActualizar: Usuario) => {
-    return usuarioActualizar.id === usuario.id;
+  (usuario: Usuario, idUsuarioActualizar: number) => {
+    return idUsuarioActualizar === usuario.id;
   }
 );
 
