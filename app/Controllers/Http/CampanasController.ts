@@ -1,6 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
@@ -22,7 +21,6 @@ export default class CampanasController {
   }
 
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
-
     const requerimientoSchema = schema.create({
       id_campana: schema.number(),
       id_usuario: schema.number.nullable(),
@@ -38,7 +36,7 @@ export default class CampanasController {
 
     try {
       await request.validate({ schema: requerimientoSchema });
-      requerimiento.fill(request.body());
+      requerimiento.fill(request.body()); //fill toma los nombres de los campos directamente del request.body, Funciona porque los nombres son iguales en ambos lugares.
       requerimiento.codigo_promo = random();
 
       await requerimiento.save();

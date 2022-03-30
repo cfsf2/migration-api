@@ -13,6 +13,7 @@ import PerfilFarmageo from "./PerfilFarmageo";
 import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
+
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Farmacia extends BaseModel {
