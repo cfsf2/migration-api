@@ -8,7 +8,6 @@ export default class AuthController {
 
     try {
       await auth.use("web").attempt(username, password);
-      console.log(request.headers());
       const usuario = await Usuario.query().where("usuario", username);
       usuario[0].f_ultimo_acceso = new Date()
         .toISOString()
