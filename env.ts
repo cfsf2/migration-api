@@ -26,6 +26,9 @@ export default Env.rules({
   SMTP_PORT: Env.schema.number(),
   SMTP_USERNAME: Env.schema.string(),
   SMTP_PASSWORD: Env.schema.string(),
-  MAILGUN_API_KEY: Env.schema.string(),
-  MAILGUN_DOMAIN: Env.schema.string(),
+  S3_KEY: Env.schema.string(),
+  S3_SECRET: Env.schema.string(),
+  S3_BUCKET: Env.schema.string(),
+  S3_REGION: Env.schema.string(),
+  S3_ENDPOINT: Env.schema.string.optional(),
 });

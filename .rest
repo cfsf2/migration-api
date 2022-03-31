@@ -4,7 +4,7 @@ GET http://localhost:3111/farmacias/F0639804 HTTP/1.1
 ####
 
 
-GET http://localhost:3111/pedidos/josemariagelabert@gmail.com HTTP/1.1
+GET http://localhost:3111/users/josemariagelabert@gmail.com HTTP/1.1
 
 ####
 
@@ -12,7 +12,7 @@ GET http://localhost:3111/productospack/ HTTP/1.1
 
 ####
 
-GET http://localhost:3111/productospack/entidad/1 HTTP/1.1
+GET http://localhost:3111/productospack HTTP/1.1
 
 ####
 
@@ -20,20 +20,60 @@ GET http://api.testingdev.ml/campana/activas/ HTTP/1.1
 
 ####
 
-POST http://localhost:3111/users/alta-usuario-web HTTP/1.1
-content-type: "application/json"
+POST http://localhost:3111/pedidos HTTP/1.1
+content-type: application/json
 
 {
-    "username":"juanloco",
-    "password": "123123123",
-    "name": "Juan",
-    "apellido": "Locardo",
-    "email": "locardo@gmail.com",
-    "usuario": "locardo@gmail.com",
-    "telefono": "2292261",
-    "caracteristica": "341",
+  "username":"'Email22@adress.com'",
+  "descripcion": "'productos'",
+  "comentarios": "''",
+  "estado": "'nuevo'",
+  "idsocio": 2247,
+  "envio": false,
+  "costoenvio": 0,
+  "pago_online": false,
+  "gruposproductos": [ { productos: [Array], precio: '219.98' } ],
+  "domicilioenvio": "'Zeballos 3030 test, Rosario, Rosario'",
+  "nombrefarmacia": "'DONADO'",
+  "whatsapp": "3411234566",
+  "es_invitado": false,
+  "datos_cliente": [
+    {
+      "nombre": "Ramari",
+      "apellido": "Bruno",
+      "email": "bjramariutn@hotmail.com"
+    }
+  ],
+  "origen": "ecommerce",
+  "destinatario": "farmaciadonado@gmail.com",
+  "asunto": "Nuevo pedido en Farmageo",
+ "html": "<p>El usuario <b>Email22@adress.com</b> ha realizado un nuevo pedido a la farmacia <b>DONADO</b></p><p><a href='http://admin.farmageo.com.ar/#/mi-farmacia'>Ir a Mi Farmacia</a></p>"
 }
 
 ###
 
+POST http://localhost:3111/users/loginwp HTTP/1.1
+content-type: application/json
+
+{ 
+    "username":"email22@adress.com",
+    "password": "123123123"
+}
+
+###
+PUT http://localhost:3111/users/updateWebUser HTTP/1.1
+content-type: application/json
+
+{
+    "data":{"id":2247, "telephone":"34199999"}
+}
+###
+
+###
 GET http://localhost:3111/users/logout HTTP/1.1
+Authorization: bearer Mjk.Hro74d-wOWhzcalBtMk3pJde764DZt-bh5jew55MfeB2FUJuKGA2fn4Gysuk
+
+
+####
+
+POST http://localhost:3111/imagenes/upload HTTP/1.1

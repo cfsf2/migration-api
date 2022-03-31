@@ -4,13 +4,10 @@ import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Categoria extends BaseModel {
-  static async aBoleanos() {
-    const datos = await Database.from("tbl_categoria as ca").select(
-      "ca.habilitado",
-      "ca.destacada",
-      "ca.nombre",
-      "ca.id"
-    );
+  static async traerCategorias() {
+    const datos = await Database.from("tbl_categoria as ca")
+      .select("ca.habilitado", "ca.destacada", "ca.nombre", "ca.id")
+      .where("habilitado", "s");
 
     const arrNuevo = datos.map((e) => {
       //ingreso al primer objeto

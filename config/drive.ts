@@ -5,9 +5,9 @@
  * file.
  */
 
-import Env from '@ioc:Adonis/Core/Env'
-import { DriveConfig } from '@ioc:Adonis/Core/Drive'
-import Application from '@ioc:Adonis/Core/Application'
+import Env from "@ioc:Adonis/Core/Env";
+import { DriveConfig } from "@ioc:Adonis/Core/Drive";
+import Application from "@ioc:Adonis/Core/Application";
 
 /*
 |--------------------------------------------------------------------------
@@ -28,7 +28,7 @@ const driveConfig: DriveConfig = {
   | the `DRIVE_DISK` environment variable.
   |
   */
-  disk: Env.get('DRIVE_DISK'),
+  disk: Env.get("DRIVE_DISK"),
 
   disks: {
     /*
@@ -41,8 +41,8 @@ const driveConfig: DriveConfig = {
     |
     */
     local: {
-      driver: 'local',
-      visibility: 'public',
+      driver: "local",
+      visibility: "public",
 
       /*
       |--------------------------------------------------------------------------
@@ -53,7 +53,7 @@ const driveConfig: DriveConfig = {
       | files.
       |
       */
-      root: Application.tmpPath('uploads'),
+      root: Application.tmpPath("uploads"),
 
       /*
       |--------------------------------------------------------------------------
@@ -77,7 +77,7 @@ const driveConfig: DriveConfig = {
       | you are not registering routes with this prefix.
       |
       */
-      basePath: '/uploads',
+      basePath: "/uploads",
     },
 
     /*
@@ -93,15 +93,15 @@ const driveConfig: DriveConfig = {
     |**************************************************************************
     |
     */
-    // s3: {
-    //   driver: 's3',
-    //   visibility: 'public',
-    //   key: Env.get('S3_KEY'),
-    //   secret: Env.get('S3_SECRET'),
-    //   region: Env.get('S3_REGION'),
-    //   bucket: Env.get('S3_BUCKET'),
-    //   endpoint: Env.get('S3_ENDPOINT'),
-    // },
+    s3: {
+      driver: "s3",
+      visibility: "private",
+      key: Env.get("S3_KEY"),
+      secret: Env.get("S3_SECRET"),
+      region: Env.get("S3_REGION"),
+      bucket: Env.get("S3_BUCKET"),
+      endpoint: Env.get("S3_ENDPOINT"),
+    },
 
     /*
     |--------------------------------------------------------------------------
@@ -122,7 +122,7 @@ const driveConfig: DriveConfig = {
     //   keyFilename: Env.get('GCS_KEY_FILENAME'),
     //   bucket: Env.get('GCS_BUCKET'),
 
-      /*
+    /*
       |--------------------------------------------------------------------------
       | Uniform ACL - Google cloud storage only
       |--------------------------------------------------------------------------
@@ -143,6 +143,6 @@ const driveConfig: DriveConfig = {
     //   usingUniformAcl: false
     // },
   },
-}
+};
 
-export default driveConfig
+export default driveConfig;
