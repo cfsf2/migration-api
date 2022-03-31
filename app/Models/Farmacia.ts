@@ -124,7 +124,10 @@ export default class Farmacia extends BaseModel {
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
         f.mediospagos = f.mediospagos?.split(",");
         f.horarios = dameloshorarios(f, dias[0]);
-        f.productos = productosCustom[0].map((pc) => stringAbooleano(pc));
+        f.productos = productosCustom[0].map((pc) => {
+          pc._id = pc._id.toString();
+          return stringAbooleano(pc);
+        });
         f.excepcionesProdFarmageo = [];
         f.excepcionesEntidadesFarmageo = [];
         f.imagen = f.imagen ? f.imagen : "";

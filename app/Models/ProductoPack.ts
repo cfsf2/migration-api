@@ -36,7 +36,7 @@ export default class ProductoPack extends BaseModel {
       return e;
     });
 
-    return arrNuevo;
+    return arrNuevo.length > 0 ? arrNuevo : null;
   }
 
   public static table = "tbl_producto_pack";
@@ -115,7 +115,7 @@ export default class ProductoPack extends BaseModel {
 
   public serializeExtras() {
     return {
-      _id: this.$extras._id,
+      _id: this.$extras._id.toString(),
     };
   }
 }
