@@ -7,7 +7,10 @@ export default class PedidoController {
 
     return await Pedido.traerPedidos({ usuarioNombre });
   }
+
   public async mig_confirmarPedido({ request }: HttpContextContract) {
+    console.log(request.body());
+    console.log(request.body().gruposproductos[0].productos);
     return request.body();
   }
 }

@@ -115,7 +115,7 @@ export default class Farmacia extends BaseModel {
     farmacias = await Promise.all(
       farmacias[0].map(async (f) => {
         const productosCustom =
-          await Database.rawQuery(`SELECT pc.* FROM tbl_farmacia_producto_custom AS fpc 
+          await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
         LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
         WHERE fpc.id_farmacia =265
         AND pc.habilitado = 's' 
