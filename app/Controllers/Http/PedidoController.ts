@@ -9,8 +9,6 @@ export default class PedidoController {
   }
 
   public async mig_confirmarPedido({ request }: HttpContextContract) {
-    console.log(request.body());
-    console.log(request.body().gruposproductos[0].productos);
-    return request.body();
+    return await Pedido.guardarPedido({ pedidoWeb: request.body() });
   }
 }
