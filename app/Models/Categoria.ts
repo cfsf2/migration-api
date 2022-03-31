@@ -4,10 +4,18 @@ import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Categoria extends BaseModel {
-  static async traerCategorias() {
+  static async traerCategorias({ habilitado }: { habilitado?: boolean }) {
     const datos = await Database.from("tbl_categoria as ca")
-      .select("ca.habilitado", "ca.destacada", "ca.nombre", "ca.id")
-      .where("habilitado", "s");
+      .select(
+        "ca.habilitado",
+        "ca.destacada",
+        "ca.nombre",
+        "ca.id",
+        "ca.id as _id"
+      )
+      .if(habilitado, (query) => {
+        query.where("habilitado", "s");
+      });
 
     const arrNuevo = datos.map((e) => {
       //ingreso al primer objeto

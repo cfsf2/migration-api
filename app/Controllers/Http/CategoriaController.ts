@@ -10,6 +10,6 @@ export default class CategoriaController {
     //   "ca.nombre",
     //   "ca.ts_creacion",
     //   "ca.id");
-    return await Categoria.traerCategorias();
+    return await Categoria.traerCategorias({ habilitado: true });
   }
 }
