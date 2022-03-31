@@ -6,12 +6,19 @@ import Entidad from "./Entidad";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class ProductoPack extends BaseModel {
-  static async traerProductosPacks({ entidad }: { entidad?: String }) {
+  static async traerProductosPacks({
+    entidad,
+    producto,
+  }: {
+    entidad?: string;
+    producto?: number;
+  }) {
     const datos = await Database.rawQuery(
       ` SELECT pp.*, pp.id as _id,   
       IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, pp.id_entidad as entidad_id 
       FROM tbl_producto_pack as pp 
-      WHERE pp.habilitado = "s" AND pp.en_papelera = "n"
+      WHERE pp.habilitado = "s" AND pp.en_papelera = "n" 
+      ${producto ? "AND pp.id = " + producto : ""}
       ${entidad ? "AND pp.id_entidad = " + entidad : ""}`
     );
 

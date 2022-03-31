@@ -5,3 +5,4 @@ Route.get(
   "/productospack/entidad/:entidad",
   "ProductoPackController.mig_entidad"
 );
+Route.get("/productospack/:idProducto", "ProductoPackController.mig_producto")

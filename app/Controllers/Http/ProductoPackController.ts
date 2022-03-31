@@ -16,4 +16,13 @@ export default class ProductoPackController {
       entidad: entidadMutual,
     });
   }
+  public async mig_producto( { request }: HttpContextContract){
+    let productoSelect = request.params().idProducto;
+    console.log(productoSelect)
+    
+    return await ProductoPack.traerProductosPacks({
+      producto: productoSelect,
+    })
+  }
+  
 }
