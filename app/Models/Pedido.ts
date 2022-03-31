@@ -36,9 +36,14 @@ export default class Pedido extends BaseModel {
       "select id, id_usuario from tbl_farmacia where nombre = ?",
       [pedidoWeb.nombrefarmacia]
     );
+    console.log("pedidoWen", pedidoWeb);
 
     pedido.id_estado_pedido = 1;
-    pedido.id_farmacia = farmacia[0][0].id;
+    pedido.id_farmacia = pedidoWeb.idFarmacia
+      ? pedidoWeb.idFarmacia
+      : pedidoWeb.nombrefarmacia
+      ? farmacia[0][0].id
+      : null;
     pedido.id_socio = pedidoWeb.idsocio;
     pedido.id_usuario_creacion = pedidoWeb.idsocio;
     pedido.id_usuario_modificacion = pedidoWeb.idsocio;
@@ -53,51 +58,55 @@ export default class Pedido extends BaseModel {
     pedido.pago_online = pedidoWeb.pago_online ? "s" : "n";
     pedido.es_invitado = pedidoWeb.es_invitado ? "s" : "n";
     pedido.whatsapp = pedidoWeb.whatsapp;
-    pedido.datos_cliente = JSON.stringify(pedidoWeb.datos_cliente[0]);
+    pedido.datos_cliente = pedidoWeb.datos_cliente
+      ? JSON.stringify(pedidoWeb.datos_cliente[0])
+      : "";
     pedido.origen = pedidoWeb.origen;
     pedido.username = pedidoWeb.username;
     pedido.obra_social = pedidoWeb.obra_social;
     pedido.obra_social_dorso = pedidoWeb.obra_social_dorso;
     pedido.obra_social_frente = pedidoWeb.obra_social_frente;
     pedido.receta = pedidoWeb.receta;
-    pedido.total = pedidoWeb.gruposproductos[0].productos.reduce(
-      (total, p, i, v) => {
-        if (i === 1) total = 0;
-        const subtotal =
-          Number(total) + Math.round(p.cantidad) * Number(p.precio);
-        return subtotal;
-      }
-    );
+    pedido.total = pedidoWeb.gruposproductos[0].productos
+      ? pedidoWeb.gruposproductos[0].productos.reduce((total, p, i, v) => {
+          if (i === 1) total = 0;
+          const subtotal =
+            Number(total) + Math.round(p.cantidad) * Number(p.precio);
+          return subtotal;
+        })
+      : null;
 
     await pedido.save();
+    console.log("pedido", pedido);
 
-    pedidoWeb.gruposproductos[0].productos.forEach(
-      async (p: {
-        entidad: string;
-        idProducto: number;
-        cantidad: number;
-        precio: number;
-      }) => {
-        const pedidoProducto = new PedidoProductoPack();
-        pedidoProducto.id_pedido = pedido.id;
-        if (p.entidad === "productopropio") {
-          pedidoProducto.id_producto_custom = p.idProducto;
-        } else {
-          pedidoProducto.id_productospack = p.idProducto;
+    if (pedidoWeb.gruposproductos[0].productos) {
+      pedidoWeb.gruposproductos[0].productos.forEach(
+        async (p: {
+          entidad: string;
+          idProducto: number;
+          cantidad: number;
+          precio: number;
+        }) => {
+          const pedidoProducto = new PedidoProductoPack();
+          pedidoProducto.id_pedido = pedido.id;
+          if (p.entidad === "productopropio") {
+            pedidoProducto.id_producto_custom = p.idProducto;
+          } else {
+            pedidoProducto.id_productospack = p.idProducto;
+          }
+          pedidoProducto.cantidad = p.cantidad;
+          pedidoProducto.precio = p.precio;
+          pedidoProducto.subtotal = Math.round(p.cantidad) * Number(p.precio);
+
+          if (pedido.id_socio) {
+            pedidoProducto.id_usuario_creacion = Number(pedido.id_socio);
+            pedidoProducto.id_usuario_modificacion = Number(pedido.id_socio);
+          }
+
+          await pedidoProducto.save();
         }
-        pedidoProducto.cantidad = p.cantidad;
-        pedidoProducto.precio = p.precio;
-        pedidoProducto.subtotal = Math.round(p.cantidad) * Number(p.precio);
-
-        if (pedido.id_socio) {
-          pedidoProducto.id_usuario_creacion = Number(pedido.id_socio);
-          pedidoProducto.id_usuario_modificacion = Number(pedido.id_socio);
-        }
-
-        await pedidoProducto.save();
-      }
-    );
-
+      );
+    }
     console.log("pedidoWeb", pedidoWeb);
     return pedido;
   }

@@ -20,7 +20,7 @@ export default class Farmacia extends BaseModel {
 
   static async traerFarmacias(usuario?: String): Promise<String> {
     let farmacias =
-      await Database.rawQuery(`SELECT f.id, f.nombre, f.nombrefarmaceutico, 
+      await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
       f.matricula, f.cufe, f.cuit, f.calle, f.numero, 
       f.direccioncompleta, f.longitud AS log, 
       f.latitud AS lat, f.costoenvio,

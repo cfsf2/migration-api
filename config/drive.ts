@@ -95,7 +95,7 @@ const driveConfig: DriveConfig = {
     */
     s3: {
       driver: "s3",
-      visibility: "private",
+      visibility: "public",
       key: Env.get("S3_KEY"),
       secret: Env.get("S3_SECRET"),
       region: Env.get("S3_REGION"),
