@@ -12,4 +12,7 @@ export default class CategoriaController {
     //   "ca.id");
     return await Categoria.traerCategorias({ habilitado: true });
   }
+  public async mig_admin({ request }: HttpContextContract) {
+    return await Categoria.mig_admin();
+  }
 }
