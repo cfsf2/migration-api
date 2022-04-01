@@ -5,6 +5,8 @@ import Usuario from "./Usuario";
 import EstadoPedido from "./EstadoPedido";
 import Database from "@ioc:Adonis/Lucid/Database";
 import PedidoProductoPack from "./PedidoProductoPack";
+import Mail from "@ioc:Adonis/Addons/Mail";
+import { generarHtml } from "App/Helper/email";
 
 export default class Pedido extends BaseModel {
   static async traerPedidos({ usuarioNombre }: { usuarioNombre: String }) {
@@ -36,7 +38,6 @@ export default class Pedido extends BaseModel {
       "select id, id_usuario from tbl_farmacia where nombre = ?",
       [pedidoWeb.nombrefarmacia]
     );
-    console.log("pedidoWen", pedidoWeb);
 
     pedido.id_estado_pedido = 1;
     pedido.id_farmacia = pedidoWeb.idFarmacia
@@ -66,18 +67,22 @@ export default class Pedido extends BaseModel {
     pedido.obra_social = pedidoWeb.obra_social;
     pedido.obra_social_dorso = pedidoWeb.obra_social_dorso;
     pedido.obra_social_frente = pedidoWeb.obra_social_frente;
-    pedido.receta = pedidoWeb.receta;
+    pedido.receta = pedidoWeb.gruposproductos[0].receta;
     pedido.total = pedidoWeb.gruposproductos[0].productos
-      ? pedidoWeb.gruposproductos[0].productos.reduce((total, p, i, v) => {
-          if (i === 1) total = 0;
-          const subtotal =
-            Number(total) + Math.round(p.cantidad) * Number(p.precio);
-          return subtotal;
-        })
+      ? pedidoWeb.gruposproductos[0].productos.reduce(
+          (
+            subtotal: number,
+            p: { cantidad: number; precio: any },
+            i: number
+          ) => {
+            subtotal = subtotal + Math.round(p.cantidad) * Number(p.precio);
+            return subtotal;
+          },
+          0
+        )
       : null;
 
     await pedido.save();
-    console.log("pedido", pedido);
 
     if (pedidoWeb.gruposproductos[0].productos) {
       pedidoWeb.gruposproductos[0].productos.forEach(
@@ -107,7 +112,31 @@ export default class Pedido extends BaseModel {
         }
       );
     }
-    console.log("pedidoWeb", pedidoWeb);
+    pedidoWeb;
+    Mail.send((message) => {
+      message
+        .from("farmageoapp@gmail.com")
+        .to(pedidoWeb.destinatario)
+        .subject(pedidoWeb.asunto)
+        .html(
+          generarHtml({
+            titulo: "Nuevo Pedido",
+            texto: pedidoWeb.html.concat(`
+             ${pedidoWeb.gruposproductos[0].productos.map((p) => {
+               return (
+                 "<p>" +
+                 p.nombre +
+                 " |    cantidad: " +
+                 p.cantidad +
+                 " |    precio unitario: " +
+                 p.precio +
+                 "</p></br>"
+               );
+             })}
+        <p>Total: ${pedido.total}</p>`),
+          })
+        );
+    });
     return pedido;
   }
   public static table = "tbl_pedido";
@@ -221,4 +250,12 @@ export default class Pedido extends BaseModel {
     localKey: "id_estado_pedido",
   })
   public estado_pedido: HasOne<typeof EstadoPedido>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id.toString(),
+      fechaalta: this.$extras.fechaalta,
+      estado: this.$extras.estado,
+    };
+  }
 }
