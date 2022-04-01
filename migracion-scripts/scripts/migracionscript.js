@@ -914,7 +914,9 @@ const tbl_pedidos_producto_pack = async () => {
     const sql_pedido = `INSERT INTO tbl_pedido (id, descripcion, comentario, id_estado_pedido, id_farmacia, costoenvio, domicilioenvio, gruposproductos, 
       pago_online, envio, habilitado, fechaentrega, es_invitado, id_socio, datos_cliente, origen, username, nombrefarmacia, whatsapp, 
       obra_social, obra_social_frente, obra_social_dorso, receta, total, id_usuario_creacion, id_usuario_modificacion)
-      VALUES (${id_pedido}, ${descripcion}, ${comentarios},${id_estado}, ${id_farmacia}, "${costoenvio}", "${domicilioenvio}", "${pedido.gruposproductos.toString()}", 
+      VALUES (${id_pedido}, ${descripcion}, ${comentarios},${id_estado}, ${id_farmacia}, "${costoenvio}", "${domicilioenvio}", "${JSON.stringify(
+      pedido.gruposproductos
+    )}", 
       "${pago_online}", "${envio}", "${habilitado}", "${fecha_entrega}","${es_invitado}", ${idsocio}, ${datos_cliente}, ${origen}, ${username}, ${nombrefarmacia}, ${whatsapp},
       ${obra_social}, ${obra_social_frente}, ${obra_social_dorso}, ${receta}, ${precio_total}, 1, 1
        ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${id_pedido}
