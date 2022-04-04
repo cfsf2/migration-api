@@ -9,6 +9,12 @@ export default class UsuarioPerfil extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
+  @column()
+  public id_usuario: number;
+
+  @column()
+  public id_perfil: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -18,21 +24,25 @@ export default class UsuarioPerfil extends BaseModel {
   //foreing key
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario",
   })
-  public id_usuario: HasOne<typeof Usuario>;
+  public usuario: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Perfil, {
     foreignKey: "id",
+    localKey: "id_perfil",
   })
-  public id_perfil: HasOne<typeof Perfil>;
+  public perfil: HasOne<typeof Perfil>;
 }

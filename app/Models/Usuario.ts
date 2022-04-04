@@ -8,6 +8,8 @@ import {
   column,
   HasMany,
   hasMany,
+  HasManyThrough,
+  hasManyThrough,
   hasOne,
   HasOne,
 } from "@ioc:Adonis/Lucid/Orm";
@@ -17,6 +19,8 @@ import Hash from "@ioc:Adonis/Core/Hash";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
+import Perfil from "./Perfil";
+import UsuarioPerfil from "./UsuarioPerfil";
 
 export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
@@ -254,10 +258,7 @@ export default class Usuario extends BaseModel {
   public id_localidad?: Number;
 
   @column()
-  public permisos: String;
-
-  @column()
-  public perfil: Number;
+  public permisos: string[];
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -275,6 +276,14 @@ export default class Usuario extends BaseModel {
     foreignKey: "id",
   })
   public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasManyThrough([() => Perfil, () => UsuarioPerfil], {
+    localKey: "id",
+    foreignKey: "id_usuario",
+    throughLocalKey: "id_perfil",
+    throughForeignKey: "id",
+  })
+  public perfil: HasManyThrough<typeof Perfil>;
 
   @hasOne(() => Localidad, {
     foreignKey: "id",

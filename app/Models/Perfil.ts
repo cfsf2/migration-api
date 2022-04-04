@@ -1,6 +1,16 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasMany,
+  HasManyThrough,
+  hasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import Permiso from "./Permiso";
+import PerfilPermiso from "./PerfilPermiso";
 
 export default class Perfil extends BaseModel {
   public static table = "tbl_perfil";
@@ -22,6 +32,14 @@ export default class Perfil extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+
+  @hasManyThrough([() => Permiso, () => PerfilPermiso], {
+    localKey: "id",
+    foreignKey: "id_perfil",
+    throughLocalKey: "id_permiso",
+    throughForeignKey: "id",
+  })
+  public permisos: HasManyThrough<typeof Permiso>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
