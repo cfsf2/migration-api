@@ -8,24 +8,27 @@ export default class AuthController {
 
     try {
       await auth.use("web").attempt(username, password);
+
       const usuario = await Usuario.query()
         .where("usuario", username)
         .preload("perfil", (query) => {
-          // query.preload("permisos");
+          query.preload("permisos");
         });
 
       usuario[0].f_ultimo_acceso = new Date()
         .toISOString()
         .replace("T", " ")
         .replace("Z", "");
-
       await usuario[0].save();
+
+      usuario[0].permisos = Array.from(
+        new Set(usuario[0].perfil[0].permisos.map((p) => p.tipo))
+      );
       usuario[0].user_display_name = usuario[0].give_user_display_name();
 
       const response = usuario[0];
-      response.token = jwt.sign({ user: usuario }, process.env.JWTSECRET, {
-        expiresIn: process.env.JWTEXPIRESIN,
-      });
+      response.token = "lalala";
+      response.user_rol = [usuario[0].perfil[0].tipo];
       response.user_email = response.email;
 
       return response;
