@@ -7,10 +7,18 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import PedidoProductoPack from "./PedidoProductoPack";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "App/Helper/email";
-import { enumaBool } from "App/Helper/funciones";
+import { boolaEnum, enumaBool } from "App/Helper/funciones";
 
 export default class Pedido extends BaseModel {
-  static async traerPedidos({ usuarioNombre }: { usuarioNombre?: String }) {
+  static async traerPedidos({
+    usuarioNombre,
+    idFarmacia,
+    idPedido,
+  }: {
+    usuarioNombre?: string;
+    idFarmacia?: number;
+    idPedido?: number;
+  }) {
     const datos = await Database.from("tbl_pedido")
       .select(
         Database.raw(
@@ -21,16 +29,52 @@ export default class Pedido extends BaseModel {
       .select("tbl_estado_pedido.nombre as estado")
       .if(usuarioNombre, (query) => {
         return query.where("tbl_pedido.username", usuarioNombre.toString());
+      })
+      .if(idFarmacia, (query) => {
+        return query.where("tbl_pedido.id_farmacia", idFarmacia);
+      })
+      .if(idPedido, (query) => {
+        return query.where("tbl_pedido.id", idPedido);
       });
 
-    const newPedido = datos.map((p) => {
-      p.gruposproductos = JSON.parse(p.gruposproductos);
-      p.datos_cliente = JSON.parse(p.datos_cliente);
+    const newPedido = await Promise.all(
+      datos.map(async (p) => {
+        // const productos = await PedidoProductoPack.query()
+        //   .where("id_pedido", p.id)
+        //   .preload("producto_pack")
+        //   .preload("producto_custom");
+        // console.log(productos, p.id);
+        p.gruposproductos = JSON.parse(p.gruposproductos);
+        p.datos_cliente = JSON.parse(p.datos_cliente);
 
-      p = enumaBool(p);
-      return p;
-    });
+        p = enumaBool(p);
+        return p;
+      })
+    );
     return newPedido;
+  }
+
+  static async actualizarPedido({ id, pedidoCambios }) {
+    let pedido = await Pedido.findOrFail(id);
+
+    const estado = await EstadoPedido.query()
+      .where("nombre", pedidoCambios.estado)
+      .select("id");
+
+    const gruposproductos = pedidoCambios.gruposproductos;
+
+    gruposproductos[0].datos_cliente = { email: pedidoCambios.username };
+
+    pedido.gruposproductos = JSON.stringify({ gruposproductos });
+    pedido.datos_cliente = JSON.stringify({ email: pedidoCambios.username });
+    pedido.id_estado_pedido = estado[0].id;
+    pedido.comentarios = pedidoCambios.comentarios;
+    pedido.domicilioenvio = pedidoCambios.domicilioenvio;
+    pedido.pago_online = boolaEnum(pedidoCambios.pago_online);
+    pedido.envio = boolaEnum(pedidoCambios.envio);
+    pedido.total = Number(pedidoCambios.gruposproductos[0].precio);
+
+    return pedido.save();
   }
 
   static async guardarPedido({ pedidoWeb }) {
@@ -52,7 +96,7 @@ export default class Pedido extends BaseModel {
     pedido.id_usuario_modificacion = pedidoWeb.idsocio;
     pedido.nombrefarmacia = pedidoWeb.nombrefarmacia;
     pedido.descripcion = pedidoWeb.descripcion;
-    pedido.comentario = pedidoWeb.comentarios;
+    pedido.comentarios = pedidoWeb.comentarios;
     pedido.costoenvio = pedidoWeb.costoenvio;
 
     pedido.envio = pedidoWeb.envio === "true" ? "s" : "n";
@@ -150,7 +194,7 @@ export default class Pedido extends BaseModel {
   public descripcion: string;
 
   @column()
-  public comentario: string;
+  public comentarios: string;
 
   @column()
   public costoenvio: string;
@@ -255,9 +299,9 @@ export default class Pedido extends BaseModel {
 
   public serializeExtras() {
     return {
-      _id: this.$extras._id.toString(),
-      fechaalta: this.$extras.fechaalta,
-      estado: this.$extras.estado,
+      _id: this.$extras._id?.toString(),
+      fechaalta: this.$extras?.fechaalta,
+      estado: this.$extras?.estado,
     };
   }
 }
