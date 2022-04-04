@@ -9,6 +9,7 @@ import "../routes/productopack";
 import "../routes/campana";
 import "../routes/pedido";
 import "../routes/imagenes";
+import "../routes/denuncias";
 
 Route.get("/", async () => {
   return { hello: "world" };
