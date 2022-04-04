@@ -16,23 +16,37 @@ export default class PerfilPermiso extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_perfil: number;
+  @column()
+  public id_permiso: number;
+
   @hasOne(() => Perfil, {
     foreignKey: "id",
+    localKey: "id_perfil",
   })
-  public id_perfil: HasOne<typeof Perfil>;
+  public perfil: HasOne<typeof Perfil>;
+
+  @column()
+  public id_usuario_creacion: number;
+  @column()
+  public id_usuario_modificacion: number;
 
   @hasOne(() => Permiso, {
     foreignKey: "id",
+    localKey: "id_permiso",
   })
-  public id_permiso: HasOne<typeof Permiso>;
+  public permiso: HasOne<typeof Permiso>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

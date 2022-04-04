@@ -1,14 +1,29 @@
 
-GET http://localhost:3111/farmacias/F0639804 HTTP/1.1
+GET http://localhost:3111/users/martinamussio@hotmail.com.ar HTTP/1.1
 
 ####
 
 
-GET http://localhost:3111/users/josemariagelabert@gmail.com HTTP/1.1
+GET http://localhost:3111/pedidos/martinamussio@hotmail.com.ar HTTP/1.1
 
 ####
 
-GET http://localhost:3111/productospack/ HTTP/1.1
+
+GET http://localhost:3111/pedidos/farmacias/3 HTTP/1.1
+
+####
+
+
+GET http://localhost:3111/pedidos/pedido/156 HTTP/1.1
+
+####
+
+PUT http://localhost:3111/pedidos/pedido/3 HTTP/1.1
+
+####
+
+
+GET http://localhost:3111/pedidos/ HTTP/1.1
 
 ####
 
@@ -56,8 +71,8 @@ POST http://localhost:3111/users/loginwp HTTP/1.1
 content-type: application/json
 
 { 
-    "username":"email22@adress.com",
-    "password": "123123123"
+    "username":"josemariagelabert@gmail.com",
+    "password": "ostin2006"
 }
 
 ###
