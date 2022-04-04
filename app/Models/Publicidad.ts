@@ -27,7 +27,7 @@ export default class Publicidad extends BaseModel {
         "p.imagen",
         "p.fecha_inicio",
         "p.fecha_fin",
-        "p.ts_creacion",
+        "p.ts_creacion as fechaalta",
         "tp.nombre as tipo",
         "cp.nombre as color",
         Database.raw("GROUP_CONCAT(i.id) as instituciones")
@@ -47,7 +47,7 @@ export default class Publicidad extends BaseModel {
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
       .groupBy("p.id")
-      .orderBy("ts_creacion", "desc");
+      .orderBy("p.ts_creacion", "desc");
 
     function arrayzar(modelo, key) {
       modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
@@ -57,7 +57,21 @@ export default class Publicidad extends BaseModel {
       return res;
     }
 
-    const result = resultado.map((r) => arrayzar(r, "instituciones"));
+    const formateo = resultado.map((e) => {
+      const claves = Object.keys(e);
+      claves.forEach((k) => {
+        if (e[k] === "s") {
+          e[k] = true;
+        }
+        if (e[k] === "n") {
+          e[k] = false;
+        }
+      });
+
+      return e;
+    });
+
+    const result = formateo.map((r) => arrayzar(r, "instituciones"));
 
     return result;
   }
@@ -100,15 +114,20 @@ export default class Publicidad extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_usuario_modificacion: Number;
+  public id_usuario_modificacion: number;
+
+  @column()
+  public id_usuario_creacion: number;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
 
