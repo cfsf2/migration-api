@@ -321,5 +321,5 @@ export default class Usuario extends BaseModel {
   public token: string;
 
   @column()
-  public user_rol: string;
+  public user_rol: string[];
 }
