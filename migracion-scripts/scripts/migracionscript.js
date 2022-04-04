@@ -248,7 +248,12 @@ const usuario_dni = async () => {
 const asignar_idsql = async (Modelo) => {
   const objetos = await Modelo.find({ idsql: null });
   const total = objetos.length;
-  let i = (await Modelo.where({ idsql: { $ne: null } }).countDocuments()) + 1;
+  if (objetos.length === 0) return;
+  console.log(objetos.length);
+  let conidsql = await Modelo.where({ idsql: { $ne: null } }).sort({
+    idsql: -1,
+  });
+  let i = conidsql[0].idsql + 2;
   let counter = 1;
 
   console.log("Objectos sin idsql: " + objetos.length);
@@ -585,7 +590,7 @@ const tbl_transfer_productos = async () => {
     let count = 0;
 
     const queries = productos.map(async (prod) => {
-      const sql = `INSERT INTO tbl_transfer_producto 
+      const sql = `INSERT IGNORE INTO tbl_transfer_producto 
     (id, id_laboratorio, nombre, habilitado, presentacion, cantidad_minima, descuento_porcentaje, precio, codigo, en_papelera, id_usuario_creacion, id_usuario_modificacion)
     VALUES (
     ${prod.idsql},
@@ -629,18 +634,18 @@ const transfer_asignar_idsql_codigotransfer = async () => {
 };
 
 const tbl_transfers = async () => {
-  console.time("Recuperacion de datos de mongoDb");
-  console.log("Recuperacion de datos de mongoDb");
+  // console.time("Recuperacion de datos de mongoDb");
+  // console.log("Recuperacion de datos de mongoDb");
   const transfers = await Transfer.find({});
   const farmacias = await Farmacia.find({});
   const droguerias = await Drogueria.find({});
   const laboratorios = await Laboratorio.find({});
   const productosTransfer = await ProductoTransfer.find({});
-  console.timeEnd("Recuperacion de datos de mongoDb");
+  // console.timeEnd("Recuperacion de datos de mongoDb");
 
   transfers.forEach((transfer, transfer_index) => {
-    console.time("Filtrando labs, drogs y farms...");
-    console.log("Filtrando labs, drogs y farms... para " + transfer_index);
+    // console.time("Filtrando labs, drogs y farms...");
+    // console.log("Filtrando labs, drogs y farms... para " + transfer_index);
     const laboratorio = laboratorios.filter(
       (lab) => lab.nombre === transfer.laboratorio_id
     )[0];
@@ -651,12 +656,12 @@ const tbl_transfers = async () => {
       (farm) => farm.farmaciaid === transfer.farmacia_id
     )[0];
 
-    console.timeEnd("Filtrando labs, drogs y farms...");
+    // console.timeEnd("Filtrando labs, drogs y farms...");
 
     // if (!farmacia)
     //   return console.log("Farmacia eliminada " + transfer.farmacia_id);
 
-    console.time("Mapeando productos solicitados...");
+    //console.time("Mapeando productos solicitados...");
 
     const productos = transfer.productos_solicitados
       .map((prod) => {
@@ -677,9 +682,9 @@ const tbl_transfers = async () => {
         }
       })
       .filter((el) => !!el);
-    console.log("Tiene elementos vacios: " + productos.includes(undefined));
-    console.log("Mapeando productos solicitados... " + productos.length);
-    console.timeEnd("Mapeando productos solicitados...");
+    //console.log("Tiene elementos vacios: " + productos.includes(undefined));
+    // console.log("Mapeando productos solicitados... " + productos.length);
+    // console.timeEnd("Mapeando productos solicitados...");
 
     if (
       farmacia &&
@@ -799,7 +804,6 @@ const tbl_farmacia_servicios = async () => {
       const sql = `INSERT INTO tbl_farmacia_servicio (id_farmacia, id_servicio, id_usuario_creacion, id_usuario_modificacion) VALUES (${farmacia.idsql}, ${serv_id}, 1, 1)`;
 
       const r = await queryPromise(con, sql);
-      console.log(r);
     });
   });
 };
@@ -897,7 +901,9 @@ const tbl_pedidos_producto_pack = async () => {
     const fecha_entrega = pedido.fechaentrega.toISOString().split("T")[0];
     const idsocio = stringOnull(pedido.idsocio);
     const username = stringOnull(pedido.username);
-    const datos_cliente = stringOnull(pedido.datos_cliente.toString());
+    const datos_cliente = pedido.datos_cliente
+      ? `'${JSON.stringify(pedido.datos_cliente)}'`
+      : null;
     const es_invitado = pedido.es_invitado ? "s" : "n";
     const origen = stringOnull(pedido.origen);
     const nombrefarmacia = stringOnull(pedido.nombrefarmacia);
@@ -914,9 +920,8 @@ const tbl_pedidos_producto_pack = async () => {
     const sql_pedido = `INSERT INTO tbl_pedido (id, descripcion, comentario, id_estado_pedido, id_farmacia, costoenvio, domicilioenvio, gruposproductos, 
       pago_online, envio, habilitado, fechaentrega, es_invitado, id_socio, datos_cliente, origen, username, nombrefarmacia, whatsapp, 
       obra_social, obra_social_frente, obra_social_dorso, receta, total, id_usuario_creacion, id_usuario_modificacion)
-      VALUES (${id_pedido}, ${descripcion}, ${comentarios},${id_estado}, ${id_farmacia}, "${costoenvio}", "${domicilioenvio}", "${JSON.stringify(
-      pedido.gruposproductos
-    )}", 
+      VALUES (${id_pedido}, ${descripcion}, ${comentarios},${id_estado}, ${id_farmacia}, "${costoenvio}", "${domicilioenvio}", 
+      '${JSON.stringify(pedido.gruposproductos)}', 
       "${pago_online}", "${envio}", "${habilitado}", "${fecha_entrega}","${es_invitado}", ${idsocio}, ${datos_cliente}, ${origen}, ${username}, ${nombrefarmacia}, ${whatsapp},
       ${obra_social}, ${obra_social_frente}, ${obra_social_dorso}, ${receta}, ${precio_total}, 1, 1
        ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${id_pedido}
@@ -947,7 +952,7 @@ const tbl_pedidos_producto_pack = async () => {
               " progreso " +
               (indx + 1) +
               " de " +
-              p.length
+              pedidos.length
           );
         });
       }
@@ -1259,11 +1264,13 @@ const tbl_usuario = () => {
     const usuarios = await Usuario.find({});
 
     const queries = usuarios.map((u) => {
-      const sql = `INSERT IGNORE INTO tbl_usuario (id, usuario, nombre, apellido, dni, fecha_nac, id_localidad, email, password, newsletter, habilitado, esfarmacia, admin, confirmado, telefono, f_ultimo_acceso, deleted, demolab, id_wp, celular) VALUES (${
-        u.idsql
-      }, "${u.usuario}", "${u.name}", ${stringOnull(u.apellido)}, "${
-        u.dni
-      }", ${stringOnull(u.fecha_nac)}, ${stringOnull(
+      const sql = `INSERT INTO tbl_usuario (id, usuario, nombre, apellido, dni, 
+        fecha_nac, id_localidad, email, password, newsletter, habilitado, esfarmacia, 
+        admin, confirmado, telefono, f_ultimo_acceso, deleted, demolab, id_wp, celular) VALUES (${
+          u.idsql
+        }, "${u.usuario}", "${u.name}", ${stringOnull(u.apellido)}, ${
+        u.dni ? Math.min(u.dni, 2147483646) : null
+      }, ${stringOnull(u.fechaNac_f)}, ${stringOnull(
         u.id_localidad
       )}, ${stringOnull(u.email)}, "${u.password}", ${stringOnull(
         u.newsletter ? "s" : "n"
@@ -1272,10 +1279,10 @@ const tbl_usuario = () => {
       )}, ${stringOnull(u.admin ? "s" : "n")}, ${stringOnull(
         u.confirmado ? "s" : "n"
       )}, ${stringOnull(u.telefono)}, ${stringOnull(
-        u.f_ultimo_acceso
+        u.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
       )}, ${stringOnull(u.deleted ? "s" : "n")}, ${stringOnull(
         u.demolab ? "s" : "n"
-      )}, "${u.id_wp}", ${stringOnull(u.celular)}) `;
+      )}, ${u.id_wp ? "'" + u.id_wp + "'" : null}, ${stringOnull(u.celular)}) `;
 
       return queryPromise(con, sql);
     });
@@ -1331,7 +1338,7 @@ const tbl_farmacia = () => {
       )}, ${stringOnull(f.visita_comercial ? "s" : "n")},${stringOnull(
         f.telefonofijo
       )}, ${stringOnull(
-        f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "")
+        f.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
       )}) ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
         f.log ? f.log : null
       }, latitud=${f.lat ? f.lat : null}, id_perfil_farmageo=${perfilFarmageo(
@@ -1391,11 +1398,14 @@ const tbl_laboratorio = () => {
     const laboratorios = await Laboratorio.find({});
 
     const queries = laboratorios.map((l) => {
-      const sql = ` INSERT INTO tbl_laboratorio (id, nombre, habilitado, imagen, novedades, condiciones_comerciales, transfer_farmageo, url, id_usuario_creacion, id_usuario_modificacion) VALUES (${
-        l.idsql
-      }, "${l.nombre}", ${stringOnull(l.habilitado ? "s" : "n")}, ${stringOnull(
-        l.imagen
-      )}, ${stringOnull(mysql_real_escape_string(l.novedades))}, ${stringOnull(
+      const sql = ` INSERT INTO tbl_laboratorio (id, nombre, 
+        habilitado, imagen, novedades, condiciones_comerciales, transfer_farmageo, url, id_usuario_creacion, id_usuario_modificacion) VALUES (${
+          l.idsql
+        }, "${l.nombre}", ${stringOnull(
+        l.habilitado ? "s" : "n"
+      )}, ${stringOnull(l.imagen)}, ${stringOnull(
+        mysql_real_escape_string(l.novedades)
+      )}, ${stringOnull(
         mysql_real_escape_string(l.condiciones_comerciales)
       )}, ${stringOnull(l.transfer_farmageo ? "s" : "n")}, ${stringOnull(
         l.url ? mysql_real_escape_string(l.url) : null
@@ -1426,7 +1436,8 @@ const tbl_producto_custom = () => {
     };
 
     const queries = productoCustoms.map((p) => {
-      const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
+      const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
+        imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
       VALUES (${p.idsql}, ${
         p.descripcion && p.descripcion !== ""
           ? stringOnull(mysql_real_escape_string(p.descripcion))
