@@ -7,28 +7,30 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import PedidoProductoPack from "./PedidoProductoPack";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "App/Helper/email";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class Pedido extends BaseModel {
-  static async traerPedidos({ usuarioNombre }: { usuarioNombre: String }) {
+  static async traerPedidos({ usuarioNombre }: { usuarioNombre?: String }) {
     const datos = await Database.from("tbl_pedido")
-      .select(Database.raw(`*, ts_modificacion as fechamodificacion`))
-      .where("username", usuarioNombre.toString());
-
-    const arrNuevo = datos.map((e) => {
-      const claves = Object.keys(e);
-      claves.forEach((k) => {
-        if (e[k] === "s") {
-          e[k] = true;
-        }
-        if (e[k] === "n") {
-          e[k] = false;
-        }
+      .select(
+        Database.raw(
+          `tbl_pedido.*, tbl_pedido.ts_modificacion as fechamodificacion, tbl_pedido.ts_creacion as fechaalta, tbl_pedido.id as _id`
+        )
+      )
+      .leftJoin("tbl_estado_pedido", "id_estado_pedido", "tbl_estado_pedido.id")
+      .select("tbl_estado_pedido.nombre as estado")
+      .if(usuarioNombre, (query) => {
+        return query.where("tbl_pedido.username", usuarioNombre.toString());
       });
 
-      return e;
-    });
+    const newPedido = datos.map((p) => {
+      p.gruposproductos = JSON.parse(p.gruposproductos);
+      p.datos_cliente = JSON.parse(p.datos_cliente);
 
-    return arrNuevo;
+      p = enumaBool(p);
+      return p;
+    });
+    return newPedido;
   }
 
   static async guardarPedido({ pedidoWeb }) {

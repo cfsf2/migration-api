@@ -24,6 +24,8 @@ export default class Usuario extends BaseModel {
   }: {
     usuarioNombre: String;
   }) {
+    if (usuarioNombre === "No%20Registrado") return;
+
     const usuario = await Database.from("tbl_usuario")
       .select(
         Database.raw(
@@ -48,6 +50,8 @@ export default class Usuario extends BaseModel {
       )
       .where("usuario", usuarioNombre.toString());
 
+    if (usuario.length === 0) return "Usuario no encontrado";
+
     let permisos = await Database.from("tbl_perfil_permiso")
       .select(Database.raw(`tipo`))
       .leftJoin(
@@ -55,7 +59,9 @@ export default class Usuario extends BaseModel {
         `tbl_perfil_permiso.id_permiso`,
         `tbl_permiso.id`
       )
-      .where("tbl_perfil_permiso.id_perfil", usuario[0].perfil)
+      .if(usuario[0], (query) => {
+        return query.where("tbl_perfil_permiso.id_perfil", usuario[0].perfil);
+      })
       .groupBy("tipo");
 
     let arrNuevo: string[] = [];
@@ -124,7 +130,6 @@ export default class Usuario extends BaseModel {
       f_ultimo_acceso: schema.string.optional(),
     });
 
-    
     try {
       const usuarioValidado = await validator.validate({
         schema: usuarioSchema,
