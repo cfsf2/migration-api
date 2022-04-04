@@ -58,11 +58,13 @@ export default class PedidoProductoPack extends BaseModel {
 
   @hasOne(() => ProductoPack, {
     foreignKey: "id",
+    serializeAs: "producto",
   })
   public producto_pack: HasOne<typeof ProductoPack>;
 
   @hasOne(() => ProductoCustom, {
     foreignKey: "id",
+    serializeAs: "producto",
   })
   public producto_custom: HasOne<typeof ProductoCustom>;
 }

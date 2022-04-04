@@ -7,5 +7,9 @@ Route.get(
   "PedidoController.mig_farmacia_pedidos"
 ).as("farm.pedidos");
 
+Route.get("/pedidos/pedido/:idPedido", "PedidoController.mig_pedido");
+
 Route.post("/pedidos", `PedidoController.mig_confirmarPedido`);
 Route.post("/pedidos/email", "FarmaciasController.mig_mail");
+
+Route.put("/pedidos", "PedidoController.mig_update_pedido");

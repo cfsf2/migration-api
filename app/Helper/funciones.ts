@@ -23,3 +23,9 @@ export const enumaBool = (e) => {
 
   return e;
 };
+
+export const boolaEnum = (e) => {
+  if (e === true || e === "true") return "s";
+  if (e === false || e === "false") return "n";
+  return e;
+};
