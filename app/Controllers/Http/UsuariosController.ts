@@ -4,15 +4,15 @@ import Usuario from "App/Models/Usuario";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
 import { generarHtml } from "../../Helper/email";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class UsuariosController {
   public async index({ request }: HttpContextContract) {
-    const { page = 1, limit = 30 } = request.qs();
-
-    return await Usuario.query()
+    const usuarios = await Usuario.query()
       .select("*")
-      .orderBy("apellido", "asc")
-      .paginate(page, limit);
+      .orderBy("apellido", "asc");
+
+    return usuarios.map((u) => enumaBool(u.toObject()));
   }
 
   public async mig_perfilUsuario({ request }: HttpContextContract) {
