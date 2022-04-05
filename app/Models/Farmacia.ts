@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  BelongsTo,
+  belongsTo,
   column,
   HasManyThrough,
   hasManyThrough,
@@ -15,6 +17,7 @@ import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
+import CampanaRequerimiento from "./CampanaRequerimiento";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";

@@ -50,4 +50,52 @@ export default class CampanasController {
       return response.status(501).send(error);
     }
   }
+
+  public async requerimientos({ request, response }: HttpContextContract) {
+    const { id_campana, finalizado, id_usuario } = request.qs();
+
+    const reqs = await CampanaRequerimiento.query()
+      .if(id_campana && id_campana !== "todas", (query) => {
+        query.where("id_campana", id_campana);
+      })
+      .if(finalizado && finalizado !== "todas", (query) => {
+        query.where("finalizado", finalizado);
+      })
+      .if(id_usuario && id_usuario !== "todas", (query) => {
+        query.where("id_usuario", id_usuario);
+      })
+      .preload("valor", (query) => query.preload("atributo"))
+      .preload("farmacia")
+      .preload("usuario");
+
+    return reqs.map((r) =>
+      r.serialize({
+        relations: {
+          valor: {
+            fields: ["valor", "sql"],
+          },
+        },
+      })
+    );
+  }
+
+  public async mig_requerimientos({ request }: HttpContextContract) {
+    const { id_campana, finalizado, id_usuario } = request.qs();
+    return CampanaRequerimiento.traerRequerimientos({
+      id_campana,
+      finalizado,
+      id_usuario,
+    });
+  }
+
+  public async update_requerimiento({
+    request,
+    response,
+  }: HttpContextContract) {
+    const { id, finalizado } = request.body();
+    const req = await CampanaRequerimiento.find(id);
+    req?.merge(request.body());
+    req?.save();
+    return response.status(201).send("Actualizado Correctamente");
+  }
 }

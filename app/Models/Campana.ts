@@ -142,7 +142,7 @@ export default class Campana extends BaseModel {
 
   public serializeExtras() {
     return {
-      _id: this.$extras._id.toString(),
+      _id: this.$extras._id?.toString(),
     };
   }
 }
