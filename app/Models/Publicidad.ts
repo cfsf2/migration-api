@@ -16,7 +16,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
 
 export default class Publicidad extends BaseModel {
-  static async traerPublicidades() {
+  static async traerPublicidades({ tipo }: { tipo?: string }) {
     const publicidades = await Database.from("tbl_publicidad as p")
       .select(
         //"p.*",
@@ -48,7 +48,12 @@ export default class Publicidad extends BaseModel {
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
       .groupBy("p.id")
-      .orderBy("fechaalta", "desc");
+      .orderBy("fechaalta", "desc")
+
+      //novedades admin
+      .if(tipo, (query) => {
+        query.where("tp.nombre", "novedadesadmin");
+      });
 
     function arrayzar(modelo, key) {
       modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
