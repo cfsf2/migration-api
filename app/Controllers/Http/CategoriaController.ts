@@ -13,6 +13,6 @@ export default class CategoriaController {
     return await Categoria.traerCategorias({ habilitado: true });
   }
   public async mig_admin({ request }: HttpContextContract) {
-    return await Categoria.mig_admin();
+    return await Categoria.traerCategorias({});
   }
 }

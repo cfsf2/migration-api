@@ -14,6 +14,7 @@ import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -30,7 +31,8 @@ export default class Farmacia extends BaseModel {
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
       l.nombre AS localidad, u.usuario AS usuario , 
       p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
-      GROUP_CONCAT(mp.nombre) AS mediospagos
+      GROUP_CONCAT(DISTINCT mp.nombre) AS mediospagos,
+      GROUP_CONCAT(DISTINCT i.id) AS instituciones
       FROM tbl_farmacia AS f
       LEFT JOIN tbl_localidad AS l ON f.id_localidad = l.id
       LEFT JOIN tbl_departamento AS d ON l.id_departamento = d.id
@@ -39,6 +41,8 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
       LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia
       LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id 
+      LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia
+      LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       GROUP BY f.id`);
@@ -98,20 +102,6 @@ export default class Farmacia extends BaseModel {
       return bloqu;
     }
 
-    function stringAbooleano(f) {
-      const keys = Object.keys(f);
-
-      keys.forEach((k) => {
-        if (f[k] === "n") {
-          f[k] = false;
-        } else if (f[k] === "s") {
-          f[k] = true;
-        }
-      });
-
-      return f;
-    }
-
     farmacias = await Promise.all(
       farmacias[0].map(async (f) => {
         const productosCustom =
@@ -123,15 +113,16 @@ export default class Farmacia extends BaseModel {
 
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
         f.mediospagos = f.mediospagos?.split(",");
+        f.instituciones = f.instituciones?.split(",");
         f.horarios = dameloshorarios(f, dias[0]);
         f.productos = productosCustom[0].map((pc) => {
           pc._id = pc._id.toString();
-          return stringAbooleano(pc);
+          return enumaBool(pc);
         });
         f.excepcionesProdFarmageo = [];
         f.excepcionesEntidadesFarmageo = [];
         f.imagen = f.imagen ? f.imagen : "";
-        f = stringAbooleano(f);
+        f = enumaBool(f);
         return f;
       })
     );
