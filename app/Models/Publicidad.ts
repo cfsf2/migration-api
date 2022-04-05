@@ -13,10 +13,11 @@ import PublicidadTipo from "./PublicidadTipo";
 import Institucion from "./Institucion";
 import PublicidadInstitucion from "./PublicidadInstitucion";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class Publicidad extends BaseModel {
   static async traerPublicidades() {
-    const resultado = await Database.from("tbl_publicidad as p")
+    const publicidades = await Database.from("tbl_publicidad as p")
       .select(
         //"p.*",
         "p.id",
@@ -27,7 +28,7 @@ export default class Publicidad extends BaseModel {
         "p.imagen",
         "p.fecha_inicio",
         "p.fecha_fin",
-        "p.ts_creacion",
+        "p.ts_creacion as fechaalta",
         "tp.nombre as tipo",
         "cp.nombre as color",
         Database.raw("GROUP_CONCAT(i.id) as instituciones")
@@ -47,7 +48,7 @@ export default class Publicidad extends BaseModel {
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
       .groupBy("p.id")
-      .orderBy("ts_creacion", "desc");
+      .orderBy("fechaalta", "desc");
 
     function arrayzar(modelo, key) {
       modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
@@ -57,7 +58,8 @@ export default class Publicidad extends BaseModel {
       return res;
     }
 
-    const result = resultado.map((r) => arrayzar(r, "instituciones"));
+    let result = publicidades.map((r) => arrayzar(r, "instituciones"));
+    result = result.map((p) => enumaBool(p));
 
     return result;
   }

@@ -1,13 +1,15 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import jwt from "jsonwebtoken";
 import Usuario from "App/Models/Usuario";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class AuthController {
   public async mig_loginwp({ request, response, auth }: HttpContextContract) {
     const { username, password } = request.only(["username", "password"]);
 
     try {
-      await auth.use("web").attempt(username, password);
+      let response = await auth.use("web").attempt(username, password);
+      response = enumaBool(response);
 
       const usuario = await Usuario.query()
         .where("usuario", username)
@@ -21,15 +23,23 @@ export default class AuthController {
         .replace("Z", "");
       await usuario[0].save();
 
-      usuario[0].permisos = Array.from(
+      response.permisos = Array.from(
         new Set(usuario[0].perfil[0].permisos.map((p) => p.tipo))
       );
-      usuario[0].user_display_name = usuario[0].give_user_display_name();
+      response.user_display_name = usuario[0].give_user_display_name();
 
-      const response = usuario[0];
-      response.token = "lalala";
+      //const response = usuario[0];
+
       response.user_rol = [usuario[0].perfil[0].tipo];
       response.user_email = response.email;
+
+      response.token = jwt.sign(
+        { user: response.toObject() },
+        process.env.JWTSECRET,
+        {
+          expiresIn: process.env.JWTEXPIRESIN,
+        }
+      );
 
       return response;
     } catch (error) {
