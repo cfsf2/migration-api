@@ -37,30 +37,6 @@ export default class Categoria extends BaseModel {
     return arrNuevo;
   }
 
-    static async mig_admin(){
-      const datos = await Database.from("tbl_categoria as ca")
-      .select(
-        "ca.habilitado",
-        "ca.destacada",
-        "ca.nombre",
-        "ca.id",
-        "ca.id as _id"
-      )
-      const arrNuevo = datos.map((e) => {
-        const claves = Object.keys(e);
-        claves.forEach((k) => {
-          if (e[k] === "s") {
-            e[k] = true;
-          }
-          if (e[k] === "n") {
-            e[k] = false;
-          }
-        });
-        return e;
-      });
-      return arrNuevo;      
-    }
-
   public static table = "tbl_categoria";
 
   @column({ isPrimary: true })
