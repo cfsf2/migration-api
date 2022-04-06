@@ -1,11 +1,18 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
 export default class Institucion extends BaseModel {
   public static table = "tbl_institucion";
 
-  @column({ isPrimary: true })
+  @column({ isPrimary: true, serializeAs: "_id" })
   public id: number;
 
   @column()
@@ -15,7 +22,7 @@ export default class Institucion extends BaseModel {
   public habilitado: string;
 
   @column()
-  public id_insitucion_madre: number;
+  public id_institucion_madre?: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -23,13 +30,28 @@ export default class Institucion extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @belongsTo(() => Institucion, {
+    foreignKey: "id_institucion_madre",
+    localKey: "id",
+    serializeAs: "id_institucion_madre",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public institucion_madre: BelongsTo<typeof Institucion>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }
