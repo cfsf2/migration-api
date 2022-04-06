@@ -12,11 +12,11 @@ import { boolaEnum, enumaBool } from "App/Helper/funciones";
 export default class Pedido extends BaseModel {
   static async traerPedidos({
     usuarioNombre,
-    idFarmacia,
+    idFarmacia = null,
     idPedido,
   }: {
     usuarioNombre?: string;
-    idFarmacia?: number;
+    idFarmacia?: number | null;
     idPedido?: number;
   }) {
     const datos = await Database.from("tbl_pedido")
@@ -39,11 +39,6 @@ export default class Pedido extends BaseModel {
 
     const newPedido = await Promise.all(
       datos.map(async (p) => {
-        // const productos = await PedidoProductoPack.query()
-        //   .where("id_pedido", p.id)
-        //   .preload("producto_pack")
-        //   .preload("producto_custom");
-        // console.log(productos, p.id);
         p.gruposproductos = JSON.parse(p.gruposproductos);
         p.datos_cliente = JSON.parse(p.datos_cliente);
 
@@ -65,14 +60,16 @@ export default class Pedido extends BaseModel {
 
     gruposproductos[0].datos_cliente = { email: pedidoCambios.username };
 
-    pedido.gruposproductos = JSON.stringify({ gruposproductos });
+    pedido.gruposproductos = JSON.stringify(gruposproductos);
     pedido.datos_cliente = JSON.stringify({ email: pedidoCambios.username });
     pedido.id_estado_pedido = estado[0].id;
     pedido.comentarios = pedidoCambios.comentarios;
     pedido.domicilioenvio = pedidoCambios.domicilioenvio;
     pedido.pago_online = boolaEnum(pedidoCambios.pago_online);
     pedido.envio = boolaEnum(pedidoCambios.envio);
-    pedido.total = Number(pedidoCambios.gruposproductos[0].precio);
+    pedido.total = pedidoCambios.gruposproductos[0].precio
+      ? Number(pedidoCambios.gruposproductos[0].precio)
+      : null;
 
     return pedido.save();
   }
@@ -251,7 +248,7 @@ export default class Pedido extends BaseModel {
   public receta: string;
 
   @column()
-  public total: number;
+  public total: number | null;
 
   @column()
   public id_farmacia: number;

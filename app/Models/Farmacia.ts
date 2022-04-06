@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  BelongsTo,
+  belongsTo,
   column,
   HasManyThrough,
   hasManyThrough,
@@ -19,7 +21,13 @@ import { enumaBool } from "App/Helper/funciones";
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
 
-  static async traerFarmacias(usuario?: String): Promise<String> {
+  static async traerFarmacias({
+    usuario,
+    matricula,
+  }: {
+    usuario?: string;
+    matricula?: number;
+  }): Promise<any> {
     let farmacias =
       await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
       f.matricula, f.cufe, f.cuit, f.calle, f.numero, 
@@ -45,6 +53,7 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
+      ${matricula ? `AND f.matricula = ${matricula}` : ""}
       GROUP BY f.id`);
 
     let servicios =
@@ -222,7 +231,7 @@ export default class Farmacia extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_localidad: Number;
+  public id_localidad: number;
 
   //foreing key
   @hasOne(() => Usuario, {
