@@ -1,24 +1,23 @@
 
-GET http://localhost:3111/farmacias/novedades/admin HTTP/1.1
+GET http://localhost:3111/instituciones/search?limit=3 HTTP/1.1
 
 ####
-
-
-GET http://localhost:3111/pedidos/martinamussio@hotmail.com.ar HTTP/1.1
-
-####
-
 
 GET http://localhost:3111/pedidos/farmacias/3 HTTP/1.1
 
 ####
 
 
-GET http://localhost:3111/pedidos/pedido/156 HTTP/1.1
+GET http://localhost:3110/farmacias/novedades/search HTTP/1.1
 
 ####
 
 PUT http://localhost:3111/pedidos/pedido/3 HTTP/1.1
+Content-Type: application/json
+
+{
+  "habilitada":"false"
+}
 
 ####
 

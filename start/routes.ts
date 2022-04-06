@@ -10,6 +10,7 @@ import "../routes/campana";
 import "../routes/pedido";
 import "../routes/imagenes";
 import "../routes/denuncias";
+import "../routes/instituciones"
 
 Route.get("/", async () => {
   return { hello: "world" };
