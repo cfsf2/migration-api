@@ -1,7 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
+import Dia from "./Dia";
 
 export default class FarmaciaDia extends BaseModel {
   public static table = "tbl_farmacia_dia";
@@ -24,23 +32,39 @@ export default class FarmaciaDia extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_farmacia: number;
+
+  @column()
+  public id_dia: number;
+
   @hasOne(() => Farmacia, {
     foreignKey: "id",
+    localKey: "id_farmacia",
   })
-  public id_farmacia: HasOne<typeof Farmacia>;
+  public farmacia: HasOne<typeof Farmacia>;
 
-  @hasOne(() => Dia, {
-    foreignKey: "id",
+  @belongsTo(() => Dia, {
+    foreignKey: "id_dia",
+    localKey: "id",
   })
-  public id_dia: HasOne<typeof Dia>;
+  public dia: BelongsTo<typeof Dia>;
+
+  @column()
+  public id_usuario_creacion: number;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @column()
+  public id_usuario_modificacion: number;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

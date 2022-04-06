@@ -1,10 +1,25 @@
 
-GET http://localhost:3111/users/martinamussio@hotmail.com.ar HTTP/1.1
+GET http://localhost:3111/publicidades HTTP/1.1
 
 ####
 
 
-GET http://localhost:3111/pedidos/martinamussio@hotmail.com.ar HTTP/1.1
+GET http://localhost:3111/pedidos/ HTTP/1.1
+
+####
+
+PUT http://localhost:3111/farmacias/?username=ALE HTTP/1.1
+Content-Type: application/json
+
+{
+  "localidad":"Rosario",
+  "calle":"Baigorria",
+  "numero":"1477"
+}
+
+####
+
+GET http://localhost:3111/farmacias/login/ALE HTTP/1.1
 
 ####
 
@@ -67,7 +82,13 @@ content-type: application/json
 
 ###
 
-POST http://localhost:3111/users/loginwp HTTP/1.1
+GET http://localhost:3111/campana/requerimientos HTTP/1.1
+content-type: application/json
+
+###
+
+
+GET http://localhost:3111/farmacias/login/F0639804 HTTP/1.1
 content-type: application/json
 
 { 

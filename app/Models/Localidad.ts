@@ -17,10 +17,14 @@ export default class Localidad extends BaseModel {
   public centroide_lat: string;
 
   @column()
+  public id_departamento: number;
+
+  @column()
   public cp: number;
 
   @hasOne(() => Departamento, {
     foreignKey: "id",
+    localKey: "id_departamento",
   })
-  public id_departamento: HasOne<typeof Departamento>;
+  public departamento: HasOne<typeof Departamento>;
 }

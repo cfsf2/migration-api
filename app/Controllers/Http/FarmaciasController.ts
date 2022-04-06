@@ -31,7 +31,7 @@ export default class FarmaciasController {
         .where("tbl_usuario.usuario", request.params().usuario);
 
       farmaciaLogueada[0].f_ultimo_acceso = DateTime.now();
-      return farmaciaLogueada[0].save();
+      farmaciaLogueada[0].save();
     }
     return farmacia;
   }
@@ -60,11 +60,9 @@ export default class FarmaciasController {
   public async mig_updatePerfil({ request }: HttpContextContract) {
     const { username } = request.qs();
 
-    const payload = request.body();
-    const horariosCambios = payload.horarios;
-    const serviciosCambios = payload.servicios;
-    const mediospagosCambios = payload.mediospagos;
-
-    return request.body();
+    return await Farmacia.acutalizarFarmacia({
+      usuario: username,
+      d: request.body(),
+    });
   }
 }

@@ -1,8 +1,6 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
-  BelongsTo,
-  belongsTo,
   column,
   HasManyThrough,
   hasManyThrough,
@@ -17,6 +15,8 @@ import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
+import axios from "axios";
+import FarmaciaDia from "./FarmaciaDia";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -141,6 +141,103 @@ export default class Farmacia extends BaseModel {
     }
 
     return farmacias;
+  }
+
+  static async acutalizarFarmacia({ usuario, d }) {
+    const localidad = await Database.query()
+      .from("tbl_localidad")
+      .select(
+        Database.raw(
+          "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
+        )
+      )
+      .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
+      .andWhere("tbl_provincia.nombre", "=", "Santa Fe")
+      .leftJoin(
+        "tbl_departamento",
+        "tbl_localidad.id_departamento",
+        "tbl_departamento.id"
+      )
+      .leftJoin(
+        "tbl_provincia",
+        "tbl_departamento.id_provincia",
+        "tbl_provincia.id"
+      );
+
+    if (localidad.length === 0) {
+      return "La localidad seleccionada no fue encontrada en la base de datos";
+    }
+
+    const provincia = "Santa Fe";
+    const pais = "Argentina";
+    const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
+
+    const geocoding = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
+    );
+
+    const { lat, lng: log } = geocoding.data.results[0].geometry.location;
+
+    //Guarda datos de farmacia
+    const farmacia = await Farmacia.query()
+      .select("tbl_farmacia.*")
+      .leftJoin("tbl_usuario as u", "id_usuario", "u.id")
+      .where("u.usuario", usuario);
+
+    farmacia[0].merge({
+      id: d.id,
+      nombre: d.nombre,
+      nombrefarmaceutico: d.nombrefarmaceutico,
+
+      calle: d.calle,
+      numero: d.numero,
+      id_localidad: localidad[0].id,
+      direccioncompleta: direccioncompleta,
+
+      longitud: log,
+      latitud: lat,
+
+      habilitado: d.habilitado ? "s" : "n",
+      email: d.email,
+      telefono: d.telefono,
+      whatsapp: d.whatsapp,
+      facebook: d.facebook,
+      instagram: d.instagram,
+      web: d.web,
+      descubrir: d.descubrir ? "s" : "n",
+      envios: d.envios ? "s" : "n",
+      costoenvio: d.costoenvio,
+      tiempotardanza: d.tiempotardanza,
+      visita_comercial: d.visita_comercial ? "s" : "n",
+      telefonofijo: d.telefonofijo,
+    });
+
+    farmacia[0].save();
+
+    //Guarda datos de horarios
+    const horarios = await FarmaciaDia.query()
+      .select(
+        "inicio",
+        "fin",
+        "tbl_farmacia_dia.habilitado",
+        "tbl_farmacia_dia.id",
+        "tbl_farmacia_dia.id_dia"
+      )
+      .preload("dia")
+      .leftJoin(
+        "tbl_farmacia",
+        "tbl_farmacia_dia.id_farmacia",
+        "tbl_farmacia.id"
+      )
+      .where("tbl_farmacia.id", farmacia[0].id);
+
+    d.horarios.forEach((bloque) => {
+      const bloqueSQL = horarios.find((h) => h.dia.nombre === bloque.dia);
+
+      console.log(bloqueSQL?.toObject());
+    });
+
+    return horarios;
   }
 
   @column({ isPrimary: true })

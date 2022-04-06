@@ -16,8 +16,12 @@ export default class Departamento extends BaseModel {
   @column()
   public centroide_lat: string;
 
+  @column()
+  public id_provincia: number;
+
   @hasOne(() => Provincia, {
     foreignKey: "id",
+    localKey: "id_provincia",
   })
-  public id_provincia: HasOne<typeof Provincia>;
+  public provincia: HasOne<typeof Provincia>;
 }
