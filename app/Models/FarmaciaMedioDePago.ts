@@ -14,6 +14,15 @@ export default class FarmaciaMedioDePago extends BaseModel {
   public id_farmacia: number;
 
   @column()
+  public id_mediodepago: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column()
   public habilitado: string;
 
   @column.dateTime({ autoCreate: true })
@@ -22,24 +31,21 @@ export default class FarmaciaMedioDePago extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
-  //foreing key
-  @hasOne(() => Farmacia, {
-    foreignKey: "id",
-  })
-  public farmacia_mediodepago_id_farmacia: HasOne<typeof Farmacia>;
-
   @hasOne(() => MedioDePago, {
     foreignKey: "id",
+    localKey: "id_mediodepago",
   })
-  public id_mediodepago: HasOne<typeof MedioDePago>;
+  public mediodepago: HasOne<typeof MedioDePago>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

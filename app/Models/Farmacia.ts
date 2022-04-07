@@ -17,6 +17,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
 import axios from "axios";
 import FarmaciaDia from "./FarmaciaDia";
+import Dia from "./Dia";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -61,7 +62,9 @@ export default class Farmacia extends BaseModel {
     LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s"`);
 
     let dias = await Database.rawQuery(
-      `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia FROM tbl_farmacia_dia AS fd LEFT JOIN tbl_dia AS d ON fd.id_dia = d.id  `
+      `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia 
+      FROM tbl_farmacia_dia AS fd 
+      LEFT JOIN tbl_dia AS d ON fd.id_dia = d.id `
     );
 
     function dameloshorarios(f, horarios) {
@@ -87,7 +90,11 @@ export default class Farmacia extends BaseModel {
         let d2 = dias.filter((d) => d.dia === dia);
 
         const bloquecitos = d2.map(
-          (bloque: { inicio: any; fin: any }, i: number) => {
+          (
+            bloque: { inicio: any; fin: any; habilitado: string },
+            i: number
+          ) => {
+            if (bloque.habilitado === "n" && i === 1) return null;
             return {
               desde: bloque.inicio,
               hasta: bloque.fin,
@@ -96,7 +103,7 @@ export default class Farmacia extends BaseModel {
           }
         );
         const horarioFarmageo = {
-          bloques: bloquecitos,
+          bloques: bloquecitos.filter((b) => b !== null),
           habilitado: d2.find((d) => d.dia === dia)
             ? d2.find((d) => d.dia === dia).habilitado === "s"
               ? true
@@ -104,6 +111,7 @@ export default class Farmacia extends BaseModel {
             : false,
           dia: dia,
         };
+
         if (horarioFarmageo.bloques.length === 0) return;
         return bloqu.push(horarioFarmageo);
       });
@@ -144,6 +152,7 @@ export default class Farmacia extends BaseModel {
   }
 
   static async acutalizarFarmacia({ usuario, d }) {
+    //Guardar datos de geolocalizacion
     const localidad = await Database.query()
       .from("tbl_localidad")
       .select(
@@ -215,6 +224,7 @@ export default class Farmacia extends BaseModel {
     farmacia[0].save();
 
     //Guarda datos de horarios
+    const dias = await Dia.query();
     const horarios = await FarmaciaDia.query()
       .select(
         "inicio",
@@ -231,13 +241,103 @@ export default class Farmacia extends BaseModel {
       )
       .where("tbl_farmacia.id", farmacia[0].id);
 
-    d.horarios.forEach((bloque) => {
-      const bloqueSQL = horarios.find((h) => h.dia.nombre === bloque.dia);
+    const escribirHorarios = (dhorarios, horarios) => {
+      let dbloques: {
+        inicio: string;
+        fin: string;
+        dia: string;
+        habilitado: string;
+      }[] = [];
+      dhorarios.forEach((d) => {
+        d.bloques.forEach((b) => {
+          dbloques.push({
+            inicio: b.desde,
+            fin: b.hasta,
+            dia: d.dia,
+            habilitado: d.habilitado,
+          });
+        });
+      });
 
-      console.log(bloqueSQL?.toObject());
-    });
+      dbloques.forEach((b, i) => {
+        let hMod = horarios.find((h) => h.dia.nombre === b.dia); // bloque a modificar
 
-    return horarios;
+        if (!hMod) {
+          const hModNuevo = new FarmaciaDia();
+
+          hModNuevo.fill({
+            inicio: b.inicio,
+            fin: b.fin,
+            habilitado: b.habilitado ? "s" : "n",
+            id_dia: dias.find((d) => d.nombre === b.dia)?.id,
+            id_farmacia: farmacia[0].id,
+          });
+
+          return hModNuevo.save();
+        } // si no existe lo inserto
+
+        hMod.merge({
+          inicio: b.inicio,
+          fin: b.fin,
+          habilitado: b.habilitado ? "s" : "n",
+          id: hMod.id,
+          id_dia: hMod.id_dia,
+        });
+
+        hMod.save();
+        horarios = horarios.filter((h) => h.id !== hMod.id); //retiro el bloque modificado de la lista
+      });
+      if (horarios.length > 0) {
+        horarios.forEach((h) => {
+          h.habilitado = "n";
+          h.save();
+        });
+      }
+    };
+    escribirHorarios(d.horarios, horarios);
+
+    //Guardar datos de servicios
+    const serviciosPosibles = await Servicio.query();
+    const serviciosDB = await FarmaciaServicio.query()
+      .preload("servicio")
+      .where("id_farmacia", farmacia[0].id);
+
+    const escribirServicios = (serviciosFront, serviciosDB) => {
+      console.log(Date());
+      let lista = serviciosDB;
+      serviciosFront.forEach((sf) => {
+        const servicioM = lista.find((sdb) => sdb.servicio.nombre === sf.tipo);
+
+        if (servicioM) {
+          servicioM.habilitado = "s";
+          lista = lista.filter((l) => servicioM.id !== l.id);
+          servicioM.save();
+          console.log(sf.tipo, "habilitado");
+        }
+        if (!servicioM) {
+          const servicioN = new FarmaciaServicio();
+          servicioN.fill({
+            id_farmacia: farmacia[0].id,
+            habilitado: "s",
+            id_servicio: serviciosPosibles.filter(
+              (sp) => sf.tipo === sp.nombre
+            )[0].id,
+          });
+          console.log(sf.tipo, "creado");
+          servicioN.save();
+        }
+      });
+      if (lista.length > 0) {
+        lista.forEach((l) => {
+          l.habilitado = "n";
+          l.save();
+          console.log(l.servicio.nombre, "deshabilitado");
+        });
+      }
+    };
+    escribirServicios(d.servicios, serviciosDB);
+
+    return serviciosDB;
   }
 
   @column({ isPrimary: true })
