@@ -13,6 +13,18 @@ export default class FarmaciaProductoCustom extends BaseModel {
   @column()
   public habilitado: string;
 
+  @column()
+  public id_farmacia: number;
+
+  @column()
+  public id_producto_custom: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -22,21 +34,25 @@ export default class FarmaciaProductoCustom extends BaseModel {
   //foreing key
   @hasOne(() => Farmacia, {
     foreignKey: "id",
+    localKey: "id_farmacia",
   })
-  public id_farmacia: HasOne<typeof Farmacia>;
+  public farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => ProductoCustom, {
     foreignKey: "id",
+    localKey: "id_producto_custom",
   })
-  public id_producto_custom: HasOne<typeof ProductoCustom>;
+  public producto_custom: HasOne<typeof ProductoCustom>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

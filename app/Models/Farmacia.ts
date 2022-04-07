@@ -18,6 +18,11 @@ import { enumaBool } from "App/Helper/funciones";
 import axios from "axios";
 import FarmaciaDia from "./FarmaciaDia";
 import Dia from "./Dia";
+import FarmaciaMedioDePago from "./FarmaciaMedioDePago";
+import MedioDePago from "./MedioDePago";
+import ProductoCustom from "./ProductoCustom";
+import FarmaciaProductoCustom from "./FarmaciaProductoCustom";
+import Inventario from "./Inventario";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -53,6 +58,7 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia
       LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
+      AND fmp.habilitado = "s"
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       ${matricula ? `AND f.matricula = ${matricula}` : ""}
       GROUP BY f.id`);
@@ -124,8 +130,8 @@ export default class Farmacia extends BaseModel {
         const productosCustom =
           await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
         LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
-        WHERE fpc.id_farmacia =265
-        AND pc.habilitado = 's' 
+        WHERE fpc.id_farmacia = ${f.id}
+        AND fpc.habilitado = 's' 
         AND pc.en_papelera = 'n'`);
 
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
@@ -193,6 +199,8 @@ export default class Farmacia extends BaseModel {
       .leftJoin("tbl_usuario as u", "id_usuario", "u.id")
       .where("u.usuario", usuario);
 
+    const perfilesFarmageo = await PerfilFarmageo.query();
+
     farmacia[0].merge({
       id: d.id,
       nombre: d.nombre,
@@ -202,6 +210,10 @@ export default class Farmacia extends BaseModel {
       numero: d.numero,
       id_localidad: localidad[0].id,
       direccioncompleta: direccioncompleta,
+
+      id_perfil_farmageo: perfilesFarmageo.filter(
+        (pf) => pf.nombre === d.perfil_farmageo
+      )[0].id,
 
       longitud: log,
       latitud: lat,
@@ -303,7 +315,7 @@ export default class Farmacia extends BaseModel {
       .where("id_farmacia", farmacia[0].id);
 
     const escribirServicios = (serviciosFront, serviciosDB) => {
-      console.log(Date());
+      // console.log(Date());
       let lista = serviciosDB;
       serviciosFront.forEach((sf) => {
         const servicioM = lista.find((sdb) => sdb.servicio.nombre === sf.tipo);
@@ -312,7 +324,7 @@ export default class Farmacia extends BaseModel {
           servicioM.habilitado = "s";
           lista = lista.filter((l) => servicioM.id !== l.id);
           servicioM.save();
-          console.log(sf.tipo, "habilitado");
+          //console.log(sf.tipo, "habilitado");
         }
         if (!servicioM) {
           const servicioN = new FarmaciaServicio();
@@ -323,7 +335,7 @@ export default class Farmacia extends BaseModel {
               (sp) => sf.tipo === sp.nombre
             )[0].id,
           });
-          console.log(sf.tipo, "creado");
+          //console.log(sf.tipo, "creado");
           servicioN.save();
         }
       });
@@ -331,13 +343,111 @@ export default class Farmacia extends BaseModel {
         lista.forEach((l) => {
           l.habilitado = "n";
           l.save();
-          console.log(l.servicio.nombre, "deshabilitado");
+          //console.log(l.servicio.nombre, "deshabilitado");
         });
       }
     };
     escribirServicios(d.servicios, serviciosDB);
 
-    return serviciosDB;
+    //Guardar datos de medios de pago
+    const mediospagosPosibles = await MedioDePago.query();
+    const mediospagosDB = await FarmaciaMedioDePago.query()
+      .preload("mediodepago")
+      .where("id_farmacia", farmacia[0].id);
+    const escribirMediosPagos = (mediosFront, mediosDB) => {
+      let lista = mediosDB;
+
+      mediosFront.forEach((mf) => {
+        const medioM = mediosDB.find((mdb) => mdb.mediodepago.nombre === mf);
+
+        if (medioM) {
+          medioM.habilitado = "s";
+
+          lista = lista.filter((l) => medioM.id !== l.id);
+          return medioM.save();
+        }
+        if (!medioM) {
+          const medioN = new FarmaciaMedioDePago();
+          medioN.fill({
+            id_farmacia: farmacia[0].id,
+            id_mediodepago: mediospagosPosibles.filter(
+              (mpp) => mpp.nombre === mf
+            )[0].id,
+            habilitado: "s",
+          });
+
+          return medioN.save();
+        }
+      });
+      if (lista.length > 0) {
+        lista.forEach((l) => {
+          l.habilitado = "n";
+          l.save();
+        });
+      }
+    };
+    escribirMediosPagos(d.mediospagos, mediospagosDB);
+
+    //Actualizar productos propios
+    // Agregar prod
+    const inventarios = await Inventario.query();
+    const productoAgregar = d.productos.filter((p) => !p.id)[0];
+    const productosActualizar = d.productos.filter((p) => p.id);
+
+    if (productosActualizar && productosActualizar.length > 0) {
+      console.log("productosActualizar");
+
+      productosActualizar.map(async (p) => {
+        console.log(p.id);
+        const productoC = await ProductoCustom.findOrFail(p.id);
+        productoC.merge({
+          descripcion: p.descripcion,
+          en_papelera: p.en_papelera ? "s" : "n",
+          es_promocion: p.esPromocion ? "s" : "n",
+          favorito: p.favorito ? "s" : "n",
+          habilitado: p.habilitado ? "s" : "n",
+          id_categoria: p.id_categoria,
+          imagen: p.imagen,
+          nombre: p.nombre,
+          precio: p.precio,
+          sku: p.sku,
+        });
+        await productoC.save();
+      });
+    }
+    if (productoAgregar && productoAgregar.nombre.trim() !== "") {
+      console.log("productosAgregar");
+      const productoN = new ProductoCustom();
+      productoN.fill({
+        nombre: productoAgregar.nombre,
+        imagen: productoAgregar.imagen,
+        precio: Number(productoAgregar.precio),
+        favorito: productoAgregar.favorito ? "s" : "n",
+        sku: productoAgregar.sku,
+        descripcion: productoAgregar.descripcion,
+        id_inventario: inventarios.filter(
+          (i) => i.nombre === productoAgregar.inventario
+        )[0].id,
+      });
+      const productoS = await productoN.save();
+      const farmaciaProdCustomN = new FarmaciaProductoCustom();
+      farmaciaProdCustomN.fill({
+        id_farmacia: farmacia[0].id,
+        id_producto_custom: productoS.id,
+        habilitado: "s",
+      });
+      farmaciaProdCustomN.save();
+    }
+    if (d.papeleraProductos) {
+      console.log("d.papeleraProductos");
+      const FPC = await FarmaciaProductoCustom.query()
+        .where("id_producto_custom", d.papeleraProductos[0].id)
+        .andWhere("id_farmacia", farmacia[0].id);
+      FPC[0].habilitado = "n";
+      FPC[0].save();
+    }
+
+    return;
   }
 
   @column({ isPrimary: true })
@@ -415,6 +525,9 @@ export default class Farmacia extends BaseModel {
   @column()
   public telefonofijo: string;
 
+  @column()
+  public id_perfil_farmageo: number;
+
   @column.dateTime()
   public f_ultimo_acceso: DateTime;
 
@@ -449,8 +562,9 @@ export default class Farmacia extends BaseModel {
 
   @hasOne(() => PerfilFarmageo, {
     foreignKey: "id",
+    localKey: "id_perfil_farmageo",
   })
-  public id_perfil_farmageo: HasOne<typeof PerfilFarmageo>;
+  public perfil_farmageo: HasOne<typeof PerfilFarmageo>;
 
   @hasManyThrough([() => Servicio, () => FarmaciaServicio], {
     localKey: "id",

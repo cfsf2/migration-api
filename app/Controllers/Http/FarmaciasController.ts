@@ -57,12 +57,18 @@ export default class FarmaciasController {
     });
   }
 
-  public async mig_updatePerfil({ request }: HttpContextContract) {
+  public async mig_updatePerfil({ request, response }: HttpContextContract) {
     const { username } = request.qs();
 
-    return await Farmacia.acutalizarFarmacia({
-      usuario: username,
-      d: request.body(),
-    });
+    try {
+      return response.created(
+        await Farmacia.acutalizarFarmacia({
+          usuario: username,
+          d: request.body(),
+        })
+      );
+    } catch (err) {
+      return err;
+    }
   }
 }
