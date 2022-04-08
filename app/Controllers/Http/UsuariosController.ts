@@ -76,10 +76,26 @@ export default class UsuariosController {
       id_wp: body.farmaciaid,
       esfarmacia: "s",
     });
+
+    try {
+      await nuevoUsuario.save();
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+
     nuevoPerfilUsuario.merge({
       id_perfil: body.perfil,
       id_usuario: nuevoUsuario.id,
     });
+
+    try {
+      await nuevoPerfilUsuario.save();
+      response.status(201);
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
 
     // const res = await Usuario.registrarUsuarioWeb(nuevoUsuario, response);
     if (response.getStatus() === 201) {
@@ -92,7 +108,7 @@ export default class UsuariosController {
             generarHtml({
               titulo: "Bienvenido a Farmageo",
               // imagen: '',
-              texto: `Usted se ha registrado correctamente! <br/> Su usuario es: <strong>${body.usuario}</strong><br/> Su contraseña es: <strong>${body.password}</strong>`,
+              texto: `Usted se ha registrado correctamente! <br/> Su usuario es: <strong>${nuevoUsuario.usuario}</strong><br/> Su contraseña es: <strong>${body.password}</strong>`,
               span: `Encontra tu Farmacia mas cercana`,
               linkspan: "https://app.farmageo.com.ar/#/",
             })

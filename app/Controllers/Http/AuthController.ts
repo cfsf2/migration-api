@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import Usuario from "App/Models/Usuario";
 import { enumaBool } from "App/Helper/funciones";
 import Perfil from "App/Models/Perfil";
+import { DateTime } from "luxon";
 
 export default class AuthController {
   public async mig_loginwp({ request, response, auth }: HttpContextContract) {
@@ -18,10 +19,9 @@ export default class AuthController {
           query.preload("permisos");
         });
 
-      usuario[0].f_ultimo_acceso = new Date()
-        .toISOString()
-        .replace("T", " ")
-        .replace("Z", "");
+      usuario[0].f_ultimo_acceso = DateTime.now()
+        .setLocale("es-Ar")
+        .toFormat("yyyy-MM-dd hh:mm:ss");
       await usuario[0].save();
 
       response.permisos = Array.from(

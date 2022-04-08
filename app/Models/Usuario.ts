@@ -23,6 +23,8 @@ import Perfil from "./Perfil";
 import UsuarioPerfil from "./UsuarioPerfil";
 
 export default class Usuario extends BaseModel {
+  public static table = "tbl_usuario";
+
   static async traerPerfilDeUsuario({
     usuarioNombre,
   }: {
@@ -91,8 +93,6 @@ export default class Usuario extends BaseModel {
 
     return formateo[0];
   }
-
-  public static table = "tbl_usuario";
 
   public static async registrarUsuarioWeb(
     usuario: {

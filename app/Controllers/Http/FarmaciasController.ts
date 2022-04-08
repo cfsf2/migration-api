@@ -26,12 +26,18 @@ export default class FarmaciasController {
     if (request.url().includes("login") && farmacia.length !== 0) {
       console.log("actualizar ultimo acceso a ", farmacia.nombre);
 
-      const farmaciaLogueada = await Farmacia.query()
-        .leftJoin("tbl_usuario", "id_usuario", "tbl_usuario.id")
-        .where("tbl_usuario.usuario", request.params().usuario);
+      const farmaciaLogueada = await Farmacia.findOrFail(farmacia.id);
 
-      farmaciaLogueada[0].f_ultimo_acceso = DateTime.now();
-      farmaciaLogueada[0].save();
+      farmaciaLogueada.f_ultimo_acceso = DateTime.now()
+        .setLocale("es-Ar")
+        .toFormat("yyyy-MM-dd hh:mm:ss");
+
+      console.log("despues ", farmaciaLogueada.f_ultimo_acceso);
+      try {
+        farmaciaLogueada.save();
+      } catch (err) {
+        return console.log(err);
+      }
     }
     return farmacia;
   }

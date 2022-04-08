@@ -557,8 +557,8 @@ export default class Farmacia extends BaseModel {
   @column()
   public id_perfil_farmageo: number;
 
-  @column.dateTime()
-  public f_ultimo_acceso: DateTime;
+  @column()
+  public f_ultimo_acceso: string;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
