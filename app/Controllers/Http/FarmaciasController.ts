@@ -4,6 +4,7 @@ import { generarHtml } from "../../Helper/email";
 
 import Farmacia from "../../Models/Farmacia";
 import { DateTime } from "luxon";
+import Usuario from "App/Models/Usuario";
 
 export default class FarmaciasController {
   public async index() {
@@ -44,7 +45,6 @@ export default class FarmaciasController {
   public async mig_matricula({ request }: HttpContextContract) {
     const { matricula } = request.params();
     return await Farmacia.traerFarmacias({ matricula });
-    return await Farmacia.findBy("matricula", matricula);
   }
 
   public async mig_mail({ request }: HttpContextContract) {
@@ -80,5 +80,13 @@ export default class FarmaciasController {
 
   public async mig_create({ request }: HttpContextContract) {
     return Farmacia.crearFarmacia(request.body());
+  }
+
+  public async mig_admin_passwords({ request }: HttpContextContract) {}
+  public async existeUsuario({ request }: HttpContextContract) {
+    const existe = await Usuario.findBy("usuario", request.params().usuario);
+
+    if (existe) return true;
+    return false;
   }
 }

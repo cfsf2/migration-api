@@ -481,8 +481,6 @@ export default class Farmacia extends BaseModel {
   }
 
   static async crearFarmacia(nuevaFarmacia) {
-    console.log(nuevaFarmacia);
-
     const usuario = await Usuario.findByOrFail(
       "usuario",
       nuevaFarmacia.usuario
@@ -509,10 +507,12 @@ export default class Farmacia extends BaseModel {
       email: nuevaFarmacia.email,
       telefono: nuevaFarmacia.telefono,
       calle: nuevaFarmacia.calle,
+      numero: Number(nuevaFarmacia.numero),
       tiempotardanza: nuevaFarmacia.tiempotardanza,
       latitud: lat,
       longitud: log,
       password: nuevaFarmacia.password,
+      id_perfil_farmageo: 2,
     });
     try {
       await farmaciaN.save();
