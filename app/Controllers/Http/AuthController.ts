@@ -2,6 +2,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import jwt from "jsonwebtoken";
 import Usuario from "App/Models/Usuario";
 import { enumaBool } from "App/Helper/funciones";
+import Perfil from "App/Models/Perfil";
 
 export default class AuthController {
   public async mig_loginwp({ request, response, auth }: HttpContextContract) {
@@ -46,6 +47,14 @@ export default class AuthController {
       console.log(error);
       response.send(error);
     }
+  }
+
+  public async mig_perfiles({ request }: HttpContextContract) {
+    const { tipo } = request.qs();
+    return await Perfil.query()
+      .select("tbl_perfil.id as _id", "tbl_perfil.*")
+      .where("tipo", tipo)
+      .preload("permisos");
   }
 
   public async logout({ response, auth }: HttpContextContract) {

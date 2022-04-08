@@ -50,4 +50,10 @@ export default class Perfil extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }

@@ -8,7 +8,7 @@ export default class Permiso extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
-  @column()
+  @column({ serializeAs: "slug" })
   public nombre: string;
 
   @column()
@@ -32,4 +32,10 @@ export default class Permiso extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }

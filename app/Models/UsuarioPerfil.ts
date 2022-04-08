@@ -21,6 +21,12 @@ export default class UsuarioPerfil extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
   //foreing key
   @hasOne(() => Usuario, {
     foreignKey: "id",

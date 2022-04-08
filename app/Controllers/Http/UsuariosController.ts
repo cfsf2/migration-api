@@ -5,6 +5,7 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 
 import { generarHtml } from "../../Helper/email";
 import { enumaBool } from "App/Helper/funciones";
+import UsuarioPerfil from "App/Models/UsuarioPerfil";
 
 export default class UsuariosController {
   public async index({ request }: HttpContextContract) {
@@ -56,6 +57,49 @@ export default class UsuariosController {
       });
     }
     return response.send(res);
+  }
+
+  public async mig_alta_usuarioFarmacia({
+    request,
+    response,
+  }: HttpContextContract) {
+    const body = request.body();
+    const nuevoUsuario = new Usuario();
+    const nuevoPerfilUsuario = new UsuarioPerfil();
+
+    nuevoUsuario.merge({
+      usuario: body.username.toUpperCase(),
+      password: body.password,
+      nombre: body.first_name,
+      apellido: body.last_name,
+      email: body.email,
+      id_wp: body.farmaciaid,
+      esfarmacia: "s",
+    });
+    nuevoPerfilUsuario.merge({
+      id_perfil: body.perfil,
+      id_usuario: nuevoUsuario.id,
+    });
+
+    // const res = await Usuario.registrarUsuarioWeb(nuevoUsuario, response);
+    if (response.getStatus() === 201) {
+      Mail.send((message) => {
+        message
+          .from("farmageoapp@gmail.com")
+          .to(nuevoUsuario.email)
+          .subject("Bienvenido " + nuevoUsuario.nombre + " a FarmaGeo")
+          .html(
+            generarHtml({
+              titulo: "Bienvenido a Farmageo",
+              // imagen: '',
+              texto: `Usted se ha registrado correctamente! <br/> Su usuario es: <strong>${body.usuario}</strong><br/> Su contraseña es: <strong>${body.password}</strong>`,
+              span: `Encontra tu Farmacia mas cercana`,
+              linkspan: "https://app.farmageo.com.ar/#/",
+            })
+          );
+      });
+    }
+    return;
   }
 
   public async mig_actualizar_usuarioWeb({

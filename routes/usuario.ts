@@ -7,7 +7,13 @@ Route.get("/users/logout", "AuthController.logout");
 Route.get("/users/:usuarioNombre", "UsuariosController.mig_perfilUsuario");
 
 Route.post("/users/loginwp", "AuthController.mig_loginwp");
+Route.get("/permisos/perfiles", "AuthController.mig_perfiles");
+
 Route.post("/users/alta-usuario-web", "UsuariosController.mig_alta_usuarioWeb");
+Route.post(
+  "/users/alta-usuario-farmacia",
+  "UsuariosController.mig_alta_usuarioFarmacia"
+);
 
 Route.put(
   "/users/updateWebUser",

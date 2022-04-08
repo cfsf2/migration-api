@@ -14,6 +14,9 @@ export default class FarmaciaProductoCustom extends BaseModel {
   public habilitado: string;
 
   @column()
+  public en_papelera: string;
+
+  @column()
   public id_farmacia: number;
 
   @column()

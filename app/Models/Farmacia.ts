@@ -42,6 +42,8 @@ export default class Farmacia extends BaseModel {
       f.habilitado, f.imagen, f.email, f.telefono, 
       f.whatsapp, f.facebook, f.instagram, f.web, 
       f.descubrir, f.envios, f.tiempotardanza, 
+      f.ts_creacion as fechaalta,
+      f.matricula as farmaciaid,
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
       l.nombre AS localidad, u.usuario AS usuario , 
       p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
@@ -132,13 +134,24 @@ export default class Farmacia extends BaseModel {
         LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
         WHERE fpc.id_farmacia = ${f.id}
         AND fpc.habilitado = 's' 
-        AND pc.en_papelera = 'n'`);
+        AND fpc.en_papelera = 'n'`);
+
+        const productosEnPapelera =
+          await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
+        LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
+        WHERE fpc.id_farmacia = ${f.id}
+        AND fpc.habilitado = 's' 
+        AND fpc.en_papelera = 's'`);
 
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
         f.mediospagos = f.mediospagos?.split(",");
         f.instituciones = f.instituciones?.split(",");
         f.horarios = dameloshorarios(f, dias[0]);
         f.productos = productosCustom[0].map((pc) => {
+          pc._id = pc._id.toString();
+          return enumaBool(pc);
+        });
+        f.papeleraProductos = productosEnPapelera[0].map((pc) => {
           pc._id = pc._id.toString();
           return enumaBool(pc);
         });
@@ -158,296 +171,312 @@ export default class Farmacia extends BaseModel {
   }
 
   static async acutalizarFarmacia({ usuario, d }) {
-    //Guardar datos de geolocalizacion
-    const localidad = await Database.query()
-      .from("tbl_localidad")
-      .select(
-        Database.raw(
-          "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
+    try {
+      //Guardar datos de geolocalizacion
+      const localidad = await Database.query()
+        .from("tbl_localidad")
+        .select(
+          Database.raw(
+            "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
+          )
         )
-      )
-      .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
-      .andWhere("tbl_provincia.nombre", "=", "Santa Fe")
-      .leftJoin(
-        "tbl_departamento",
-        "tbl_localidad.id_departamento",
-        "tbl_departamento.id"
-      )
-      .leftJoin(
-        "tbl_provincia",
-        "tbl_departamento.id_provincia",
-        "tbl_provincia.id"
+        .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
+        .andWhere("tbl_provincia.nombre", "=", "Santa Fe")
+        .leftJoin(
+          "tbl_departamento",
+          "tbl_localidad.id_departamento",
+          "tbl_departamento.id"
+        )
+        .leftJoin(
+          "tbl_provincia",
+          "tbl_departamento.id_provincia",
+          "tbl_provincia.id"
+        );
+
+      if (localidad.length === 0) {
+        return "La localidad seleccionada no fue encontrada en la base de datos";
+      }
+
+      const provincia = "Santa Fe";
+      const pais = "Argentina";
+      const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
+
+      const geocoding = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
       );
 
-    if (localidad.length === 0) {
-      return "La localidad seleccionada no fue encontrada en la base de datos";
-    }
+      const { lat, lng: log } = geocoding.data.results[0].geometry.location;
 
-    const provincia = "Santa Fe";
-    const pais = "Argentina";
-    const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
+      //Guarda datos de farmacia
+      const farmacia = await Farmacia.query()
+        .select("tbl_farmacia.*")
+        .leftJoin("tbl_usuario as u", "id_usuario", "u.id")
+        .where("u.usuario", usuario);
 
-    const geocoding = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
-    );
+      const perfilesFarmageo = await PerfilFarmageo.query();
 
-    const { lat, lng: log } = geocoding.data.results[0].geometry.location;
+      farmacia[0].merge({
+        id: d.id,
+        nombre: d.nombre,
+        nombrefarmaceutico: d.nombrefarmaceutico,
 
-    //Guarda datos de farmacia
-    const farmacia = await Farmacia.query()
-      .select("tbl_farmacia.*")
-      .leftJoin("tbl_usuario as u", "id_usuario", "u.id")
-      .where("u.usuario", usuario);
+        calle: d.calle,
+        numero: d.numero,
+        id_localidad: localidad[0].id,
+        direccioncompleta: direccioncompleta,
 
-    const perfilesFarmageo = await PerfilFarmageo.query();
+        id_perfil_farmageo: perfilesFarmageo.filter(
+          (pf) => pf.nombre === d.perfil_farmageo
+        )[0].id,
 
-    farmacia[0].merge({
-      id: d.id,
-      nombre: d.nombre,
-      nombrefarmaceutico: d.nombrefarmaceutico,
+        longitud: log,
+        latitud: lat,
 
-      calle: d.calle,
-      numero: d.numero,
-      id_localidad: localidad[0].id,
-      direccioncompleta: direccioncompleta,
-
-      id_perfil_farmageo: perfilesFarmageo.filter(
-        (pf) => pf.nombre === d.perfil_farmageo
-      )[0].id,
-
-      longitud: log,
-      latitud: lat,
-
-      habilitado: d.habilitado ? "s" : "n",
-      email: d.email,
-      telefono: d.telefono,
-      whatsapp: d.whatsapp,
-      facebook: d.facebook,
-      instagram: d.instagram,
-      web: d.web,
-      descubrir: d.descubrir ? "s" : "n",
-      envios: d.envios ? "s" : "n",
-      costoenvio: d.costoenvio,
-      tiempotardanza: d.tiempotardanza,
-      visita_comercial: d.visita_comercial ? "s" : "n",
-      telefonofijo: d.telefonofijo,
-    });
-
-    farmacia[0].save();
-
-    //Guarda datos de horarios
-    const dias = await Dia.query();
-    const horarios = await FarmaciaDia.query()
-      .select(
-        "inicio",
-        "fin",
-        "tbl_farmacia_dia.habilitado",
-        "tbl_farmacia_dia.id",
-        "tbl_farmacia_dia.id_dia"
-      )
-      .preload("dia")
-      .leftJoin(
-        "tbl_farmacia",
-        "tbl_farmacia_dia.id_farmacia",
-        "tbl_farmacia.id"
-      )
-      .where("tbl_farmacia.id", farmacia[0].id);
-
-    const escribirHorarios = (dhorarios, horarios) => {
-      let dbloques: {
-        inicio: string;
-        fin: string;
-        dia: string;
-        habilitado: string;
-      }[] = [];
-      dhorarios.forEach((d) => {
-        d.bloques.forEach((b) => {
-          dbloques.push({
-            inicio: b.desde,
-            fin: b.hasta,
-            dia: d.dia,
-            habilitado: d.habilitado,
-          });
-        });
+        habilitado: d.habilitado ? "s" : "n",
+        email: d.email,
+        telefono: d.telefono,
+        whatsapp: d.whatsapp,
+        facebook: d.facebook,
+        instagram: d.instagram,
+        web: d.web,
+        descubrir: d.descubrir ? "s" : "n",
+        envios: d.envios ? "s" : "n",
+        costoenvio: d.costoenvio,
+        tiempotardanza: d.tiempotardanza,
+        visita_comercial: d.visita_comercial ? "s" : "n",
+        telefonofijo: d.telefonofijo,
       });
 
-      dbloques.forEach((b, i) => {
-        let hMod = horarios.find((h) => h.dia.nombre === b.dia); // bloque a modificar
+      farmacia[0].save();
 
-        if (!hMod) {
-          const hModNuevo = new FarmaciaDia();
+      //Guarda datos de horarios
+      const dias = await Dia.query();
+      const horarios = await FarmaciaDia.query()
+        .select(
+          "inicio",
+          "fin",
+          "tbl_farmacia_dia.habilitado",
+          "tbl_farmacia_dia.id",
+          "tbl_farmacia_dia.id_dia"
+        )
+        .preload("dia")
+        .leftJoin(
+          "tbl_farmacia",
+          "tbl_farmacia_dia.id_farmacia",
+          "tbl_farmacia.id"
+        )
+        .where("tbl_farmacia.id", farmacia[0].id);
 
-          hModNuevo.fill({
+      const escribirHorarios = (dhorarios, horarios) => {
+        let dbloques: {
+          inicio: string;
+          fin: string;
+          dia: string;
+          habilitado: string;
+        }[] = [];
+        dhorarios.forEach((d) => {
+          d.bloques.forEach((b) => {
+            dbloques.push({
+              inicio: b.desde,
+              fin: b.hasta,
+              dia: d.dia,
+              habilitado: d.habilitado,
+            });
+          });
+        });
+
+        dbloques.forEach((b, i) => {
+          let hMod = horarios.find((h) => h.dia.nombre === b.dia); // bloque a modificar
+
+          if (!hMod) {
+            const hModNuevo = new FarmaciaDia();
+
+            hModNuevo.fill({
+              inicio: b.inicio,
+              fin: b.fin,
+              habilitado: b.habilitado ? "s" : "n",
+              id_dia: dias.find((d) => d.nombre === b.dia)?.id,
+              id_farmacia: farmacia[0].id,
+            });
+
+            return hModNuevo.save();
+          } // si no existe lo inserto
+
+          hMod.merge({
             inicio: b.inicio,
             fin: b.fin,
             habilitado: b.habilitado ? "s" : "n",
-            id_dia: dias.find((d) => d.nombre === b.dia)?.id,
-            id_farmacia: farmacia[0].id,
+            id: hMod.id,
+            id_dia: hMod.id_dia,
           });
 
-          return hModNuevo.save();
-        } // si no existe lo inserto
-
-        hMod.merge({
-          inicio: b.inicio,
-          fin: b.fin,
-          habilitado: b.habilitado ? "s" : "n",
-          id: hMod.id,
-          id_dia: hMod.id_dia,
+          hMod.save();
+          horarios = horarios.filter((h) => h.id !== hMod.id); //retiro el bloque modificado de la lista
         });
-
-        hMod.save();
-        horarios = horarios.filter((h) => h.id !== hMod.id); //retiro el bloque modificado de la lista
-      });
-      if (horarios.length > 0) {
-        horarios.forEach((h) => {
-          h.habilitado = "n";
-          h.save();
-        });
-      }
-    };
-    escribirHorarios(d.horarios, horarios);
-
-    //Guardar datos de servicios
-    const serviciosPosibles = await Servicio.query();
-    const serviciosDB = await FarmaciaServicio.query()
-      .preload("servicio")
-      .where("id_farmacia", farmacia[0].id);
-
-    const escribirServicios = (serviciosFront, serviciosDB) => {
-      // console.log(Date());
-      let lista = serviciosDB;
-      serviciosFront.forEach((sf) => {
-        const servicioM = lista.find((sdb) => sdb.servicio.nombre === sf.tipo);
-
-        if (servicioM) {
-          servicioM.habilitado = "s";
-          lista = lista.filter((l) => servicioM.id !== l.id);
-          servicioM.save();
-          //console.log(sf.tipo, "habilitado");
-        }
-        if (!servicioM) {
-          const servicioN = new FarmaciaServicio();
-          servicioN.fill({
-            id_farmacia: farmacia[0].id,
-            habilitado: "s",
-            id_servicio: serviciosPosibles.filter(
-              (sp) => sf.tipo === sp.nombre
-            )[0].id,
+        if (horarios.length > 0) {
+          horarios.forEach((h) => {
+            h.habilitado = "n";
+            h.save();
           });
-          //console.log(sf.tipo, "creado");
-          servicioN.save();
         }
-      });
-      if (lista.length > 0) {
-        lista.forEach((l) => {
-          l.habilitado = "n";
-          l.save();
-          //console.log(l.servicio.nombre, "deshabilitado");
+      };
+      escribirHorarios(d.horarios, horarios);
+
+      //Guardar datos de servicios
+      const serviciosPosibles = await Servicio.query();
+      const serviciosDB = await FarmaciaServicio.query()
+        .preload("servicio")
+        .where("id_farmacia", farmacia[0].id);
+
+      const escribirServicios = (serviciosFront, serviciosDB) => {
+        // console.log(Date());
+        let lista = serviciosDB;
+        serviciosFront.forEach((sf) => {
+          const servicioM = lista.find(
+            (sdb) => sdb.servicio.nombre === sf.tipo
+          );
+
+          if (servicioM) {
+            servicioM.habilitado = "s";
+            lista = lista.filter((l) => servicioM.id !== l.id);
+            servicioM.save();
+            //console.log(sf.tipo, "habilitado");
+          }
+          if (!servicioM) {
+            const servicioN = new FarmaciaServicio();
+            servicioN.fill({
+              id_farmacia: farmacia[0].id,
+              habilitado: "s",
+              id_servicio: serviciosPosibles.filter(
+                (sp) => sf.tipo === sp.nombre
+              )[0].id,
+            });
+            //console.log(sf.tipo, "creado");
+            servicioN.save();
+          }
         });
-      }
-    };
-    escribirServicios(d.servicios, serviciosDB);
-
-    //Guardar datos de medios de pago
-    const mediospagosPosibles = await MedioDePago.query();
-    const mediospagosDB = await FarmaciaMedioDePago.query()
-      .preload("mediodepago")
-      .where("id_farmacia", farmacia[0].id);
-    const escribirMediosPagos = (mediosFront, mediosDB) => {
-      let lista = mediosDB;
-
-      mediosFront.forEach((mf) => {
-        const medioM = mediosDB.find((mdb) => mdb.mediodepago.nombre === mf);
-
-        if (medioM) {
-          medioM.habilitado = "s";
-
-          lista = lista.filter((l) => medioM.id !== l.id);
-          return medioM.save();
-        }
-        if (!medioM) {
-          const medioN = new FarmaciaMedioDePago();
-          medioN.fill({
-            id_farmacia: farmacia[0].id,
-            id_mediodepago: mediospagosPosibles.filter(
-              (mpp) => mpp.nombre === mf
-            )[0].id,
-            habilitado: "s",
+        if (lista.length > 0) {
+          lista.forEach((l) => {
+            l.habilitado = "n";
+            l.save();
+            //console.log(l.servicio.nombre, "deshabilitado");
           });
-
-          return medioN.save();
         }
-      });
-      if (lista.length > 0) {
-        lista.forEach((l) => {
-          l.habilitado = "n";
-          l.save();
+      };
+      escribirServicios(d.servicios, serviciosDB);
+
+      //Guardar datos de medios de pago
+      const mediospagosPosibles = await MedioDePago.query();
+      const mediospagosDB = await FarmaciaMedioDePago.query()
+        .preload("mediodepago")
+        .where("id_farmacia", farmacia[0].id);
+      const escribirMediosPagos = (mediosFront, mediosDB) => {
+        let lista = mediosDB;
+
+        mediosFront.forEach((mf) => {
+          const medioM = mediosDB.find((mdb) => mdb.mediodepago.nombre === mf);
+
+          if (medioM) {
+            medioM.habilitado = "s";
+
+            lista = lista.filter((l) => medioM.id !== l.id);
+            return medioM.save();
+          }
+          if (!medioM) {
+            const medioN = new FarmaciaMedioDePago();
+            medioN.fill({
+              id_farmacia: farmacia[0].id,
+              id_mediodepago: mediospagosPosibles.filter(
+                (mpp) => mpp.nombre === mf
+              )[0].id,
+              habilitado: "s",
+            });
+
+            return medioN.save();
+          }
+        });
+        if (lista.length > 0) {
+          lista.forEach((l) => {
+            l.habilitado = "n";
+            l.save();
+          });
+        }
+      };
+      escribirMediosPagos(d.mediospagos, mediospagosDB);
+
+      //Actualizar productos propios
+      // Agregar prod
+      const inventarios = await Inventario.query();
+      const productoAgregar = d.productos.filter((p) => !p.id)[0];
+      const productosActualizar = d.productos.filter((p) => p.id);
+
+      if (productosActualizar && productosActualizar.length > 0) {
+        productosActualizar.map(async (p) => {
+          const productoC = await ProductoCustom.findOrFail(p.id);
+          productoC.merge({
+            descripcion: p.descripcion,
+            en_papelera: p.en_papelera ? "s" : "n",
+            es_promocion: p.esPromocion ? "s" : "n",
+            favorito: p.favorito ? "s" : "n",
+            habilitado: p.habilitado ? "s" : "n",
+            id_categoria: p.id_categoria,
+            imagen: p.imagen,
+            nombre: p.nombre,
+            precio: p.precio,
+            sku: p.sku,
+          });
+          await productoC.save();
+          const farmaciaProdCustomN = await FarmaciaProductoCustom.query()
+            .where("id_farmacia", farmacia[0].id)
+            .where("id_producto_custom", p.id);
+
+          farmaciaProdCustomN[0].en_papelera = "n";
+          farmaciaProdCustomN[0].habilitado = "s";
+
+          farmaciaProdCustomN[0].save();
         });
       }
-    };
-    escribirMediosPagos(d.mediospagos, mediospagosDB);
-
-    //Actualizar productos propios
-    // Agregar prod
-    const inventarios = await Inventario.query();
-    const productoAgregar = d.productos.filter((p) => !p.id)[0];
-    const productosActualizar = d.productos.filter((p) => p.id);
-
-    if (productosActualizar && productosActualizar.length > 0) {
-      console.log("productosActualizar");
-
-      productosActualizar.map(async (p) => {
-        console.log(p.id);
-        const productoC = await ProductoCustom.findOrFail(p.id);
-        productoC.merge({
-          descripcion: p.descripcion,
-          en_papelera: p.en_papelera ? "s" : "n",
-          es_promocion: p.esPromocion ? "s" : "n",
-          favorito: p.favorito ? "s" : "n",
-          habilitado: p.habilitado ? "s" : "n",
-          id_categoria: p.id_categoria,
-          imagen: p.imagen,
-          nombre: p.nombre,
-          precio: p.precio,
-          sku: p.sku,
+      if (productoAgregar && productoAgregar.nombre.trim() !== "") {
+        console.log("productosAgregar");
+        const productoN = new ProductoCustom();
+        productoN.fill({
+          nombre: productoAgregar.nombre,
+          imagen: productoAgregar.imagen,
+          precio: Number(productoAgregar.precio),
+          favorito: productoAgregar.favorito ? "s" : "n",
+          sku: productoAgregar.sku,
+          descripcion: productoAgregar.descripcion,
+          id_inventario: inventarios.filter(
+            (i) => i.nombre === productoAgregar.inventario
+          )[0].id,
         });
-        await productoC.save();
-      });
-    }
-    if (productoAgregar && productoAgregar.nombre.trim() !== "") {
-      console.log("productosAgregar");
-      const productoN = new ProductoCustom();
-      productoN.fill({
-        nombre: productoAgregar.nombre,
-        imagen: productoAgregar.imagen,
-        precio: Number(productoAgregar.precio),
-        favorito: productoAgregar.favorito ? "s" : "n",
-        sku: productoAgregar.sku,
-        descripcion: productoAgregar.descripcion,
-        id_inventario: inventarios.filter(
-          (i) => i.nombre === productoAgregar.inventario
-        )[0].id,
-      });
-      const productoS = await productoN.save();
-      const farmaciaProdCustomN = new FarmaciaProductoCustom();
-      farmaciaProdCustomN.fill({
-        id_farmacia: farmacia[0].id,
-        id_producto_custom: productoS.id,
-        habilitado: "s",
-      });
-      farmaciaProdCustomN.save();
-    }
-    if (d.papeleraProductos) {
-      console.log("d.papeleraProductos");
-      const FPC = await FarmaciaProductoCustom.query()
-        .where("id_producto_custom", d.papeleraProductos[0].id)
-        .andWhere("id_farmacia", farmacia[0].id);
-      FPC[0].habilitado = "n";
-      FPC[0].save();
-    }
+        const productoS = await productoN.save();
+        const farmaciaProdCustomN = new FarmaciaProductoCustom();
+        farmaciaProdCustomN.fill({
+          id_farmacia: farmacia[0].id,
+          id_producto_custom: productoS.id,
+          habilitado: "s",
+          en_papelera: "n",
+        });
+        farmaciaProdCustomN.save();
+      }
+      if (d.papeleraProductos.length > 0) {
+        console.log("d.papeleraProductos");
+        d.papeleraProductos.forEach(async (p) => {
+          const FPC = await FarmaciaProductoCustom.query()
+            .where("id_producto_custom", p.id)
+            .andWhere("id_farmacia", farmacia[0].id);
+          FPC[0].en_papelera = "s";
+          FPC[0].habilitado = p.habilitado ? "s" : "n";
+          FPC[0].save();
+        });
+      }
 
-    return;
+      //Actualizar productos Pack >:'(
+      return "Terminamos de actualizar papu";
+    } catch (err) {
+      return err;
+    }
   }
 
   @column({ isPrimary: true })
