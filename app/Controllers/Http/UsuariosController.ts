@@ -115,7 +115,7 @@ export default class UsuariosController {
           );
       });
     }
-    return;
+    return nuevoUsuario;
   }
 
   public async mig_actualizar_usuarioWeb({

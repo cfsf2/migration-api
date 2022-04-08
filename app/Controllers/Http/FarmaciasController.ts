@@ -32,7 +32,6 @@ export default class FarmaciasController {
         .setLocale("es-Ar")
         .toFormat("yyyy-MM-dd hh:mm:ss");
 
-      console.log("despues ", farmaciaLogueada.f_ultimo_acceso);
       try {
         farmaciaLogueada.save();
       } catch (err) {
@@ -45,6 +44,7 @@ export default class FarmaciasController {
   public async mig_matricula({ request }: HttpContextContract) {
     const { matricula } = request.params();
     return await Farmacia.traerFarmacias({ matricula });
+    return await Farmacia.findBy("matricula", matricula);
   }
 
   public async mig_mail({ request }: HttpContextContract) {
@@ -76,5 +76,9 @@ export default class FarmaciasController {
     } catch (err) {
       return err;
     }
+  }
+
+  public async mig_create({ request }: HttpContextContract) {
+    return Farmacia.crearFarmacia(request.body());
   }
 }

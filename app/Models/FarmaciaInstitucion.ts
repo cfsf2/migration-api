@@ -11,6 +11,18 @@ export default class FarmaciaInstitucion extends BaseModel {
   public id: number;
 
   @column()
+  public id_farmacia: number;
+
+  @column()
+  public id_institucion: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column()
   public habilitado: string;
 
   @column.dateTime({ autoCreate: true })
@@ -21,21 +33,25 @@ export default class FarmaciaInstitucion extends BaseModel {
 
   @hasOne(() => Farmacia, {
     foreignKey: "id",
+    localKey: "id_farmacia",
   })
-  public id_farmacia: HasOne<typeof Farmacia>;
+  public farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => Institucion, {
     foreignKey: "id",
+    localKey: "id_institucion",
   })
-  public d_institucion: HasOne<typeof Institucion>;
+  public institucion: HasOne<typeof Institucion>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

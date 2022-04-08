@@ -9,5 +9,6 @@ Route.get(
 );
 
 Route.post("/farmacias/register-try", "FarmaciasController.ts.mig_mail");
+Route.post("/farmacias", "FarmaciasController.ts.mig_create");
 
 Route.put("/farmacias", "FarmaciasController.ts.mig_updatePerfil");
