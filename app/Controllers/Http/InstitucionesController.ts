@@ -11,7 +11,7 @@ export default class InstitucionesController {
     } = request.qs();
 
     const instituciones = await Institucion.query()
-
+      .select('tbl_institucion.id as _id', 'tbl_institucion.*')
       .preload("institucion_madre")
       .if(search, (query) => {
         query.where("nombre", "LIKE", `${search}%`);
@@ -29,7 +29,6 @@ export default class InstitucionesController {
       .if(limit, (query) => {
         query.limit(limit);
       });
-
     return instituciones;
   }
 }

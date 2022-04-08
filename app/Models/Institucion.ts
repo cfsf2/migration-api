@@ -12,7 +12,7 @@ import Usuario from "./Usuario";
 export default class Institucion extends BaseModel {
   public static table = "tbl_institucion";
 
-  @column({ isPrimary: true, serializeAs: "_id" })
+  @column({ isPrimary: true })
   public id: number;
 
   @column()
@@ -54,4 +54,10 @@ export default class Institucion extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }

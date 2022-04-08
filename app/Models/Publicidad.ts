@@ -40,9 +40,9 @@ export default class Publicidad extends BaseModel {
         "p.link",
         "p.habilitado",
         "p.imagen",
-        "p.fecha_inicio",
-        "p.fecha_fin",
-        "p.ts_creacion as fechaalta",
+        "p.fecha_inicio as fechainicio",
+        "p.fecha_fin as fechafin",
+        "p.ts_creacion as fecha_alta",
         "tp.nombre as tipo",
         "cp.nombre as color",
         Database.raw("GROUP_CONCAT(i.id) as instituciones")
@@ -62,7 +62,7 @@ export default class Publicidad extends BaseModel {
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
       .groupBy("p.id")
-      .orderBy("fechaalta", "desc")
+      .orderBy("fecha_alta", "desc")
 
       //novedades admin
       .if(tipo, (query) => {
@@ -72,36 +72,39 @@ export default class Publicidad extends BaseModel {
       //novedades search
       .if(habilitado === "true" || habilitado === "false", (query) => {
         const condicional = habilitado === "true" ? "s" : "n";
-        query.where("habilitado", condicional);
+        query.andWhere("habilitado", condicional);
       })
 
       .if(institucion && institucion !== "todas", (query) => {
-        query.where("i.id", institucion);
+        console.log(institucion);
+        query.andWhere("i.id", institucion);
       })
 
       .if(titulo && titulo.trim() !== "", (query) => {
-        query.where("titulo", "LIKE", `${titulo}%`);
+        query.andWhere("titulo", "LIKE", `${titulo}%`);
       })
 
       .if(vigencia && vigencia !== "todas", (query) => {
         const hoy = DateTime.now().setLocale("es-Ar").toISO();
         query
           .if(vigencia === "true", (query) => {
-            console.log("fecha de", hoy);
+            //console.log("fecha de", hoy);
             query
               .where("fecha_inicio", "<=", hoy)
               .where("fecha_fin", ">=", hoy);
           })
 
           .if(vigencia === "false", (query) =>
-            query
-              .orWhere("fecha_inicio", ">", hoy)
-              .orWhere("fecha_fin", "<", hoy)
+            query.andWhere((query) =>
+              query
+                .orWhere("fecha_inicio", ">", hoy)
+                .orWhere("fecha_fin", "<", hoy)
+            )
           );
       });
 
     function arrayzar(modelo, key) {
-      modelo[key] = modelo[key] ? modelo[key].split(",") : modelo;
+      modelo[key] = modelo[key] ? modelo[key].split(",") : [];
 
       let res = modelo;
 
