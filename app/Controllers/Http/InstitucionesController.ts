@@ -11,7 +11,7 @@ export default class InstitucionesController {
     } = request.qs();
 
     const instituciones = await Institucion.query()
-    
+
       .preload("institucion_madre")
       .if(search, (query) => {
         query.where("nombre", "LIKE", `${search}%`);

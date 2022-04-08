@@ -1,42 +1,14 @@
 
-<<<<<<< HEAD
-GET http://localhost:3111/publicidades HTTP/1.1
-
-####
-
-
-GET http://localhost:3111/pedidos/ HTTP/1.1
-
-####
-
-PUT http://localhost:3111/farmacias/?username=ALE HTTP/1.1
-Content-Type: application/json
-
-{
-  "localidad":"Rosario",
-  "calle":"Baigorria",
-  "numero":"1477"
-}
-
-####
-
-GET http://localhost:3111/farmacias/login/ALE HTTP/1.1
-
-####
-
-
-=======
 GET http://localhost:3111/instituciones/search?limit=3 HTTP/1.1
 
 ####
 
->>>>>>> a755aa67e47b01b808745080b165acc73533a572
 GET http://localhost:3111/pedidos/farmacias/3 HTTP/1.1
 
 ####
 
 
-GET http://localhost:3110/farmacias/novedades/search HTTP/1.1
+GET http://localhost:3111/farmacias/novedades/search?habilitado=&instituciones=todas&vigencia=false&titulo= HTTP/1.1
 
 ####
 

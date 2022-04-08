@@ -13,6 +13,16 @@ export default class PublicidadsController {
     //   .where("id_publicidad_tipo", "=", "1");
   }
   public async mig_novedadesAdmin({ request }: HttpContextContract) {
-    return Publicidad.traerPublicidades({ tipo: 'novedadesadmin' });
+    return Publicidad.traerPublicidades({ tipo: "novedadesadmin" });
+  }
+  public async mig_novedadesSearch({ request }: HttpContextContract) {
+    const publicidades = await Publicidad.traerPublicidades({
+      habilitado: request.qs().tipo,
+      institucion: request.qs().instituciones,
+      vigencia: request.qs().vigencia,
+      titulo: request.qs().titulo,
+    });
+    console.log(request.qs());
+    return publicidades;
   }
 }

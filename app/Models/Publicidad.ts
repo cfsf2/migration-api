@@ -14,13 +14,27 @@ import Institucion from "./Institucion";
 import PublicidadInstitucion from "./PublicidadInstitucion";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
+import { Request } from "@adonisjs/core/build/standalone";
 
 export default class Publicidad extends BaseModel {
-  static async traerPublicidades({ tipo }: { tipo?: string }) {
+  static async traerPublicidades({
+    tipo,
+    habilitado,
+    institucion,
+    titulo,
+    vigencia,
+  }: {
+    tipo?: string;
+    habilitado?: string;
+    institucion?: string;
+    titulo?: string;
+    vigencia?: string;
+  }) {
     const publicidades = await Database.from("tbl_publicidad as p")
       .select(
         //"p.*",
         "p.id",
+        "p.id as _id",
         "p.titulo",
         "p.descripcion",
         "p.link",
@@ -53,6 +67,37 @@ export default class Publicidad extends BaseModel {
       //novedades admin
       .if(tipo, (query) => {
         query.where("tp.nombre", "novedadesadmin");
+      })
+
+      //novedades search
+      .if(habilitado === "true" || habilitado === "false", (query) => {
+        const condicional = habilitado === "true" ? "s" : "n";
+        query.where("habilitado", condicional);
+      })
+
+      .if(institucion && institucion !== "todas", (query) => {
+        query.where("i.id", institucion);
+      })
+
+      .if(titulo && titulo.trim() !== "", (query) => {
+        query.where("titulo", "LIKE", `${titulo}%`);
+      })
+
+      .if(vigencia && vigencia !== "todas", (query) => {
+        const hoy = DateTime.now().setLocale("es-Ar").toISO();
+        query
+          .if(vigencia === "true", (query) => {
+            console.log("fecha de", hoy);
+            query
+              .where("fecha_inicio", "<=", hoy)
+              .where("fecha_fin", ">=", hoy);
+          })
+
+          .if(vigencia === "false", (query) =>
+            query
+              .orWhere("fecha_inicio", ">", hoy)
+              .orWhere("fecha_fin", "<", hoy)
+          );
       });
 
     function arrayzar(modelo, key) {
