@@ -5,6 +5,8 @@ import PublicidadTipo from "App/Models/PublicidadTipo";
 import PublicidadColor from "App/Models/PublicidadColor";
 import Institucion from "App/Models/Institucion";
 import PublicidadInstitucion from "App/Models/PublicidadInstitucion";
+import { eliminarKeysVacios } from "App/Helper/funciones";
+import { DateTime } from "luxon";
 
 export default class PublicidadsController {
   public async mig_publicidades({ request }: HttpContextContract) {
@@ -41,9 +43,9 @@ export default class PublicidadsController {
     //devuelve un objeto
 
     const color = await PublicidadColor.findByOrFail(
-      'nombre',
+      "nombre",
       request.body().color
-    )
+    );
 
     nuevaNovedad.merge({
       fecha_inicio: request.body().fechainicio,
@@ -55,20 +57,63 @@ export default class PublicidadsController {
       id_color: color.id,
     });
 
-    nuevaNovedad.save()
-    console.log('soy un string ', nuevaNovedad.habilitado)
+    nuevaNovedad.save();
 
-    request.body().instituciones.forEach(id_institucion => {
-      const publicidadInstitucion = new PublicidadInstitucion()
+    request.body().instituciones.forEach((id_institucion) => {
+      const publicidadInstitucion = new PublicidadInstitucion();
       publicidadInstitucion.merge({
         //el id no se guarda hasta que no se crea el registro
         id_publicidad: nuevaNovedad.id,
-        id_institucion: Number(id_institucion)
-      })
-      publicidadInstitucion.save()
+        id_institucion: Number(id_institucion),
+      });
+      publicidadInstitucion.save();
     });
 
-    console.log(request.body())
-    return;
+    try {
+      return 
+    } catch (error) {
+      return error
+    }
+  }
+
+  public async mig_update_novedad({ request }: HttpContextContract) {
+    const { id } = request.qs();
+
+    let publicidad = await Publicidad.findOrFail(id);
+
+    const tipo = request.body().tipo
+      ? await PublicidadTipo.findBy("nombre", request.body().tipo)
+      : null;
+    //devuelve un objeto
+
+    const color = request.body().color
+      ? await PublicidadColor.findBy("nombre", request.body().color)
+      : null;
+
+    let mergeObject: any = {
+      fecha_inicio: DateTime.fromISO(request.body().fechainicio)
+        .setLocale("es-Ar")
+        .toFormat("yyyy-MM-dd hh:mm:ss"),
+      fecha_fin: DateTime.fromISO(request.body().fechafin)
+        .setLocale("es-Ar")
+        .toFormat("yyyy-MM-dd hh:mm:ss"),
+      titulo: request.body().titulo,
+      descripcion: request.body().descripcion,
+      habilitado: request.body().habilitado === true ? "s" : "n",
+      link: request.body().link,
+      imagen: request.body().imagen,
+      id_publicidad_tipo: tipo?.id,
+      id_color: color?.id,
+    };
+    mergeObject = eliminarKeysVacios(mergeObject);
+
+    publicidad.merge(mergeObject);
+
+    try {
+      publicidad.save();
+      return publicidad;
+    } catch (error) {
+      return error;
+    }
   }
 }

@@ -11,3 +11,5 @@ Route.get(
 );
 
 Route.post("/publicidades", "PublicidadsController.mig_agregar_novedad");
+
+Route.put("/publicidades", "PublicidadsController.mig_update_novedad")
