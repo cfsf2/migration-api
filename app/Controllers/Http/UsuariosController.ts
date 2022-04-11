@@ -142,7 +142,9 @@ export default class UsuariosController {
   }
 
   public async mig_actualizar({ request }: HttpContextContract) {
-    console.log(request.qs());
-    return request.qs();
+    return Usuario.actualizar({
+      id_usuario: request.qs().id,
+      data: request.body().data,
+    });
   }
 }

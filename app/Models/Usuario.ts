@@ -57,7 +57,7 @@ export default class Usuario extends BaseModel {
         `tbl_usuario_perfil.id_usuario`
       )
       .if(usuarioNombre, (query) => {
-        query.where("usuario", usuarioNombre);
+        return query.where("usuario", usuarioNombre);
       });
 
     if (usuarios.length === 0) return "Usuario no encontrado";
@@ -200,6 +200,62 @@ export default class Usuario extends BaseModel {
       console.log(err);
       return response.status(409);
     }
+  }
+
+  public static async actualizar({
+    id_usuario,
+    data,
+  }: {
+    id_usuario: number;
+    data: any;
+  }) {
+    console.log(data);
+    const usuario = await Usuario.findOrFail(Number(id_usuario));
+    const perfilUsuario = await UsuarioPerfil.findBy(
+      "id_usuario",
+      Number(id_usuario)
+    );
+    const localidad = await Localidad.findBy("nombre", data.localidad);
+
+    //Localidad
+    if (localidad && usuario.id_localidad !== localidad?.id) {
+      data.id_localidad = localidad.id;
+    }
+
+    let mergObject: any = {
+      nombre: data.nombre,
+      usuario: data.usuario,
+      apellido: data.apellido,
+      dni: data.dni,
+      fecha_nac: data.fecha_nac,
+      id_localidad: data.id_localidad,
+      email: data.email,
+
+      newsletter: data.newsletter ? "s" : "n",
+      habilitado: data.habilitado ? "s" : "n",
+      esfarmacia: data.esfarmacia ? "s" : "n",
+      admin: data.admin ? "s" : "n",
+      confirmado: data.confirmado ? "s" : "n",
+      telefono: data.telefono,
+
+      deleted: data.deleted ? "s" : "n",
+      demolab: data.demolab ? "s" : "n",
+      id_wp: data.id_wp,
+      celular: data.celular,
+      telephone: data.telephone,
+    };
+
+    mergObject = Object.fromEntries(
+      Object.entries(mergObject).filter(([_, v]) => v != null)
+    );
+
+    usuario.merge(mergObject);
+    usuario.save();
+    if (data.perfil) {
+      perfilUsuario?.merge({ id_perfil: Number(data.perfil) });
+      perfilUsuario?.save();
+    }
+    return usuario;
   }
 
   @column({ isPrimary: true })
