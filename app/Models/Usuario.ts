@@ -28,7 +28,7 @@ export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
     usuarioNombre,
   }: {
-    usuarioNombre: String;
+    usuarioNombre: string;
   }) {
     if (usuarioNombre === "No%20Registrado") return;
 
@@ -54,7 +54,7 @@ export default class Usuario extends BaseModel {
         `tbl_usuario.id`,
         `tbl_usuario_perfil.id_usuario`
       )
-      .where("usuario", usuarioNombre.toString());
+      .where("usuario", usuarioNombre);
 
     if (usuario.length === 0) return "Usuario no encontrado";
 

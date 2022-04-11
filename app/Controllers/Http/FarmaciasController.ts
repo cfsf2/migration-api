@@ -4,6 +4,7 @@ import { generarHtml } from "../../Helper/email";
 
 import Farmacia from "../../Models/Farmacia";
 import { DateTime } from "luxon";
+import Usuario from "App/Models/Usuario";
 
 export default class FarmaciasController {
   public async index() {
@@ -32,7 +33,6 @@ export default class FarmaciasController {
         .setLocale("es-Ar")
         .toFormat("yyyy-MM-dd hh:mm:ss");
 
-      console.log("despues ", farmaciaLogueada.f_ultimo_acceso);
       try {
         farmaciaLogueada.save();
       } catch (err) {
@@ -76,5 +76,17 @@ export default class FarmaciasController {
     } catch (err) {
       return err;
     }
+  }
+
+  public async mig_create({ request }: HttpContextContract) {
+    return Farmacia.crearFarmacia(request.body());
+  }
+
+  public async mig_admin_passwords({ request }: HttpContextContract) {}
+  public async existeUsuario({ request }: HttpContextContract) {
+    const existe = await Usuario.findBy("usuario", request.params().usuario);
+
+    if (existe) return true;
+    return false;
   }
 }

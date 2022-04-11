@@ -73,7 +73,7 @@ export default class UsuariosController {
       nombre: body.first_name,
       apellido: body.last_name,
       email: body.email,
-      id_wp: body.farmaciaid,
+      id_wp: body.farmaciaId,
       esfarmacia: "s",
     });
 
@@ -115,7 +115,7 @@ export default class UsuariosController {
           );
       });
     }
-    return;
+    return nuevoUsuario;
   }
 
   public async mig_actualizar_usuarioWeb({

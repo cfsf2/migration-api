@@ -14,7 +14,7 @@ import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
-import { enumaBool } from "App/Helper/funciones";
+import { enumaBool, getCoordenadas } from "App/Helper/funciones";
 import axios from "axios";
 import FarmaciaDia from "./FarmaciaDia";
 import Dia from "./Dia";
@@ -23,6 +23,7 @@ import MedioDePago from "./MedioDePago";
 import ProductoCustom from "./ProductoCustom";
 import FarmaciaProductoCustom from "./FarmaciaProductoCustom";
 import Inventario from "./Inventario";
+import FarmaciaInstitucion from "./FarmaciaInstitucion";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -55,12 +56,12 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_provincia AS p ON d.id_provincia = p.id
       LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id
       LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
-      LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia
+      LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia AND fmp.habilitado = 's'
       LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id 
       LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia
       LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
-      AND fmp.habilitado = "s"
+     
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       ${matricula ? `AND f.matricula = ${matricula}` : ""}
       GROUP BY f.id`);
@@ -144,8 +145,8 @@ export default class Farmacia extends BaseModel {
         AND fpc.en_papelera = 's'`);
 
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
-        f.mediospagos = f.mediospagos?.split(",");
-        f.instituciones = f.instituciones?.split(",");
+        f.mediospagos = f.mediospagos ? f.mediospagos.split(",") : [];
+        f.instituciones = f.instituciones ? f.instituciones.split(",") : [];
         f.horarios = dameloshorarios(f, dias[0]);
         f.productos = productosCustom[0].map((pc) => {
           pc._id = pc._id.toString();
@@ -201,11 +202,11 @@ export default class Farmacia extends BaseModel {
       const pais = "Argentina";
       const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
 
-      const geocoding = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
-      );
-
-      const { lat, lng: log } = geocoding.data.results[0].geometry.location;
+      const { lat, lng: log } = await getCoordenadas({
+        calle: d.calle,
+        numero: d.numero,
+        localidad: localidad[0].nombre,
+      });
 
       //Guarda datos de farmacia
       const farmacia = await Farmacia.query()
@@ -479,6 +480,62 @@ export default class Farmacia extends BaseModel {
     }
   }
 
+  static async crearFarmacia(nuevaFarmacia) {
+    const usuario = await Usuario.findByOrFail(
+      "usuario",
+      nuevaFarmacia.usuario
+    );
+    const localidad = await Localidad.findByOrFail(
+      "nombre",
+      nuevaFarmacia.localidad
+    );
+    const farmaciaN = new Farmacia();
+    const { lat, lng: log } = await getCoordenadas({
+      calle: nuevaFarmacia.calle,
+      numero: nuevaFarmacia.numero,
+      localidad: nuevaFarmacia.localidad,
+    });
+
+    farmaciaN.merge({
+      id_usuario: usuario.id,
+      nombrefarmaceutico: nuevaFarmacia.nombrefarmaceutico,
+      matricula: nuevaFarmacia.matricula,
+      id_localidad: localidad.id,
+      nombre: nuevaFarmacia.nombre,
+      cuit: nuevaFarmacia.cuit,
+      cufe: nuevaFarmacia.cufe,
+      email: nuevaFarmacia.email,
+      telefono: nuevaFarmacia.telefono,
+      calle: nuevaFarmacia.calle,
+      numero: Number(nuevaFarmacia.numero),
+      tiempotardanza: nuevaFarmacia.tiempotardanza,
+      latitud: lat,
+      longitud: log,
+      password: nuevaFarmacia.password,
+      id_perfil_farmageo: 2,
+    });
+    try {
+      await farmaciaN.save();
+    } catch (err) {
+      return err;
+    }
+
+    nuevaFarmacia.instituciones.forEach((id_institucion) => {
+      const farmaciaInstitucion = new FarmaciaInstitucion();
+      farmaciaInstitucion.merge({
+        id_institucion: Number(id_institucion),
+        id_farmacia: farmaciaN.id,
+      });
+      try {
+        farmaciaInstitucion.save();
+      } catch (err) {
+        return err;
+      }
+    });
+
+    return farmaciaN;
+  }
+
   @column({ isPrimary: true })
   public id: number;
 
@@ -572,16 +629,27 @@ export default class Farmacia extends BaseModel {
   @column()
   public id_localidad: number;
 
+  @column()
+  public id_usuario: number;
+
   //foreing key
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario",
   })
   public usuario: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
   public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Localidad, {
     foreignKey: "id",
