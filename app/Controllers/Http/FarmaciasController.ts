@@ -5,6 +5,7 @@ import { generarHtml } from "../../Helper/email";
 import Farmacia from "../../Models/Farmacia";
 import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class FarmaciasController {
   public async index() {
@@ -82,7 +83,11 @@ export default class FarmaciasController {
     return Farmacia.crearFarmacia(request.body());
   }
 
-  public async mig_admin_passwords({ request }: HttpContextContract) {}
+  public async mig_admin_passwords({ request }: HttpContextContract) {
+    return await Database.from("tbl_farmacia")
+      .leftJoin("tbl_usuario", "id_usuario", "tbl_usuario.id")
+      .select("tbl_farmacia.password", "tbl_usuario.usuario");
+  }
   public async existeUsuario({ request }: HttpContextContract) {
     const existe = await Usuario.findBy("usuario", request.params().usuario);
 

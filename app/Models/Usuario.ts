@@ -21,6 +21,7 @@ import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
 import UsuarioPerfil from "./UsuarioPerfil";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -28,11 +29,11 @@ export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
     usuarioNombre,
   }: {
-    usuarioNombre: string;
+    usuarioNombre?: string;
   }) {
     if (usuarioNombre === "No%20Registrado") return;
 
-    const usuario = await Database.from("tbl_usuario")
+    let usuarios = await Database.from("tbl_usuario")
       .select(
         Database.raw(
           `tbl_usuario.*, 
@@ -44,7 +45,8 @@ export default class Usuario extends BaseModel {
           tbl_usuario.ts_modificacion as fecha_modificacion,
           tbl_localidad.nombre as localidad,
           tbl_usuario_perfil.id_perfil as perfil,
-          tbl_usuario.id as _id
+          tbl_usuario.id as _id,
+          tbl_usuario.id
           `
         )
       )
@@ -54,44 +56,47 @@ export default class Usuario extends BaseModel {
         `tbl_usuario.id`,
         `tbl_usuario_perfil.id_usuario`
       )
-      .where("usuario", usuarioNombre);
-
-    if (usuario.length === 0) return "Usuario no encontrado";
-
-    let permisos = await Database.from("tbl_perfil_permiso")
-      .select(Database.raw(`tipo`))
-      .leftJoin(
-        `tbl_permiso`,
-        `tbl_perfil_permiso.id_permiso`,
-        `tbl_permiso.id`
-      )
-      .if(usuario[0], (query) => {
-        return query.where("tbl_perfil_permiso.id_perfil", usuario[0].perfil);
-      })
-      .groupBy("tipo");
-
-    let arrNuevo: string[] = [];
-    permisos.forEach((i) => {
-      arrNuevo.push(i.tipo);
-      return arrNuevo;
-    });
-
-    usuario[0].permisos = arrNuevo;
-    const formateo = usuario.map((e) => {
-      const claves = Object.keys(e);
-      claves.forEach((k) => {
-        if (e[k] === "s") {
-          e[k] = true;
-        }
-        if (e[k] === "n") {
-          e[k] = false;
-        }
+      .if(usuarioNombre, (query) => {
+        query.where("usuario", usuarioNombre);
       });
+
+    if (usuarios.length === 0) return "Usuario no encontrado";
+
+    await Promise.all(
+      usuarios.map(async (usuario) => {
+        let permisos = await Database.from("tbl_perfil_permiso")
+          .select(Database.raw(`tipo`))
+          .leftJoin(
+            `tbl_permiso`,
+            `tbl_perfil_permiso.id_permiso`,
+            `tbl_permiso.id`
+          )
+          .if(usuario, (query) => {
+            return query.where("tbl_perfil_permiso.id_perfil", usuario.perfil);
+          })
+          .groupBy("tipo");
+
+        let arrNuevo: string[] = [];
+        permisos.forEach((i) => {
+          arrNuevo.push(i.tipo);
+          return arrNuevo;
+        });
+
+        usuario.permisos = arrNuevo;
+      })
+    );
+
+    usuarios = usuarios.map((e) => {
+      e._id = e._id.toString();
+      enumaBool(e);
 
       return e;
     });
 
-    return formateo[0];
+    if (usuarios.length === 1) {
+      return usuarios[0];
+    }
+    return usuarios;
   }
 
   public static async registrarUsuarioWeb(
@@ -287,16 +292,19 @@ export default class Usuario extends BaseModel {
 
   @hasOne(() => Localidad, {
     foreignKey: "id",
+    localKey: "id_localidad",
   })
   public localidad: HasOne<typeof Localidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasMany(() => CampanaRequerimiento, {
     foreignKey: "id_usuario",
+    localKey: "id",
   })
   public requerimientos: HasMany<typeof CampanaRequerimiento>;
 
@@ -322,4 +330,10 @@ export default class Usuario extends BaseModel {
 
   @column()
   public user_rol: string[];
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }

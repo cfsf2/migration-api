@@ -12,7 +12,7 @@ Route.get(
   "FarmaciasController.ts.mig_matricula"
 );
 
-Route.get(
+Route.post(
   "/farmacias/admin/passwords",
   "FarmaciasController.ts.mig_admin_passwords"
 );

@@ -6,14 +6,13 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "../../Helper/email";
 import { enumaBool } from "App/Helper/funciones";
 import UsuarioPerfil from "App/Models/UsuarioPerfil";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class UsuariosController {
   public async index({ request }: HttpContextContract) {
-    const usuarios = await Usuario.query()
-      .select("*")
-      .orderBy("apellido", "asc");
+    const usuarios = await Usuario.traerPerfilDeUsuario({});
 
-    return usuarios.map((u) => enumaBool(u.toObject()));
+    return usuarios;
   }
 
   public async mig_perfilUsuario({ request }: HttpContextContract) {
@@ -140,5 +139,10 @@ export default class UsuariosController {
         console.log(err);
         response.status(401);
       });
+  }
+
+  public async mig_actualizar({ request }: HttpContextContract) {
+    console.log(request.qs());
+    return request.qs();
   }
 }
