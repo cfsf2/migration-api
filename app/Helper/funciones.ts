@@ -53,3 +53,6 @@ export const getCoordenadas = ({
     resolve(geocoding.data.results[0].geometry.location);
   });
 };
+
+export const eliminarKeysVacios = (mergObject) =>
+  Object.fromEntries(Object.entries(mergObject).filter(([_, v]) => v != null));

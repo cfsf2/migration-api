@@ -21,7 +21,7 @@ import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
 import UsuarioPerfil from "./UsuarioPerfil";
-import { enumaBool } from "App/Helper/funciones";
+import { eliminarKeysVacios, enumaBool } from "App/Helper/funciones";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -245,9 +245,7 @@ export default class Usuario extends BaseModel {
       telephone: data.telephone,
     };
 
-    mergObject = Object.fromEntries(
-      Object.entries(mergObject).filter(([_, v]) => v != null)
-    );
+    mergObject = eliminarKeysVacios(mergObject);
 
     usuario.merge(mergObject);
     usuario.save();
