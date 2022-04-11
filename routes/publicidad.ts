@@ -9,3 +9,5 @@ Route.get(
   "/farmacias/novedades/search",
   "PublicidadsController.mig_novedadesSearch"
 );
+
+Route.post("/publicidades", "PublicidadsController.mig_agregar_novedad");

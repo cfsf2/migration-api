@@ -29,6 +29,7 @@ export default class Publicidad extends BaseModel {
     institucion?: string;
     titulo?: string;
     vigencia?: string;
+    username?: string;
   }) {
     const publicidades = await Database.from("tbl_publicidad as p")
       .select(
@@ -143,10 +144,10 @@ export default class Publicidad extends BaseModel {
   public habilitado: string;
 
   @column()
-  public id_publicidad_tipo: Number;
+  public id_publicidad_tipo: number;
 
   @column()
-  public id_publicidad_color: Number;
+  public id_color: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
