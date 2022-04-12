@@ -24,6 +24,7 @@ import ProductoCustom from "./ProductoCustom";
 import FarmaciaProductoCustom from "./FarmaciaProductoCustom";
 import Inventario from "./Inventario";
 import FarmaciaInstitucion from "./FarmaciaInstitucion";
+import UsuarioPerfil from "./UsuarioPerfil";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -31,9 +32,13 @@ export default class Farmacia extends BaseModel {
   static async traerFarmacias({
     usuario,
     matricula,
+    id,
+    admin,
   }: {
     usuario?: string;
     matricula?: number;
+    id?: number;
+    admin?: boolean;
   }): Promise<any> {
     let farmacias =
       await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
@@ -46,6 +51,7 @@ export default class Farmacia extends BaseModel {
       f.ts_creacion as fechaalta,
       f.matricula as farmaciaid,
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
+      ${admin ? "f.*," : ""}
       l.nombre AS localidad, u.usuario AS usuario , 
       p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
       GROUP_CONCAT(DISTINCT mp.nombre) AS mediospagos,
@@ -64,6 +70,7 @@ export default class Farmacia extends BaseModel {
      
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       ${matricula ? `AND f.matricula = ${matricula}` : ""}
+      ${id ? `AND f.id = ${id}` : ""}
       GROUP BY f.id`);
 
     let servicios =
@@ -159,6 +166,13 @@ export default class Farmacia extends BaseModel {
         f.excepcionesProdFarmageo = [];
         f.excepcionesEntidadesFarmageo = [];
         f.imagen = f.imagen ? f.imagen : "";
+
+        if (admin) {
+          let perfil = await UsuarioPerfil.query()
+            .preload("perfil")
+            .where("id_usuario", f.id_usuario);
+          f.id_perfil = perfil[0].perfil.id;
+        }
         f = enumaBool(f);
         return f;
       })
@@ -171,7 +185,7 @@ export default class Farmacia extends BaseModel {
     return farmacias;
   }
 
-  static async acutalizarFarmacia({ usuario, d }) {
+  static async actualizarFarmacia({ usuario, d }: { usuario: string; d: any }) {
     try {
       //Guardar datos de geolocalizacion
       const localidad = await Database.query()
@@ -232,6 +246,8 @@ export default class Farmacia extends BaseModel {
 
         longitud: log,
         latitud: lat,
+
+        password: d.password,
 
         habilitado: d.habilitado ? "s" : "n",
         email: d.email,
@@ -407,6 +423,7 @@ export default class Farmacia extends BaseModel {
 
       //Actualizar productos propios
       // Agregar prod
+
       const inventarios = await Inventario.query();
       const productoAgregar = d.productos.filter((p) => !p.id)[0];
       const productosActualizar = d.productos.filter((p) => p.id);
@@ -477,6 +494,40 @@ export default class Farmacia extends BaseModel {
       return "Terminamos de actualizar papu";
     } catch (err) {
       return err;
+    }
+  }
+
+  static async actualizarFarmaciaAdmin({
+    id,
+    data,
+  }: {
+    id: number;
+    data: { usuario: any; farmacia: any; instituciones: any };
+  }) {
+    const usuario = await Usuario.findOrFail(data.farmacia.id_usuario);
+    const instituciones = await FarmaciaInstitucion.query().whereIn(
+      "id",
+      data.instituciones
+    );
+
+    this.actualizarFarmacia({ usuario: usuario.usuario, d: data.farmacia });
+    if (data.usuario.password !== data.farmacia.password) {
+      const farmacia = await Farmacia.findOrFail(data.farmacia.id);
+      farmacia.merge({
+        password: data.usuario.password,
+      });
+
+      try {
+        console.log(data.usuario);
+        await Usuario.cambiarPasswordByUsername({
+          username: data.usuario.username,
+          password: data.usuario.password,
+        });
+        console.log("Cambio de password");
+        farmacia.save();
+      } catch (error) {
+        return error;
+      }
     }
   }
 

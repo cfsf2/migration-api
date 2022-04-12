@@ -209,7 +209,6 @@ export default class Usuario extends BaseModel {
     id_usuario: number;
     data: any;
   }) {
-    console.log(data);
     const usuario = await Usuario.findOrFail(Number(id_usuario));
     const perfilUsuario = await UsuarioPerfil.findBy(
       "id_usuario",
@@ -254,6 +253,13 @@ export default class Usuario extends BaseModel {
       perfilUsuario?.save();
     }
     return usuario;
+  }
+
+  public static async cambiarPasswordByUsername({ username, password }) {
+    const usuario = await Usuario.findByOrFail("usuario", username);
+
+    usuario.merge({ password: password });
+    return usuario.save();
   }
 
   @column({ isPrimary: true })
@@ -364,6 +370,13 @@ export default class Usuario extends BaseModel {
 
   @beforeCreate()
   public static async hashPassword(user: Usuario) {
+    if (user.$dirty.password) {
+      user.password = await Hash.make(user.password);
+    }
+  }
+
+  @beforeSave()
+  public static async hashPasswordSave(user: Usuario) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password);
     }
