@@ -104,6 +104,7 @@ export default class Publicidad extends BaseModel {
           );
       });
 
+      
     function arrayzar(modelo, key) {
       modelo[key] = modelo[key] ? modelo[key].split(",") : [];
 
