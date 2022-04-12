@@ -35,7 +35,11 @@ export default class PublicidadsController {
     const novedades = await Publicidad.traerNovedadesFarmacias({
       id_farmacia: request.params().farmacia,
     });
-    return novedades;
+    try {
+      return novedades;
+    } catch (error) {
+      return error
+    }
   }
 
   public async mig_agregar_novedad({ request }: HttpContextContract) {
