@@ -123,7 +123,7 @@ export default class Publicidad extends BaseModel {
     id_farmacia: string;
   }) {
     const publicidades = await Database.from("tbl_publicidad as p")
-      .select("*")
+      .select("p.*", "p.ts_creacion as fecha_alta", "pc.nombre as color")
       .leftJoin("tbl_publicidad_institucion as pi", "p.id", "pi.id_publicidad")
       .leftJoin(
         "tbl_farmacia_institucion as fi",
@@ -131,7 +131,10 @@ export default class Publicidad extends BaseModel {
         "fi.id_institucion"
       )
       .leftJoin("tbl_farmacia as f", "fi.id_farmacia", "f.id")
-      .where("f.id", id_farmacia);
+      .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
+      .where("f.id", id_farmacia)
+      .where("p.id_publicidad_tipo", 1)
+      .orderBy("fecha_alta", 'desc')
 
     return publicidades;
   }
