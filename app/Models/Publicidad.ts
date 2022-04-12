@@ -104,7 +104,6 @@ export default class Publicidad extends BaseModel {
           );
       });
 
-      
     function arrayzar(modelo, key) {
       modelo[key] = modelo[key] ? modelo[key].split(",") : [];
 
@@ -118,6 +117,28 @@ export default class Publicidad extends BaseModel {
 
     return result;
   }
+  static async traerNovedadesFarmacias({
+    id_farmacia,
+  }: {
+    id_farmacia: string;
+  }) {
+    const publicidades = await Database.from("tbl_publicidad as p")
+      .select("p.*", "p.ts_creacion as fecha_alta", "pc.nombre as color")
+      .leftJoin("tbl_publicidad_institucion as pi", "p.id", "pi.id_publicidad")
+      .leftJoin(
+        "tbl_farmacia_institucion as fi",
+        "pi.id_institucion",
+        "fi.id_institucion"
+      )
+      .leftJoin("tbl_farmacia as f", "fi.id_farmacia", "f.id")
+      .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
+      .where("f.id", id_farmacia)
+      .where("p.id_publicidad_tipo", 1)
+      .orderBy("fecha_alta", 'desc')
+
+    return publicidades;
+  }
+
   public static table = "tbl_publicidad";
 
   @column({ isPrimary: true })

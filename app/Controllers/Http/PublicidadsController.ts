@@ -30,6 +30,14 @@ export default class PublicidadsController {
     });
     return publicidades;
   }
+
+  public async mig_novedadesFarmacia({ request }: HttpContextContract) {
+    const novedades = await Publicidad.traerNovedadesFarmacias({
+      id_farmacia: request.params().farmacia,
+    });
+    return novedades;
+  }
+
   public async mig_agregar_novedad({ request }: HttpContextContract) {
     const nuevaNovedad = new Publicidad();
 
@@ -70,9 +78,9 @@ export default class PublicidadsController {
     });
 
     try {
-      return 
+      return;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
