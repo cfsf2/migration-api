@@ -4,9 +4,8 @@ import Usuario from "App/Models/Usuario";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
 import { generarHtml } from "../../Helper/email";
-import { enumaBool } from "App/Helper/funciones";
+
 import UsuarioPerfil from "App/Models/UsuarioPerfil";
-import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class UsuariosController {
   public async index({ request }: HttpContextContract) {
@@ -142,7 +141,7 @@ export default class UsuariosController {
   }
 
   public async mig_actualizar({ request }: HttpContextContract) {
-    return Usuario.actualizar({
+    return await Usuario.actualizar({
       id_usuario: request.qs().id,
       data: request.body().data,
     });

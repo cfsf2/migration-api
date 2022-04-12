@@ -45,7 +45,10 @@ export default class AuthController {
       return response;
     } catch (error) {
       console.log(error);
-      response.send(error);
+      response.send({
+        statusCode: 500,
+        body: { message: error.responseText },
+      });
     }
   }
 

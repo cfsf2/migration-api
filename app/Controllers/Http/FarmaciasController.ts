@@ -69,11 +69,34 @@ export default class FarmaciasController {
 
     try {
       return response.created(
-        await Farmacia.acutalizarFarmacia({
+        await Farmacia.actualizarFarmacia({
           usuario: username,
           d: request.body(),
         })
       );
+    } catch (err) {
+      return err;
+    }
+  }
+
+  public async mig_admin_updatePerfil({
+    request,
+    response,
+  }: HttpContextContract) {
+    const data: { farmacia: any; usuario: any; instituciones: any } = {
+      farmacia: {},
+      instituciones: {},
+      usuario: {},
+    };
+    data.farmacia = request.body().farmacia;
+    data.instituciones = request.body().instituciones;
+    data.usuario = request.body().login;
+
+    try {
+      await Farmacia.actualizarFarmaciaAdmin({
+        id: request.body().farmacia.id,
+        data: data,
+      });
     } catch (err) {
       return err;
     }
@@ -93,5 +116,29 @@ export default class FarmaciasController {
 
     if (existe) return true;
     return false;
+  }
+  public async mig_admin_farmacia({ request }: HttpContextContract) {
+    const farmacia = await Farmacia.traerFarmacias({
+      id: request.params().id,
+      admin: request.url().includes("admin"),
+    });
+    delete farmacia.costoenvio;
+    delete farmacia.imagen;
+    delete farmacia.whatsapp;
+    delete farmacia.instagram;
+    delete farmacia.facebook;
+    delete farmacia.telefonofijo;
+    delete farmacia.web;
+    delete farmacia.descubrir;
+    delete farmacia.envios;
+    delete farmacia.visita_comercial;
+    delete farmacia.id_usuario_creacion;
+    delete farmacia.id_usuario_modificacion;
+
+    return {
+      farmacia: farmacia,
+      instituciones: farmacia.instituciones,
+      perfil: farmacia.id_perfil,
+    };
   }
 }
