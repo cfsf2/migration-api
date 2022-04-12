@@ -22,4 +22,6 @@ Route.post("/farmacias/register-try", "FarmaciasController.ts.mig_mail");
 Route.post("/farmacias", "FarmaciasController.ts.mig_create");
 
 Route.put("/farmacias", "FarmaciasController.ts.mig_updatePerfil");
-Route.put("farmacias/admin/", "FarmaciasController.ts.mig_admin_updatePerfil");
+Route.put("/farmacias/admin/", "FarmaciasController.ts.mig_admin_updatePerfil");
+
+Route.get("/farmacias/debitos/:periodo/:cufe", "DebitosController.debitos");

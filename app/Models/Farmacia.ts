@@ -14,8 +14,12 @@ import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
-import { enumaBool, getCoordenadas } from "App/Helper/funciones";
-import axios from "axios";
+import {
+  eliminarKeysVacios,
+  enumaBool,
+  getCoordenadas,
+} from "App/Helper/funciones";
+
 import FarmaciaDia from "./FarmaciaDia";
 import Dia from "./Dia";
 import FarmaciaMedioDePago from "./FarmaciaMedioDePago";
@@ -42,7 +46,7 @@ export default class Farmacia extends BaseModel {
   }): Promise<any> {
     let farmacias =
       await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
-      f.matricula, f.cufe, f.cuit, f.calle, f.numero, 
+      f.matricula, f.cufe, f.cuit, f.calle, f.numero, f.cp,
       f.direccioncompleta, f.longitud AS log, 
       f.latitud AS lat, f.costoenvio,
       f.habilitado, f.imagen, f.email, f.telefono, 
@@ -63,10 +67,11 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id
       LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
       LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia AND fmp.habilitado = 's'
-      LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id 
-      LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia
+      LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id
+      LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia AND fi.habilitado = 's'
       LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
+      
      
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
       ${matricula ? `AND f.matricula = ${matricula}` : ""}
@@ -196,7 +201,11 @@ export default class Farmacia extends BaseModel {
           )
         )
         .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
-        .andWhere("tbl_provincia.nombre", "=", "Santa Fe")
+        .andWhere(
+          "tbl_provincia.nombre",
+          "=",
+          d.provincia ? d.provincia : "Santa Fe"
+        )
         .leftJoin(
           "tbl_departamento",
           "tbl_localidad.id_departamento",
@@ -208,11 +217,7 @@ export default class Farmacia extends BaseModel {
           "tbl_provincia.id"
         );
 
-      if (localidad.length === 0) {
-        return "La localidad seleccionada no fue encontrada en la base de datos";
-      }
-
-      const provincia = "Santa Fe";
+      const provincia = d.provincia ? d.provincia : "Santa Fe";
       const pais = "Argentina";
       const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
 
@@ -230,7 +235,7 @@ export default class Farmacia extends BaseModel {
 
       const perfilesFarmageo = await PerfilFarmageo.query();
 
-      farmacia[0].merge({
+      let mergeObject: any = {
         id: d.id,
         nombre: d.nombre,
         nombrefarmaceutico: d.nombrefarmaceutico,
@@ -242,14 +247,16 @@ export default class Farmacia extends BaseModel {
 
         id_perfil_farmageo: perfilesFarmageo.filter(
           (pf) => pf.nombre === d.perfil_farmageo
-        )[0].id,
+        )[0]?.id,
 
         longitud: log,
         latitud: lat,
 
+        cp: d.cp,
         password: d.password,
 
-        habilitado: d.habilitado ? "s" : "n",
+        habilitado:
+          d.habilitado === "true" || d.habilitado === true ? "s" : "n",
         email: d.email,
         telefono: d.telefono,
         whatsapp: d.whatsapp,
@@ -262,9 +269,11 @@ export default class Farmacia extends BaseModel {
         tiempotardanza: d.tiempotardanza,
         visita_comercial: d.visita_comercial ? "s" : "n",
         telefonofijo: d.telefonofijo,
-      });
+      };
+      mergeObject = eliminarKeysVacios(mergeObject);
+      farmacia[0].merge(mergeObject);
 
-      farmacia[0].save();
+      await farmacia[0].save();
 
       //Guarda datos de horarios
       const dias = await Dia.query();
@@ -493,6 +502,7 @@ export default class Farmacia extends BaseModel {
       //Actualizar productos Pack >:'(
       return "Terminamos de actualizar papu";
     } catch (err) {
+      console.log(err);
       return err;
     }
   }
@@ -502,15 +512,54 @@ export default class Farmacia extends BaseModel {
     data,
   }: {
     id: number;
-    data: { usuario: any; farmacia: any; instituciones: any };
+    data: { usuario: any; farmacia: any; instituciones: any; perfil: any };
   }) {
     const usuario = await Usuario.findOrFail(data.farmacia.id_usuario);
-    const instituciones = await FarmaciaInstitucion.query().whereIn(
-      "id",
-      data.instituciones
+    const instituciones = await FarmaciaInstitucion.query().where(
+      "id_farmacia",
+      data.farmacia.id
     );
 
-    this.actualizarFarmacia({ usuario: usuario.usuario, d: data.farmacia });
+    await this.actualizarFarmacia({
+      usuario: usuario.usuario,
+      d: data.farmacia,
+    });
+
+    await Promise.all(
+      data.instituciones.map((id_institucion: number, i: number) => {
+        const encontrado = instituciones.find(
+          (d) => d.$original.id_institucion === Number(id_institucion)
+        );
+
+        if (!encontrado) {
+          const farmaciaInstitucion = new FarmaciaInstitucion();
+          farmaciaInstitucion.merge({
+            id_institucion: Number(id_institucion),
+            id_farmacia: data.farmacia.id,
+            habilitado: "s",
+          });
+          return farmaciaInstitucion.save();
+        }
+        if (encontrado) {
+          instituciones.splice(
+            instituciones.findIndex((ins) => ins.id === encontrado.id),
+            1
+          );
+
+          encontrado.merge({
+            habilitado: "s",
+          });
+          return encontrado.save();
+        }
+      })
+    );
+    if (instituciones.length > 0) {
+      instituciones.forEach((i) => {
+        i.merge({ habilitado: "n" });
+        i.save();
+      });
+    }
+
     if (data.usuario.password !== data.farmacia.password) {
       const farmacia = await Farmacia.findOrFail(data.farmacia.id);
       farmacia.merge({
@@ -518,17 +567,32 @@ export default class Farmacia extends BaseModel {
       });
 
       try {
-        console.log(data.usuario);
         await Usuario.cambiarPasswordByUsername({
           username: data.usuario.username,
           password: data.usuario.password,
         });
-        console.log("Cambio de password");
-        farmacia.save();
+        return await farmacia.save();
       } catch (error) {
         return error;
       }
     }
+
+    if (Number(data.perfil) !== data.farmacia.id_perfil) {
+      console.log(
+        "cambio de perfil ",
+        data.farmacia.id_perfil,
+        " a ",
+        data.perfil
+      );
+      const perfilDB = await UsuarioPerfil.findBy(
+        "id_usuario",
+        data.farmacia.id_usuario
+      );
+
+      perfilDB?.merge({ id_perfil: Number(data.perfil) });
+      perfilDB?.save();
+    }
+    return;
   }
 
   static async crearFarmacia(nuevaFarmacia) {
@@ -616,6 +680,9 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public direccioncompleta: string;
+
+  @column()
+  public cp: string;
 
   @column()
   public longitud: string;
