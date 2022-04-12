@@ -83,14 +83,21 @@ export default class FarmaciasController {
     request,
     response,
   }: HttpContextContract) {
-    const data: { farmacia: any; usuario: any; instituciones: any } = {
+    const data: {
+      farmacia: any;
+      usuario: any;
+      instituciones: any;
+      perfil: any;
+    } = {
       farmacia: {},
       instituciones: {},
       usuario: {},
+      perfil: null,
     };
     data.farmacia = request.body().farmacia;
     data.instituciones = request.body().instituciones;
     data.usuario = request.body().login;
+    data.perfil = request.body().perfil;
 
     try {
       await Farmacia.actualizarFarmaciaAdmin({
