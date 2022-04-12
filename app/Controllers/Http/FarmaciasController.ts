@@ -6,6 +6,7 @@ import Farmacia from "../../Models/Farmacia";
 import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
+import { Response } from "@adonisjs/core/build/standalone";
 
 export default class FarmaciasController {
   public async index() {
@@ -35,7 +36,7 @@ export default class FarmaciasController {
         .toFormat("yyyy-MM-dd hh:mm:ss");
 
       try {
-        farmaciaLogueada.save();
+        await farmaciaLogueada.save();
       } catch (err) {
         return console.log(err);
       }
@@ -104,26 +105,29 @@ export default class FarmaciasController {
         id: request.body().farmacia.id,
         data: data,
       });
+      return response.created();
     } catch (err) {
       return err;
     }
   }
 
   public async mig_create({ request }: HttpContextContract) {
-    return Farmacia.crearFarmacia(request.body());
+    return await Farmacia.crearFarmacia(request.body());
   }
 
-  public async mig_admin_passwords({ request }: HttpContextContract) {
+  public async mig_admin_passwords() {
     return await Database.from("tbl_farmacia")
       .leftJoin("tbl_usuario", "id_usuario", "tbl_usuario.id")
       .select("tbl_farmacia.password", "tbl_usuario.usuario");
   }
+
   public async existeUsuario({ request }: HttpContextContract) {
     const existe = await Usuario.findBy("usuario", request.params().usuario);
 
     if (existe) return true;
     return false;
   }
+
   public async mig_admin_farmacia({ request }: HttpContextContract) {
     const farmacia = await Farmacia.traerFarmacias({
       id: request.params().id,
@@ -141,6 +145,8 @@ export default class FarmaciasController {
     delete farmacia.visita_comercial;
     delete farmacia.id_usuario_creacion;
     delete farmacia.id_usuario_modificacion;
+    delete farmacia.ultimoacceso;
+    delete farmacia.f_ultimo_acceso;
 
     return {
       farmacia: farmacia,

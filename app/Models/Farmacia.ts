@@ -14,8 +14,12 @@ import FarmaciaServicio from "./FarmaciaServicio";
 import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
-import { enumaBool, getCoordenadas } from "App/Helper/funciones";
-import axios from "axios";
+import {
+  eliminarKeysVacios,
+  enumaBool,
+  getCoordenadas,
+} from "App/Helper/funciones";
+
 import FarmaciaDia from "./FarmaciaDia";
 import Dia from "./Dia";
 import FarmaciaMedioDePago from "./FarmaciaMedioDePago";
@@ -42,7 +46,7 @@ export default class Farmacia extends BaseModel {
   }): Promise<any> {
     let farmacias =
       await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
-      f.matricula, f.cufe, f.cuit, f.calle, f.numero, 
+      f.matricula, f.cufe, f.cuit, f.calle, f.numero, f.cp,
       f.direccioncompleta, f.longitud AS log, 
       f.latitud AS lat, f.costoenvio,
       f.habilitado, f.imagen, f.email, f.telefono, 
@@ -197,7 +201,11 @@ export default class Farmacia extends BaseModel {
           )
         )
         .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
-        .andWhere("tbl_provincia.nombre", "=", "Santa Fe")
+        .andWhere(
+          "tbl_provincia.nombre",
+          "=",
+          d.provincia ? d.provincia : "Santa Fe"
+        )
         .leftJoin(
           "tbl_departamento",
           "tbl_localidad.id_departamento",
@@ -209,11 +217,7 @@ export default class Farmacia extends BaseModel {
           "tbl_provincia.id"
         );
 
-      if (localidad.length === 0) {
-        return "La localidad seleccionada no fue encontrada en la base de datos";
-      }
-
-      const provincia = "Santa Fe";
+      const provincia = d.provincia ? d.provincia : "Santa Fe";
       const pais = "Argentina";
       const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
 
@@ -231,7 +235,7 @@ export default class Farmacia extends BaseModel {
 
       const perfilesFarmageo = await PerfilFarmageo.query();
 
-      farmacia[0].merge({
+      let mergeObject: any = {
         id: d.id,
         nombre: d.nombre,
         nombrefarmaceutico: d.nombrefarmaceutico,
@@ -243,14 +247,16 @@ export default class Farmacia extends BaseModel {
 
         id_perfil_farmageo: perfilesFarmageo.filter(
           (pf) => pf.nombre === d.perfil_farmageo
-        )[0].id,
+        )[0]?.id,
 
         longitud: log,
         latitud: lat,
 
+        cp: d.cp,
         password: d.password,
 
-        habilitado: d.habilitado ? "s" : "n",
+        habilitado:
+          d.habilitado === "true" || d.habilitado === true ? "s" : "n",
         email: d.email,
         telefono: d.telefono,
         whatsapp: d.whatsapp,
@@ -263,9 +269,11 @@ export default class Farmacia extends BaseModel {
         tiempotardanza: d.tiempotardanza,
         visita_comercial: d.visita_comercial ? "s" : "n",
         telefonofijo: d.telefonofijo,
-      });
+      };
+      mergeObject = eliminarKeysVacios(mergeObject);
+      farmacia[0].merge(mergeObject);
 
-      farmacia[0].save();
+      await farmacia[0].save();
 
       //Guarda datos de horarios
       const dias = await Dia.query();
@@ -494,6 +502,7 @@ export default class Farmacia extends BaseModel {
       //Actualizar productos Pack >:'(
       return "Terminamos de actualizar papu";
     } catch (err) {
+      console.log(err);
       return err;
     }
   }
@@ -671,6 +680,9 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public direccioncompleta: string;
+
+  @column()
+  public cp: string;
 
   @column()
   public longitud: string;
