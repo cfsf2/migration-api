@@ -14,15 +14,21 @@ export default class ProductoPackController {
 
     return await ProductoPack.traerProductosPacks({
       entidad: entidadMutual,
+      habilitado: "s",
+      en_papelera: "n",
     });
   }
-  public async mig_producto( { request }: HttpContextContract){
+
+  public async mig_producto({ request }: HttpContextContract) {
     let productoSelect = request.params().idProducto;
-    console.log(productoSelect)
-    
+
+    if (productoSelect === "all") {
+      return await ProductoPack.traerProductosPacks({ en_papelera: "n" });
+    }
     return await ProductoPack.traerProductosPacks({
       producto: productoSelect,
-    })
+      habilitado: "s",
+      en_papelera: "n",
+    });
   }
-  
 }

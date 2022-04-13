@@ -10,6 +10,7 @@ Route.post("/users/loginwp", "AuthController.mig_loginwp");
 Route.get("/permisos/perfiles", "AuthController.mig_perfiles");
 
 Route.post("/users/alta-usuario-web", "UsuariosController.mig_alta_usuarioWeb");
+Route.post("/users/alta-usuario", "UsuariosController.mig_alta_usuario");
 Route.post(
   "/users/alta-usuario-farmacia",
   "UsuariosController.mig_alta_usuarioFarmacia"
