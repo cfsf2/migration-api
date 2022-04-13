@@ -1171,27 +1171,29 @@ const tbl_solicitud_proveeduria = async () => {
 
     if (farmacia && entidad) {
       productos.forEach((prod, idx) => {
-        const sql = `INSERT INTO tbl_solicitud_proveeduria_producto_pack (id_solicitud_proveeduria, id_producto_pack, cantidad, id_usuario_creacion, id_usuario_modificacion)
+        if (prod.idsql) {
+          const sql = `INSERT INTO tbl_solicitud_proveeduria_producto_pack (id_solicitud_proveeduria, id_producto_pack, cantidad, id_usuario_creacion, id_usuario_modificacion)
                     VALUES (${soli.codigo_solicitud}, ${prod.idsql}, ${
-          soli.productos_solicitados.find(
-            (Sprod) => Sprod.nombre === prod.nombre
-          ).cantidad
-        },1,1)
+            soli.productos_solicitados.find(
+              (Sprod) => Sprod.nombre === prod.nombre
+            ).cantidad
+          },1,1)
         `;
-        con.query(sql, function (err, result) {
-          if (err) {
-            console.log(sql);
-            throw err;
-          }
+          con.query(sql, function (err, result) {
+            if (err) {
+              console.log(sql);
+              throw err;
+            }
 
-          console.log(
-            "solicitud " +
-              soli.codigo_solicitud +
-              " escrito con " +
-              (((idx + 1) * 100) / productos.length).toFixed(2) +
-              "% productos"
-          );
-        });
+            console.log(
+              "solicitud " +
+                soli.codigo_solicitud +
+                " escrito con " +
+                (((idx + 1) * 100) / productos.length).toFixed(2) +
+                "% productos"
+            );
+          });
+        }
       });
     }
   });

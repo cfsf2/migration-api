@@ -48,11 +48,11 @@ connectToDatabase = async () => {
         //migracion.tbl_farmacia_servicios();
         //migracion.tbl_farmacia_dia();
         // migracion.tbl_perfil_permiso();
-        migracion.tbl_usuario_perfil();
+        //migracion.tbl_usuario_perfil();
         //migracion.tbl_farmacia_institucion();
         //migracion.tbl_publicidad_institucion();
         //migracion.tbl_ptransfer_institucion();
-        //migracion.tbl_solicitud_proveeduria();
+        migracion.tbl_solicitud_proveeduria();
         //migracion.tbl_debitofarmacia();
         resolve();
       });
