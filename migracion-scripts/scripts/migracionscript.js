@@ -1312,7 +1312,7 @@ const tbl_farmacia = () => {
     };
 
     const queries = farmacias.map((f) => {
-      const sql = `INSERT INTO tbl_farmacia (id, id_usuario, password, nombre, nombrefarmaceutico, matricula, cufe, cuit, id_localidad, calle, numero, direccioncompleta, longitud, latitud, habilitado,imagen, email, telefono, whatsapp, facebook, instagram, web, id_perfil_farmageo, descubrir, envios, costoenvio, tiempotardanza, visita_comercial, telefonofijo, f_ultimo_acceso)
+      const sql = `INSERT INTO tbl_farmacia (id, id_usuario, password, nombre, nombrefarmaceutico, matricula, cufe, cuit, id_localidad, calle, numero, direccioncompleta, longitud, latitud, habilitado,imagen, email, telefono, whatsapp, facebook, instagram, web, id_perfil_farmageo, descubrir, envios, costoenvio, tiempotardanza, visita_comercial, telefonofijo, f_ultimo_acceso, cp)
       VALUES (${f.idsql}, ${f.idsql_usuario}, ${stringOnull(
         f.password
       )}, ${stringOnull(f.nombre.toString())},${stringOnull(
@@ -1339,7 +1339,7 @@ const tbl_farmacia = () => {
         f.telefonofijo
       )}, ${stringOnull(
         f.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
-      )}) ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
+      )}, ${f.cp}) ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
         f.log ? f.log : null
       }, latitud=${f.lat ? f.lat : null}, id_perfil_farmageo=${perfilFarmageo(
         f.perfil_farmageo
@@ -1349,7 +1349,7 @@ const tbl_farmacia = () => {
             f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "") +
             "'"
           : null
-      }`;
+      }, cp=${f.cp}`;
 
       return queryPromise(con, sql);
     });
