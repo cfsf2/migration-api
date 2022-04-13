@@ -11,7 +11,7 @@ export default class InstitucionesController {
     } = request.qs();
 
     const instituciones = await Institucion.query()
-      .select('tbl_institucion.id as _id', 'tbl_institucion.*')
+      .select("tbl_institucion.id as _id", "tbl_institucion.*")
       .preload("institucion_madre")
       .if(search, (query) => {
         query.where("nombre", "LIKE", `${search}%`);
@@ -30,5 +30,25 @@ export default class InstitucionesController {
         query.limit(limit);
       });
     return instituciones;
+  }
+
+  public async crear({ request, response }: HttpContextContract) {
+    const institucion = new Institucion();
+    try {
+      await institucion.merge(request.body()).save();
+      return response.created();
+    } catch (err) {
+      return err;
+    }
+  }
+
+  public async actualizar({ request, response }: HttpContextContract) {
+    const institucion = await Institucion.findOrFail(request.body().id);
+    institucion.merge(request.body().data);
+    try {
+      return await institucion.save();
+    } catch (err) {
+      return response.status(406).send(err);
+    }
   }
 }

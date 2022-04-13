@@ -12,6 +12,7 @@ import "../routes/imagenes";
 import "../routes/denuncias";
 import "../routes/instituciones";
 import "../routes/entidad";
+import "../routes/repooss";
 
 Route.get("/", async () => {
   return { hello: "world" };

@@ -146,4 +146,6 @@ export default class UsuariosController {
       data: request.body().data,
     });
   }
+
+  public async mig_alta_usuario({ request }: HttpContextContract) {}
 }
