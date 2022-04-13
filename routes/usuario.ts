@@ -20,5 +20,7 @@ Route.put(
   "/users/updateWebUser",
   "UsuariosController.mig_actualizar_usuarioWeb"
 );
-
 Route.put("/users/", "UsuariosController.mig_actualizar");
+Route.put("/users/newpassword", "UsuariosController.mig_newpassword");
+
+Route.delete("/users", "UsuariosController.ts.delete");

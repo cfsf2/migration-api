@@ -25,7 +25,7 @@ class CustomBcryptDriver implements HashDriverContract {
    * Hash value
    */
   public async hash(value: string) {
-    return bcrypt.hash(value, this.config.saltRounds);
+    return bcrypt.hashSync(value, this.config.saltRounds);
   }
 
   public async make(value: string): Promise<string> {

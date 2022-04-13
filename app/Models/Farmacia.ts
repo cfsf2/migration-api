@@ -263,11 +263,17 @@ export default class Farmacia extends BaseModel {
         facebook: d.facebook,
         instagram: d.instagram,
         web: d.web,
-        descubrir: d.descubrir ? "s" : "n",
-        envios: d.envios ? "s" : "n",
+        descubrir:
+          typeof d.descubrir !== "undefined" ? (d.descubrir ? "s" : "n") : null,
+        envios: typeof d.envios !== "undefined" ? (d.envios ? "s" : "n") : null,
         costoenvio: d.costoenvio,
         tiempotardanza: d.tiempotardanza,
-        visita_comercial: d.visita_comercial ? "s" : "n",
+        visita_comercial:
+          typeof d.visita_comercial !== "undefined"
+            ? d.visita_comercial
+              ? "s"
+              : "n"
+            : null,
         telefonofijo: d.telefonofijo,
       };
       mergeObject = eliminarKeysVacios(mergeObject);
@@ -567,7 +573,7 @@ export default class Farmacia extends BaseModel {
       });
 
       try {
-        await Usuario.cambiarPasswordByUsername({
+        await Usuario.cambiarPassword({
           username: data.usuario.username,
           password: data.usuario.password,
         });
