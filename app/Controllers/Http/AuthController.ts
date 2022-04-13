@@ -10,6 +10,7 @@ export default class AuthController {
     const { username, password } = request.only(["username", "password"]);
 
     try {
+      console.log(username, password);
       let response = await auth.use("web").attempt(username, password);
       response = enumaBool(response);
 

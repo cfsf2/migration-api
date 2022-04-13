@@ -8,7 +8,7 @@ import { generarHtml } from "../../Helper/email";
 import UsuarioPerfil from "App/Models/UsuarioPerfil";
 
 export default class UsuariosController {
-  public async index({ request }: HttpContextContract) {
+  public async index() {
     const usuarios = await Usuario.traerPerfilDeUsuario({});
 
     return usuarios;
@@ -147,41 +147,26 @@ export default class UsuariosController {
     });
   }
 
-  public async mig_alta_usuario({ request, response }: HttpContextContract) {
+  public async mig_alta_usuario({ request }: HttpContextContract) {
     const data = request.body();
-    console.log(data);
+    return Usuario.registrarUsuarioAdmin(data);
+  }
 
-    const usuario = new Usuario();
-    const usuarioPerfil = new UsuarioPerfil();
-
+  public async mig_newpassword({ request }: HttpContextContract) {
     try {
-      usuario.merge({
-        nombre: data.first_name,
-        apellido: data.last_name,
-        usuario: data.username.includes("@")
-          ? data.usernam.toLowerCase()
-          : data.username.toUpperCase(),
-        password: data.password,
-        esfarmacia: data.roles.includes("farmacia") ? "s" : "n",
-        admin: data.roles.includes("admin") ? "s" : "n",
-        habilitado: "s",
-        id_wp: data.farmaciaId,
-      });
-      await usuario.save();
-
-      usuarioPerfil.merge({
-        id_usuario: usuario.id,
-        id_perfil: Number(data.perfil),
-      });
-      await usuarioPerfil.save();
-      return response.send({
-        body: {
-          type: "success",
-          msg: "Usuario creado con exito",
-        },
+      return Usuario.cambiarPassword({
+        id: request.qs().id,
+        password: request.body().data,
       });
     } catch (err) {
       return err;
     }
+  }
+
+  public async delete({ request }: HttpContextContract) {
+    return await Usuario.actualizar({
+      username: request.qs().username,
+      data: request.body(),
+    });
   }
 }

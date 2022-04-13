@@ -177,6 +177,81 @@ export default class Usuario extends BaseModel {
     }
   }
 
+  public static async registrarUsuarioAdmin(data) {
+    const usuario = new Usuario();
+    const usuarioPerfil = new UsuarioPerfil();
+
+    try {
+      const usuarioSchema = schema.create({
+        usuario: schema.string({ trim: true }, [
+          rules.unique({
+            table: "tbl_usuario",
+            column: "usuario",
+            caseInsensitive: true,
+          }),
+        ]),
+        nombre: schema.string(),
+        apellido: schema.string(),
+        password: schema.string(),
+        habilitado: schema.string.optional(),
+        dni: schema.number.optional(),
+        fecha_nac: schema.string.optional(),
+        id_localidad: schema.number.optional(),
+        esfarmacia: schema.string.optional(),
+        admin: schema.string.optional(),
+        demolab: schema.string.optional(),
+        id_usuario_creacion: schema.number.optional(),
+        id_usuario_modificacion: schema.number.optional(),
+        f_ultimo_acceso: schema.string.optional(),
+      });
+      const datos = {
+        nombre: data.first_name,
+        apellido: data.last_name,
+        usuario: data.username.includes("@")
+          ? data.usernam.toLowerCase()
+          : data.username.toUpperCase(),
+        password: data.password,
+        esfarmacia: data.roles.includes("farmacia") ? "s" : "n",
+        admin: data.roles.includes("admin") ? "s" : "n",
+        habilitado: "s",
+        id_wp: data.farmaciaId,
+      };
+
+      const datosValidados = await validator.validate({
+        schema: usuarioSchema,
+        data: datos,
+        messages: {
+          "email.unique": "El email ya esta en uso",
+          "email.required": "Un email es requerido",
+          "usuario.unique": "El nombre de Usuario ya esta en uso",
+        },
+        reporter: validator.reporters.api,
+      });
+
+      usuario.merge(datosValidados);
+      await usuario.save();
+
+      usuarioPerfil.merge({
+        id_usuario: usuario.id,
+        id_perfil: Number(data.perfil),
+      });
+      await usuarioPerfil.save();
+      return {
+        body: {
+          type: "success",
+          msg: "Usuario creado con exito",
+        },
+      };
+    } catch (err) {
+      return {
+        body: {
+          type: "fail",
+          msg: err.messages.errors[0].message,
+        },
+      };
+    }
+  }
+
   public static async actualizarTelefonoUsuarioWeb({
     id,
     usuarioData,
@@ -204,21 +279,29 @@ export default class Usuario extends BaseModel {
 
   public static async actualizar({
     id_usuario,
+    username,
     data,
   }: {
-    id_usuario: number;
+    username?: string;
+    id_usuario?: number;
     data: any;
   }) {
-    const usuario = await Usuario.findOrFail(Number(id_usuario));
-    const perfilUsuario = await UsuarioPerfil.findBy(
-      "id_usuario",
-      Number(id_usuario)
-    );
-    const localidad = await Localidad.findBy("nombre", data.localidad);
+    let usuario = new Usuario();
+    if (id_usuario) {
+      usuario = await Usuario.findOrFail(Number(id_usuario));
+    }
+    if (username) {
+      usuario = await Usuario.findByOrFail("usuario", username);
+    }
+    const perfilUsuario = await UsuarioPerfil.findBy("id_usuario", usuario.id);
 
-    //Localidad
-    if (localidad && usuario.id_localidad !== localidad?.id) {
-      data.id_localidad = localidad.id;
+    if (data.localidad) {
+      const localidad = await Localidad.findBy("nombre", data.localidad);
+
+      //Localidad
+      if (localidad && usuario.id_localidad !== localidad?.id) {
+        data.id_localidad = localidad.id;
+      }
     }
 
     let mergObject: any = {
@@ -229,35 +312,82 @@ export default class Usuario extends BaseModel {
       fecha_nac: data.fecha_nac,
       id_localidad: data.id_localidad,
       email: data.email,
-
-      newsletter: data.newsletter ? "s" : "n",
-      habilitado: data.habilitado ? "s" : "n",
-      esfarmacia: data.esfarmacia ? "s" : "n",
-      admin: data.admin ? "s" : "n",
-      confirmado: data.confirmado ? "s" : "n",
-      telefono: data.telefono,
-
-      deleted: data.deleted ? "s" : "n",
-      demolab: data.demolab ? "s" : "n",
       id_wp: data.id_wp,
       celular: data.celular,
       telephone: data.telephone,
+
+      newsletter:
+        typeof data.newsletter !== "undefined"
+          ? data.newsletter
+            ? "s"
+            : "n"
+          : null,
+      habilitado:
+        typeof data.habilitado !== "undefined"
+          ? data.habilitado
+            ? "s"
+            : "n"
+          : null,
+      esfarmacia:
+        typeof data.esfarmacia !== "undefined"
+          ? data.esfarmacia
+            ? "s"
+            : "n"
+          : null,
+      admin:
+        typeof data.admin !== "undefined" ? (data.admin ? "s" : "n") : null,
+      confirmado:
+        typeof data.confirmado !== "undefined"
+          ? data.confirmado
+            ? "s"
+            : "n"
+          : null,
+      telefono: data.telefono,
+
+      deleted:
+        typeof data.deleted !== "undefined" ? (data.deleted ? "s" : "n") : null,
+      demolab:
+        typeof data.demolab !== "undefined" ? (data.demolab ? "s" : "n") : null,
     };
 
     mergObject = eliminarKeysVacios(mergObject);
 
     usuario.merge(mergObject);
     usuario.save();
-    if (data.perfil) {
-      perfilUsuario?.merge({ id_perfil: Number(data.perfil) });
-      perfilUsuario?.save();
+    if (data.perfil && Number(data.perfil) !== perfilUsuario?.id_perfil) {
+      if (perfilUsuario) {
+        perfilUsuario?.merge({ id_perfil: Number(data.perfil) });
+        perfilUsuario?.save();
+      }
+      if (!perfilUsuario) {
+        const perfilUsuario = new UsuarioPerfil();
+        perfilUsuario
+          .merge({
+            id_usuario: usuario.id,
+            id_perfil: Number(data.perfil),
+          })
+          .save();
+      }
     }
     return usuario;
   }
 
-  public static async cambiarPasswordByUsername({ username, password }) {
-    const usuario = await Usuario.findByOrFail("usuario", username);
-
+  public static async cambiarPassword({
+    id,
+    username,
+    password,
+  }: {
+    id?: number;
+    username?: string;
+    password: string;
+  }) {
+    let usuario: Usuario = new Usuario();
+    if (id) {
+      usuario = await Usuario.findOrFail(id);
+    }
+    if (username) {
+      usuario = await Usuario.findByOrFail("usuario", username);
+    }
     usuario.merge({ password: password });
     return usuario.save();
   }
@@ -368,12 +498,12 @@ export default class Usuario extends BaseModel {
   })
   public requerimientos: HasMany<typeof CampanaRequerimiento>;
 
-  @beforeCreate()
-  public static async hashPassword(user: Usuario) {
-    if (user.$dirty.password) {
-      user.password = await Hash.make(user.password);
-    }
-  }
+  // @beforeCreate()
+  // public static async hashPassword(user: Usuario) {
+  //   if (user.$dirty.password) {
+  //     user.password = await Hash.make(user.password);
+  //   }
+  // }
 
   @beforeSave()
   public static async hashPasswordSave(user: Usuario) {
