@@ -14,6 +14,7 @@ import Publicidad from "./Publicidad";
 import Database from "@ioc:Adonis/Lucid/Database";
 import ProductoPack from "./ProductoPack";
 import SolicitudProveeduriaProductoPack from "./SolicitudProveeduriaProductoPack";
+import { JsonWebTokenError } from "jsonwebtoken";
 
 export default class SolicitudProveeduria extends BaseModel {
   static async traerSolicitudesProveeduria() {
@@ -35,16 +36,17 @@ export default class SolicitudProveeduria extends BaseModel {
       solicitudes.map(async (solicitud) => {
         const productosSolicitados = await Database.from(
           "tbl_solicitud_proveeduria_producto_pack as sppp"
-        )
+          )
           .select("*")
           .leftJoin("tbl_producto_pack as pp", "sppp.id_producto_pack", "pp.id")
           .where("sppp.id_solicitud_proveeduria", solicitud.id);
-
+          
+        JSON.stringify(solicitud)
         solicitud.productos_solicitados = productosSolicitados;
         return solicitud;
       })
     );
-    return await arraySolicitudes;
+    return solicitudes;
   }
 
   public static table = "tbl_solicitud_proveeduria";
