@@ -5,18 +5,40 @@ import Laboratorio from "./Laboratorio";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class TransferProducto extends BaseModel {
-  static async traerTrasferProducto() {
+  static async traerTrasferProducto({
+    en_papelera,
+    habilitado,
+  }: {
+    en_papelera?: string;
+    habilitado?: string;
+  }) {
     const trasfersProducto = await Database.from("tbl_transfer_producto as tp")
       .select(
         "*",
+        "tp.id as id",
+        "tp.habilitado as habilitado",
+        "tp.nombre as nombre",
+        "tp.codigo as codigo",
         "tp.ts_creacion as fechaalta",
         "tp.ts_creacion as fecha_alta",
-        "ts_modificacion as fecha_modificacion",
-        ""
-
+        "tp.ts_modificacion as fecha_modificacion",
+        "l.id as laboratorioid",
+        "u.id_usuario_creacion as id_usuario_alta",
+        "u.id_usuario_modificacion as id_usuario_modificacion"
       )
+
       .leftJoin("tbl_laboratorio as l", "tp.id_laboratorio", "l.id")
-      .where("tp.id", "1");
+      .leftJoin("tbl_usuario as u", "tp.id", "u.id")
+      //en_papelera
+      .if(en_papelera, (query) => {
+        query.where("tp.en_papelera", "n");
+      })
+      .if(habilitado, (query) => {
+        query.where("tp.habilitado", "s");
+      })
+
+      .orderBy("codigo", "desc");
+
     return trasfersProducto;
   }
   public static table = "tbl_transfer_producto";

@@ -5,11 +5,14 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { boolaEnum, enumaBool } from "App/Helper/funciones";
 
 export default class Laboratorio extends BaseModel {
-  static async traerLaboratorios(){
+  static async traerLaboratorios() {
     const laboratorios = await Database.from("tbl_laboratorio as l")
-    .select("*",
-    "l.ts_timestamp as fechaalta")
-    .orderBy("l.nombre", "asc")
+      .select(
+      "*", 
+      "l.id as _id", 
+      "l.id as id",
+      "l.ts_timestamp as fechaalta")
+      .orderBy("l.nombre", "asc");
 
     let result = laboratorios.map((l) => boolaEnum(l));
     return result;
@@ -55,13 +58,13 @@ export default class Laboratorio extends BaseModel {
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
-    localKey: "id_usuario_creacion"
+    localKey: "id_usuario_creacion",
   })
   public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
-    localKey: "id_usuario_modificacion"
+    localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
 }
