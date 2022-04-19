@@ -16,6 +16,7 @@ import "../routes/repooss";
 import "../routes/solicitudesproveeduria";
 import "../routes/laboratorios";
 import "../routes/droguerias";
+import "../routes/productosTransfers";
 
 Route.get("/", async () => {
   return { hello: "world" };
