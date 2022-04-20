@@ -1181,15 +1181,20 @@ const tbl_solicitud_proveeduria = async () => {
 
     if (!farmacia || !entidad) return;
 
-    const sql_solicitud = `INSERT INTO tbl_solicitud_proveeduria (id, id_estado_pedido, id_farmacia, id_entidad, fecha, nro_cuenta_drogueria, email_destinatario, productos_solicitados, id_usuario_creacion, id_usuario_modificacion)
+    const sql_solicitud = `INSERT INTO tbl_solicitud_proveeduria (id, id_estado_pedido,
+       id_farmacia, id_entidad, fecha, nro_cuenta_drogueria, 
+       email_destinatario, productos_solicitados, 
+       id_usuario_creacion, id_usuario_modificacion)
     VALUES (${soli.codigo_solicitud}, 1 ,${farmacia.idsql}, ${
       entidad.idsql
     }, "${soli.fecha.toISOString().split("T")[0]}", ${stringOnull(
       soli.nro_cuenta_drogueria
-    )}, ${stringOnull(
-      soli.email_destinatario
-    )}, "${soli.productos_solicitados.toString()}", 1, 1  )
-    `;
+    )}, ${stringOnull(soli.email_destinatario)}, '${JSON.stringify(
+      soli.productos_solicitados
+    )}', 1, 1  )
+    ON DUPLICATE KEY UPDATE productos_solicitados = '${JSON.stringify(
+      soli.productos_solicitados
+    )}'`;
 
     await queryPromise(con, sql_solicitud);
 
