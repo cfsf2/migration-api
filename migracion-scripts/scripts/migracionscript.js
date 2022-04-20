@@ -1490,26 +1490,27 @@ const tbl_producto_custom = () => {
     }
        `;
     const sql2 = (
-      farmacia,
       p
     ) => `INSERT INTO tbl_farmacia_producto_custom (id_farmacia, id_producto_custom, en_papelera)
-        VALUES (${farmacia.idsql}, ${p.idsql},${stringOnull(
+        VALUES (${p.id_farmacia}, ${p.idsql},${stringOnull(
       p.en_papelera ? "s" : "n"
     )} )`;
 
     farmaciasConProductosCustom.map((farmacia) => {
       farmacia.productos.map((p) => {
-        p.idsql = id;
-        p.id_farmacia = farmacia.idsql;
+        const prod = p;
+        prod.idsql = id;
+        prod.id_farmacia = farmacia.idsql;
 
-        productosCustoms.push(p);
+        productosCustoms.push(prod);
+
         id = id + 1;
         return;
       });
     });
 
-    // await Promise.all(queriesPC.map((q) => queryPromise(con, q)));
-    // await Promise.all(queriesFPC.map((q) => queryPromise(con, q)));
+    await Promise.all(productosCustoms.map((p) => queryPromise(con, sql(p))));
+    await Promise.all(productosCustoms.map((p) => queryPromise(con, sql2(p))));
   });
 };
 
