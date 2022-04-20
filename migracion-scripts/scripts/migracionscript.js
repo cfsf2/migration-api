@@ -1286,7 +1286,8 @@ const tbl_usuario = () => {
         u.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
       )}, ${stringOnull(u.deleted ? "s" : "n")}, ${stringOnull(
         u.demolab ? "s" : "n"
-      )}, ${u.id_wp ? "'" + u.id_wp + "'" : null}, ${stringOnull(u.celular)}) `;
+      )}, ${u.id_wp ? "'" + u.id_wp + "'" : null}, ${stringOnull(u.celular)})
+      ON DUPLICATE KEY UPDATE id = ${u.idsql} `;
 
       return queryPromise(con, sql);
     });
@@ -1343,9 +1344,11 @@ const tbl_farmacia = () => {
         f.telefonofijo
       )}, ${stringOnull(
         f.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
-      )}, ${f.cp}) ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
-        f.log ? f.log : null
-      }, latitud=${f.lat ? f.lat : null}, id_perfil_farmageo=${perfilFarmageo(
+      )}, ${f.cp ? `"${f.cp}"` : null}) ON DUPLICATE KEY UPDATE id = ${
+        f.idsql
+      }, longitud=${f.log ? f.log : null}, latitud=${
+        f.lat ? f.lat : null
+      }, id_perfil_farmageo=${perfilFarmageo(
         f.perfil_farmageo
       )}, f_ultimo_acceso=${
         f.ultimoacceso
@@ -1353,7 +1356,7 @@ const tbl_farmacia = () => {
             f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "") +
             "'"
           : null
-      }, cp=${f.cp}`;
+      }, cp=${f.cp ? `"${f.cp}"` : null}`;
 
       return queryPromise(con, sql);
     });
@@ -1385,8 +1388,10 @@ const tbl_producto_pack = () => {
       )}, 1, 1) ON DUPLICATE KEY UPDATE tbl_producto_pack.id = ${
         p.idsql
       }, tbl_producto_pack.id_categoria = ${
-        p.idsql_categoria
-      }, tbl_producto_pack.id_entidad = ${p.idsql_entidad}`;
+        p.idsql_categoria ? `"${p.idsql_categoria}"` : null
+      }, tbl_producto_pack.id_entidad = ${
+        p.idsql_entidad ? `"${p.idsql_entidad}"` : null
+      }`;
 
       return queryPromise(con, sql);
     });
@@ -1426,7 +1431,10 @@ const tbl_laboratorio = () => {
 
 const tbl_producto_custom = () => {
   return new Promise(async (resolve, reject) => {
-    const productoCustoms = await ProductoCustom.find({});
+    const farmaciasConProductosCustom = await Farmacia.find({
+      productos: { $ne: null },
+    });
+    let id = 0;
 
     const inventario = (i) => {
       switch (i) {
@@ -1439,51 +1447,63 @@ const tbl_producto_custom = () => {
       }
     };
 
-    const queries = productoCustoms.map((p) => {
-      const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
-        imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
-      VALUES (${p.idsql}, ${
-        p.descripcion && p.descripcion !== ""
-          ? stringOnull(mysql_real_escape_string(p.descripcion))
-          : '""'
-      }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
-        p.imagen
-      )}, "s", ${stringOnull(p.favorito ? "s" : "n")}, ${p.precio}, ${
-        p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
-      }, ${inventario(p.inventario)},${stringOnull(
-        p.esPromocion ? "s" : "n"
-      )}, ${stringOnull(p.en_papelera ? "s" : "n")}, ${
-        p.idsql_categoria
-      }) ON DUPLICATE KEY UPDATE tbl_producto_custom.id = ${p.idsql}
-       , tbl_producto_custom.descripcion =${
-         p.descripcion && p.descripcion !== ""
-           ? stringOnull(mysql_real_escape_string(p.descripcion))
-           : '""'
-       }, tbl_producto_custom.nombre = ${stringOnull(
-        mysql_real_escape_string(p.nombre)
-      )}, tbl_producto_custom.imagen =  ${stringOnull(
-        p.imagen
-      )}, habilitado = "s", tbl_producto_custom.favorito = ${stringOnull(
-        p.favorito ? "s" : "n"
-      )}, tbl_producto_custom.precio = ${
-        p.precio
-      }, tbl_producto_custom.sku =  ${
-        p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
-      }, tbl_producto_custom.inventario = ${inventario(
-        p.inventario
-      )}, tbl_producto_custom.esPromocion = ${stringOnull(
-        p.esPromocion ? "s" : "n"
-      )}, tbl_producto_custom.en_papelera = ${stringOnull(
-        p.en_papelera ? "s" : "n"
-      )}, tbl_producto_custom.id_categoria = ${p.idsql_categoria}
-       `;
+    let queriesPC = [];
+    let queriesFPC = [];
 
-      return queryPromise(con, sql);
+    farmaciasConProductosCustom.map((farmacia) => {
+      farmacia.productos.map((p) => {
+        p.idsql = id + 1;
+        const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
+            imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
+          VALUES (${p.idsql}, ${
+          p.descripcion && p.descripcion !== ""
+            ? stringOnull(mysql_real_escape_string(p.descripcion))
+            : '""'
+        }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
+          p.imagen
+        )}, "s", ${stringOnull(p.favorito ? "s" : "n")}, ${p.precio}, ${
+          p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+        }, ${inventario(p.inventario)},${stringOnull(
+          p.esPromocion ? "s" : "n"
+        )}, ${stringOnull(p.en_papelera ? "s" : "n")}, ${
+          p.idsql_categoria ? p.idsql_categoria : null
+        }) ON DUPLICATE KEY UPDATE tbl_producto_custom.id = ${p.idsql}
+           , tbl_producto_custom.descripcion =${
+             p.descripcion && p.descripcion !== ""
+               ? stringOnull(mysql_real_escape_string(p.descripcion))
+               : '""'
+           }, tbl_producto_custom.nombre = ${stringOnull(
+          mysql_real_escape_string(p.nombre)
+        )}, tbl_producto_custom.imagen =  ${stringOnull(
+          p.imagen
+        )}, habilitado = "s", tbl_producto_custom.favorito = ${stringOnull(
+          p.favorito ? "s" : "n"
+        )}, tbl_producto_custom.precio = ${
+          p.precio
+        }, tbl_producto_custom.sku =  ${
+          p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+        }, tbl_producto_custom.inventario = ${inventario(
+          p.inventario
+        )}, tbl_producto_custom.esPromocion = ${stringOnull(
+          p.esPromocion ? "s" : "n"
+        )}, tbl_producto_custom.en_papelera = ${stringOnull(
+          p.en_papelera ? "s" : "n"
+        )}, tbl_producto_custom.id_categoria = ${
+          p.idsql_categoria ? p.idsql_categoria : null
+        }
+           `;
+        const sql2 = `INSERT INTO tbl_farmacia_producto_custom (id_farmacia, id_producto_custom, en_papelera)
+            VALUES (${farmacia.idsql}, ${p.idsql},${stringOnull(
+          p.en_papelera ? "s" : "n"
+        )} )`;
+
+        queriesPC.push(sql);
+        queriesFPC.push(sql2);
+      });
     });
-    Promise.all(queries).then(() => {
-      console.log("productoCustoms migradas " + productoCustoms.length);
-      resolve();
-    });
+
+    await Promise.all(queriesPC.map((q) => queryPromise(con, q)));
+    await Promise.all(queriesFPC.map((q) => queryPromise(con, q)));
   });
 };
 

@@ -42,7 +42,7 @@ const asignaridsql = async () => {
   // migracion.asignar_idsql(Laboratorio);
   // migracion.asignar_idsql(Drogueria);
   // migracion.asignar_idsql(Publicidad);
-  migracion.asignar_idsql(ProductoTransfer);
+   migracion.asignar_idsql(ProductoTransfer);
 
   // migracion.asignar_idsql_externo(
   //   ProductoTransfer,
