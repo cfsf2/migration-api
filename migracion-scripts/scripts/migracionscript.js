@@ -1434,7 +1434,7 @@ const tbl_producto_custom = () => {
     const farmaciasConProductosCustom = await Farmacia.find({
       productos: { $ne: null },
     });
-    let id = 0;
+    let id = 1;
 
     const inventario = (i) => {
       switch (i) {
@@ -1449,61 +1449,67 @@ const tbl_producto_custom = () => {
 
     let queriesPC = [];
     let queriesFPC = [];
+    let productosCustoms = [];
+    const sql = (
+      p
+    ) => `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
+        imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
+      VALUES (${p.idsql}, ${
+      p.descripcion && p.descripcion !== ""
+        ? stringOnull(mysql_real_escape_string(p.descripcion))
+        : '""'
+    }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
+      p.imagen
+    )}, "s", ${stringOnull(p.favorito ? "s" : "n")}, ${p.precio}, ${
+      p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+    }, ${inventario(p.inventario)},${stringOnull(
+      p.esPromocion ? "s" : "n"
+    )}, ${stringOnull(p.en_papelera ? "s" : "n")}, ${
+      p.idsql_categoria ? p.idsql_categoria : null
+    }) ON DUPLICATE KEY UPDATE tbl_producto_custom.id = ${p.idsql}
+       , tbl_producto_custom.descripcion =${
+         p.descripcion && p.descripcion !== ""
+           ? stringOnull(mysql_real_escape_string(p.descripcion))
+           : '""'
+       }, tbl_producto_custom.nombre = ${stringOnull(
+      mysql_real_escape_string(p.nombre)
+    )}, tbl_producto_custom.imagen =  ${stringOnull(
+      p.imagen
+    )}, habilitado = "s", tbl_producto_custom.favorito = ${stringOnull(
+      p.favorito ? "s" : "n"
+    )}, tbl_producto_custom.precio = ${p.precio}, tbl_producto_custom.sku =  ${
+      p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
+    }, tbl_producto_custom.inventario = ${inventario(
+      p.inventario
+    )}, tbl_producto_custom.esPromocion = ${stringOnull(
+      p.esPromocion ? "s" : "n"
+    )}, tbl_producto_custom.en_papelera = ${stringOnull(
+      p.en_papelera ? "s" : "n"
+    )}, tbl_producto_custom.id_categoria = ${
+      p.idsql_categoria ? p.idsql_categoria : null
+    }
+       `;
+    const sql2 = (
+      farmacia,
+      p
+    ) => `INSERT INTO tbl_farmacia_producto_custom (id_farmacia, id_producto_custom, en_papelera)
+        VALUES (${farmacia.idsql}, ${p.idsql},${stringOnull(
+      p.en_papelera ? "s" : "n"
+    )} )`;
 
     farmaciasConProductosCustom.map((farmacia) => {
       farmacia.productos.map((p) => {
-        p.idsql = id + 1;
-        const sql = `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
-            imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
-          VALUES (${p.idsql}, ${
-          p.descripcion && p.descripcion !== ""
-            ? stringOnull(mysql_real_escape_string(p.descripcion))
-            : '""'
-        }, ${stringOnull(mysql_real_escape_string(p.nombre))}, ${stringOnull(
-          p.imagen
-        )}, "s", ${stringOnull(p.favorito ? "s" : "n")}, ${p.precio}, ${
-          p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
-        }, ${inventario(p.inventario)},${stringOnull(
-          p.esPromocion ? "s" : "n"
-        )}, ${stringOnull(p.en_papelera ? "s" : "n")}, ${
-          p.idsql_categoria ? p.idsql_categoria : null
-        }) ON DUPLICATE KEY UPDATE tbl_producto_custom.id = ${p.idsql}
-           , tbl_producto_custom.descripcion =${
-             p.descripcion && p.descripcion !== ""
-               ? stringOnull(mysql_real_escape_string(p.descripcion))
-               : '""'
-           }, tbl_producto_custom.nombre = ${stringOnull(
-          mysql_real_escape_string(p.nombre)
-        )}, tbl_producto_custom.imagen =  ${stringOnull(
-          p.imagen
-        )}, habilitado = "s", tbl_producto_custom.favorito = ${stringOnull(
-          p.favorito ? "s" : "n"
-        )}, tbl_producto_custom.precio = ${
-          p.precio
-        }, tbl_producto_custom.sku =  ${
-          p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
-        }, tbl_producto_custom.inventario = ${inventario(
-          p.inventario
-        )}, tbl_producto_custom.esPromocion = ${stringOnull(
-          p.esPromocion ? "s" : "n"
-        )}, tbl_producto_custom.en_papelera = ${stringOnull(
-          p.en_papelera ? "s" : "n"
-        )}, tbl_producto_custom.id_categoria = ${
-          p.idsql_categoria ? p.idsql_categoria : null
-        }
-           `;
-        const sql2 = `INSERT INTO tbl_farmacia_producto_custom (id_farmacia, id_producto_custom, en_papelera)
-            VALUES (${farmacia.idsql}, ${p.idsql},${stringOnull(
-          p.en_papelera ? "s" : "n"
-        )} )`;
+        p.idsql = id;
+        p.id_farmacia = farmacia.idsql;
 
-        queriesPC.push(sql);
-        queriesFPC.push(sql2);
+        productosCustoms.push(p);
+        id = id + 1;
+        return;
       });
     });
 
-    await Promise.all(queriesPC.map((q) => queryPromise(con, q)));
-    await Promise.all(queriesFPC.map((q) => queryPromise(con, q)));
+    // await Promise.all(queriesPC.map((q) => queryPromise(con, q)));
+    // await Promise.all(queriesFPC.map((q) => queryPromise(con, q)));
   });
 };
 
