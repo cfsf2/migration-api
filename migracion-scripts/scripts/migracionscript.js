@@ -917,14 +917,42 @@ const tbl_pedidos_producto_pack = async () => {
     const receta = stringOnull(p.receta);
     const precio_total = p.precio ? p.precio : null;
 
-    const sql_pedido = `INSERT INTO tbl_pedido (id, descripcion, comentario, id_estado_pedido, id_farmacia, costoenvio, domicilioenvio, gruposproductos, 
+    const sql_pedido = `INSERT INTO tbl_pedido (id, descripcion, comentarios, id_estado_pedido, id_farmacia, costoenvio, domicilioenvio, gruposproductos, 
       pago_online, envio, habilitado, fechaentrega, es_invitado, id_socio, datos_cliente, origen, username, nombrefarmacia, whatsapp, 
       obra_social, obra_social_frente, obra_social_dorso, receta, total, id_usuario_creacion, id_usuario_modificacion)
       VALUES (${id_pedido}, ${descripcion}, ${comentarios},${id_estado}, ${id_farmacia}, "${costoenvio}", "${domicilioenvio}", 
       '${JSON.stringify(pedido.gruposproductos)}', 
       "${pago_online}", "${envio}", "${habilitado}", "${fecha_entrega}","${es_invitado}", ${idsocio}, ${datos_cliente}, ${origen}, ${username}, ${nombrefarmacia}, ${whatsapp},
       ${obra_social}, ${obra_social_frente}, ${obra_social_dorso}, ${receta}, ${precio_total}, 1, 1
-       ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${id_pedido}
+       ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${
+         id_pedido + 1
+       }, tbl_pedido.descripcion = ${descripcion}, 
+       tbl_pedido.comentarios =${comentarios} , 
+       tbl_pedido.id_estado_pedido =${id_estado} , 
+       tbl_pedido.id_farmacia =${id_farmacia} ,
+        tbl_pedido.costoenvio ="${costoenvio}"
+       , tbl_pedido.domicilioenvio = "${domicilioenvio}"
+       , tbl_pedido.gruposproductos ='${JSON.stringify(
+         pedido.gruposproductos
+       )}' , 
+       tbl_pedido.pago_online =  "${pago_online}", 
+       tbl_pedido.envio = "${envio}", 
+       tbl_pedido.habilitado ="${habilitado}" , 
+       tbl_pedido.fechaentrega = "${fecha_entrega}",
+       tbl_pedido.es_invitado = "${es_invitado}", 
+       tbl_pedido.id_socio =  ${idsocio}, 
+       tbl_pedido.datos_cliente = ${datos_cliente},
+       tbl_pedido.origen = ${origen},
+        tbl_pedido.username = ${username} , 
+        tbl_pedido.nombrefarmacia =  ${nombrefarmacia}, 
+        tbl_pedido.whatsapp =${whatsapp} ,
+       tbl_pedido.obra_social =  ${obra_social},
+        tbl_pedido.obra_social_frente =  ${obra_social_frente}
+        ,tbl_pedido.obra_social_dorso = ${obra_social_dorso} , 
+        tbl_pedido.receta =${receta} , 
+        tbl_pedido.total = ${precio_total} , 
+        tbl_pedido.id_usuario_creacion =1, 
+        tbl_pedido.id_usuario_modificacion=1
       `;
 
     await queryPromise(con, sql_pedido);
