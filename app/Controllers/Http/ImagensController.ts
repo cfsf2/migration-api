@@ -8,7 +8,8 @@ export default class ImagensController {
     });
     if (file) {
       const timestamp = Date.now().toString();
-      const nombreArchivo = `A${timestamp}-lgTESTEANDOAAAAA.${file.extname}`;
+      const nombreArchivo = `A${timestamp}-${file.fileName}
+      .${file.extname}`;
       const carpeta = "farmacias/";
       try {
         const res = await file.moveToDisk(
@@ -21,9 +22,9 @@ export default class ImagensController {
           },
           "s3"
         );
-
+          console.log(await Drive.getSignedUrl(`${carpeta}${nombreArchivo}`))
         return response.send({
-          Key: await Drive.getUrl(carpeta + nombreArchivo),
+          Key: await Drive.getSignedUrl(`${carpeta}${nombreArchivo}`),
         });
       } catch (err) {
         console.log(err);
