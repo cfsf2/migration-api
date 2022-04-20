@@ -33,27 +33,30 @@ connectToDatabase = async () => {
     //   await migracion.tbl_laboratorio();
     //await migracion.tbl_transfer_productos();
     // await migracion.tbl_publicidades();
-    await migracion.tbl_producto_custom();
+    //await migracion.tbl_producto_custom();
     resolve();
   });
 })()
   .then(() => {
     const migration = () => {
       return new Promise((resolve, reject) => {
-        //  migracion.tbl_farmacia_productopack();
-        //  migracion.tbl_farmacia_producto_custom();
-        //  migracion.tbl_pedidos_producto_pack();
-        //  migracion.tbl_transfers();
+        // migracion.tbl_farmacia_productopack();
+        //migracion.tbl_farmacia_institucion();
         //  migracion.tbl_farmacia_mediosdepago();
-        //  migracion.tbl_farmacia_servicios();
+        //migracion.tbl_farmacia_servicios();
         //  migracion.tbl_farmacia_dia();
-        //  migracion.tbl_perfil_permiso();
-        //  migracion.tbl_usuario_perfil();
-        //  migracion.tbl_farmacia_institucion();
-        //  migracion.tbl_publicidad_institucion();
-        //  migracion.tbl_ptransfer_institucion();
-        //  migracion.tbl_solicitud_proveeduria();
+
+        // migracion.tbl_perfil_permiso();
+        // migracion.tbl_usuario_perfil();
+
+        // migracion.tbl_publicidad_institucion();
+        // migracion.tbl_ptransfer_institucion();
+
+        migracion.tbl_solicitud_proveeduria();
         //  migracion.tbl_debitofarmacia();
+        //  migracion.tbl_pedidos_producto_pack();
+        //   migracion.tbl_transfers();
+
         resolve();
       });
     };
