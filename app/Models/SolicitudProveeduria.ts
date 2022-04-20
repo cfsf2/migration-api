@@ -41,7 +41,6 @@ export default class SolicitudProveeduria extends BaseModel {
           .leftJoin("tbl_producto_pack as pp", "sppp.id_producto_pack", "pp.id")
           .where("sppp.id_solicitud_proveeduria", solicitud.id);
           
-        JSON.stringify(solicitud)
         solicitud.productos_solicitados = productosSolicitados;
         return solicitud;
       })
