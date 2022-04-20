@@ -32,7 +32,7 @@ export default class SolicitudProveeduria extends BaseModel {
       .leftJoin("tbl_estado_pedido as ep", "sp.id_estado_pedido", "ep.id")
       .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id");
 
-    const arraySolicitudes = Promise.all(
+    const arraySolicitudes =await Promise.all(
       solicitudes.map(async (solicitud) => {
         const productosSolicitados = await Database.from(
           "tbl_solicitud_proveeduria_producto_pack as sppp"
@@ -40,12 +40,16 @@ export default class SolicitudProveeduria extends BaseModel {
           .select("*")
           .leftJoin("tbl_producto_pack as pp", "sppp.id_producto_pack", "pp.id")
           .where("sppp.id_solicitud_proveeduria", solicitud.id);
-          
+
+          if(productosSolicitados.length === 0 ){
+           solicitud.productos_solicitados =await JSON.parse(solicitud.productos_solicitados)
+            return solicitud
+          }
         solicitud.productos_solicitados = productosSolicitados;
         return solicitud;
       })
     );
-    return solicitudes;
+    return  arraySolicitudes;
   }
 
   public static table = "tbl_solicitud_proveeduria";
