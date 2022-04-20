@@ -42,7 +42,7 @@ export default class SolicitudProveeduria extends BaseModel {
           .where("sppp.id_solicitud_proveeduria", solicitud.id);
 
           if(productosSolicitados.length === 0 ){
-           // solicitud.productos_solicitados =await JSON.parse(solicitud.productos_solicitados)
+           solicitud.productos_solicitados =await JSON.parse(solicitud.productos_solicitados)
             return solicitud
           }
         solicitud.productos_solicitados = productosSolicitados;
