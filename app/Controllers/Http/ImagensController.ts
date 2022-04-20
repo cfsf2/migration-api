@@ -1,5 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Drive from "@ioc:Adonis/Core/Drive";
+import env from "env";
 
 export default class ImagensController {
   public async upload({ request, response }: HttpContextContract) {
@@ -8,7 +9,7 @@ export default class ImagensController {
     });
     if (file) {
       const timestamp = Date.now().toString();
-      const nombreArchivo = `A${timestamp}-lgTESTEANDOAAAAA.${file.extname}`;
+      const nombreArchivo = `A${timestamp}-${file.fileName}.${file.extname}`;
       const carpeta = "farmacias/";
       try {
         const res = await file.moveToDisk(
@@ -21,9 +22,9 @@ export default class ImagensController {
           },
           "s3"
         );
-
+     
         return response.send({
-          Key: await Drive.getUrl(carpeta + nombreArchivo),
+          Key: `${carpeta}${nombreArchivo}`
         });
       } catch (err) {
         console.log(err);
