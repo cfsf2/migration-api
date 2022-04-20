@@ -1,12 +1,37 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, column, hasManyThrough, HasManyThrough, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Farmacia from "./Farmacia";
 import Drogueria from "./Drogueria";
 import EstadoTransfer from "./EstadoTransfer";
 import Laboratorio from "./Laboratorio";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Transfer extends BaseModel {
+  static async traerTransfers(){
+    const transfers = await Database.from("tbl_transfer as t")
+      .select("*",
+      "t.id as id",
+      "t.id as _id",
+      "t.ts_modificacion as fecha_modificacion",
+      "t.ts_creacion as fecha_alta",
+      "d.nombre as drogueria_id",
+      "f.matricula as farmacia_id",
+      "f.nombre as farmacia_nombre",
+      "et.nombre as estado",
+      "u.id_usuario_creacion as id_usuario_creacion",
+      "u.id_usuario_modificacion as ultima_modificacion",
+      )
+
+      .leftJoin("tbl_drogueria as d", "t.id_drogueria", "d.id")
+      .leftJoin("tbl_farmacia as f", "t.id", "f.id")
+      .leftJoin("tbl_estado_transfer as et", "t.id_transfer_estado", "et.id")
+      .leftJoin("tbl_usuario as u", "t.id", "u.id")
+
+      .where("t.id", 19)
+      return transfers
+  }
+
   public static table = "tbl_transfer";
 
   @column({ isPrimary: true })
@@ -36,33 +61,53 @@ export default class Transfer extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-  })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  //foreing key
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Farmacia, {
     foreignKey: "id",
+    localKey: "id_farmacia",
   })
-  public id_farmacia: HasOne<typeof Farmacia>;
+  public farmacia: HasOne<typeof Farmacia>;
 
   @hasOne(() => Drogueria, {
     foreignKey: "id",
+    localKey: "id_drogueria",
   })
-  public id_drogueria: HasOne<typeof Drogueria>;
+  public drogueria: HasOne<typeof Drogueria>;
 
   @hasOne(() => Laboratorio, {
     foreignKey: "id",
+    localKey: "id_laboratorio",
   })
-  public id_laboratorio: HasOne<typeof Laboratorio>;
+  public laboratorio: HasOne<typeof Laboratorio>;
 
   @hasOne(() => EstadoTransfer, {
     foreignKey: "id",
+    localKey: "id_estado_transfer",
   })
-  public id_estado_transfer: HasOne<typeof EstadoTransfer>;
+  public estado_transfer: HasOne<typeof EstadoTransfer>;
+
+  // @hasManyThrough(
+  //   [() => ProductoPack, () => SolicitudProveeduriaProductoPack],
+  //   {
+  //     localKey: "id",
+  //     foreignKey: "id_solicitud_proveeduria",
+
+  //     throughLocalKey: "id_producto_pack",
+  //     throughForeignKey: "id",
+  //   }
+  // )
+  // public producto: HasManyThrough<typeof ProductoPack>;
 }
