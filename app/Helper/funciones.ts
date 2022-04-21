@@ -32,6 +32,15 @@ export const boolaEnum = (e) => {
   return e;
 };
 
+export const boolaEnumObj = (e) => {
+  const claves = Object.keys(e);
+  claves.forEach((k) => {
+    e[k] = boolaEnum(e[k]);
+  });
+
+  return e;
+};
+
 export const getCoordenadas = ({
   calle,
   numero,

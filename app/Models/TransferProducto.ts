@@ -3,6 +3,8 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Laboratorio from "./Laboratorio";
 import Database from "@ioc:Adonis/Lucid/Database";
+import TransferProductoInstitucion from "./TransferProductoInstitucion";
+import { eliminarKeysVacios, enumaBool } from "App/Helper/funciones";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -14,7 +16,8 @@ export default class TransferProducto extends BaseModel {
   }) {
     const trasfersProducto = await Database.from("tbl_transfer_producto as tp")
       .select(
-        "*",
+        "tp.*",
+        "tp.id as _id",
         "tp.id as id",
         "tp.habilitado as habilitado",
         "tp.nombre as nombre",
@@ -26,7 +29,6 @@ export default class TransferProducto extends BaseModel {
         "u.id_usuario_creacion as id_usuario_alta",
         "u.id_usuario_modificacion as id_usuario_modificacion"
       )
-
       .leftJoin("tbl_laboratorio as l", "tp.id_laboratorio", "l.id")
       .leftJoin("tbl_usuario as u", "tp.id", "u.id")
       //en_papelera
@@ -36,10 +38,107 @@ export default class TransferProducto extends BaseModel {
       .if(habilitado, (query) => {
         query.where("tp.habilitado", "s");
       })
-
       .orderBy("codigo", "desc");
 
-    return trasfersProducto;
+    return trasfersProducto.map((t) => {
+      t._id = t._id.toString();
+      return enumaBool(t);
+    });
+  }
+
+  static async agregar(data) {
+    const nuevoPF = new TransferProducto();
+
+    const instituciones = data.instituciones;
+
+    delete data.instituciones;
+
+    try {
+      nuevoPF.merge({
+        id_laboratorio: data.laboratorioid,
+        nombre: data.nombre,
+        habilitado: data.habilitado ? "s" : "n",
+        presentacion: data.presentacion,
+        cantidad_minima: data.cantidad_minima,
+        descuento_porcentaje: data.descuento_porcentaje,
+        precio: data.precio,
+        codigo: data.codigo,
+      });
+      await nuevoPF.save();
+
+      instituciones.forEach((i) => {
+        const institucionPF = new TransferProductoInstitucion();
+        institucionPF.merge({
+          id_transfer_producto: nuevoPF.id,
+          id_institucion: i,
+        });
+        institucionPF.save();
+      });
+      return;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  static async actualizar(id, data) {
+    const transferProducto = await TransferProducto.findOrFail(id);
+
+    const mergeObject: TransferProducto | any = {
+      id_laboratorio: data.productosTransfers.laboratorioid,
+      nombre: data.productosTransfers.nombre,
+      habilitado:
+        typeof data.productosTransfers.habilitado !== "undefined"
+          ? data.productosTransfers.habilitado
+            ? "s"
+            : "n"
+          : null,
+      presentacion: data.productosTransfers.presentacion,
+      cantidad_minima: data.productosTransfers.cantidad_minima,
+      descuento_porcentaje: data.productosTransfers.descuento_porcentaje,
+      precio: data.productosTransfers.precio,
+      codigo: data.productosTransfers.codigo,
+      en_papelera:
+        typeof data.productosTransfers.en_papelera !== "undefined"
+          ? data.productosTransfers.en_papelera
+            ? "s"
+            : "n"
+          : null,
+    };
+
+    transferProducto.merge(eliminarKeysVacios(mergeObject));
+    try {
+      await transferProducto.save();
+
+      let instDB = data.productosTransfers.instituciones;
+
+      if (data.instituciones) {
+        data.instituciones.forEach(async (i) => {
+          if (instDB.includes(i)) {
+            return instDB.splice(
+              instDB.findIndex((e) => e == i),
+              1
+            );
+          }
+
+          await TransferProductoInstitucion.create({
+            id_institucion: i,
+            id_transfer_producto: data.productosTransfers.id,
+          });
+        });
+
+        instDB.forEach(async (i) => {
+          const relacion = await TransferProductoInstitucion.query()
+            .where("id_institucion", i)
+            .andWhere("id_transfer_producto", data.productosTransfers.id);
+          relacion[0].delete();
+        });
+      }
+      return;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
   public static table = "tbl_transfer_producto";
 
