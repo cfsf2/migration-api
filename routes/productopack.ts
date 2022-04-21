@@ -6,3 +6,5 @@ Route.get(
   "ProductoPackController.mig_entidad"
 );
 Route.get("/productospack/:idProducto", "ProductoPackController.mig_producto");
+
+Route.post("/productospack", "ProductoPackController.mig_agregar_producto");

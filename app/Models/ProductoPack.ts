@@ -18,8 +18,10 @@ export default class ProductoPack extends BaseModel {
     en_papelera?: string;
   }) {
     const datos = await Database.rawQuery(
-      ` SELECT pp.*, pp.id as _id,   
-      IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, pp.id_entidad as entidad_id 
+      ` SELECT pp.*, pp.id as _id,
+      pp.ts_creacion as fechaalta,
+      IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, 
+      IF ( pp.id_entidad is NULL, '', pp.id_entidad) as entidad_id 
       FROM tbl_producto_pack as pp 
       WHERE 1 = 1
       ${en_papelera ? `AND pp.en_papelera =  "${en_papelera}"` : ""}
@@ -84,16 +86,16 @@ export default class ProductoPack extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_entidad: Number;
+  public id_entidad: number;
 
   @column()
-  public id_categoria: Number;
+  public id_categoria: number;
 
   @column()
-  public id_usuario_creacion: Number;
+  public id_usuario_creacion: number;
 
   @column()
-  public id_usuario_modificacion: Number; //foreing key
+  public id_usuario_modificacion: number; //foreing key
 
   @hasOne(() => Categoria, {
     foreignKey: "id",
@@ -121,7 +123,7 @@ export default class ProductoPack extends BaseModel {
 
   public serializeExtras() {
     return {
-      _id: this.$extras._id.toString(),
+      _id: this.$extras._id?.toString(),
     };
   }
 }
