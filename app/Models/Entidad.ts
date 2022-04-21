@@ -4,30 +4,21 @@ import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Entidad extends BaseModel {
-  static async traerEntidades() {
+  static async traerEntidades({ habilitado }: { habilitado?: string }) {
     const datos = await Database.from("tbl_entidad as e").select(
       "*",
       "e.id as _id",
       "e.nombre as entidadnombre",
       "e.titulo as nombre",
       "e.mostrar_en_proveeduria as no_mostrar_en_proveeduria"
-    );
-    
-
+    )
+    .if(habilitado, (query)=>{
+      query.where('habilitado', 's')
+    })
 
     const arrNuevo = datos.map((e) => {
-      e.no_mostrar_en_proveeduria = e.no_mostrar_en_proveeduria === "s" ? false : true
-      
-      const claves = Object.keys(e);
-      claves.forEach((k) => {
-        if (e[k] === "s") {
-          e[k] = true;
-        }
-        if (e[k] === "n") {
-          e[k] = false;
-        }
-      });
-
+      e.no_mostrar_en_proveeduria =
+        e.no_mostrar_en_proveeduria === "s" ? 'false' : 'true';
       return e;
     });
     return arrNuevo;

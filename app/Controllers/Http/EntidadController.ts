@@ -1,10 +1,11 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { eliminarKeysVacios } from "App/Helper/funciones";
+import Publicidad from "App/Models/Publicidad";
 import Entidad from "../../Models/Entidad";
 
 export default class EntidadController {
   public async index({ request }: HttpContextContract) {
-    return await Entidad.traerEntidades();
+    return await Entidad.traerEntidades({ habilitado : 'true'});
   }
 
   public async mig_agregar_entidad({ request }: HttpContextContract) {
@@ -13,7 +14,7 @@ export default class EntidadController {
     nuevaEntidad.merge({
       imagen: request.body().imagen,
       logo: request.body().logo,
-      habilitado: request.body().habilitado === true ? "s" : "n",
+      habilitado: request.body().habilitado = 's',
       email: request.body().email,
       nombre: request.body().entidadnombre, //entidadnombre
       titulo: request.body().nombre, //nombre
@@ -24,17 +25,20 @@ export default class EntidadController {
           : "n"
         : "s",
     });
-    nuevaEntidad.save();
-    //console.log(nuevaEntidad.save())
-    return;
+
+    try {
+      nuevaEntidad.save();
+      return nuevaEntidad;
+    } catch (error) {
+      return error;
+    }
   }
 
   public async mig_update_entidad({ request }: HttpContextContract) {
     const { id } = request.qs();
-    console.log(request.qs());
 
     let entidad = await Entidad.findOrFail(id);
-
+    console.log(request.body().habilitado)
     let mergeObject: any = {
       imagen: request.body().imagen,
       logo: request.body().logo,
@@ -61,6 +65,24 @@ export default class EntidadController {
 
     try {
       entidad.save();
+      return entidad;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async mig_delete({ request }: HttpContextContract) {
+    const { id } = request.params();
+
+    let entidad = await Entidad.findOrFail(id);
+    
+    entidad.merge({
+      habilitado: request.body().habilitado = 'n'
+    });
+
+    entidad.save();
+    
+    try {
       return entidad;
     } catch (error) {
       return error;
