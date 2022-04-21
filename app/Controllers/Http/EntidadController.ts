@@ -38,7 +38,7 @@ export default class EntidadController {
     const { id } = request.qs();
 
     let entidad = await Entidad.findOrFail(id);
-    console.log(request.body().habilitado)
+
     let mergeObject: any = {
       imagen: request.body().imagen,
       logo: request.body().logo,

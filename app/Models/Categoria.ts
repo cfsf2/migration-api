@@ -4,7 +4,7 @@ import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Categoria extends BaseModel {
-  static async traerCategorias({ habilitado }: { habilitado?: boolean }) {
+  static async traerCategorias({ habilitado }: { habilitado?: string }) {
     const datos = await Database.from("tbl_categoria as ca")
       .select(
         "ca.habilitado",
@@ -74,4 +74,5 @@ export default class Categoria extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
 }
