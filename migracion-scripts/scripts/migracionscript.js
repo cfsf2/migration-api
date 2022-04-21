@@ -1096,13 +1096,29 @@ const tbl_publicidades = async () => {
       const habilitado = publicidad.habilitado ? "s" : "n";
 
       const sql = `INSERT INTO tbl_publicidad 
-   (titulo, descripcion, link, imagen, id_publicidad_tipo, id_color, fecha_inicio, fecha_fin, habilitado, id_usuario_creacion, id_usuario_modificacion)
-    VALUES (${stringOnull(publicidad.titulo)},${stringOnull(
+   (id, titulo, descripcion, link, imagen, id_publicidad_tipo, id_color, fecha_inicio, fecha_fin, habilitado, id_usuario_creacion, id_usuario_modificacion)
+    VALUES (${publicidad.idsql},${stringOnull(publicidad.titulo)},${stringOnull(
         mysql_real_escape_string(publicidad.descripcion)
       )},${stringOnull(publicidad.link)}, ${stringOnull(
         publicidad.imagen
       )}, ${id_tipo}, ${id_color}, ${fecha_inicio}, ${fecha_fin}, 
-    "${habilitado}", 1, 1 )`;
+    "${habilitado}", 1, 1 )
+    ON DUPLICATE KEY UPDATE
+    id = ${publicidad.idsql + 1},
+    titulo =${stringOnull(publicidad.titulo)},
+    descripcion =${stringOnull(
+      mysql_real_escape_string(publicidad.descripcion)
+    )} ,
+    link= ${stringOnull(publicidad.link)},
+    imagen= ${stringOnull(publicidad.imagen)},
+    id_publicidad_tipo =${id_tipo} ,
+    id_color= ${id_color} ,
+    fecha_inicio= ${fecha_inicio},
+    fecha_fin= ${fecha_fin} ,
+    habilitado="${habilitado}" ,
+    id_usuario_creacion=1,
+    id_usuario_modificacion=1
+    `;
 
       return queryPromise(con, sql);
       //console.log((100 * ((indx + 1) / publicidades.length)).toFixed(2) + "%");
@@ -1122,7 +1138,7 @@ const tbl_publicidad_institucion = async () => {
   console.log(relaciones);
 
   relaciones.forEach((rel, idx) => {
-    const sql = `INSERT IGNORE INTO tbl_publicidad_institucion (id_publicidad, id_institucion, id_usuario_creacion, id_usuario_modificacion)
+    const sql = `INSERT INTO tbl_publicidad_institucion (id_publicidad, id_institucion, id_usuario_creacion, id_usuario_modificacion)
                 VALUES (${rel.publicidad.idsql}, ${rel.institucion.idsql}, 1, 1)
     `;
 
@@ -1350,7 +1366,14 @@ const tbl_farmacia = () => {
     };
 
     const queries = farmacias.map((f) => {
-      const sql = `INSERT INTO tbl_farmacia (id, id_usuario, password, nombre, nombrefarmaceutico, matricula, cufe, cuit, id_localidad, calle, numero, direccioncompleta, longitud, latitud, habilitado,imagen, email, telefono, whatsapp, facebook, instagram, web, id_perfil_farmageo, descubrir, envios, costoenvio, tiempotardanza, visita_comercial, telefonofijo, f_ultimo_acceso, cp)
+      const sql = `INSERT INTO tbl_farmacia (id, id_usuario, password, 
+        nombre, nombrefarmaceutico, 
+        matricula, cufe, cuit, 
+        id_localidad, calle, numero, 
+        direccioncompleta, longitud, latitud, habilitado,
+        imagen, email, telefono, whatsapp, facebook, instagram,
+         web, id_perfil_farmageo, descubrir, envios, costoenvio, 
+         tiempotardanza, visita_comercial, telefonofijo, f_ultimo_acceso, cp)
       VALUES (${f.idsql}, ${f.idsql_usuario}, ${stringOnull(
         f.password
       )}, ${stringOnull(f.nombre.toString())},${stringOnull(
@@ -1377,11 +1400,10 @@ const tbl_farmacia = () => {
         f.telefonofijo
       )}, ${stringOnull(
         f.ultimoacceso?.toISOString().replace("T", " ").replace("Z", "")
-      )}, ${f.cp ? `"${f.cp}"` : null}) ON DUPLICATE KEY UPDATE id = ${
-        f.idsql
-      }, longitud=${f.log ? f.log : null}, latitud=${
-        f.lat ? f.lat : null
-      }, id_perfil_farmageo=${perfilFarmageo(
+      )}, ${f.cp ? `"${f.cp}"` : null}) 
+      ON DUPLICATE KEY UPDATE id = ${f.idsql}, longitud=${
+        f.log ? f.log : null
+      }, latitud=${f.lat ? f.lat : null}, id_perfil_farmageo=${perfilFarmageo(
         f.perfil_farmageo
       )}, f_ultimo_acceso=${
         f.ultimoacceso
