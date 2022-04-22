@@ -18,7 +18,8 @@ export default class ProductoPack extends BaseModel {
     en_papelera?: string;
   }) {
     const datos = await Database.rawQuery(
-      ` SELECT pp.*, pp.id as _id,
+      ` SELECT pp.*, 
+      pp.id as _id,
       pp.ts_creacion as fechaalta,
       pp.precio_con_iva as precio_con_IVA,
       IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, 
@@ -44,7 +45,6 @@ export default class ProductoPack extends BaseModel {
 
       return e;
     });
-
     return arrNuevo.length > 0 ? arrNuevo : null;
   }
 

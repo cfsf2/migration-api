@@ -22,13 +22,7 @@ export default class ProductoPackController {
   }
 
   public async mig_producto({ request }: HttpContextContract) {
-    let productoSelect = request.params().idProducto;
-
-    if (productoSelect === "all") {
-      return await ProductoPack.traerProductosPacks({ en_papelera: "n" });
-    }
     return await ProductoPack.traerProductosPacks({
-      producto: productoSelect,
       habilitado: "s",
       en_papelera: "n",
     });
@@ -48,7 +42,7 @@ export default class ProductoPackController {
       sku: request.body().sku,
       id_categoria: request.body().categoria_id,
       id_entidad: request.body().entidad_id,
-      en_papelera: 'n',
+      en_papelera: "n",
     });
     console.log(nuevoProducto);
     try {
@@ -74,22 +68,42 @@ export default class ProductoPackController {
       sku: request.body().sku,
       id_categoria: request.body().categoria_id,
       id_entidad: request.body().entidad_id,
-      en_papelera: 'n',
-    }
+      en_papelera: "n",
+    };
 
     mergeObject = eliminarKeysVacios(mergeObject);
-    
-    console.log(mergeObject)
 
-    producto.merge(mergeObject)
-    
+    producto.merge(mergeObject);
+
     try {
-      producto.save()
+      producto.save();
       return producto;
     } catch (error) {
-      return error
+      return error;
     }
-    
+  }
 
+  public async mig_delete_producto({ request }: HttpContextContract) {
+    const { id } = request.params();
+
+    let producto = await ProductoPack.findOrFail(id);
+
+    producto.merge({
+      en_papelera: "s",
+    });
+    console.log("directo a papelera...");
+
+    try {
+      producto.save();
+      return producto;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async mig_papelera({ request }: HttpContextContract) {
+    return await ProductoPack.traerProductosPacks({
+      en_papelera: "s",
+    });
   }
 }
