@@ -8,3 +8,5 @@ Route.get(
 Route.get("/productospack/:idProducto", "ProductoPackController.mig_producto");
 
 Route.post("/productospack", "ProductoPackController.mig_agregar_producto");
+
+Route.put("/productospack", "ProductoPackController.mig_update_producto");

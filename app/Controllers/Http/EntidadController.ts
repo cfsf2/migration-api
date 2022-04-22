@@ -77,7 +77,7 @@ export default class EntidadController {
     let entidad = await Entidad.findOrFail(id);
     
     entidad.merge({
-      habilitado: request.body().habilitado = 'n'
+      habilitado: 'n'
     });
 
     entidad.save();
