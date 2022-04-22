@@ -13,6 +13,15 @@ export default class TransferProductoInstitucion extends BaseModel {
   @column()
   public id_transfer_producto: number;
 
+  @column()
+  public id_institucion: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_transfer_modificacion: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -21,21 +30,25 @@ export default class TransferProductoInstitucion extends BaseModel {
 
   @hasOne(() => TransferProducto, {
     foreignKey: "id",
+    localKey: "id_transfer_producto",
   })
-  public id_productotransfer: HasOne<typeof TransferProducto>;
+  public productotransfer: HasOne<typeof TransferProducto>;
 
   @hasOne(() => Institucion, {
     foreignKey: "id",
+    localKey: "id_institucion",
   })
-  public id_institucion: HasOne<typeof Institucion>;
+  public institucion: HasOne<typeof Institucion>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

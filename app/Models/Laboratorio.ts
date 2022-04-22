@@ -2,19 +2,20 @@ import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { boolaEnum, enumaBool } from "App/Helper/funciones";
+import { enumaBool } from "App/Helper/funciones";
 
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios() {
     const laboratorios = await Database.from("tbl_laboratorio as l")
-      .select(
-      "*", 
-      "l.id as _id", 
-      "l.id as id",
-      "l.ts_timestamp as fechaalta")
-      .orderBy("l.nombre", "asc");
+      .select("*", "l.id as _id", "l.id as id", "l.ts_creacion as fechaalta")
+      .orderBy("fechaalta", "desc");
 
-    let result = laboratorios.map((l) => boolaEnum(l));
+    let result = laboratorios.map((l) => {
+      l._id = l._id.toString();
+      enumaBool(l);
+      return l;
+    });
+
     return result;
   }
 
@@ -67,4 +68,10 @@ export default class Laboratorio extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }
