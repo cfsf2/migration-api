@@ -941,7 +941,7 @@ const tbl_pedidos_producto_pack = async () => {
        tbl_pedido.fechaentrega = "${fecha_entrega}",
        tbl_pedido.es_invitado = "${es_invitado}", 
        tbl_pedido.id_socio =  ${idsocio}, 
-       tbl_pedido.datos_cliente = '${JSON.stringify(datos_cliente)}',
+       tbl_pedido.datos_cliente = ${datos_cliente},
        tbl_pedido.origen = ${origen},
         tbl_pedido.username = ${username} , 
         tbl_pedido.nombrefarmacia =  ${nombrefarmacia}, 

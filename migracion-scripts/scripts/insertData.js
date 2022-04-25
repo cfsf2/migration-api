@@ -27,15 +27,6 @@ connectToDatabase = async () => {
   return new Promise(async (resolve, reject) => {
     await connectToDatabase();
 
-<<<<<<< HEAD
-    // await migracion.tbl_usuario();
-      await migracion.tbl_farmacia();
-    //   await migracion.tbl_producto_pack();
-    //   await migracion.tbl_laboratorio();
-    //await migracion.tbl_transfer_productos();
-    // await migracion.tbl_publicidades();
-    //await migracion.tbl_producto_custom();
-=======
     //  await migracion.tbl_usuario();
     // await migracion.tbl_farmacia();
     // await migracion.tbl_producto_pack();
@@ -43,7 +34,6 @@ connectToDatabase = async () => {
     // await migracion.tbl_transfer_productos();
     //  await migracion.tbl_publicidades();
     // await migracion.tbl_producto_custom();
->>>>>>> ad6516be0a4a9727587200f356ef8799b20614a9
     resolve();
   });
 })()
@@ -61,14 +51,10 @@ connectToDatabase = async () => {
         // migracion.tbl_ptransfer_institucion();
 
         //migracion.tbl_solicitud_proveeduria();
-<<<<<<< HEAD
-        // migracion.tbl_debitofarmacia();
-=======
         //migracion.tbl_debitofarmacia();
->>>>>>> ad6516be0a4a9727587200f356ef8799b20614a9
-        // migracion.tbl_pedidos_producto_pack();
+         migracion.tbl_pedidos_producto_pack();
         //migracion.tbl_transfers();
-        migracion.tbl_farmacia_productopack();
+        //migracion.tbl_farmacia_productopack();
 
         resolve();
       });
