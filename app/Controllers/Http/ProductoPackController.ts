@@ -1,5 +1,6 @@
 import { Request } from "@adonisjs/core/build/standalone";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { eliminarKeysVacios } from "App/Helper/funciones";
 import ProductoPack from "App/Models/ProductoPack";
 
 export default class ProductoPackController {
@@ -21,13 +22,7 @@ export default class ProductoPackController {
   }
 
   public async mig_producto({ request }: HttpContextContract) {
-    let productoSelect = request.params().idProducto;
-
-    if (productoSelect === "all") {
-      return await ProductoPack.traerProductosPacks({ en_papelera: "n" });
-    }
     return await ProductoPack.traerProductosPacks({
-      producto: productoSelect,
       habilitado: "s",
       en_papelera: "n",
     });
@@ -47,7 +42,7 @@ export default class ProductoPackController {
       sku: request.body().sku,
       id_categoria: request.body().categoria_id,
       id_entidad: request.body().entidad_id,
-      en_papelera: request.body().en_papelera
+      en_papelera: "n",
     });
     console.log(nuevoProducto);
     try {
@@ -56,5 +51,59 @@ export default class ProductoPackController {
     } catch (error) {
       return error;
     }
+  }
+
+  public async mig_update_producto({ request }: HttpContextContract) {
+    const { id } = request.qs();
+
+    let producto = await ProductoPack.findOrFail(id);
+
+    let mergeObject: any = {
+      descripcion: request.body().descripcion,
+      imagen: request.body().imagen,
+      nombre: request.body().nombre,
+      precio: request.body().precio,
+      precio_con_iva: request.body().precio_con_IVA,
+      rentabilidad: request.body().rentabilidad,
+      sku: request.body().sku,
+      id_categoria: request.body().categoria_id,
+      id_entidad: request.body().entidad_id,
+      en_papelera: "n",
+    };
+
+    mergeObject = eliminarKeysVacios(mergeObject);
+
+    producto.merge(mergeObject);
+
+    try {
+      producto.save();
+      return producto;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async mig_delete_producto({ request }: HttpContextContract) {
+    const { id } = request.params();
+
+    let producto = await ProductoPack.findOrFail(id);
+
+    producto.merge({
+      en_papelera: "s",
+    });
+    console.log("directo a papelera...");
+
+    try {
+      producto.save();
+      return producto;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  public async mig_papelera({ request }: HttpContextContract) {
+    return await ProductoPack.traerProductosPacks({
+      en_papelera: "s",
+    });
   }
 }
