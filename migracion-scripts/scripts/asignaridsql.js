@@ -8,6 +8,7 @@ const Drogueria = require("../models/transfers/drogueria");
 const Farmacia = require("../models/farmacia");
 const Usuario = require("../models/user");
 const Publicidad = require("../models/publicidad");
+const DebitoFarmacia = require("../models/debitoFarmacia");
 
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
@@ -41,8 +42,9 @@ const asignaridsql = async () => {
   // migracion.asignar_idsql(ProductoPack);
   // migracion.asignar_idsql(Laboratorio);
   // migracion.asignar_idsql(Drogueria);
-  // migracion.asignar_idsql(Publicidad);
-   migracion.asignar_idsql(ProductoTransfer);
+  //migracion.asignar_idsql(Publicidad);
+  // migracion.asignar_idsql(ProductoTransfer);
+  migracion.asignar_idsql(DebitoFarmacia);
 
   // migracion.asignar_idsql_externo(
   //   ProductoTransfer,
