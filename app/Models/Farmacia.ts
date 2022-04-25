@@ -53,7 +53,7 @@ export default class Farmacia extends BaseModel {
       f.whatsapp, f.facebook, f.instagram, f.web, 
       f.descubrir, f.envios, f.tiempotardanza, 
       f.ts_creacion as fechaalta,
-      f.matricula as farmaciaid,
+      f.id as farmaciaid,
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
       ${admin ? "f.*," : ""}
       l.nombre AS localidad, u.usuario AS usuario , 

@@ -18,9 +18,9 @@ import { JsonWebTokenError } from "jsonwebtoken";
 
 export default class SolicitudProveeduria extends BaseModel {
   static async traerSolicitudesProveeduria({
-    id_farmacia,
+    farmaciaid,
   }: {
-    id_farmacia?: number;
+    farmaciaid?: number;
   }) {
     const solicitudes = await Database.from("tbl_solicitud_proveeduria as sp")
       .select(
@@ -35,7 +35,7 @@ export default class SolicitudProveeduria extends BaseModel {
       .leftJoin("tbl_farmacia as f", "sp.id_farmacia", "f.id")
       .leftJoin("tbl_estado_pedido as ep", "sp.id_estado_pedido", "ep.id")
       .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id")
-      .if(id_farmacia, (query) => query.where("sp.id_farmacia", id_farmacia));
+      .if(farmaciaid, (query) => query.where("sp.id_farmacia", farmaciaid));
 
     const arraySolicitudes = await Promise.all(
       solicitudes.map(async (solicitud) => {

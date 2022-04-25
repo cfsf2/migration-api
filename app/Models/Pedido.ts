@@ -39,10 +39,21 @@ export default class Pedido extends BaseModel {
 
     const newPedido = await Promise.all(
       datos.map(async (p) => {
-        p.gruposproductos = JSON.parse(p.gruposproductos);
-        p.datos_cliente = JSON.parse(p.datos_cliente);
+        const pedidosSolicitado = await Database.from(
+          "tbl_pedido_producto_pack as ppp"
+        )
+          .select("*")
+          .leftJoin("tbl_producto_pack as pp", "ppp.id_productospack", "pp.id")
+          .where("ppp.id_pedido", p.id);
+
+        if (pedidosSolicitado.length === 0) {
+          p.gruposproductos = await JSON.parse(p.gruposproductos);
+          p.datos_cliente = JSON.parse(p.datos_cliente);
+          return p;
+        }
 
         p = enumaBool(p);
+        p.gruposproductos = pedidosSolicitado;
         return p;
       })
     );
