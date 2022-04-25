@@ -117,6 +117,7 @@ export default class Publicidad extends BaseModel {
 
     return result;
   }
+  
   static async traerNovedadesFarmacias({
     id_farmacia,
   }: {

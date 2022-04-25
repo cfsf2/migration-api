@@ -17,7 +17,11 @@ import SolicitudProveeduriaProductoPack from "./SolicitudProveeduriaProductoPack
 import { JsonWebTokenError } from "jsonwebtoken";
 
 export default class SolicitudProveeduria extends BaseModel {
-  static async traerSolicitudesProveeduria() {
+  static async traerSolicitudesProveeduria({
+    id_farmacia,
+  }: {
+    id_farmacia?: number;
+  }) {
     const solicitudes = await Database.from("tbl_solicitud_proveeduria as sp")
       .select(
         "sp.*",
@@ -30,26 +34,29 @@ export default class SolicitudProveeduria extends BaseModel {
       )
       .leftJoin("tbl_farmacia as f", "sp.id_farmacia", "f.id")
       .leftJoin("tbl_estado_pedido as ep", "sp.id_estado_pedido", "ep.id")
-      .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id");
+      .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id")
+      .if(id_farmacia, (query) => query.where("sp.id_farmacia", id_farmacia));
 
-    const arraySolicitudes =await Promise.all(
+    const arraySolicitudes = await Promise.all(
       solicitudes.map(async (solicitud) => {
         const productosSolicitados = await Database.from(
           "tbl_solicitud_proveeduria_producto_pack as sppp"
-          )
+        )
           .select("*")
           .leftJoin("tbl_producto_pack as pp", "sppp.id_producto_pack", "pp.id")
           .where("sppp.id_solicitud_proveeduria", solicitud.id);
 
-          if(productosSolicitados.length === 0 ){
-           solicitud.productos_solicitados =await JSON.parse(solicitud.productos_solicitados)
-            return solicitud
-          }
+        if (productosSolicitados.length === 0) {
+          solicitud.productos_solicitados = await JSON.parse(
+            solicitud.productos_solicitados
+          );
+          return solicitud;
+        }
         solicitud.productos_solicitados = productosSolicitados;
         return solicitud;
       })
     );
-    return  arraySolicitudes;
+    return arraySolicitudes;
   }
 
   public static table = "tbl_solicitud_proveeduria";
