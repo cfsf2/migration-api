@@ -44,7 +44,7 @@ export default class Transfer extends BaseModel {
 
   static async guardar(data) {
     const nuevoTransfer = new Transfer();
-    console.log(data);
+    // console.log(data);
     nuevoTransfer.merge({
       nro_cuenta_drogueria: data.nro_cuenta_drogueria,
       id_drogueria: data.drogueria_id,

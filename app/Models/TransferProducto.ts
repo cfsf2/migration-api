@@ -10,9 +10,13 @@ export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
     en_papelera,
     habilitado,
+    labid,
+    instituciones,
   }: {
     en_papelera?: string;
     habilitado?: string;
+    labid?: number;
+    instituciones?: string[];
   }) {
     const trasfersProducto = await Database.from("tbl_transfer_producto as tp")
       .select(
@@ -31,6 +35,16 @@ export default class TransferProducto extends BaseModel {
       )
       .leftJoin("tbl_laboratorio as l", "tp.id_laboratorio", "l.id")
       .leftJoin("tbl_usuario as u", "tp.id", "u.id")
+      .if(instituciones, (query) =>
+        query
+          .leftJoin(
+            "tbl_transfer_producto_institucion as tpi",
+            "tpi.id_transfer_producto",
+            "tp.id"
+          )
+          .whereIn("tpi.id_institucion", instituciones)
+          .groupBy("tpi.id_transfer_producto")
+      )
       //en_papelera
       .if(en_papelera, (query) => {
         query.where("tp.en_papelera", "n");
@@ -38,6 +52,7 @@ export default class TransferProducto extends BaseModel {
       .if(habilitado, (query) => {
         query.where("tp.habilitado", "s");
       })
+      .if(labid, (query) => query.where("l.id", labid))
       .orderBy("codigo", "desc");
 
     return trasfersProducto.map((t) => {
@@ -57,7 +72,7 @@ export default class TransferProducto extends BaseModel {
       nuevoPF.merge({
         id_laboratorio: data.laboratorioid,
         nombre: data.nombre,
-        habilitado: data.habilitado ? "s" : "n",
+        habilitado: "s",
         presentacion: data.presentacion,
         cantidad_minima: data.cantidad_minima,
         descuento_porcentaje: data.descuento_porcentaje,

@@ -5,9 +5,10 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
 
 export default class Laboratorio extends BaseModel {
-  static async traerLaboratorios() {
+  static async traerLaboratorios({ id }: { id?: number }) {
     const laboratorios = await Database.from("tbl_laboratorio as l")
       .select("*", "l.id as _id", "l.id as id", "l.ts_creacion as fechaalta")
+      .if(id, (query) => query.where("id", id))
       .orderBy("fechaalta", "desc");
 
     let result = laboratorios.map((l) => {
@@ -16,6 +17,7 @@ export default class Laboratorio extends BaseModel {
       return l;
     });
 
+    if (result.length === 1) return result[0];
     return result;
   }
 
