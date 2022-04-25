@@ -5,7 +5,7 @@ import Entidad from "../../Models/Entidad";
 
 export default class EntidadController {
   public async index({ request }: HttpContextContract) {
-    return await Entidad.traerEntidades({ habilitado : 'true'});
+    return await Entidad.traerEntidades({ habilitado: "true" });
   }
 
   public async mig_agregar_entidad({ request }: HttpContextContract) {
@@ -14,13 +14,13 @@ export default class EntidadController {
     nuevaEntidad.merge({
       imagen: request.body().imagen,
       logo: request.body().logo,
-      habilitado: request.body().habilitado = 's',
+      habilitado: (request.body().habilitado = "s"),
       email: request.body().email,
       nombre: request.body().entidadnombre, //entidadnombre
       titulo: request.body().nombre, //nombre
       rentabilidad: request.body().rentabilidad,
       mostrar_en_proveeduria: request.body().no_mostrar_en_proveeduria
-        ? request.body().no_mostrar_en_proveeduria === true
+        ? request.body().no_mostrar_en_proveeduria === "true"
           ? "s"
           : "n"
         : "s",
@@ -75,13 +75,13 @@ export default class EntidadController {
     const { id } = request.params();
 
     let entidad = await Entidad.findOrFail(id);
-    
+
     entidad.merge({
-      habilitado: 'n'
+      habilitado: "n",
     });
 
     entidad.save();
-    
+
     try {
       return entidad;
     } catch (error) {
