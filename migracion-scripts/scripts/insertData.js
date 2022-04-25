@@ -28,7 +28,7 @@ connectToDatabase = async () => {
     await connectToDatabase();
 
     // await migracion.tbl_usuario();
-    //  await migracion.tbl_farmacia();
+      await migracion.tbl_farmacia();
     //   await migracion.tbl_producto_pack();
     //   await migracion.tbl_laboratorio();
     //await migracion.tbl_transfer_productos();
@@ -52,7 +52,7 @@ connectToDatabase = async () => {
         // migracion.tbl_publicidad_institucion();
         // migracion.tbl_ptransfer_institucion();
 
-        migracion.tbl_solicitud_proveeduria();
+        //migracion.tbl_solicitud_proveeduria();
         // migracion.tbl_debitofarmacia();
         // migracion.tbl_pedidos_producto_pack();
         //migracion.tbl_transfers();
