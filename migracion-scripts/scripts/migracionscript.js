@@ -1411,7 +1411,9 @@ const tbl_farmacia = () => {
             f.ultimoacceso.toISOString().replace("T", " ").replace("Z", "") +
             "'"
           : null
-      }, cp=${f.cp ? `"${f.cp}"` : null}`;
+      }, cp=${f.cp ? `"${f.cp}"` : null}, farmaciaid=${
+        f.farmaciaid ? `"${f.farmaciaid}"` : null
+      }`;
 
       return queryPromise(con, sql);
     });

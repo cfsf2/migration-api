@@ -10,7 +10,7 @@ var mysql = require("mysql");
 const con = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "pass",
+  password: "password",
   database: "farmageo",
   charset: "utf8mb4",
 });
