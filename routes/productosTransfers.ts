@@ -5,6 +5,10 @@ Route.get(
   "/productosTransfers/instituciones/:id",
   "ProductosTransfersController.mig_instituciones"
 );
+Route.get(
+  "/productosTransfers/laboratorio/:id",
+  "ProductosTransfersController.mig_bylab"
+);
 
 Route.post("/productosTransfers", "ProductosTransfersController.mig_add");
 

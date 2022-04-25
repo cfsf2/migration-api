@@ -10,6 +10,18 @@ export default class ProductosTransfersController {
     });
   }
 
+  public async mig_bylab({ request }: HttpContextContract) {
+    const { instituciones } = request.qs();
+    const labid = request.params().id;
+
+    return await TransferProducto.traerTrasferProducto({
+      en_papelera: "n",
+      habilitado: "s",
+      labid: labid,
+      instituciones: instituciones,
+    });
+  }
+
   public async mig_instituciones({ request }: HttpContextContract) {
     const res = await TransferProductoInstitucion.query().where(
       "id_transfer_producto",
