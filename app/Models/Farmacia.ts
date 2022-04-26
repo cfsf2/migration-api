@@ -192,7 +192,15 @@ export default class Farmacia extends BaseModel {
     return farmacias;
   }
 
-  static async actualizarFarmacia({ usuario, d, usuarioAuth}: { usuario: string; d: any, usuarioAuth: Usuario}) {
+  static async actualizarFarmacia({
+    usuario,
+    d,
+    usuarioAuth,
+  }: {
+    usuario: string;
+    d: any;
+    usuarioAuth: Usuario;
+  }) {
     try {
       //Guardar datos de geolocalizacion
       const localidad = await Database.query()
@@ -523,9 +531,11 @@ export default class Farmacia extends BaseModel {
   static async actualizarFarmaciaAdmin({
     id,
     data,
+    usuarioAuth,
   }: {
     id: number;
     data: { usuario: any; farmacia: any; instituciones: any; perfil: any };
+    usuarioAuth: Usuario;
   }) {
     const usuario = await Usuario.findOrFail(data.farmacia.id_usuario);
     const instituciones = await FarmaciaInstitucion.query().where(
@@ -536,6 +546,7 @@ export default class Farmacia extends BaseModel {
     await this.actualizarFarmacia({
       usuario: usuario.usuario,
       d: data.farmacia,
+      usuarioAuth: usuarioAuth,
     });
 
     await Promise.all(
@@ -603,6 +614,7 @@ export default class Farmacia extends BaseModel {
       );
 
       perfilDB?.merge({ id_perfil: Number(data.perfil) });
+
       perfilDB?.save();
     }
     return;

@@ -97,6 +97,7 @@ export default class CampanasController {
     const usuario = await auth.authenticate();
     const { id, finalizado } = request.body();
     const req = await CampanaRequerimiento.find(id);
+    
     guardarDatosAuditoria({
       objeto: req,
       usuario: usuario,

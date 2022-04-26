@@ -6,6 +6,7 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "../../Helper/email";
 
 import UsuarioPerfil from "App/Models/UsuarioPerfil";
+import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 
 export default class UsuariosController {
   public async index() {
@@ -60,7 +61,9 @@ export default class UsuariosController {
   public async mig_alta_usuarioFarmacia({
     request,
     response,
+    auth
   }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     const body = request.body();
     const nuevoUsuario = new Usuario();
     const nuevoPerfilUsuario = new UsuarioPerfil();
@@ -76,6 +79,11 @@ export default class UsuariosController {
     });
 
     try {
+      guardarDatosAuditoria({
+        objeto: nuevoUsuario,
+        usuario: usuario,
+        accion: AccionCRUD.crear
+      })
       await nuevoUsuario.save();
     } catch (err) {
       console.log(err);
@@ -88,6 +96,11 @@ export default class UsuariosController {
     });
 
     try {
+      guardarDatosAuditoria({
+        objeto: nuevoPerfilUsuario,
+        usuario: usuario,
+        accion: AccionCRUD.crear
+      })
       await nuevoPerfilUsuario.save();
       response.status(201);
     } catch (err) {

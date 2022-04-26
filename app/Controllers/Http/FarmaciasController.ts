@@ -82,7 +82,6 @@ export default class FarmaciasController {
         })
       );
     } catch (err) {
-      console.log(err);
       return err;
     }
   }
@@ -90,7 +89,9 @@ export default class FarmaciasController {
   public async mig_admin_updatePerfil({
     request,
     response,
+    auth
   }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     const data: {
       farmacia: any;
       usuario: any;
@@ -111,6 +112,7 @@ export default class FarmaciasController {
       await Farmacia.actualizarFarmaciaAdmin({
         id: request.body().farmacia.id,
         data: data,
+        usuarioAuth: usuario
       });
       return response.created();
     } catch (err) {
