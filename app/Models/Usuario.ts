@@ -514,7 +514,8 @@ export default class Usuario extends BaseModel {
 
   // Campos locos especificamente diseñados para que siga funcionando la aplicacion sin cambiar el frontend
   public give_user_display_name() {
-    return this.nombre + " " + this.apellido;
+    const ap = this.apellido ? this.apellido : "";
+    return this.nombre + " " + ap;
   }
   @column()
   public user_display_name: string;

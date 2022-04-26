@@ -1,17 +1,18 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Transfer from "App/Models/Transfer";
-import jwt from "jsonwebtoken";
 
 export default class TransfersController {
   public async mig_index({ request }: HttpContextContract) {
-    return await Transfer.traerTransfers();
+    return await Transfer.traerTransfers({});
   }
 
-  public async mig_add({ request, session }: HttpContextContract) {
-    const token = request.headers().authorization?.split("Bearer ")[1];
-    console.log(token);
-    const usuario = jwt.verify(token, process.env.JWTSECRET);
-    console.log(usuario);
-    Transfer.guardar(request.body());
+  public async mig_byFarmacia({ request }: HttpContextContract) {
+    return await Transfer.traerTransfers({ id_farmacia: request.params().id });
+  }
+
+  public async mig_add({ request, auth }: HttpContextContract) {
+    const usuario = auth.user;
+
+    Transfer.guardar({ data: request.body(), usuario: usuario });
   }
 }

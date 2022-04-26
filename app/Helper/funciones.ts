@@ -59,6 +59,7 @@ export const getCoordenadas = ({
     const geocoding = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
     );
+
     resolve(geocoding.data.results[0].geometry.location);
   });
 };

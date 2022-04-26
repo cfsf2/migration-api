@@ -1,10 +1,10 @@
 
+
 GET http://localhost:3111/solicitudesproveeduria/farmacia/ HTTP/1.1
 
 ####
 
-GET http://localhost:3110/farmacias/novedades/search?habilitado=todas&instituciones=todas&vigencia=false&titulo= HTTP/1.1
-
+GET  http://localhost:3111/transfers/farmacia/265 HTTP/1.1
 
 ####
 

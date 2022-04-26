@@ -11,7 +11,9 @@ export default class AuthController {
 
     try {
       console.log(username, password);
-      let response = await auth.use("web").attempt(username, password);
+      const log = await auth.use("api").attempt(username, password);
+
+      let response = log.user.toObject();
       response = enumaBool(response);
 
       const usuario = await Usuario.query()
@@ -30,18 +32,18 @@ export default class AuthController {
       );
       response.user_display_name = usuario[0].give_user_display_name();
 
-      //const response = usuario[0];
-
       response.user_rol = [usuario[0].perfil[0].tipo];
       response.user_email = response.email;
 
-      response.token = jwt.sign(
-        { user: response.toObject() },
-        process.env.JWTSECRET,
-        {
-          expiresIn: process.env.JWTEXPIRESIN,
-        }
-      );
+      response.token = log.token;
+
+      // jwt.sign(
+      //   { user: response.toObject() },
+      //   process.env.JWTSECRET,
+      //   {
+      //     expiresIn: process.env.JWTEXPIRESIN,
+      //   }
+      // );
 
       return response;
     } catch (error) {

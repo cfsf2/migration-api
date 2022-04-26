@@ -15,13 +15,21 @@ export default class TransferTransferProducto extends BaseModel {
 
   @column()
   public id_transfer_producto: number;
-
+  @column()
+  public id_transfer: number;
   @column()
   public cantidad: number;
 
   @column()
   public precio: number;
 
+  @column()
+  public observaciones: string;
+
+  @column()
+  public id_usuario_creacion: number;
+  @column()
+  public id_usuario_modificacion: number;
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -30,21 +38,25 @@ export default class TransferTransferProducto extends BaseModel {
 
   @hasOne(() => Transfer, {
     foreignKey: "id",
+    localKey: "id_transfer",
   })
-  public id_transfer: HasOne<typeof Transfer>;
+  public transfer: HasOne<typeof Transfer>;
 
   @hasOne(() => TransferProducto, {
     foreignKey: "id",
+    localKey: "id_transfer_producto",
   })
-  public id_productotransfer: HasOne<typeof TransferProducto>;
+  public transfer_producto: HasOne<typeof TransferProducto>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
-  public id_usuario_creacion: HasOne<typeof Usuario>;
+  public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
-  public id_usuario_modificacion: HasOne<typeof Usuario>;
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }

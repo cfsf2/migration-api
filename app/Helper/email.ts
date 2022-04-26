@@ -1,5 +1,14 @@
-const imagen_path = `https://${process.env.BUCKET_NAME}.s3.amazonaws.com/imagenes/`;
+const imagen_path = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/imagenes/`;
 
+interface Email {
+  titulo: string;
+  texto: string;
+  subtitulo?: string;
+  imagen?: string;
+  linkimagen?: string;
+  span?: string;
+  linkspan?: string;
+}
 export const generarHtml = ({
   titulo,
   texto,
@@ -8,15 +17,7 @@ export const generarHtml = ({
   linkimagen,
   span,
   linkspan,
-}: {
-  titulo: string;
-  texto: string;
-  subtitulo?: string;
-  imagen?: string;
-  linkimagen?: string;
-  span?: string;
-  linkspan?: string;
-}): string => {
+}: Email): string => {
   return `
   <!DOCTYPE html>
 
@@ -320,4 +321,64 @@ export const generarHtml = ({
   </body>
   </html>
         `;
+};
+
+export const transferHtml = ({ transfer, farmacia }) => {
+  let stringTable = transfer.productos_solicitados.map((p) => {
+    return `<tr>
+                            <td>${p.codigo ? p.codigo : ""}</td>
+                            <td>${p.nombre}</td>
+                            <td>${p.presentacion}</td>
+                            <td>${p.cantidad}</td>
+                            <td>${p.observacion ? p.observacion : ""}</td>
+                        </tr>`;
+  });
+  let emailBody = `<head>
+                        <style>
+                          table {
+                            font-family: arial, sans-serif;
+                            border-collapse: collapse;
+                            width: 100%;
+                          }
+                          
+                          td, th {
+                            border: 1px solid #dddddd;
+                            text-align: left;
+                            padding: 8px;
+                          }
+                          
+                          tr:nth-child(even) {
+                            background-color: #dddddd;
+                          }
+
+                        </style>
+                      </head>
+                      <body>
+                        <div>
+                          <p><b>Farmacia: </b>${farmacia.nombre} / <b>Cuit: </b>${farmacia.cuit}</p>
+                          <p><b>Telefono: </b>${farmacia.telefono}</p>
+                          <p><b>Nro Cufe: </b>${farmacia.cufe}</p>
+                          <p><b>Nro Cuenta de Droguería: </b>${transfer.nro_cuenta_drogueria}</p> 
+                          <p><b>Droguería: </b>${transfer.drogueria_id}</p>
+                          <p><b>Laboratorio elegido: </b>${transfer.laboratorio_id}</p>
+                          <p><b>Dirección: </b>${farmacia.direccioncompleta}</p>
+                        </div>
+                      <table>
+                          <tr>
+                            <th>Código</th>
+                            <th>Producto</th>
+                            <th>Presentación</th>
+                            <th>Cantidad</th>
+                            <th>Observaciones</th>
+                          </tr>
+                        <tbody>
+                        ${stringTable}                    
+                        </tbody>
+                      </table>
+                    </body>`;
+
+  return generarHtml({
+    titulo: "Pedido de Transfer",
+    texto: emailBody,
+  });
 };

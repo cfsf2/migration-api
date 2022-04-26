@@ -16,40 +16,104 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProducto from "./TransferProducto";
 import TransferTransferProducto from "./TransferTransferProducto";
 
+import { transferHtml } from "../Helper/email";
+import Mail from "@ioc:Adonis/Addons/Mail";
+
 export default class Transfer extends BaseModel {
-  static async traerTransfers() {
+  static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
     const transfers = await Database.from("tbl_transfer as t")
       .select(
-        "*",
-        "t.id as id",
+        "t.*",
         "t.id as _id",
         "t.ts_modificacion as fecha_modificacion",
         "t.ts_creacion as fecha_alta",
         "d.nombre as drogueria_id",
         "f.matricula as farmacia_id",
         "f.nombre as farmacia_nombre",
+        "f.id",
         "et.nombre as estado",
         "u.id_usuario_creacion as id_usuario_creacion",
         "u.id_usuario_modificacion as ultima_modificacion"
       )
-
       .leftJoin("tbl_drogueria as d", "t.id_drogueria", "d.id")
-      .leftJoin("tbl_farmacia as f", "t.id", "f.id")
+      .leftJoin("tbl_farmacia as f", "t.id_farmacia", "f.id")
       .leftJoin("tbl_estado_transfer as et", "t.id_transfer_estado", "et.id")
       .leftJoin("tbl_usuario as u", "t.id", "u.id")
-      .orderBy("fecha_alta", "desc");
+      .if(id_farmacia, (query) => {
+        console.log(id_farmacia);
+        query.where("t.id_farmacia", id_farmacia);
+      })
+      .orderBy("fecha_alta", "desc")
+      .limit(5);
 
-    return transfers;
+    const res = await Promise.all(
+      transfers.map(async (t) => {
+        const productos = await Database.query()
+          .select("tp.*")
+          .from("tbl_transfer_transfer_producto as ttp")
+          .leftJoin(
+            "tbl_transfer_producto as tp",
+            "ttp.id_transfer_producto",
+            "tp.id"
+          ).where("ttp.id_transfer", t.id)
+
+        t.productos_solicitados = productos;
+        // if (productos.length === 0) {
+        //   t.productos_solicitados = JSON.parse(t.productos_solicitados);
+        // }
+        return t;
+      })
+    );
+
+    return res;
   }
 
-  static async guardar(data) {
+  static async guardar({ data, usuario }: { data: any; usuario: any }) {
     const nuevoTransfer = new Transfer();
-    // console.log(data);
+    const drogueria = await Drogueria.findByOrFail("nombre", data.drogueria_id);
+    const laboratorio = await Laboratorio.findByOrFail(
+      "nombre",
+      data.laboratorio_id
+    );
+    const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
+
     nuevoTransfer.merge({
       nro_cuenta_drogueria: data.nro_cuenta_drogueria,
-      id_drogueria: data.drogueria_id,
-      id_laboratorio: data.laboratorio_id,
+      id_drogueria: drogueria.id,
+      id_laboratorio: laboratorio.id,
       id_transfer_estado: 1,
+      id_farmacia: farmacia.id,
+      fecha: DateTime.now(),
+      email_destinatario: farmacia.email ? farmacia.email : usuario.email,
+      productos_solicitados: JSON.stringify(data.productos_solicitados),
+
+      id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+    });
+
+    await nuevoTransfer.save();
+
+    data.productos_solicitados.forEach((p) => {
+      const transferProducto = new TransferTransferProducto();
+      transferProducto.merge({
+        id_transfer_producto: p.id,
+        id_transfer: nuevoTransfer.id,
+        cantidad: p.cantidad,
+        precio: p.precio,
+        observaciones: p.observacion,
+
+        id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+      });
+      transferProducto.save();
+    });
+
+    Mail.send((message) => {
+      message
+        .from("farmageoapp@gmail.com")
+        //.to(process.env.TRANSFER_EMAIL)
+        .to(farmacia.email)
+        .to(process.env.TRANSFER_EMAIL)
+        .subject("Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id)
+        .html(transferHtml({ transfer: data, farmacia: farmacia }));
     });
   }
   public static table = "tbl_transfer";
@@ -83,6 +147,12 @@ export default class Transfer extends BaseModel {
 
   @column()
   public productos_solicitados: string;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -135,4 +205,10 @@ export default class Transfer extends BaseModel {
     throughForeignKey: "id",
   })
   public productos: HasManyThrough<typeof TransferProducto>;
+
+  public serializeExtras() {
+    return {
+      _id: this.$extras._id?.toString(),
+    };
+  }
 }
