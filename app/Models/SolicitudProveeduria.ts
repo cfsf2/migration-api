@@ -10,11 +10,14 @@ import {
 import Farmacia from "./Farmacia";
 import Usuario from "./Usuario";
 import Entidad from "./Entidad";
-import Publicidad from "./Publicidad";
 import Database from "@ioc:Adonis/Lucid/Database";
 import ProductoPack from "./ProductoPack";
 import SolicitudProveeduriaProductoPack from "./SolicitudProveeduriaProductoPack";
 import { JsonWebTokenError } from "jsonwebtoken";
+import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
+import Mail from "@ioc:Adonis/Addons/Mail";
+import { generarHtml } from "App/Helper/email";
+import EstadoPedido from "./EstadoPedido";
 
 export default class SolicitudProveeduria extends BaseModel {
   static async traerSolicitudesProveeduria({
@@ -59,6 +62,64 @@ export default class SolicitudProveeduria extends BaseModel {
     return arraySolicitudes;
   }
 
+  static async crearSolicitud({ data, usuario }) {
+    const nuevaSolicitud = new SolicitudProveeduria();
+
+    const entidad = await Entidad.findByOrFail("nombre", data.entidad_id);
+
+    nuevaSolicitud.merge({
+      email_destinatario: data.email_destinatario,
+      id_entidad: entidad.id,
+      id_estado_pedido: 1,
+      id_farmacia: data.farmacia_id,
+      nro_cuenta_drogueria: data.nro_cuenta_drogueria,
+      fecha: data.fecha,
+      productos_solicitados: JSON.stringify(data.productos_solicitados),
+    });
+
+    guardarDatosAuditoria({
+      objeto: nuevaSolicitud,
+      usuario: usuario,
+      accion: AccionCRUD.crear,
+    });
+
+    try {
+      await nuevaSolicitud.save();
+      //const arrayDestinatarios = data.destinatario.split(";");
+
+      const arr = "rodriad90@gmail.com;rodrigoa.acevedo@mgmail.com".split(";");
+      console.log(arr);
+      arr.forEach((destinatario) => {
+        Mail.send((messege) => {
+          messege
+            .from(process.env.SMTP_USERNAME)
+            // .to(data.email_destinatario)
+            .to(destinatario)
+            .subject(data.asunto)
+            .html(
+              generarHtml({
+                titulo: data.asunto,
+                texto: data.html,
+              })
+            );
+        });
+      });
+
+      data.productos_solicitados.forEach((item) => {
+        const solicitudProducto = new SolicitudProveeduriaProductoPack();
+        solicitudProducto.merge({
+          id_solicitud_proveeduria: nuevaSolicitud.id,
+          id_producto_pack: item._id,
+          cantidad: item.cantidad,
+        });
+        solicitudProducto.save();
+      });
+      return nuevaSolicitud;
+    } catch (error) {
+      return error;
+    }
+  }
+
   public static table = "tbl_solicitud_proveeduria";
 
   @column({ isPrimary: true })
@@ -93,6 +154,9 @@ export default class SolicitudProveeduria extends BaseModel {
 
   @column()
   public id_usuario_creacion: number;
+
+  @column()
+  public id_estado_pedido: number;
 
   //foreing key
   @hasOne(() => Entidad, {

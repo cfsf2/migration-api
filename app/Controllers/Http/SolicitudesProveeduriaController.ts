@@ -1,6 +1,8 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Entidad from "App/Models/Entidad";
 import EstadoPedido from "App/Models/EstadoPedido";
 import SolicitudProveeduria from "App/Models/SolicitudProveeduria";
+import SolicitudProveeduriaProductoPack from "App/Models/SolicitudProveeduriaProductoPack";
 
 export default class SolicitudesProveeduriaController {
   public async mig_index() {
@@ -11,7 +13,6 @@ export default class SolicitudesProveeduriaController {
     const solicitud = await SolicitudProveeduria.traerSolicitudesProveeduria({
       farmaciaid: request.params().id_farmacia,
     });
-    console.log(request.params().id_farmacia);
     try {
       return solicitud;
     } catch (error) {
@@ -19,22 +20,11 @@ export default class SolicitudesProveeduriaController {
     }
   }
 
-  public async mig_agregar_solicitud({ request }: HttpContextContract) {
-    const nuevaSolicitud = new SolicitudProveeduria();
-
-    nuevaSolicitud.merge({
-      // asunto: "Confirmación de pedido a Proveeduria"
-      // destinatario: "farmaciadonado@gmail.com"
-      email_destinatario: request.body().email_destinatario,
-      id_entidad: request.body().entidad_id,
-      //estado: 
-      id_farmacia: request.body().farmacia_id,
-      //farmacia_nombre:
-      fecha: request.body().fecha,
-      //html:
-      productos_solicitados: request.body().productos_solicitados,
+  public async mig_agregar_solicitud({ request, auth }: HttpContextContract) {
+    const usuario = auth.user;
+    return await SolicitudProveeduria.crearSolicitud({
+      data: request.body(),
+      usuario: usuario,
     });
-    console.log(nuevaSolicitud);
-    return;
   }
 }
