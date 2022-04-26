@@ -100,11 +100,13 @@ export default class CampanasController {
     request,
     response,
     auth,
+    bouncer,
   }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_FINALIZADO);
     const usuario = await auth.authenticate();
     const { id, finalizado } = request.body();
     const req = await CampanaRequerimiento.find(id);
-    
+
     guardarDatosAuditoria({
       objeto: req,
       usuario: usuario,

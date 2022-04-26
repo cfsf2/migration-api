@@ -66,8 +66,10 @@ export default class UsuariosController {
   public async mig_alta_usuarioFarmacia({
     request,
     response,
-    auth
+    auth,
+    bouncer,
   }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_CREATE);
     const usuario = await auth.authenticate();
     const body = request.body();
     const nuevoUsuario = new Usuario();
@@ -87,8 +89,8 @@ export default class UsuariosController {
       guardarDatosAuditoria({
         objeto: nuevoUsuario,
         usuario: usuario,
-        accion: AccionCRUD.crear
-      })
+        accion: AccionCRUD.crear,
+      });
       await nuevoUsuario.save();
     } catch (err) {
       console.log(err);
@@ -104,8 +106,8 @@ export default class UsuariosController {
       guardarDatosAuditoria({
         objeto: nuevoPerfilUsuario,
         usuario: usuario,
-        accion: AccionCRUD.crear
-      })
+        accion: AccionCRUD.crear,
+      });
       await nuevoPerfilUsuario.save();
       response.status(201);
     } catch (err) {
@@ -187,7 +189,7 @@ export default class UsuariosController {
   }
 
   public async delete({ request, bouncer }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.USER_DELETE;
+    await bouncer.authorize("AccesoRuta", Permiso.USER_DELETE);
 
     return await Usuario.actualizar({
       username: request.qs().username,
