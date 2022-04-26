@@ -44,12 +44,12 @@ export default class Transfer extends BaseModel {
         console.log(id_farmacia);
         query.where("t.id_farmacia", id_farmacia);
       })
-      .orderBy("fecha_alta", "desc")
+      .orderBy("fecha_alta", "desc");
 
     const res = await Promise.all(
       transfers.map(async (t) => {
         const productos = await Database.query()
-          .select("tp.*"," ttp.cantidad", "ttp.observaciones")
+          .select("tp.*", " ttp.cantidad", "ttp.observaciones")
           .from("tbl_transfer_transfer_producto as ttp")
           .leftJoin(
             "tbl_transfer_producto as tp",
@@ -59,9 +59,9 @@ export default class Transfer extends BaseModel {
           .where("ttp.id_transfer", t.id);
 
         t.productos_solicitados = productos;
-        // if (productos.length === 0) {
-        //   t.productos_solicitados = JSON.parse(t.productos_solicitados);
-        // }
+        if (productos.length === 0) {
+          t.productos_solicitados = JSON.parse(t.productos_solicitados);
+        }
         return t;
       })
     );
