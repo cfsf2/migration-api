@@ -3,6 +3,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
+import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 
 export default class CampanasController {
   public async index() {
@@ -91,9 +92,16 @@ export default class CampanasController {
   public async update_requerimiento({
     request,
     response,
+    auth,
   }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     const { id, finalizado } = request.body();
     const req = await CampanaRequerimiento.find(id);
+    guardarDatosAuditoria({
+      objeto: req,
+      usuario: usuario,
+      accion: AccionCRUD.editar,
+    });
     req?.merge(request.body());
     req?.save();
     return response.status(201).send("Actualizado Correctamente");

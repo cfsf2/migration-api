@@ -15,9 +15,11 @@ import Servicio from "./Servicio";
 
 import Database from "@ioc:Adonis/Lucid/Database";
 import {
+  AccionCRUD,
   eliminarKeysVacios,
   enumaBool,
   getCoordenadas,
+  guardarDatosAuditoria,
 } from "App/Helper/funciones";
 
 import FarmaciaDia from "./FarmaciaDia";
@@ -190,7 +192,7 @@ export default class Farmacia extends BaseModel {
     return farmacias;
   }
 
-  static async actualizarFarmacia({ usuario, d }: { usuario: string; d: any }) {
+  static async actualizarFarmacia({ usuario, d, usuarioAuth}: { usuario: string; d: any, usuarioAuth: Usuario}) {
     try {
       //Guardar datos de geolocalizacion
       const localidad = await Database.query()
@@ -279,6 +281,11 @@ export default class Farmacia extends BaseModel {
       mergeObject = eliminarKeysVacios(mergeObject);
       farmacia[0].merge(mergeObject);
 
+      guardarDatosAuditoria({
+        objeto: farmacia[0],
+        usuario: usuarioAuth,
+        accion: AccionCRUD.editar,
+      });
       await farmacia[0].save();
 
       //Guarda datos de horarios

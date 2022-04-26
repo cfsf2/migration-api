@@ -7,6 +7,7 @@ import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Response } from "@adonisjs/core/build/standalone";
+import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 
 export default class FarmaciasController {
   public async index() {
@@ -65,17 +66,23 @@ export default class FarmaciasController {
     });
   }
 
-  public async mig_updatePerfil({ request, response }: HttpContextContract) {
-    const { username } = request.qs();
-
+  public async mig_updatePerfil({
+    request,
+    response,
+    auth,
+  }: HttpContextContract) {
+    const usuario = await auth.authenticate();
+    const { username, id } = request.qs();
     try {
       return response.created(
         await Farmacia.actualizarFarmacia({
           usuario: username,
           d: request.body(),
+          usuarioAuth: usuario,
         })
       );
     } catch (err) {
+      console.log(err);
       return err;
     }
   }

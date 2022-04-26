@@ -68,38 +68,37 @@ export const getCoordenadas = ({
 export const eliminarKeysVacios = (mergObject) =>
   Object.fromEntries(Object.entries(mergObject).filter(([_, v]) => v != null));
 
-  
-  export enum AccionCRUD {
-    crear = "crear",
-    editar = "editar",
+export enum AccionCRUD {
+  crear = "crear",
+  editar = "editar",
+}
+
+export interface GuardarDatosAuditoria {
+  usuario: Usuario;
+  objeto: any;
+  accion: AccionCRUD;
+}
+
+export const guardarDatosAuditoria = ({
+  usuario,
+  objeto,
+  accion,
+}: GuardarDatosAuditoria) => {
+  switch (accion) {
+    case AccionCRUD.crear:
+      objeto.merge({
+        id_usuario_creacion: usuario.id,
+        id_usuario_modificacion: usuario.id,
+      });
+      break;
+
+    case AccionCRUD.editar:
+      objeto.merge({
+        id_usuario_modificacion: usuario.id,
+      });
+      break;
+
+    default:
+      break;
   }
-
-  export interface GuardarDatosAuditoria {
-    usuario: Usuario;
-    objeto: any;
-    accion: AccionCRUD;
-  }
-
-  export const guardarDatosAuditoria = ({
-    usuario,
-    objeto,
-    accion,
-  }: GuardarDatosAuditoria) => {
-    switch (accion) {
-      case AccionCRUD.crear:
-        objeto.merge({
-          id_usuario_creacion: usuario.id,
-          id_usuario_modificacion: usuario.id,
-        });
-        break;
-
-      case AccionCRUD.editar:
-        objeto.merge({
-          id_usuario_modificaicon: usuario.id,
-        });
-        break;
-
-      default:
-        break;
-    }
-  };
+};
