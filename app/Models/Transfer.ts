@@ -31,7 +31,7 @@ export default class Transfer extends BaseModel {
         "d.nombre as drogueria_id",
         "f.matricula as farmacia_id",
         "f.nombre as farmacia_nombre",
-        "f.id",
+        "f.id as id_farmacia",
         "et.nombre as estado",
         "u.id_usuario_creacion as id_usuario_creacion",
         "u.id_usuario_modificacion as ultima_modificacion"
@@ -45,12 +45,11 @@ export default class Transfer extends BaseModel {
         query.where("t.id_farmacia", id_farmacia);
       })
       .orderBy("fecha_alta", "desc")
-      .limit(5);
 
     const res = await Promise.all(
       transfers.map(async (t) => {
         const productos = await Database.query()
-          .select("tp.*")
+          .select("tp.*"," ttp.cantidad", "ttp.observaciones")
           .from("tbl_transfer_transfer_producto as ttp")
           .leftJoin(
             "tbl_transfer_producto as tp",
