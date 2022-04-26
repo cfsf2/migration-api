@@ -11,7 +11,9 @@ export default class AuthController {
 
     try {
       console.log(username, password);
-      const log = await auth.use("api").attempt(username, password);
+      const log = await auth
+        .use("api")
+        .attempt(username, password, { expiresIn: "24h" });
 
       let response = log.user.toObject();
       response = enumaBool(response);

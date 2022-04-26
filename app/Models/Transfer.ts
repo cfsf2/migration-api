@@ -17,6 +17,7 @@ import TransferProducto from "./TransferProducto";
 import TransferTransferProducto from "./TransferTransferProducto";
 
 import { transferHtml } from "../Helper/email";
+import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
 export default class Transfer extends BaseModel {
@@ -55,7 +56,8 @@ export default class Transfer extends BaseModel {
             "tbl_transfer_producto as tp",
             "ttp.id_transfer_producto",
             "tp.id"
-          ).where("ttp.id_transfer", t.id)
+          )
+          .where("ttp.id_transfer", t.id);
 
         t.productos_solicitados = productos;
         // if (productos.length === 0) {
@@ -90,6 +92,12 @@ export default class Transfer extends BaseModel {
       id_usuario_creacion: usuario.id, // cambiar por dato de sesion
     });
 
+    guardarDatosAuditoria({
+      objeto: nuevoTransfer,
+      usuario: usuario,
+      accion: AccionCRUD.crear,
+    });
+
     await nuevoTransfer.save();
 
     data.productos_solicitados.forEach((p) => {
@@ -108,7 +116,7 @@ export default class Transfer extends BaseModel {
 
     Mail.send((message) => {
       message
-        .from("farmageoapp@gmail.com")
+        .from(process.env.SMTP_USERNAME)
         //.to(process.env.TRANSFER_EMAIL)
         .to(farmacia.email)
         .to(process.env.TRANSFER_EMAIL)
