@@ -6,19 +6,24 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "../../Helper/email";
 
 import UsuarioPerfil from "App/Models/UsuarioPerfil";
+import { Permiso } from "App/Helper/permisos";
 
 export default class UsuariosController {
-  public async index() {
+  public async index({ bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_GET_ALL);
+
     const usuarios = await Usuario.traerPerfilDeUsuario({});
 
     return usuarios;
   }
 
-  public async mig_perfilUsuario({ request }: HttpContextContract) {
+  public async mig_perfilUsuario({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_GET);
+
     const { usuarioNombre } = request.params();
     console.log(usuarioNombre);
+
     return Usuario.traerPerfilDeUsuario({ usuarioNombre });
-    // return Usuario.query().where("usuario", usuarioNombre.toString());
   }
 
   public async mig_alta_usuarioWeb({ request, response }: HttpContextContract) {
@@ -60,7 +65,10 @@ export default class UsuariosController {
   public async mig_alta_usuarioFarmacia({
     request,
     response,
+    bouncer,
   }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_CREATE);
+
     const body = request.body();
     const nuevoUsuario = new Usuario();
     const nuevoPerfilUsuario = new UsuarioPerfil();
@@ -140,19 +148,24 @@ export default class UsuariosController {
       });
   }
 
-  public async mig_actualizar({ request }: HttpContextContract) {
+  public async mig_actualizar({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_UPDATE);
     return await Usuario.actualizar({
       id_usuario: request.qs().id,
       data: request.body().data,
     });
   }
 
-  public async mig_alta_usuario({ request }: HttpContextContract) {
+  public async mig_alta_usuario({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_CREATE);
+
     const data = request.body();
     return Usuario.registrarUsuarioAdmin(data);
   }
 
-  public async mig_newpassword({ request }: HttpContextContract) {
+  public async mig_newpassword({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_NEWPASSWORD);
+
     try {
       return Usuario.cambiarPassword({
         id: request.qs().id,
@@ -163,7 +176,9 @@ export default class UsuariosController {
     }
   }
 
-  public async delete({ request }: HttpContextContract) {
+  public async delete({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.USER_DELETE;
+
     return await Usuario.actualizar({
       username: request.qs().username,
       data: request.body(),

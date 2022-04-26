@@ -6,6 +6,7 @@
  */
 
 import Bouncer from "@ioc:Adonis/Addons/Bouncer";
+import { Permiso } from "App/Helper/permisos";
 import Usuario from "App/Models/Usuario";
 
 /*
@@ -31,12 +32,26 @@ import Usuario from "App/Models/Usuario";
 |****************************************************************
 */
 
-export const { actions } = Bouncer.define(
+export const { actions } = Bouncer
+.define(
   "actualizarUsuarioWeb",
   (usuario: Usuario, idUsuarioActualizar: number) => {
     return idUsuarioActualizar === usuario.id;
   }
-);
+)
+.define("AccesoRuta",async (usuario: Usuario, permiso: string)=>{
+  const perfiles = await usuario.related("perfil").query().preload("permisos")
+
+    let permisos : any = []
+
+    perfiles.forEach(perfil=>{
+      perfil.permisos.forEach(permiso=>permisos.push(permiso))
+    })
+
+    if( permisos.findIndex((p: { nombre: string; })=>p.nombre === permiso)!==-1)return true
+  
+  return Bouncer.deny("Acceso no autorizado", 401)
+}
 
 /*
 |--------------------------------------------------------------------------

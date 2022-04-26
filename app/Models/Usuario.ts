@@ -469,6 +469,7 @@ export default class Usuario extends BaseModel {
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
   public usuario_creacion: HasOne<typeof Usuario>;
 
@@ -497,13 +498,6 @@ export default class Usuario extends BaseModel {
     localKey: "id",
   })
   public requerimientos: HasMany<typeof CampanaRequerimiento>;
-
-  // @beforeCreate()
-  // public static async hashPassword(user: Usuario) {
-  //   if (user.$dirty.password) {
-  //     user.password = await Hash.make(user.password);
-  //   }
-  // }
 
   @beforeSave()
   public static async hashPasswordSave(user: Usuario) {
