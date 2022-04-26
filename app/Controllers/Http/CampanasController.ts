@@ -4,6 +4,7 @@ import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
+import { Permiso } from "App/Helper/permisos";
 
 export default class CampanasController {
   public async index() {
@@ -52,7 +53,12 @@ export default class CampanasController {
     }
   }
 
-  public async requerimientos({ request, response }: HttpContextContract) {
+  public async requerimientos({
+    request,
+    response,
+    bouncer,
+  }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
     const { id_campana, finalizado, id_usuario } = request.qs();
 
     const reqs = await CampanaRequerimiento.query()
@@ -80,7 +86,8 @@ export default class CampanasController {
     );
   }
 
-  public async mig_requerimientos({ request }: HttpContextContract) {
+  public async mig_requerimientos({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
     const { id_campana, finalizado, id_usuario } = request.qs();
     return CampanaRequerimiento.traerRequerimientos({
       id_campana,
