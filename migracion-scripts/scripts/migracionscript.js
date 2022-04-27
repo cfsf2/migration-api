@@ -868,9 +868,8 @@ const stringOnull = (dato) => {
 const tbl_pedidos_producto_pack = async () => {
   const pedidos = await Pedido.find({});
   const farmacias = await Farmacia.find({});
-  const productospack = await ProductoPack.find({});
-
-  console.log(pedidos.length);
+  const productospack = //await ProductoPack.find({});
+    console.log(pedidos.length);
   const total = pedidos.length;
 
   pedidos.forEach(async (pedido) => {
@@ -924,9 +923,7 @@ const tbl_pedidos_producto_pack = async () => {
       '${JSON.stringify(pedido.gruposproductos)}', 
       "${pago_online}", "${envio}", "${habilitado}", "${fecha_entrega}","${es_invitado}", ${idsocio}, ${datos_cliente}, ${origen}, ${username}, ${nombrefarmacia}, ${whatsapp},
       ${obra_social}, ${obra_social_frente}, ${obra_social_dorso}, ${receta}, ${precio_total}, 1, 1
-       ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${
-         id_pedido + 1
-       }, tbl_pedido.descripcion = ${descripcion}, 
+       ) ON DUPLICATE KEY UPDATE tbl_pedido.id = ${id_pedido}, tbl_pedido.descripcion = ${descripcion}, 
        tbl_pedido.comentarios =${comentarios} , 
        tbl_pedido.id_estado_pedido =${id_estado} , 
        tbl_pedido.id_farmacia =${id_farmacia} ,
@@ -941,7 +938,7 @@ const tbl_pedidos_producto_pack = async () => {
        tbl_pedido.fechaentrega = "${fecha_entrega}",
        tbl_pedido.es_invitado = "${es_invitado}", 
        tbl_pedido.id_socio =  ${idsocio}, 
-       tbl_pedido.datos_cliente = ${datos_cliente},
+       tbl_pedido.datos_cliente = '${JSON.stringify(pedido.datos_cliente)}',
        tbl_pedido.origen = ${origen},
         tbl_pedido.username = ${username} , 
         tbl_pedido.nombrefarmacia =  ${nombrefarmacia}, 
