@@ -1,7 +1,8 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { boolaEnumObj, eliminarKeysVacios } from "App/Helper/funciones";
+import { AccionCRUD, boolaEnumObj, eliminarKeysVacios, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Laboratorio from "App/Models/Laboratorio";
+import auth from "Config/auth";
 
 export default class LaboratoriosController {
   public async mig_index({ bouncer }) {
@@ -9,13 +10,19 @@ export default class LaboratoriosController {
     return await Laboratorio.traerLaboratorios({});
   }
 
-  public async mig_add({ request, bouncer }: HttpContextContract) {
+  public async mig_add({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_LAB);
+    const usuario = await auth.authenticate();
 
     const nuevoLab = new Laboratorio();
     delete request.body()._id;
     nuevoLab.merge(eliminarKeysVacios(boolaEnumObj(request.body())));
     try {
+      guardarDatosAuditoria({
+        objeto: nuevoLab,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       nuevoLab.save();
     } catch (err) {
       console.log(err);
@@ -24,13 +31,19 @@ export default class LaboratoriosController {
     return;
   }
 
-  public async mig_update({ request, bouncer }: HttpContextContract) {
+  public async mig_update({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_UPDATE_LAB);
+    const usuario = await auth.authenticate();
 
     const lab = await Laboratorio.findOrFail(request.qs().id);
     delete request.body()._id;
     lab.merge(eliminarKeysVacios(boolaEnumObj(request.body())));
     try {
+      guardarDatosAuditoria({
+        objeto: lab,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       lab.save();
       return;
     } catch (err) {

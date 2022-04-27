@@ -50,10 +50,8 @@ export default class PublicidadsController {
   public async mig_agregar_novedad({
     request,
     bouncer,
-    auth,
   }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_CREATE);
-    const usuario = await auth.authenticate();
 
     const nuevaNovedad = new Publicidad();
 

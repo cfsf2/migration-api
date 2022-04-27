@@ -4,7 +4,7 @@ import Usuario from "./Usuario";
 import Laboratorio from "./Laboratorio";
 import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProductoInstitucion from "./TransferProductoInstitucion";
-import { eliminarKeysVacios, enumaBool } from "App/Helper/funciones";
+import { AccionCRUD, eliminarKeysVacios, enumaBool, guardarDatosAuditoria } from "App/Helper/funciones";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -61,7 +61,7 @@ export default class TransferProducto extends BaseModel {
     });
   }
 
-  static async agregar(data) {
+  static async agregar(data, usuario) {
     const nuevoPF = new TransferProducto();
 
     const instituciones = data.instituciones;
@@ -79,6 +79,11 @@ export default class TransferProducto extends BaseModel {
         precio: data.precio,
         codigo: data.codigo,
       });
+      guardarDatosAuditoria({
+        objeto: nuevoPF,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       await nuevoPF.save();
 
       instituciones.forEach((i) => {
@@ -87,6 +92,7 @@ export default class TransferProducto extends BaseModel {
           id_transfer_producto: nuevoPF.id,
           id_institucion: i,
         });
+        
         institucionPF.save();
       });
       return;
@@ -96,7 +102,7 @@ export default class TransferProducto extends BaseModel {
     }
   }
 
-  static async actualizar(id, data) {
+  static async actualizar(id, data, usuario) {
     const transferProducto = await TransferProducto.findOrFail(id);
 
     const mergeObject: TransferProducto | any = {
@@ -123,6 +129,11 @@ export default class TransferProducto extends BaseModel {
 
     transferProducto.merge(eliminarKeysVacios(mergeObject));
     try {
+      guardarDatosAuditoria({
+        objeto: transferProducto,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       await transferProducto.save();
 
       let instDB = data.productosTransfers.instituciones;
