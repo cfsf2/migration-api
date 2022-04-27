@@ -167,6 +167,7 @@ export default class Farmacia extends BaseModel {
           return enumaBool(pc);
         });
         f.direccioncompleta = `${f.calle} ${f.numero}, ${f.localidad}, ${f.provincia}`;
+        f.instagran = f.instagram;
         f.papeleraProductos = productosEnPapelera[0].map((pc) => {
           pc._id = pc._id.toString();
           return enumaBool(pc);
@@ -250,7 +251,7 @@ export default class Farmacia extends BaseModel {
         id: d.id,
         nombre: d.nombre,
         nombrefarmaceutico: d.nombrefarmaceutico,
-
+        imagen: d.imagen,
         calle: d.calle,
         numero: d.numero,
         id_localidad: localidad[0].id,
@@ -272,11 +273,16 @@ export default class Farmacia extends BaseModel {
         telefono: d.telefono,
         whatsapp: d.whatsapp,
         facebook: d.facebook,
-        instagram: d.instagram,
+        instagram: d.instagram ? d.instagram : d.instagran,
         web: d.web,
         descubrir:
           typeof d.descubrir !== "undefined" ? (d.descubrir ? "s" : "n") : null,
-        envios: typeof d.envios !== "undefined" ? (d.envios ? "s" : "n") : null,
+        envios:
+          typeof d.nohagoenvios !== "undefined"
+            ? d.nohagoenvios
+              ? "n"
+              : "s"
+            : null,
         costoenvio: d.costoenvio,
         tiempotardanza: d.tiempotardanza,
         visita_comercial:
@@ -743,6 +749,9 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public instagram: string;
+
+  @column()
+  public imagen: string;
 
   @column()
   public web: string;
