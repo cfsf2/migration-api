@@ -25,7 +25,7 @@ export default class Repoo extends BaseModel {
         }
       }
       if (file && !file.isValid) {
-        throw "imagen no valida";
+        throw { msg: "imagen no valida" };
       }
       const repos = await Repoo.query();
       const repo = repos.pop();
@@ -36,6 +36,7 @@ export default class Repoo extends BaseModel {
       return await repo?.save();
     } catch (err) {
       console.log(err);
+      err.status = 409;
       return err;
     }
   }
