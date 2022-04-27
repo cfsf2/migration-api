@@ -702,7 +702,11 @@ const tbl_transfers = async () => {
         transfer.fecha.toISOString().split("T")[0]
       }", 1, "${transfer.nro_cuenta_drogueria}", "${
         transfer.email_destinatario
-      }", "${transfer.productos_solicitados.toString()}", 1, 1)
+      }", '${JSON.stringify(
+        transfer.productos_solicitados
+      )}', 1, 1) ON DUPLICATE KEY UPDATE productos_solicitados = '${JSON.stringify(
+        transfer.productos_solicitados
+      )}'
      `;
 
       con.query(sql_transfer, function (err, result) {
