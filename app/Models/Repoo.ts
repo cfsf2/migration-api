@@ -39,8 +39,10 @@ export default class Repoo extends BaseModel {
         usuario: auth,
         accion: AccionCRUD.crear,
       });
+      console.log(repo)
       return await repo?.save();
     } catch (err) {
+      console.log(err)
       return err;
     }
   }
