@@ -15,17 +15,21 @@ export default class RepoossController {
       .pop();
   }
 
-  public async update({ request, bouncer, response, auth }: HttpContextContract) {
+  public async update({
+    request,
+    bouncer,
+    response,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.REPORTEOOSS_CREATE);
     const usuario = await auth.authenticate();
 
     try {
       return Repoo.actualizar({
-        auth:usuario,
+        auth: usuario,
         data: request.body(),
         file: request.file("file", {
           extnames: ["pdf"],
-      
         }),
       });
     } catch (err) {
