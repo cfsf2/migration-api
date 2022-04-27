@@ -166,6 +166,7 @@ export default class Farmacia extends BaseModel {
           pc._id = pc._id.toString();
           return enumaBool(pc);
         });
+        f.direccioncompleta = `${f.calle} ${f.numero}, ${f.localidad}, ${f.provincia}`;
         f.papeleraProductos = productosEnPapelera[0].map((pc) => {
           pc._id = pc._id.toString();
           return enumaBool(pc);
@@ -632,55 +633,58 @@ export default class Farmacia extends BaseModel {
       nuevaFarmacia.localidad
     );
     const farmaciaN = new Farmacia();
-    const { lat, lng: log } = await getCoordenadas({
-      calle: nuevaFarmacia.calle,
-      numero: nuevaFarmacia.numero,
-      localidad: nuevaFarmacia.localidad,
-    });
-
-    farmaciaN.merge({
-      id_usuario: usuario.id,
-      nombrefarmaceutico: nuevaFarmacia.nombrefarmaceutico,
-      matricula: nuevaFarmacia.matricula,
-      id_localidad: localidad.id,
-      nombre: nuevaFarmacia.nombre,
-      cuit: nuevaFarmacia.cuit,
-      cufe: nuevaFarmacia.cufe,
-      email: nuevaFarmacia.email,
-      telefono: nuevaFarmacia.telefono,
-      calle: nuevaFarmacia.calle,
-      numero: Number(nuevaFarmacia.numero),
-      tiempotardanza: nuevaFarmacia.tiempotardanza,
-      latitud: lat,
-      longitud: log,
-      password: nuevaFarmacia.password,
-      id_perfil_farmageo: 2,
-    });
     try {
+      const { lat, lng: log } = await getCoordenadas({
+        calle: nuevaFarmacia.calle,
+        numero: nuevaFarmacia.numero,
+        localidad: nuevaFarmacia.localidad,
+      });
+
+      console.log("he sido  invocado ", lat, log);
+
+      farmaciaN.merge({
+        id_usuario: usuario.id,
+        nombrefarmaceutico: nuevaFarmacia.nombrefarmaceutico,
+        matricula: nuevaFarmacia.matricula,
+        id_localidad: localidad.id,
+        nombre: nuevaFarmacia.nombre,
+        cuit: nuevaFarmacia.cuit,
+        cufe: nuevaFarmacia.cufe,
+        email: nuevaFarmacia.email,
+        telefono: nuevaFarmacia.telefono,
+        calle: nuevaFarmacia.calle,
+        numero: Number(nuevaFarmacia.numero),
+        tiempotardanza: nuevaFarmacia.tiempotardanza,
+        latitud: lat,
+        longitud: log,
+        password: nuevaFarmacia.password,
+        id_perfil_farmageo: 2,
+        cp: nuevaFarmacia.cp,
+      });
+
+      console.log(farmaciaN);
+
       guardarDatosAuditoria({
         objeto: farmaciaN,
         usuario: usuarioAuth,
         accion: AccionCRUD.crear,
       });
       await farmaciaN.save();
+
+      nuevaFarmacia.instituciones.forEach((id_institucion) => {
+        const farmaciaInstitucion = new FarmaciaInstitucion();
+        farmaciaInstitucion.merge({
+          id_institucion: Number(id_institucion),
+          id_farmacia: farmaciaN.id,
+        });
+
+        farmaciaInstitucion.save();
+      });
+      return farmaciaN;
     } catch (err) {
+      console.log(err);
       return err;
     }
-
-    nuevaFarmacia.instituciones.forEach((id_institucion) => {
-      const farmaciaInstitucion = new FarmaciaInstitucion();
-      farmaciaInstitucion.merge({
-        id_institucion: Number(id_institucion),
-        id_farmacia: farmaciaN.id,
-      });
-      try {
-        farmaciaInstitucion.save();
-      } catch (err) {
-        return err;
-      }
-    });
-
-    return farmaciaN;
   }
 
   @column({ isPrimary: true })
@@ -772,6 +776,9 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public id_usuario_modificacion: number;
+
+  @column()
+  public id_usuario_creacion: number;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;

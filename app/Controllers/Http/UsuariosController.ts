@@ -133,7 +133,7 @@ export default class UsuariosController {
           );
       });
     }
-    return nuevoUsuario;
+    return response.send(nuevoUsuario);
   }
 
   public async mig_actualizar_usuarioWeb({
