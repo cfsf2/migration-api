@@ -1,15 +1,19 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Entidad from "App/Models/Entidad";
-import EstadoPedido from "App/Models/EstadoPedido";
+import { Permiso } from "App/Helper/permisos";
 import SolicitudProveeduria from "App/Models/SolicitudProveeduria";
-import SolicitudProveeduriaProductoPack from "App/Models/SolicitudProveeduriaProductoPack";
 
 export default class SolicitudesProveeduriaController {
-  public async mig_index() {
+  public async mig_index({ bouncer }) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_GET_SOLICITUDES);
     return await SolicitudProveeduria.traerSolicitudesProveeduria({});
   }
 
-  public async mig_solicitud_farmacia({ request }: HttpContextContract) {
+  public async mig_solicitud_farmacia({
+    request,
+    bouncer,
+  }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_GET_SOLICITUD_FARMACIA);
+
     const solicitud = await SolicitudProveeduria.traerSolicitudesProveeduria({
       farmaciaid: request.params().id_farmacia,
     });
@@ -20,7 +24,12 @@ export default class SolicitudesProveeduriaController {
     }
   }
 
-  public async mig_agregar_solicitud({ request, auth }: HttpContextContract) {
+  public async mig_agregar_solicitud({
+    request,
+    auth,
+    bouncer,
+  }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_SOLICITUD);
     const usuario = auth.user;
     return await SolicitudProveeduria.crearSolicitud({
       data: request.body(),

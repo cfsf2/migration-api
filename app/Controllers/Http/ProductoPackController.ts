@@ -1,6 +1,6 @@
-import { Request } from "@adonisjs/core/build/standalone";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { eliminarKeysVacios } from "App/Helper/funciones";
+import { Permiso } from "App/Helper/permisos";
 import ProductoPack from "App/Models/ProductoPack";
 
 export default class ProductoPackController {
@@ -21,14 +21,15 @@ export default class ProductoPackController {
     });
   }
 
-  public async mig_producto({ request }: HttpContextContract) {
+  public async mig_producto({}: HttpContextContract) {
     return await ProductoPack.traerProductosPacks({
       habilitado: "s",
       en_papelera: "n",
     });
   }
 
-  public async mig_agregar_producto({ request }: HttpContextContract) {
+  public async mig_agregar_producto({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE);
     const nuevoProducto = new ProductoPack();
 
     nuevoProducto.merge({
@@ -44,7 +45,7 @@ export default class ProductoPackController {
       id_entidad: request.body().entidad_id,
       en_papelera: "n",
     });
-    console.log(nuevoProducto);
+
     try {
       nuevoProducto.save();
       return nuevoProducto;
@@ -53,7 +54,9 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_update_producto({ request }: HttpContextContract) {
+  public async mig_update_producto({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE);
+
     const { id } = request.qs();
 
     let producto = await ProductoPack.findOrFail(id);
@@ -83,7 +86,9 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_delete_producto({ request }: HttpContextContract) {
+  public async mig_delete_producto({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_DELETE);
+
     const { id } = request.params();
 
     let producto = await ProductoPack.findOrFail(id);
@@ -101,7 +106,7 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_papelera({ request }: HttpContextContract) {
+  public async mig_papelera({}: HttpContextContract) {
     return await ProductoPack.traerProductosPacks({
       en_papelera: "s",
     });

@@ -1,8 +1,15 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { Permiso } from "App/Helper/permisos";
 import Institucion from "App/Models/Institucion";
 
 export default class InstitucionesController {
-  public async mig_instituciones({ request }: HttpContextContract) {
+  public async mig_instituciones({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", [
+      Permiso.INSTITUCIONES_GET,
+      Permiso.INSTITUCIONES_GET_PARA_FARMACIA,
+      Permiso.INSTITUCIONES_SEARCH,
+    ]);
+
     const {
       limit = 1000,
       search,
@@ -32,7 +39,9 @@ export default class InstitucionesController {
     return instituciones;
   }
 
-  public async crear({ request, response }: HttpContextContract) {
+  public async crear({ request, response, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.INSTITUCIONES_CREATE);
+
     const institucion = new Institucion();
     try {
       await institucion.merge(request.body()).save();
@@ -42,7 +51,9 @@ export default class InstitucionesController {
     }
   }
 
-  public async actualizar({ request, response }: HttpContextContract) {
+  public async actualizar({ request, response, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.INSTITUCIONES_UPDATE);
+
     const institucion = await Institucion.findOrFail(request.body().id);
     institucion.merge(request.body().data);
     try {
