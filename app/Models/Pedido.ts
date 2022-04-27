@@ -46,14 +46,20 @@ export default class Pedido extends BaseModel {
           .leftJoin("tbl_producto_pack as pp", "ppp.id_productospack", "pp.id")
           .where("ppp.id_pedido", p.id);
 
+        p.datos_cliente = (await JSON.parse(p.datos_cliente))[0]?.apellido
+          ? await JSON.parse(p.datos_cliente)
+          : [{ apellido: null }];
+
         if (pedidosSolicitado.length === 0) {
           p.gruposproductos = await JSON.parse(p.gruposproductos);
-          p.datos_cliente = JSON.parse(p.datos_cliente);
+
           return p;
         }
 
         p = enumaBool(p);
-        p.gruposproductos = pedidosSolicitado;
+        p.gruposproductos = [{ productos: [] }];
+        p.gruposproductos[0].productos = pedidosSolicitado;
+
         return p;
       })
     );
