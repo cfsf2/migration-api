@@ -3,9 +3,11 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import {
+  AccionCRUD,
   boolaEnumObj,
   eliminarKeysVacios,
   enumaBool,
+  guardarDatosAuditoria,
 } from "App/Helper/funciones";
 
 export default class Drogueria extends BaseModel {
@@ -20,7 +22,7 @@ export default class Drogueria extends BaseModel {
     return droguerias.map((d) => enumaBool(d));
   }
 
-  static async actualizarDrogueria(id, data) {
+  static async actualizarDrogueria(id, data, auth) {
     const drog = await Drogueria.findOrFail(id);
 
     delete data._id;
@@ -30,6 +32,11 @@ export default class Drogueria extends BaseModel {
 
     drog.merge(eliminarKeysVacios(boolaEnumObj(data)));
     try {
+      guardarDatosAuditoria({
+        objeto: drog,
+        usuario: auth,
+        accion: AccionCRUD.crear,
+      });
       drog.save();
     } catch (err) {
       console.log(err);

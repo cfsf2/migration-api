@@ -26,6 +26,7 @@ export default class ProductoPackController {
   }
 
   public async mig_producto({}: HttpContextContract) {
+    
     return await ProductoPack.traerProductosPacks({
       habilitado: "s",
       en_papelera: "n",

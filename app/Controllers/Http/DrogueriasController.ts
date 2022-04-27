@@ -1,5 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { boolaEnumObj, eliminarKeysVacios } from "App/Helper/funciones";
+import { AccionCRUD, boolaEnumObj, eliminarKeysVacios, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Drogueria from "App/Models/Drogueria";
 
@@ -13,12 +13,18 @@ export default class DrogueriasController {
     return await Drogueria.traerDroguerias({});
   }
 
-  public async mig_add({ request, bouncer }: HttpContextContract) {
+  public async mig_add({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_DROGUERIA);
+    const usuario = await auth.authenticate();
 
     const nuevaDrog = new Drogueria();
     nuevaDrog.merge(eliminarKeysVacios(boolaEnumObj(request.body())));
     try {
+      guardarDatosAuditoria({
+        objeto: nuevaDrog,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       nuevaDrog.save();
     } catch (err) {
       console.log(err);
@@ -26,9 +32,11 @@ export default class DrogueriasController {
     }
   }
 
-  public async mig_update({ request, response, bouncer }: HttpContextContract) {
+  public async mig_update({ request, response, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_UPDATE_DROGUERIA);
-    Drogueria.actualizarDrogueria(request.qs().id, request.body());
+    const usuario = await auth.authenticate();
+
+    Drogueria.actualizarDrogueria(request.qs().id, request.body(), usuario);
     return response.status(201).send("Se actualizo");
   }
 }
