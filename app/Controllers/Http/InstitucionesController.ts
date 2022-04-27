@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Institucion from "App/Models/Institucion";
 
@@ -39,24 +40,45 @@ export default class InstitucionesController {
     return instituciones;
   }
 
-  public async crear({ request, response, bouncer }: HttpContextContract) {
+  public async crear({
+    request,
+    response,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.INSTITUCIONES_CREATE);
 
+    const usuario = await auth.authenticate();
     const institucion = new Institucion();
+
     try {
-      await institucion.merge(request.body()).save();
+      institucion.merge(request.body());
+
+      guardarDatosAuditoria({
+        objeto: institucion,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
+      await institucion.save();
       return response.created();
     } catch (err) {
       return err;
     }
   }
 
-  public async actualizar({ request, response, bouncer }: HttpContextContract) {
+  public async actualizar({ request, response, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.INSTITUCIONES_UPDATE);
+    const usuario = await auth.authenticate();
 
     const institucion = await Institucion.findOrFail(request.body().id);
     institucion.merge(request.body().data);
+    
     try {
+      guardarDatosAuditoria({
+        objeto: institucion,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       return await institucion.save();
     } catch (err) {
       return response.status(406).send(err);
