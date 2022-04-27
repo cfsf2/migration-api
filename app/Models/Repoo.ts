@@ -3,15 +3,13 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
 export default class Repoo extends BaseModel {
-  static async actualizar({ data, file }) {
+  static async actualizar({ data, file }: { data: any; file?: any }) {
     const { oossInactivas, alert } = data;
+
     try {
-      if (file) {
-        console.log("subiendo");
+      if (file && file.isValid) {
         try {
-          await file("file", {
-            extnames: ["pdf"],
-          })?.moveToDisk(
+          file.moveToDisk(
             "ooss/",
             {
               name: "ooss.pdf",
@@ -26,7 +24,9 @@ export default class Repoo extends BaseModel {
           return err;
         }
       }
-
+      if (file && !file.isValid) {
+        throw "imagen no valida";
+      }
       const repos = await Repoo.query();
       const repo = repos.pop();
       repo?.merge({
@@ -35,6 +35,7 @@ export default class Repoo extends BaseModel {
       });
       return await repo?.save();
     } catch (err) {
+      console.log(err);
       return err;
     }
   }
