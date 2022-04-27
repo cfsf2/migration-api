@@ -1,5 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { eliminarKeysVacios } from "App/Helper/funciones";
+import { AccionCRUD, eliminarKeysVacios, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Publicidad from "App/Models/Publicidad";
 import Entidad from "../../Models/Entidad";
@@ -14,7 +14,8 @@ export default class EntidadController {
     return await Entidad.traerEntidades({});
   }
 
-  public async mig_agregar_entidad({ request, bouncer }: HttpContextContract) {
+  public async mig_agregar_entidad({ request, bouncer, auth }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_ENTIDADES);
 
     const nuevaEntidad = new Entidad();
@@ -35,6 +36,11 @@ export default class EntidadController {
     });
 
     try {
+      guardarDatosAuditoria({
+        objeto: nuevaEntidad,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       nuevaEntidad.save();
       return nuevaEntidad;
     } catch (error) {
@@ -42,7 +48,8 @@ export default class EntidadController {
     }
   }
 
-  public async mig_update_entidad({ request, bouncer }: HttpContextContract) {
+  public async mig_update_entidad({ request, bouncer, auth }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE_ENTIDADES);
 
     const { id } = request.qs();
@@ -54,7 +61,7 @@ export default class EntidadController {
       logo: request.body().logo,
       habilitado:
         typeof request.body().habilitado !== "undefined"
-          ? request.body().habilitado === true
+          ? request.body().habilitado === 's'
             ? "s"
             : "n"
           : null,
@@ -69,11 +76,19 @@ export default class EntidadController {
             : "n"
           : null,
     };
+    console.log('habilitado? ; ',`${request.body().habilitado}`)
+
+
     mergeObject = eliminarKeysVacios(mergeObject);
 
     entidad.merge(mergeObject);
 
     try {
+      guardarDatosAuditoria({
+        objeto: entidad,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       entidad.save();
       return entidad;
     } catch (error) {
@@ -81,7 +96,8 @@ export default class EntidadController {
     }
   }
 
-  public async mig_delete({ request, bouncer }: HttpContextContract) {
+  public async mig_delete({ request, bouncer,auth }: HttpContextContract) {
+    const usuario = await auth.authenticate();
     await bouncer.authorize("AccesoRuta", Permiso.PDP_DELETE_ENTIDADES);
 
     const { id } = request.params();
@@ -91,7 +107,11 @@ export default class EntidadController {
     entidad.merge({
       habilitado: "n",
     });
-
+    guardarDatosAuditoria({
+      objeto: entidad,
+      usuario: usuario,
+      accion: AccionCRUD.editar,
+    });
     entidad.save();
 
     try {

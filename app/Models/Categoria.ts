@@ -52,10 +52,10 @@ export default class Categoria extends BaseModel {
   public destacada: string;
 
   @column()
-  public id_usuario_creacion: Number;
+  public id_usuario_creacion: number;
 
   @column()
-  public id_usuario_modificacion: Number;
+  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -74,5 +74,4 @@ export default class Categoria extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
-
 }

@@ -1,5 +1,9 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { eliminarKeysVacios } from "App/Helper/funciones";
+import {
+  AccionCRUD,
+  eliminarKeysVacios,
+  guardarDatosAuditoria,
+} from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ProductoPack from "App/Models/ProductoPack";
 
@@ -28,8 +32,14 @@ export default class ProductoPackController {
     });
   }
 
-  public async mig_agregar_producto({ request, bouncer }: HttpContextContract) {
+  public async mig_agregar_producto({
+    request,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE);
+    const usuario = await auth.authenticate();
+
     const nuevoProducto = new ProductoPack();
 
     nuevoProducto.merge({
@@ -47,6 +57,11 @@ export default class ProductoPackController {
     });
 
     try {
+      guardarDatosAuditoria({
+        objeto: nuevoProducto,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
       nuevoProducto.save();
       return nuevoProducto;
     } catch (error) {
@@ -54,9 +69,13 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_update_producto({ request, bouncer }: HttpContextContract) {
+  public async mig_update_producto({
+    request,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE);
-
+    const usuario = await auth.authenticate();
     const { id } = request.qs();
 
     let producto = await ProductoPack.findOrFail(id);
@@ -79,6 +98,11 @@ export default class ProductoPackController {
     producto.merge(mergeObject);
 
     try {
+      guardarDatosAuditoria({
+        objeto: producto,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       producto.save();
       return producto;
     } catch (error) {
@@ -86,9 +110,13 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_delete_producto({ request, bouncer }: HttpContextContract) {
+  public async mig_delete_producto({
+    request,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PDP_DELETE);
-
+    const usuario = await auth.authenticate();
     const { id } = request.params();
 
     let producto = await ProductoPack.findOrFail(id);
@@ -99,6 +127,11 @@ export default class ProductoPackController {
     console.log("directo a papelera...");
 
     try {
+      guardarDatosAuditoria({
+        objeto: producto,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       producto.save();
       return producto;
     } catch (error) {

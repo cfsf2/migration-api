@@ -5,7 +5,11 @@ import PublicidadTipo from "App/Models/PublicidadTipo";
 import PublicidadColor from "App/Models/PublicidadColor";
 
 import PublicidadInstitucion from "App/Models/PublicidadInstitucion";
-import { eliminarKeysVacios } from "App/Helper/funciones";
+import {
+  AccionCRUD,
+  eliminarKeysVacios,
+  guardarDatosAuditoria,
+} from "App/Helper/funciones";
 import { DateTime } from "luxon";
 import { Permiso } from "App/Helper/permisos";
 
@@ -43,8 +47,14 @@ export default class PublicidadsController {
     }
   }
 
-  public async mig_agregar_novedad({ request, bouncer }: HttpContextContract) {
+  public async mig_agregar_novedad({
+    request,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_CREATE);
+    const usuario = await auth.authenticate();
+
     const nuevaNovedad = new Publicidad();
 
     // const tipo =  await PublicidadTipo.query().where( 'nombre', request.body().tipo )
@@ -83,15 +93,23 @@ export default class PublicidadsController {
       publicidadInstitucion.save();
     });
 
+
     try {
-      return;
+      nuevaNovedad.save()
+      return nuevaNovedad;
     } catch (error) {
       return error;
     }
   }
 
-  public async mig_update_novedad({ request, bouncer }: HttpContextContract) {
+  public async mig_update_novedad({
+    request,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_UPDATE);
+    const usuario = await auth.authenticate();
+
     const { id } = request.qs();
 
     let publicidad = await Publicidad.findOrFail(id);
@@ -120,11 +138,17 @@ export default class PublicidadsController {
       id_publicidad_tipo: tipo?.id,
       id_color: color?.id,
     };
+
     mergeObject = eliminarKeysVacios(mergeObject);
 
     publicidad.merge(mergeObject);
 
     try {
+      guardarDatosAuditoria({
+        objeto: publicidad,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
       publicidad.save();
       return publicidad;
     } catch (error) {

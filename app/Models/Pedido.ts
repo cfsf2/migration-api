@@ -7,7 +7,12 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import PedidoProductoPack from "./PedidoProductoPack";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "App/Helper/email";
-import { boolaEnum, enumaBool } from "App/Helper/funciones";
+import {
+  AccionCRUD,
+  boolaEnum,
+  enumaBool,
+  guardarDatosAuditoria,
+} from "App/Helper/funciones";
 
 export default class Pedido extends BaseModel {
   static async traerPedidos({
@@ -22,7 +27,10 @@ export default class Pedido extends BaseModel {
     const datos = await Database.from("tbl_pedido")
       .select(
         Database.raw(
-          `tbl_pedido.*, tbl_pedido.ts_modificacion as fechamodificacion, tbl_pedido.ts_creacion as fechaalta, tbl_pedido.id as _id`
+          `tbl_pedido.*, 
+          tbl_pedido.ts_modificacion as fechamodificacion, 
+          tbl_pedido.ts_creacion as fechaalta, 
+          tbl_pedido.id as _id`
         )
       )
       .leftJoin("tbl_estado_pedido", "id_estado_pedido", "tbl_estado_pedido.id")
@@ -52,7 +60,6 @@ export default class Pedido extends BaseModel {
 
         if (pedidosSolicitado.length === 0) {
           p.gruposproductos = await JSON.parse(p.gruposproductos);
-
           return p;
         }
 
@@ -66,7 +73,7 @@ export default class Pedido extends BaseModel {
     return newPedido;
   }
 
-  static async actualizarPedido({ id, pedidoCambios }) {
+  static async actualizarPedido({ id, pedidoCambios, auth }) {
     let pedido = await Pedido.findOrFail(id);
 
     const estado = await EstadoPedido.query()
@@ -88,6 +95,11 @@ export default class Pedido extends BaseModel {
       ? Number(pedidoCambios.gruposproductos[0].precio)
       : null;
 
+    guardarDatosAuditoria({
+      objeto: pedido,
+      usuario: auth,
+      accion: AccionCRUD.editar,
+    });
     return pedido.save();
   }
 
