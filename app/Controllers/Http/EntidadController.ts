@@ -1,14 +1,22 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { eliminarKeysVacios } from "App/Helper/funciones";
+import { Permiso } from "App/Helper/permisos";
 import Publicidad from "App/Models/Publicidad";
 import Entidad from "../../Models/Entidad";
 
 export default class EntidadController {
   public async index({ request }: HttpContextContract) {
-    return await Entidad.traerEntidades({ habilitado: "true" });
+    return await Entidad.traerEntidades({ habilitado: "s" });
   }
 
-  public async mig_agregar_entidad({ request }: HttpContextContract) {
+  public async index_Admin({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_GET_ENTIDADES);
+    return await Entidad.traerEntidades({});
+  }
+
+  public async mig_agregar_entidad({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_ENTIDADES);
+
     const nuevaEntidad = new Entidad();
 
     nuevaEntidad.merge({
@@ -34,7 +42,9 @@ export default class EntidadController {
     }
   }
 
-  public async mig_update_entidad({ request }: HttpContextContract) {
+  public async mig_update_entidad({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE_ENTIDADES);
+
     const { id } = request.qs();
 
     let entidad = await Entidad.findOrFail(id);
@@ -71,7 +81,9 @@ export default class EntidadController {
     }
   }
 
-  public async mig_delete({ request }: HttpContextContract) {
+  public async mig_delete({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_DELETE_ENTIDADES);
+
     const { id } = request.params();
 
     let entidad = await Entidad.findOrFail(id);

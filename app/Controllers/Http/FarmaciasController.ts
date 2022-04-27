@@ -8,6 +8,7 @@ import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Response } from "@adonisjs/core/build/standalone";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
+import { Permiso } from "App/Helper/permisos";
 
 export default class FarmaciasController {
   public async index() {
@@ -69,9 +70,12 @@ export default class FarmaciasController {
   public async mig_updatePerfil({
     request,
     response,
+    bouncer,
     auth,
   }: HttpContextContract) {
     const usuario = await auth.authenticate();
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
+
     const { username, id } = request.qs();
     try {
       return response.created(
@@ -89,9 +93,12 @@ export default class FarmaciasController {
   public async mig_admin_updatePerfil({
     request,
     response,
-    auth
+    bouncer,
+    auth,
   }: HttpContextContract) {
     const usuario = await auth.authenticate();
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_ADMIN_UPDATE);
+
     const data: {
       farmacia: any;
       usuario: any;
@@ -112,7 +119,7 @@ export default class FarmaciasController {
       await Farmacia.actualizarFarmaciaAdmin({
         id: request.body().farmacia.id,
         data: data,
-        usuarioAuth: usuario
+        usuarioAuth: usuario,
       });
       return response.created();
     } catch (err) {
@@ -120,24 +127,28 @@ export default class FarmaciasController {
     }
   }
 
-  public async mig_create({ request }: HttpContextContract) {
+  public async mig_create({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
     return await Farmacia.crearFarmacia(request.body());
   }
 
-  public async mig_admin_passwords() {
+  public async mig_admin_passwords({ bouncer }) {
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     return await Database.from("tbl_farmacia")
       .leftJoin("tbl_usuario", "id_usuario", "tbl_usuario.id")
       .select("tbl_farmacia.password", "tbl_usuario.usuario");
   }
 
-  public async existeUsuario({ request }: HttpContextContract) {
+  public async existeUsuario({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     const existe = await Usuario.findBy("usuario", request.params().usuario);
 
     if (existe) return true;
     return false;
   }
 
-  public async mig_admin_farmacia({ request }: HttpContextContract) {
+  public async mig_admin_farmacia({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     const farmacia = await Farmacia.traerFarmacias({
       id: request.params().id,
       admin: request.url().includes("admin"),

@@ -1,9 +1,9 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import jwt from "jsonwebtoken";
 import Usuario from "App/Models/Usuario";
 import { enumaBool } from "App/Helper/funciones";
 import Perfil from "App/Models/Perfil";
 import { DateTime } from "luxon";
+import { Permiso } from "App/Helper/permisos";
 
 export default class AuthController {
   public async mig_loginwp({ request, response, auth }: HttpContextContract) {
@@ -57,7 +57,9 @@ export default class AuthController {
     }
   }
 
-  public async mig_perfiles({ request }: HttpContextContract) {
+  public async mig_perfiles({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PERFILES_GET);
+
     const { tipo } = request.qs();
     return await Perfil.query()
       .select("tbl_perfil.id as _id", "tbl_perfil.*")

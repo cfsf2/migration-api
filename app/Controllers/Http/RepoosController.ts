@@ -1,9 +1,11 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Repoo from "App/Models/Repoo";
-import Drive from "@ioc:Adonis/Core/Drive";
+
+import { Permiso } from "App/Helper/permisos";
 
 export default class RepoossController {
-  public async index() {
+  public async index({ bouncer }) {
+    await bouncer.authorize("AccesoRuta", Permiso.REPORTEOOSS_GET);
     const repooss = await Repoo.query();
     return repooss
       .map((rep) => {
@@ -13,7 +15,8 @@ export default class RepoossController {
       .pop();
   }
 
-  public async update({ request }: HttpContextContract) {
+  public async update({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.REPORTEOOSS_CREATE);
     return Repoo.actualizar({ data: request.body(), file: request.file });
   }
 }

@@ -69,7 +69,7 @@ export default class UsuariosController {
     auth,
     bouncer,
   }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.USER_CREATE);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
     const usuario = await auth.authenticate();
     const body = request.body();
     const nuevoUsuario = new Usuario();

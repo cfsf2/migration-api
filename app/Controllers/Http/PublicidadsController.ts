@@ -1,27 +1,24 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Publicidad from "../../Models/Publicidad";
-import Database from "@ioc:Adonis/Lucid/Database";
+
 import PublicidadTipo from "App/Models/PublicidadTipo";
 import PublicidadColor from "App/Models/PublicidadColor";
-import Institucion from "App/Models/Institucion";
+
 import PublicidadInstitucion from "App/Models/PublicidadInstitucion";
 import { eliminarKeysVacios } from "App/Helper/funciones";
 import { DateTime } from "luxon";
+import { Permiso } from "App/Helper/permisos";
 
 export default class PublicidadsController {
-  public async mig_publicidades({ request }: HttpContextContract) {
+  public async mig_publicidades({}: HttpContextContract) {
     return Publicidad.traerPublicidades({});
-
-    // return await Publicidad.query()
-    //   .preload("instituciones")
-    //   .preload("juancito")
-    //   .select("*")
-    //   .where("id_publicidad_tipo", "=", "1");
   }
-  public async mig_novedadesAdmin({ request }: HttpContextContract) {
+  public async mig_novedadesAdmin({ bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_ADMIN);
     return Publicidad.traerPublicidades({ tipo: "novedadesadmin" });
   }
-  public async mig_novedadesSearch({ request }: HttpContextContract) {
+  public async mig_novedadesSearch({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_SEARCH);
     const publicidades = await Publicidad.traerPublicidades({
       habilitado: request.qs().tipo,
       institucion: request.qs().instituciones,
@@ -31,18 +28,23 @@ export default class PublicidadsController {
     return publicidades;
   }
 
-  public async mig_novedadesFarmacia({ request }: HttpContextContract) {
+  public async mig_novedadesFarmacia({
+    request,
+    bouncer,
+  }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_FARMACIA);
     const novedades = await Publicidad.traerNovedadesFarmacias({
       id_farmacia: request.params().farmacia,
     });
     try {
       return novedades;
     } catch (error) {
-      return error
+      return error;
     }
   }
 
-  public async mig_agregar_novedad({ request }: HttpContextContract) {
+  public async mig_agregar_novedad({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_CREATE);
     const nuevaNovedad = new Publicidad();
 
     // const tipo =  await PublicidadTipo.query().where( 'nombre', request.body().tipo )
@@ -88,7 +90,8 @@ export default class PublicidadsController {
     }
   }
 
-  public async mig_update_novedad({ request }: HttpContextContract) {
+  public async mig_update_novedad({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_UPDATE);
     const { id } = request.qs();
 
     let publicidad = await Publicidad.findOrFail(id);

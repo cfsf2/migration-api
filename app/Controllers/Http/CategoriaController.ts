@@ -1,17 +1,22 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Database from "@ioc:Adonis/Lucid/Database";
+
 import { eliminarKeysVacios } from "App/Helper/funciones";
+import { Permiso } from "App/Helper/permisos";
 import Categoria from "App/Models/Categoria";
 
 export default class CategoriaController {
-  public async index({ request }: HttpContextContract) {
+  public async index({}: HttpContextContract) {
     return await Categoria.traerCategorias({ habilitado: "s" });
   }
-  public async mig_admin({ request }: HttpContextContract) {
+  public async mig_admin({}: HttpContextContract) {
     return await Categoria.traerCategorias({});
   }
 
-  public async mig_agregar_categoria({ request }: HttpContextContract) {
+  public async mig_agregar_categoria({
+    request,
+    bouncer,
+  }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_CATEGORIA);
     const nuevaCategoria = new Categoria();
 
     nuevaCategoria.merge({
@@ -28,7 +33,8 @@ export default class CategoriaController {
     }
   }
 
-  public async mig_update_categoria({ request }: HttpContextContract) {
+  public async mig_update_categoria({ request, bouncer }: HttpContextContract) {
+    await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE_CATEGORIA);
     const { id } = request.qs();
 
     let categoria = await Categoria.findOrFail(id);
