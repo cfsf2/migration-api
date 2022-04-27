@@ -4,15 +4,21 @@ import Usuario from "./Usuario";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 
 export default class Repoo extends BaseModel {
-  static async actualizar({ data, file, auth }) {
+  static async actualizar({
+    data,
+    file,
+    auth,
+  }: {
+    data: any;
+    file?: any;
+    auth: Usuario;
+  }) {
     const { oossInactivas, alert } = data;
+
     try {
-      if (file) {
-        console.log("subiendo");
+      if (file && file.isValid) {
         try {
-          await file("file", {
-            extnames: ["pdf"],
-          })?.moveToDisk(
+          file.moveToDisk(
             "ooss/",
             {
               name: "ooss.pdf",
@@ -27,7 +33,9 @@ export default class Repoo extends BaseModel {
           return err;
         }
       }
-
+      if (file && !file.isValid) {
+        throw { msg: "imagen no valida" };
+      }
       const repos = await Repoo.query();
       const repo = repos.pop();
       repo?.merge({
@@ -39,10 +47,11 @@ export default class Repoo extends BaseModel {
         usuario: auth,
         accion: AccionCRUD.crear,
       });
-      console.log(repo)
+
       return await repo?.save();
     } catch (err) {
-      console.log(err)
+      console.log(err);
+      err.status = 409;
       return err;
     }
   }
