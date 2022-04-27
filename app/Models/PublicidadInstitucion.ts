@@ -17,7 +17,7 @@ export default class PublicidadInstitucion extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_publicidad: Number;
+  public id_publicidad: number;
 
   //foreing keys
 
@@ -27,7 +27,7 @@ export default class PublicidadInstitucion extends BaseModel {
   // public id_publicidad: HasOne<typeof Publicidad>;
 
   @column()
-  public id_institucion: Number;
+  public id_institucion: number;
 
   @hasOne(() => Institucion, {
     foreignKey: "id",
