@@ -81,23 +81,21 @@ export default class PublicidadsController {
       id_color: color.id,
     });
 
-    nuevaNovedad.save();
-
-    request.body().instituciones.forEach((id_institucion) => {
-      const publicidadInstitucion = new PublicidadInstitucion();
-      publicidadInstitucion.merge({
-        //el id no se guarda hasta que no se crea el registro
-        id_publicidad: nuevaNovedad.id,
-        id_institucion: Number(id_institucion),
-      });
-      publicidadInstitucion.save();
-    });
-
-
     try {
-      nuevaNovedad.save()
-      return nuevaNovedad;
+      await nuevaNovedad.save();
+
+      request.body().instituciones.forEach((id_institucion) => {
+        const publicidadInstitucion = new PublicidadInstitucion();
+        publicidadInstitucion.merge({
+          id_publicidad: nuevaNovedad.id,
+          id_institucion: Number(id_institucion),
+        });
+        publicidadInstitucion.save();
+      });
+
+      return;
     } catch (error) {
+      console.log(error);
       return error;
     }
   }
