@@ -4,7 +4,15 @@ import Usuario from "./Usuario";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 
 export default class Repoo extends BaseModel {
-  static async actualizar({ data, file, auth }: { data: any; file?: any, auth: Usuario }) {
+  static async actualizar({
+    data,
+    file,
+    auth,
+  }: {
+    data: any;
+    file?: any;
+    auth: Usuario;
+  }) {
     const { oossInactivas, alert } = data;
 
     try {
@@ -39,7 +47,7 @@ export default class Repoo extends BaseModel {
         usuario: auth,
         accion: AccionCRUD.crear,
       });
-      console.log(repo)
+
       return await repo?.save();
     } catch (err) {
       console.log(err);
