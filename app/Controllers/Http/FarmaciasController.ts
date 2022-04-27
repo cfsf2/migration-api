@@ -6,8 +6,6 @@ import Farmacia from "../../Models/Farmacia";
 import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { Response } from "@adonisjs/core/build/standalone";
-import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 
 export default class FarmaciasController {
