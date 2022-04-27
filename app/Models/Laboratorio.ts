@@ -51,7 +51,7 @@ export default class Laboratorio extends BaseModel {
   public url: string;
 
   @column.dateTime({ autoCreate: true })
-  public ts_creacion: DateTime;
+  public ts_timestamp: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
