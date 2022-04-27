@@ -124,8 +124,8 @@ export default class Usuario extends BaseModel {
         rules.email(),
         rules.unique({ table: "tbl_usuario", column: "email" }),
       ]),
-      telefono: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
-      celular: schema.string({}, [rules.mobile({ locales: ["es-AR"] })]),
+      telefono: schema.string({}, [rules.mobile({ locale: ["es-AR"] })]),
+      celular: schema.string({}, [rules.mobile({ locale: ["es-AR"] })]),
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),
@@ -208,7 +208,7 @@ export default class Usuario extends BaseModel {
         nombre: data.first_name,
         apellido: data.last_name,
         usuario: data.username.includes("@")
-          ? data.usernam.toLowerCase()
+          ? data.username.toLowerCase()
           : data.username.toUpperCase(),
         password: data.password,
         esfarmacia: data.roles.includes("farmacia") ? "s" : "n",
@@ -243,10 +243,11 @@ export default class Usuario extends BaseModel {
         },
       };
     } catch (err) {
+      console.log(err)
       return {
         body: {
           type: "fail",
-          msg: err.messages.errors[0].message,
+          msg: "Ha ocurrido un error",
         },
       };
     }
