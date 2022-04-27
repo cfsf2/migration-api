@@ -1,5 +1,5 @@
 
-GET http://localhost:3111/transfers/farmacia/265 HTTP/1.1
+GET http://localhost:3111/farmacias/admin/10 HTTP/1.1
 
 ####
 

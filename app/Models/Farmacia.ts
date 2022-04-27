@@ -620,7 +620,9 @@ export default class Farmacia extends BaseModel {
     return;
   }
 
-  static async crearFarmacia(nuevaFarmacia) {
+  static async crearFarmacia(nuevaFarmacia, auth) {
+    const usuarioAuth = await auth.authenticate();
+
     const usuario = await Usuario.findByOrFail(
       "usuario",
       nuevaFarmacia.usuario
@@ -655,6 +657,11 @@ export default class Farmacia extends BaseModel {
       id_perfil_farmageo: 2,
     });
     try {
+      guardarDatosAuditoria({
+        objeto: farmaciaN,
+        usuario: usuarioAuth,
+        accion: AccionCRUD.crear,
+      });
       await farmaciaN.save();
     } catch (err) {
       return err;
