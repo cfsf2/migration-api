@@ -177,6 +177,7 @@ export default class UsuariosController {
 
   public async mig_newpassword({ request, bouncer }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.USER_NEWPASSWORD);
+    const usuario = await auth.authenticate();
 
     try {
       return Usuario.cambiarPassword({

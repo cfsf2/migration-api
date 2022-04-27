@@ -75,6 +75,7 @@ export default class ProductosTransfersController {
     } catch (error) {}
   }
 }
+
 function guardarDatosAuditoria(arg0: {
   objeto: any;
   usuario: import("../../Models/Usuario").default;
