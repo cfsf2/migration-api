@@ -69,7 +69,7 @@ export default class Transfer extends BaseModel {
     return res;
   }
 
-  static async guardar({ data, usuario }: { data: any; usuario: any }) {
+  static async guardar({ data, usuario }: { data: any; usuario: Usuario }) {
     const nuevoTransfer = new Transfer();
     const drogueria = await Drogueria.findByOrFail("nombre", data.drogueria_id);
     const laboratorio = await Laboratorio.findByOrFail(
@@ -109,6 +109,11 @@ export default class Transfer extends BaseModel {
         observaciones: p.observacion,
 
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+      });
+      guardarDatosAuditoria({
+        objeto: transferProducto,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
       });
       transferProducto.save();
     });
