@@ -15,8 +15,10 @@ export default class RepoossController {
       .pop();
   }
 
-  public async update({ request, bouncer }: HttpContextContract) {
+  public async update({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.REPORTEOOSS_CREATE);
-    return Repoo.actualizar({ data: request.body(), file: request.file });
+    const usuario = await auth.authenticate();
+
+    return Repoo.actualizar({ data: request.body(), file: request.file, auth: usuario });
   }
 }

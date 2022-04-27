@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 
 export default class Repoo extends BaseModel {
-  static async actualizar({ data, file }) {
+  static async actualizar({ data, file, auth }) {
     const { oossInactivas, alert } = data;
     try {
       if (file) {
@@ -32,6 +33,11 @@ export default class Repoo extends BaseModel {
       repo?.merge({
         oossInactivas: JSON.stringify(oossInactivas),
         alert: alert,
+      });
+      guardarDatosAuditoria({
+        objeto: repo,
+        usuario: auth,
+        accion: AccionCRUD.crear,
       });
       return await repo?.save();
     } catch (err) {
