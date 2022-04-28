@@ -21,7 +21,7 @@ import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
 import UsuarioPerfil from "./UsuarioPerfil";
-import { eliminarKeysVacios, enumaBool } from "App/Helper/funciones";
+import { AccionCRUD, eliminarKeysVacios, enumaBool, guardarDatosAuditoria } from "App/Helper/funciones";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -177,7 +177,7 @@ export default class Usuario extends BaseModel {
     }
   }
 
-  public static async registrarUsuarioAdmin(data) {
+  public static async registrarUsuarioAdmin(data, usuarioAuth) {
     const usuario = new Usuario();
     const usuarioPerfil = new UsuarioPerfil();
 
@@ -229,11 +229,21 @@ export default class Usuario extends BaseModel {
       });
 
       usuario.merge(datosValidados);
+      guardarDatosAuditoria({
+        objeto: usuario,
+        usuario: usuarioAuth,
+        accion: AccionCRUD.crear,
+      });
       await usuario.save();
 
       usuarioPerfil.merge({
         id_usuario: usuario.id,
         id_perfil: Number(data.perfil),
+      });
+      guardarDatosAuditoria({
+        objeto: usuarioPerfil,
+        usuario: usuarioAuth,
+        accion: AccionCRUD.crear,
       });
       await usuarioPerfil.save();
       return {
@@ -257,11 +267,13 @@ export default class Usuario extends BaseModel {
     id,
     usuarioData,
     response,
+    usuarioAuth
   }: {
     id: number;
     usuarioData: any;
     request: RequestContract;
     response: ResponseContract;
+    usuarioAuth: any;
   }) {
     const usuario = await Usuario.find(id);
 
@@ -269,6 +281,11 @@ export default class Usuario extends BaseModel {
       if (usuario) {
         usuario.telefono = usuarioData.telephone;
         usuario.celular = usuarioData.telephone;
+        guardarDatosAuditoria({
+          objeto: usuario,
+          usuario: usuarioAuth,
+          accion: AccionCRUD.editar,
+        });
         usuario.save();
         return response.status(202);
       }
@@ -282,10 +299,12 @@ export default class Usuario extends BaseModel {
     id_usuario,
     username,
     data,
+    usuarioAuth
   }: {
     username?: string;
     id_usuario?: number;
     data: any;
+    usuarioAuth: any;
   }) {
     let usuario = new Usuario();
     if (id_usuario) {
@@ -354,6 +373,11 @@ export default class Usuario extends BaseModel {
     mergObject = eliminarKeysVacios(mergObject);
 
     usuario.merge(mergObject);
+    guardarDatosAuditoria({
+      objeto: usuario,
+      usuario: usuarioAuth,
+      accion: AccionCRUD.editar,
+    });
     usuario.save();
     if (data.perfil && Number(data.perfil) !== perfilUsuario?.id_perfil) {
       if (perfilUsuario) {
@@ -362,12 +386,16 @@ export default class Usuario extends BaseModel {
       }
       if (!perfilUsuario) {
         const perfilUsuario = new UsuarioPerfil();
-        perfilUsuario
-          .merge({
+        perfilUsuario.merge({
             id_usuario: usuario.id,
             id_perfil: Number(data.perfil),
           })
-          .save();
+          guardarDatosAuditoria({
+            objeto: perfilUsuario,
+            usuario: usuarioAuth,
+            accion: AccionCRUD.editar,
+          })
+          perfilUsuario.save();
       }
     }
     return usuario;
@@ -377,10 +405,12 @@ export default class Usuario extends BaseModel {
     id,
     username,
     password,
+    usuarioAuth
   }: {
     id?: number;
     username?: string;
     password: string;
+    usuarioAuth: any;
   }) {
     let usuario: Usuario = new Usuario();
     if (id) {
@@ -390,6 +420,11 @@ export default class Usuario extends BaseModel {
       usuario = await Usuario.findByOrFail("usuario", username);
     }
     usuario.merge({ password: password });
+    guardarDatosAuditoria({
+      objeto: usuario,
+      usuario: usuarioAuth,
+      accion: AccionCRUD.editar,
+    });
     return usuario.save();
   }
 

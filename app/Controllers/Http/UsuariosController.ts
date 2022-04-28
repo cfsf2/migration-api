@@ -140,9 +140,11 @@ export default class UsuariosController {
     request,
     response,
     bouncer,
+    auth
   }: HttpContextContract) {
     const usuarioData = request.body().data;
     const token = request.header("authorization")?.split(" ")[1];
+    const usuarioAuth = await auth.authenticate();
 
     bouncer
       .authorize("actualizarUsuarioWeb", usuarioData.id)
@@ -152,6 +154,7 @@ export default class UsuariosController {
           usuarioData: usuarioData,
           response,
           request,
+          usuarioAuth
         });
       })
       .catch((err) => {
@@ -160,41 +163,48 @@ export default class UsuariosController {
       });
   }
 
-  public async mig_actualizar({ request, bouncer }: HttpContextContract) {
+  public async mig_actualizar({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.USER_UPDATE);
+    const usuarioAuth = await auth.authenticate();
+
     return await Usuario.actualizar({
       id_usuario: request.qs().id,
       data: request.body().data,
+      usuarioAuth
     });
   }
 
-  public async mig_alta_usuario({ request, bouncer }: HttpContextContract) {
+  public async mig_alta_usuario({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.USER_CREATE);
+    const usuarioAuth = await auth.authenticate();
 
     const data = request.body();
-    return Usuario.registrarUsuarioAdmin(data);
+    return Usuario.registrarUsuarioAdmin(data, usuarioAuth);
   }
 
-  public async mig_newpassword({ request, bouncer }: HttpContextContract) {
+  public async mig_newpassword({ request, bouncer, auth}: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.USER_NEWPASSWORD);
-    const usuario = await auth.authenticate();
+    const usuarioAuth = await auth.authenticate();
 
     try {
       return Usuario.cambiarPassword({
         id: request.qs().id,
         password: request.body().data,
+        usuarioAuth
       });
     } catch (err) {
       return err;
     }
   }
 
-  public async delete({ request, bouncer }: HttpContextContract) {
+  public async delete({ request, bouncer, auth }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.USER_DELETE);
+    const usuarioAuth = await auth.authenticate();
 
     return await Usuario.actualizar({
       username: request.qs().username,
       data: request.body(),
+      usuarioAuth
     });
   }
 }
