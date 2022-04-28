@@ -657,7 +657,7 @@ const tbl_transfers = async () => {
     )[0];
     if (!farmacia) {
       farmacia = farmacias.filter(
-        (farm) => farm.id === transfer.farmacia_id
+        (farm) => farm._id === transfer.farmacia_id
       )[0];
     }
 
