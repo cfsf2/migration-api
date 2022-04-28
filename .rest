@@ -1,5 +1,5 @@
 
-GET http://localhost:3111/productosTransfers HTTP/1.1
+GET http://localhost:3111/farmacias/admin/2205 HTTP/1.1
 
 ####
 

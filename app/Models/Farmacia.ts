@@ -52,13 +52,16 @@ export default class Farmacia extends BaseModel {
       f.direccioncompleta, f.longitud AS log, 
       f.latitud AS lat, f.costoenvio,
       f.habilitado, f.imagen, f.email, f.telefono, 
-      f.whatsapp, f.facebook, f.instagram, f.web, 
+      f.whatsapp, 
+      f.facebook,
+      f.instagram, 
+      f.web, 
       f.descubrir, f.envios, f.tiempotardanza, 
       f.ts_creacion as fechaalta,
       f.id as farmaciaid,
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
       ${admin ? "f.*," : ""}
-      l.nombre AS localidad, u.usuario AS usuario , 
+      l.nombre AS localidad, u.usuario AS usuario, 
       p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
       GROUP_CONCAT(DISTINCT mp.nombre) AS mediospagos,
       GROUP_CONCAT(DISTINCT i.id) AS instituciones
@@ -167,7 +170,6 @@ export default class Farmacia extends BaseModel {
           return enumaBool(pc);
         });
         f.direccioncompleta = `${f.calle} ${f.numero}, ${f.localidad}, ${f.provincia}`;
-        f.instagran = f.instagram;
         f.papeleraProductos = productosEnPapelera[0].map((pc) => {
           pc._id = pc._id.toString();
           return enumaBool(pc);
@@ -181,12 +183,14 @@ export default class Farmacia extends BaseModel {
             .preload("perfil")
             .where("id_usuario", f.id_usuario);
           f.id_perfil = perfil[0].perfil.id;
+          delete f.instagran;
+          delete f.facebook;
+          delete f.farmaciaid;
         }
         f = enumaBool(f);
         return f;
       })
     );
-
     if (farmacias.length === 1) {
       return farmacias[0];
     }
@@ -601,6 +605,7 @@ export default class Farmacia extends BaseModel {
         await Usuario.cambiarPassword({
           username: data.usuario.username,
           password: data.usuario.password,
+          usuarioAuth: usuarioAuth,
         });
         return await farmacia.save();
       } catch (error) {
