@@ -872,8 +872,8 @@ const stringOnull = (dato) => {
 const tbl_pedidos_producto_pack = async () => {
   const pedidos = await Pedido.find({});
   const farmacias = await Farmacia.find({});
-  const productospack = //await ProductoPack.find({});
-    console.log(pedidos.length);
+  const productospack = await ProductoPack.find({});
+  console.log(pedidos.length);
   const total = pedidos.length;
 
   pedidos.forEach(async (pedido) => {
