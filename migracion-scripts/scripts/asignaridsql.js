@@ -44,14 +44,14 @@ const asignaridsql = async () => {
   // migracion.asignar_idsql(Drogueria);
   //migracion.asignar_idsql(Publicidad);
   // migracion.asignar_idsql(ProductoTransfer);
-  //migracion.asignar_idsql(DebitoFarmacia);
+  migracion.asignar_idsql(DebitoFarmacia);
 
-  migracion.asignar_idsql_externo(
-    ProductoTransfer,
-    Laboratorio,
-    "idsql_laboratorio",
-    "laboratorioid"
-  );
+  // migracion.asignar_idsql_externo(
+  //   ProductoTransfer,
+  //   Laboratorio,
+  //   "idsql_laboratorio",
+  //   "laboratorioid"
+  // );
 
   // migracion.transfer_asignar_idsql_codigotransfer();
 

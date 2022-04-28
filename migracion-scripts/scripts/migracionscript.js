@@ -652,9 +652,14 @@ const tbl_transfers = async () => {
     const drogueria = droguerias.filter(
       (drog) => drog.nombre === transfer.drogueria_id
     )[0];
-    const farmacia = farmacias.filter(
+    let farmacia = farmacias.filter(
       (farm) => farm.farmaciaid === transfer.farmacia_id
     )[0];
+    if (!farmacia[0]) {
+      farmacia = farmacias.filter(
+        (farm) => farm.id === transfer.farmacia_id
+      )[0];
+    }
 
     // console.timeEnd("Filtrando labs, drogs y farms...");
 
@@ -1298,7 +1303,7 @@ const tbl_debitofarmacia = async () => {
     const sql = `INSERT INTO tbl_debitofarmacia (id, usuario, periodo, archivo, id_usuario_creacion, id_usuario_modificacion)
       VALUES (${deb.idsql}, ${stringOnull(deb.usuario)}, ${stringOnull(
       deb.periodo
-    )}, ${stringOnull(deb.archivo)}, 1, 1)`;
+    )}, ${stringOnull(deb.archivo)}, 1, 1) ON DUPLICATE KEY id=${deb.idsql}`;
 
     con.query(sql, function (err, result) {
       if (err) {
