@@ -1303,7 +1303,9 @@ const tbl_debitofarmacia = async () => {
     const sql = `INSERT INTO tbl_debitofarmacia (id, usuario, periodo, archivo, id_usuario_creacion, id_usuario_modificacion)
       VALUES (${deb.idsql}, ${stringOnull(deb.usuario)}, ${stringOnull(
       deb.periodo
-    )}, ${stringOnull(deb.archivo)}, 1, 1) ON DUPLICATE KEY id=${deb.idsql}`;
+    )}, ${stringOnull(deb.archivo)}, 1, 1) ON DUPLICATE KEY UPDATE id=${
+      deb.idsql
+    }`;
 
     con.query(sql, function (err, result) {
       if (err) {
