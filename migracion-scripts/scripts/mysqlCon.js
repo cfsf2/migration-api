@@ -11,7 +11,7 @@ const con = mysql.createConnection({
   host: "localhost",
   user: "root",
   password: "pass",
-  database: "farmageo",
+  database: "apifarmageotest_bdtest",
   charset: "utf8mb4",
 });
 con.query("SET GLOBAL connect_timeout=28800");
