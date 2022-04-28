@@ -1569,6 +1569,7 @@ const tbl_producto_custom = () => {
 
     await Promise.all(productosCustoms.map((p) => queryPromise(con, sql(p))));
     await Promise.all(productosCustoms.map((p) => queryPromise(con, sql2(p))));
+    resolve();
   });
 };
 

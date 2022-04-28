@@ -36,26 +36,26 @@ connectToDatabase = async () => {
 const asignaridsql = async () => {
   await connectToDatabase();
 
-  // migracion.asignar_idsql(Usuario);
-  // migracion.asignar_idsql(Farmacia);
+  //migracion.asignar_idsql(Usuario);
+  //migracion.asignar_idsql(Farmacia);
   // migracion.asignar_idsql(Permiso);
   // migracion.asignar_idsql(ProductoPack);
   // migracion.asignar_idsql(Laboratorio);
   // migracion.asignar_idsql(Drogueria);
   //migracion.asignar_idsql(Publicidad);
   // migracion.asignar_idsql(ProductoTransfer);
-  migracion.asignar_idsql(DebitoFarmacia);
+  //migracion.asignar_idsql(DebitoFarmacia);
 
-  // migracion.asignar_idsql_externo(
-  //   ProductoTransfer,
-  //   Laboratorio,
-  //   "idsql_laboratorio",
-  //   "laboratorioid"
-  // );
+  migracion.asignar_idsql_externo(
+    ProductoTransfer,
+    Laboratorio,
+    "idsql_laboratorio",
+    "laboratorioid"
+  );
 
   // migracion.transfer_asignar_idsql_codigotransfer();
 
-  // migracion.farmacia_asignar_usuario_idsql();
+  //migracion.farmacia_asignar_usuario_idsql();
   // migracion.farmacia_asignar_id_localidad();
   // migracion.usuario_asignar_id_localidad();
   // migracion.productoPack_categoria_entidad_idsql();
