@@ -44,6 +44,7 @@ export default class Publicidad extends BaseModel {
         "p.fecha_inicio as fechainicio",
         "p.fecha_fin as fechafin",
         "p.ts_creacion as fecha_alta",
+        "p.ts_creacion as fechaalta",
         "tp.nombre as tipo",
         "cp.nombre as color",
         Database.raw("GROUP_CONCAT(i.id) as instituciones")
