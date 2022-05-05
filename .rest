@@ -1,5 +1,5 @@
 
-GET http://localhost:3111/publicidades HTTP/1.1
+GET http://localhost:3111/transfers HTTP/1.1
 
 ####
 

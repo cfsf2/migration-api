@@ -58,9 +58,20 @@ export default class Transfer extends BaseModel {
           )
           .where("ttp.id_transfer", t.id);
 
-        t.productos_solicitados = productos;
+        let counter = 0;
+
         if (productos.length === 0) {
-          t.productos_solicitados = JSON.parse(t.productos_solicitados);
+          try {
+            t.productos_solicitados = await JSON.parse(t.productos_solicitados.replace(/\s*"/g, '"'));
+          } catch (error) {
+            counter += 1
+            console.log(counter);
+            console.log(t.productos_solicitados);
+            console.log(error);
+            return t;
+          }
+        } else {
+          t.productos_solicitados = productos;
         }
         return t;
       })
