@@ -6,3 +6,4 @@ services:
     image: farmageoapi:latest
     ports:
       - "3001:3001"
+    network_mode: host
