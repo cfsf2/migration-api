@@ -27,7 +27,7 @@ export default class Transfer extends BaseModel {
         "t.*",
         "t.id as _id",
         "t.ts_modificacion as fecha_modificacion",
-        "t.ts_creacion as fecha_alta",
+        "t.fecha as fecha_alta",
         "d.nombre as drogueria_id",
         "f.matricula as farmacia_id",
         "f.nombre as farmacia_nombre",

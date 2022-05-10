@@ -1,5 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { AccionCRUD } from "App/Helper/funciones";
+import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import TransferProducto from "App/Models/TransferProducto";
 import TransferProductoInstitucion from "App/Models/TransferProductoInstitucion";
@@ -62,7 +62,7 @@ export default class ProductosTransfersController {
     const usuario = await auth.authenticate();
 
     const prod = await TransferProducto.findOrFail(request.params().id);
-    prod.merge({ habilitado: "n" });
+    prod.merge({ en_papelera: "s" });
 
     try {
       guardarDatosAuditoria({
@@ -70,16 +70,13 @@ export default class ProductosTransfersController {
         usuario: usuario,
         accion: AccionCRUD.crear,
       });
-      prod.save();
-      return;
-    } catch (error) {}
+      await prod.save();
+      return prod
+    } catch (error) {
+      console.log(error)
+      return error
+    }
   }
 }
 
-function guardarDatosAuditoria(arg0: {
-  objeto: any;
-  usuario: import("../../Models/Usuario").default;
-  accion: any;
-}) {
-  throw new Error("Function not implemented.");
-}
+

@@ -57,6 +57,7 @@ export default class TransferProducto extends BaseModel {
 
     return trasfersProducto.map((t) => {
       t._id = t._id.toString();
+      t.laboratorioid = t.laboratorioid?.toString()
       return enumaBool(t);
     });
   }

@@ -17,14 +17,17 @@ export default class PublicidadsController {
   public async mig_publicidades({}: HttpContextContract) {
     return Publicidad.traerPublicidades({});
   }
+
   public async mig_novedadesAdmin({ bouncer }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_ADMIN);
     return Publicidad.traerPublicidades({ tipo: "novedadesadmin" });
   }
+
   public async mig_novedadesSearch({ request, bouncer }: HttpContextContract) {
     await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_SEARCH);
+
     const publicidades = await Publicidad.traerPublicidades({
-      habilitado: request.qs().tipo,
+      habilitado: request.qs().habilitado,
       institucion: request.qs().instituciones,
       vigencia: request.qs().vigencia,
       titulo: request.qs().titulo,

@@ -74,11 +74,10 @@ export default class Publicidad extends BaseModel {
       //novedades search
       .if(habilitado === "true" || habilitado === "false", (query) => {
         const condicional = habilitado === "true" ? "s" : "n";
-        query.andWhere("habilitado", condicional);
+        query.andWhere("p.habilitado", condicional);
       })
 
       .if(institucion && institucion !== "todas", (query) => {
-        console.log(institucion);
         query.andWhere("i.id", institucion);
       })
 
