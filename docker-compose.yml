@@ -1,9 +1,16 @@
 version: "3.2"
 services:
   app:
-    container_name: farmageo-api
     restart: always
-    image: farmageoapi:latest
+    build:
+      context: ./
+    image: apif
+    container_name: API
     ports:
-      - "3001:3001"
-    network_mode: host
+      - "3111:3111"
+    volumes:
+      - ./:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    command: node ace serve --watch
+volumes:
+  node_modules: {}
