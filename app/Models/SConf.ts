@@ -1,5 +1,13 @@
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import SConfPermiso from "./SConfPermiso";
 import STipo from "./STipo";
 import Usuario from "./Usuario";
 
@@ -32,6 +40,12 @@ export default class SConf extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+
+  @belongsTo(() => SConfPermiso, {
+    localKey: "id_conf",
+    foreignKey: "id",
+  })
+  public conf_permiso: BelongsTo<typeof SConfPermiso>;
 
   @hasOne(() => STipo, {
     localKey: "id_tipo",
