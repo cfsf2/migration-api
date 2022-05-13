@@ -1,6 +1,8 @@
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import STipo from "./STipo";
 import SAtributo from "./SAtributo";
+import Usuario from "./Usuario";
+import { DateTime } from "luxon";
 
 export default class STipoAtributo extends BaseModel {
   public static table = "s_tipo_atributo";
@@ -8,14 +10,45 @@ export default class STipoAtributo extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
-  //foreing key
+  @column()
+  public id_tipo: number;
+
+  @column()
+  public id_atributo: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
+
   @hasOne(() => STipo, {
+    localKey: "id_tipo",
     foreignKey: "id",
   })
-  public id_tipo: HasOne<typeof STipo>;
+  public tipos: HasOne<typeof STipo>;
 
   @hasOne(() => SAtributo, {
+    localKey: "id_atributo",
     foreignKey: "id",
   })
-  public id_atributo: HasOne<typeof SAtributo>;
+  public atributos: HasOne<typeof SAtributo>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_creacion",
+  })
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 }
