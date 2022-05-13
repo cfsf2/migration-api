@@ -9,7 +9,7 @@ COPY --chown=node:node ./package*.json ./
 
 RUN npm ci --silent
 
-COPY --chown=node:node . .
+# COPY --chown=node:node . .
 
 USER node
 
@@ -18,4 +18,4 @@ USER node
 
 EXPOSE 3111
 
-CMD node ace serve --watch
+# CMD node ace serve --watch

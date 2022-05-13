@@ -9,7 +9,10 @@ services:
     ports:
       - "3111:3111"
     volumes:
-      - ./:/home/node/app
+      - type: bind
+        source: ./
+        target: /home/node/app
+        read_only: true
       - node_modules:/home/node/app/node_modules
     command: node ace serve --watch
 volumes:

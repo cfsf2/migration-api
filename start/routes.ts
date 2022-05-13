@@ -20,5 +20,5 @@ import "../routes/productosTransfers";
 import "../routes/transfers";
 
 Route.get("/", async () => {
-  return { farmageo: "11-5-22 H" };
+  return { farmageo: "11-5-22 Farmacias Windows" };
 });
