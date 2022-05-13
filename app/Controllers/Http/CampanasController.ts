@@ -27,7 +27,7 @@ export default class CampanasController {
       id_campana: schema.number(),
       id_usuario: schema.number.nullable(),
       id_farmacia: schema.number.nullable(),
-      celular: schema.string({}, [rules.mobile({ locale: ["es-AR"] })]),
+      celular: schema.string({}, [rules.minLength(10)]),
     });
 
     let random = () => {
