@@ -3,11 +3,17 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  hasMany,
+  HasMany,
+  HasManyThrough,
+  hasManyThrough,
   hasOne,
   HasOne,
 } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import SConfCpsc from "./SConfCpsc";
 import SConfPermiso from "./SConfPermiso";
+import SConfTipoAtributoValor from "./SConfTipoAtributoValor";
 import STipo from "./STipo";
 import Usuario from "./Usuario";
 
@@ -26,7 +32,7 @@ export default class SConf extends BaseModel {
   @column()
   public id_a: string;
 
-  @column()
+  @column({ serializeAs: null })
   public id_tipo: number;
 
   @column()
@@ -52,6 +58,20 @@ export default class SConf extends BaseModel {
     foreignKey: "id",
   })
   public tipo: HasOne<typeof STipo>;
+
+  @hasMany(() => SConfTipoAtributoValor, {
+    localKey: "id",
+    foreignKey: "id_conf",
+  })
+  public valores: HasMany<typeof SConfTipoAtributoValor>;
+
+  @hasManyThrough([() => SConf, () => SConfCpsc], {
+    localKey: "id",
+    foreignKey: "id_conf",
+    throughLocalKey: "id_conf_h",
+    throughForeignKey: "id",
+  })
+  public sub_conf: HasManyThrough<typeof SConf>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",

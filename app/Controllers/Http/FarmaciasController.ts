@@ -7,6 +7,7 @@ import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
+import ConfigsController from "../Interno/ConfigsController";
 
 export default class FarmaciasController {
   public async index() {
@@ -146,7 +147,7 @@ export default class FarmaciasController {
   }
 
   public async mig_admin_farmacia({ request, bouncer }: HttpContextContract) {
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     const farmacia = await Farmacia.traerFarmacias({
       id: request.params().id,
       admin: request.url().includes("admin"),
@@ -171,5 +172,19 @@ export default class FarmaciasController {
       instituciones: farmacia.instituciones,
       perfil: farmacia.id_perfil,
     };
+  }
+
+  public async servicios({ request, bouncer, response }: HttpContextContract) {
+    console.log(request.qs());
+    try {
+      const confs = await ConfigsController.Config({
+        config: request.qs().pantalla,
+      });
+      return confs;
+    } catch (err) {
+      console.log(err);
+      return response.status(404);
+    }
+    // return await Servicio.find({});
   }
 }

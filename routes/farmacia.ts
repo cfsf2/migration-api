@@ -14,7 +14,14 @@ Route.get(
   match: /^[0-9]+$/,
   cast: (matricula) => Number(matricula),
 });
-Route.get("/farmacias/admin/:id", "FarmaciasController.ts.mig_admin_farmacia");
+
+Route.get(
+  "/farmacias/admin/:id",
+  "FarmaciasController.ts.mig_admin_farmacia"
+).where("id", {
+  match: /^[0-9]+$/,
+  cast: (matricula) => Number(matricula),
+});
 
 Route.post(
   "/farmacias/admin/passwords",
@@ -28,3 +35,5 @@ Route.put("/farmacias", "FarmaciasController.ts.mig_updatePerfil");
 Route.put("/farmacias/admin/", "FarmaciasController.ts.mig_admin_updatePerfil");
 
 Route.get("/farmacias/debitos/:periodo/:cufe", "DebitosController.debitos");
+
+Route.get("/farmacias/admin/servicios/", "FarmaciasController.servicios");
