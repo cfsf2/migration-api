@@ -35,5 +35,3 @@ Route.put("/farmacias", "FarmaciasController.ts.mig_updatePerfil");
 Route.put("/farmacias/admin/", "FarmaciasController.ts.mig_admin_updatePerfil");
 
 Route.get("/farmacias/debitos/:periodo/:cufe", "DebitosController.debitos");
-
-Route.get("/farmacias/admin/servicios/", "FarmaciasController.servicios");

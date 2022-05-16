@@ -18,6 +18,7 @@ import "../routes/laboratorios";
 import "../routes/droguerias";
 import "../routes/productosTransfers";
 import "../routes/transfers";
+import "../routes/pantalla";
 
 Route.get("/", async () => {
   return { farmageo: "10-5-22" };

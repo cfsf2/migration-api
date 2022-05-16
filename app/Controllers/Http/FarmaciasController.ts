@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
-import ConfigsController from "../Interno/ConfigsController";
+import ConfigsController from "./ConfigsController";
 
 export default class FarmaciasController {
   public async index() {
@@ -172,19 +172,5 @@ export default class FarmaciasController {
       instituciones: farmacia.instituciones,
       perfil: farmacia.id_perfil,
     };
-  }
-
-  public async servicios({ request, bouncer, response }: HttpContextContract) {
-    console.log(request.qs());
-    try {
-      const confs = await ConfigsController.Config({
-        config: request.qs().pantalla,
-      });
-      return confs;
-    } catch (err) {
-      console.log(err);
-      return response.status(404);
-    }
-    // return await Servicio.find({});
   }
 }

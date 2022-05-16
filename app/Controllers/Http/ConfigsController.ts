@@ -14,7 +14,9 @@ const preloadRecursivo = (query) => {
 };
 
 export default class ConfigsController {
-  public static async Config({ config }: { config: string }) {
+  public async Config({ request }) {
+    const config = request.qs().pantalla;
+
     const conf = await SConf.query()
       .where("id_a", config)
       .andWhere("id_tipo", 1)
@@ -29,10 +31,28 @@ export default class ConfigsController {
       ?.valores.find((val) => val.atributo.find((a) => a.id === 15))
       ?.toObject().valor;
 
-    // eval(modelo);
+    const columnas = conf.sub_conf
+      .find((sc) => sc.tipo.id === 2)
+      ?.sub_conf.map((sc) => {
+        if (sc.tipo.id === 4) {
+          return sc;
+        }
+      });
 
-    console.log(typeof eval(modelo));
+    const campos = columnas?.map((col) => {
+      return col?.valores.find((v) => v.atributo[0].id === 7)?.valor;
+    });
 
-    return await eval(modelo).query().select("nombre");
+    const cabeceras = columnas?.map((col) => {
+      let cabecera = {};
+
+      col?.valores.forEach((val) => {
+        cabecera[val.atributo[0].nombre] = val.valor;
+      });
+      return cabecera;
+    });
+
+    const datos = await eval(modelo).query().select(campos);
+    return { datos, cabeceras };
   }
 }
