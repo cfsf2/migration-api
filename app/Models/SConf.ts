@@ -11,6 +11,7 @@ import {
   HasOne,
 } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import Permiso from "./Permiso";
 import SConfCpsc from "./SConfCpsc";
 import SConfPermiso from "./SConfPermiso";
 import SConfTipoAtributoValor from "./SConfTipoAtributoValor";
@@ -58,6 +59,20 @@ export default class SConf extends BaseModel {
     foreignKey: "id",
   })
   public tipo: HasOne<typeof STipo>;
+
+  @hasManyThrough([() => Permiso, () => SConfPermiso], {
+    localKey: "id",
+    foreignKey: "id_conf",
+    throughLocalKey: "id_permiso",
+    throughForeignKey: "id",
+  })
+  public permiso_string: HasManyThrough<typeof Permiso>;
+
+  @hasMany(() => SConfCpsc, {
+    localKey: "id",
+    foreignKey: "id_conf",
+  })
+  public orden: HasMany<typeof SConfCpsc>;
 
   @hasMany(() => SConfTipoAtributoValor, {
     localKey: "id",

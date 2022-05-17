@@ -7,6 +7,7 @@
 
 import Bouncer from "@ioc:Adonis/Addons/Bouncer";
 import { Permiso } from "App/Helper/permisos";
+import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
 
 /*
@@ -68,7 +69,45 @@ export const { actions } = Bouncer.define(
 
     return Bouncer.deny("Acceso no autorizado", 401);
   }
-);
+).define("AccesoConf", async (usuario: Usuario, conf: SConf)=>{
+    const clearanceLevel = conf.permiso
+
+    switch clearanceLevel{
+    case 't':
+      return true
+    case 'n':
+      return false
+    case 'p':
+    //   const perfiles = await usuario
+    //   .related("perfil")
+    //   .query()
+    //   .preload("permisos");
+
+    // let permisos: any = [];
+
+
+    // perfiles.forEach((perfil) => {
+    //   perfil.permisos.forEach((permiso) => permisos.push(permiso));
+    // });
+
+    // if (Array.isArray(conf.permiso)) {
+    //   if (
+    //     permisos.some((p: { nombre: string }) =>
+    //       permiso.includes(p.nombre as Permiso)
+    //     )
+    //   )
+    //     return true;
+    //   return false;
+    // }
+
+    // if (
+    //   permisos.findIndex((p: { nombre: string }) => p.nombre === permiso) !== -1
+    // )
+    //   return true;
+
+    return Bouncer.deny("Acceso no autorizado", 401);
+    }
+})
 
 /*
 |--------------------------------------------------------------------------
