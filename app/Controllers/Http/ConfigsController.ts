@@ -17,8 +17,9 @@ const preloadRecursivo = (query) => {
 export default class ConfigsController {
   public async Config({ request, bouncer }) {
     const config = request.qs().pantalla;
+    const queryFiltros = request.qs();
+    console.log(queryFiltros);
 
-    console.log(config);
     if (!config) {
       console.log({ datos: [], cabeceras: [], filtros: [] });
       return { datos: [], cabeceras: [], filtros: [] };
@@ -35,7 +36,7 @@ export default class ConfigsController {
 
     // para listado
     const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2);
-    console.log(listado?.toJSON());
+    // console.log(listado?.toJSON());
 
     let opcionesListado = {};
 
