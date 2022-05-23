@@ -38,76 +38,113 @@ export const { actions } = Bouncer.define(
   (usuario: Usuario, idUsuarioActualizar: number) => {
     return idUsuarioActualizar === usuario.id;
   }
-).define(
-  "AccesoRuta",
-  async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
-    const perfiles = await usuario
-      .related("perfil")
-      .query()
-      .preload("permisos");
+)
+  .define(
+    "AccesoRuta",
+    async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
+      const perfiles = await usuario
+        .related("perfil")
+        .query()
+        .preload("permisos");
 
-    let permisos: any = [];
+      let permisos: any = [];
 
-    perfiles.forEach((perfil) => {
-      perfil.permisos.forEach((permiso) => permisos.push(permiso));
-    });
+      perfiles.forEach((perfil) => {
+        perfil.permisos.forEach((permiso) => permisos.push(permiso));
+      });
 
-    if (Array.isArray(permiso)) {
-      if (
-        permisos.some((p: { nombre: string }) =>
-          permiso.includes(p.nombre as Permiso)
+      if (Array.isArray(permiso)) {
+        if (
+          permisos.some((p: { nombre: string }) =>
+            permiso.includes(p.nombre as Permiso)
+          )
         )
+          return true;
+        return false;
+      }
+
+      if (
+        permisos.findIndex((p: { nombre: string }) => p.nombre === permiso) !==
+        -1
       )
         return true;
-      return false;
+
+      return Bouncer.deny("Acceso no autorizado", 401);
     }
+  )
+  .define(
+    "AccesoConf",
+    async (usuario: Usuario, conf: SConf) => {
+      const clearanceLevel = conf.permiso;
+      if (!clearanceLevel) {
+        console.log("sin clearance");
+        return false;
+      }
+      switch (clearanceLevel) {
+        case undefined:
+          // console.log("undefined", clearanceLevel, conf.permiso, conf.id_a);
+          return false;
+        case "t":
+          //  console.log("todos", clearanceLevel, conf.permiso, conf.id_a);
+          return true;
+        case "u":
+          console.log(
+            "usuario logueado",
+            clearanceLevel,
+            conf.permiso,
+            conf.id_a,
+            usuario
+          );
+          if (usuario) return true;
 
-    if (
-      permisos.findIndex((p: { nombre: string }) => p.nombre === permiso) !== -1
-    )
-      return true;
+          return false;
+        case "n":
+          // console.log("nadie", clearanceLevel, conf.permiso, conf.id_a);
+          return false;
+        case "p":
+          // console.log(
+          //   "Con Permiso",
+          //   clearanceLevel,
+          //   conf.id_a,
+          //   conf.conf_permiso.permiso.nombre
+          // );
+          const perfiles = await usuario
+            .related("perfil")
+            .query()
+            .preload("permisos");
 
-    return Bouncer.deny("Acceso no autorizado", 401);
-  }
-).define("AccesoConf", async (usuario: Usuario, conf: SConf)=>{
-    const clearanceLevel = conf.permiso
+          let permisos: any = [];
 
-    switch clearanceLevel{
-    case 't':
-      return true
-    case 'n':
-      return false
-    case 'p':
-    //   const perfiles = await usuario
-    //   .related("perfil")
-    //   .query()
-    //   .preload("permisos");
+          perfiles.forEach((perfil) => {
+            perfil.permisos.forEach((permiso) => permisos.push(permiso));
+          });
 
-    // let permisos: any = [];
+          if (Array.isArray(conf.permiso)) {
+            // if (
+            //   permisos.some((p: { nombre: string }) =>
+            //     conf.conf_permiso.permiso.includes(p.nombre as Permiso)
+            //   )
+            // )
+            return true;
+            return false;
+          }
 
+          if (
+            permisos.findIndex(
+              (p: { nombre: string }) =>
+                p.nombre === conf.conf_permiso.permiso.nombre
+            ) !== -1
+          )
+            return true;
 
-    // perfiles.forEach((perfil) => {
-    //   perfil.permisos.forEach((permiso) => permisos.push(permiso));
-    // });
-
-    // if (Array.isArray(conf.permiso)) {
-    //   if (
-    //     permisos.some((p: { nombre: string }) =>
-    //       permiso.includes(p.nombre as Permiso)
-    //     )
-    //   )
-    //     return true;
-    //   return false;
-    // }
-
-    // if (
-    //   permisos.findIndex((p: { nombre: string }) => p.nombre === permiso) !== -1
-    // )
-    //   return true;
-
-    return Bouncer.deny("Acceso no autorizado", 401);
-    }
-})
+          return Bouncer.deny("Acceso no autorizado", 401);
+        default:
+          // console.log("default", clearanceLevel, conf.permiso, conf.id_a);
+          return false;
+      }
+    },
+    { allowGuest: true }
+  );
 
 /*
 |--------------------------------------------------------------------------
