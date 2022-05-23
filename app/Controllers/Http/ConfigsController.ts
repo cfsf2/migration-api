@@ -31,6 +31,28 @@ const getColumnas = async (listado: SConf, bouncer: any) => {
   return columnas;
 };
 
+const getFiltros = async (listado: SConf, bouncer: any) => {
+  const filtros_aplicables = listado?.sub_conf.filter((sc) => sc.tipo.id === 3);
+  const filtros = await Promise.all(
+    filtros_aplicables?.map(async (fil) => {
+      let filters = {};
+
+      if (!(await bouncer.allows("AccesoConf", fil))) return false;
+
+      filters["orden"] = listado?.orden.find(
+        (o) => o.id_conf_h === fil.id
+      )?.orden;
+
+      fil?.valores.forEach((val) => {
+        filters[val.atributo[0].nombre] = val.valor;
+      });
+      return filters;
+    })
+  );
+
+  return filtros.filter((f) => f);
+};
+
 const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
   let opcionesListado = {};
   let datos = [];
@@ -50,6 +72,7 @@ const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
     ?.toObject().valor;
 
   let columnas = await getColumnas(listado, bouncer);
+  let filtros = await getFiltros(listado, bouncer);
 
   const campos = columnas
     ?.map((col) => {
@@ -68,21 +91,6 @@ const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
       cabecera[val.atributo[0].nombre] = val.valor;
     });
     return cabecera;
-  });
-
-  const filtros_aplicables = listado?.sub_conf.filter((sc) => sc.tipo.id === 3);
-
-  const filtros = filtros_aplicables?.map((fil) => {
-    let filters = {};
-
-    filters["orden"] = listado?.orden.find(
-      (o) => o.id_conf_h === fil.id
-    )?.orden;
-
-    fil?.valores.forEach((val) => {
-      filters[val.atributo[0].nombre] = val.valor;
-    });
-    return filters;
   });
 
   if (campos.length !== 0) datos = await eval(modelo).query().select(campos);
