@@ -93,8 +93,9 @@ const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
 export default class ConfigsController {
   public async Config({ request, bouncer }) {
     const config = request.qs().pantalla;
+    const queryFiltros = request.qs();
+    console.log(queryFiltros);
 
-    console.log(config);
     if (!config) {
       return { datos: [], cabeceras: [], filtros: [] };
     }
