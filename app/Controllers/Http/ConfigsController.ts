@@ -35,25 +35,21 @@ const getFiltros = async (listado: SConf, bouncer: any) => {
   const filtros_aplicables = listado?.sub_conf.filter((sc) => sc.tipo.id === 3);
   const filtros = await Promise.all(
     filtros_aplicables?.map(async (fil) => {
-      let filters = {};
-
-      if (!(await bouncer.allows("AccesoConf", fil))) return false;
-
-      filters["orden"] = listado?.orden.find(
-        (o) => o.id_conf_h === fil.id
-      )?.orden;
-
-      fil?.valores.forEach((val) => {
-        filters[val.atributo[0].nombre] = val.valor;
-      });
-      return filters;
+      if (!(await bouncer.allows("AccesoConf", fil)))
+        return false as unknown as SConf;
+      return fil;
     })
   );
 
   return filtros.filter((f) => f);
 };
 
-const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
+const armarListado = async (
+  listado: SConf,
+  conf: SConf,
+  bouncer: any,
+  queryFiltros
+) => {
   let opcionesListado = {};
   let datos = [];
 
@@ -72,7 +68,7 @@ const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
     ?.toObject().valor;
 
   let columnas = await getColumnas(listado, bouncer);
-  let filtros = await getFiltros(listado, bouncer);
+  let filtros_aplicables = await getFiltros(listado, bouncer);
 
   const campos = columnas
     ?.map((col) => {
@@ -92,6 +88,34 @@ const armarListado = async (listado: SConf, conf: SConf, bouncer: any) => {
     });
     return cabecera;
   });
+
+  const filtros = filtros_aplicables.map((fil) => {
+    let filters = {};
+
+    filters["orden"] = listado?.orden.find(
+      (o) => o.id_conf_h === fil.id
+    )?.orden;
+
+    filters["id_a"] = fil.id_a;
+
+    fil?.valores.forEach((val) => {
+      filters[val.atributo[0].nombre] = val.valor;
+    });
+    return filters;
+  });
+
+  const aplicarFiltros = (queryFiltros, query, filtros_aplicable: SConf[]) => {
+    const filtros_id_a = Object.keys(queryFiltros);
+
+    filtros_id_a.forEach((id_a) => {
+      const filtro = filtros_aplicables.find((fil) => fil.id_a === id_a);
+      console.log(filtro, id_a);
+    });
+
+    return;
+  };
+
+  aplicarFiltros(queryFiltros, "", filtros_aplicables);
 
   if (campos.length !== 0) datos = await eval(modelo).query().select(campos);
 
@@ -121,6 +145,6 @@ export default class ConfigsController {
 
     const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
 
-    return armarListado(listado, conf, bouncer);
+    return armarListado(listado, conf, bouncer, queryFiltros);
   }
 }
