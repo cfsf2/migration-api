@@ -88,13 +88,13 @@ export const { actions } = Bouncer.define(
           //  console.log("todos", clearanceLevel, conf.permiso, conf.id_a);
           return true;
         case "u":
-          console.log(
-            "usuario logueado",
-            clearanceLevel,
-            conf.permiso,
-            conf.id_a,
-            usuario
-          );
+          // console.log(
+          //   "usuario logueado",
+          //   clearanceLevel,
+          //   conf.permiso,
+          //   conf.id_a,
+          //   usuario
+          // );
           if (usuario) return true;
 
           return false;
@@ -113,10 +113,10 @@ export const { actions } = Bouncer.define(
             .query()
             .preload("permisos");
 
-          let permisos: any = [];
+          let permisosUsuario: any = [];
 
           perfiles.forEach((perfil) => {
-            perfil.permisos.forEach((permiso) => permisos.push(permiso));
+            perfil.permisos.forEach((permiso) => permisosUsuario.push(permiso));
           });
 
           if (Array.isArray(conf.permiso)) {
@@ -130,7 +130,7 @@ export const { actions } = Bouncer.define(
           }
 
           if (
-            permisos.findIndex(
+            permisosUsuario.findIndex(
               (p: { nombre: string }) =>
                 p.nombre === conf.conf_permiso.permiso.nombre
             ) !== -1

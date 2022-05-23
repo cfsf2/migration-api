@@ -16,39 +16,89 @@ const preloadRecursivo = (query) => {
     .preload("sub_conf", (query) => preloadRecursivo(query));
 };
 
-const getColumnas = async (listado: SConf, bouncer: any) => {
-  let columnas = listado?.sub_conf.filter((sc) => sc.tipo.id === 4);
-  columnas = await Promise.all(
-    columnas.map(async (column) => {
-      if (await bouncer.allows("AccesoConf", column)) {
-        return column;
-      }
-      return false as unknown as SConf;
+const verificarPermisos = async (listado: SConf, bouncer: any, tipoId) => {
+  const sconfs_pedidos = listado?.sub_conf.filter(
+    (sc) => sc.tipo.id === tipoId
+  );
+  const sconf_habilitados = await Promise.all(
+    sconfs_pedidos?.map(async (sc) => {
+      if (!(await bouncer.allows("AccesoConf", sc)))
+        return false as unknown as SConf;
+      return sc;
     })
   );
-  columnas = columnas?.filter((c) => c);
 
-  return columnas;
+  return sconf_habilitados?.filter((f) => f);
 };
 
-const getFiltros = async (listado: SConf, bouncer: any) => {
-  const filtros_aplicables = listado?.sub_conf.filter((sc) => sc.tipo.id === 3);
-  const filtros = await Promise.all(
-    filtros_aplicables?.map(async (fil) => {
-      if (!(await bouncer.allows("AccesoConf", fil)))
-        return false as unknown as SConf;
-      return fil;
-    })
-  );
+const aplicarFiltros = (
+  queryFiltros: {},
+  query: any,
+  filtros_e: SConf[], // filtros para los que tiene permiso
+  listado: SConf
+) => {
+  //aplica filtros por defecto
+  const filtros_solicitados = Object.keys(queryFiltros);
+  const filtros_default = listado?.sub_conf
+    .filter((sc) => sc.tipo.id === 3)
+    .filter((filtro_d) => {
+      return !filtros_solicitados.includes(filtro_d.id_a);
+    });
 
-  return filtros.filter((f) => f);
+  filtros_default.forEach((fd) => {
+    let valordefault = fd?.valores.find((v) => {
+      return v.atributo[0].nombre === "default";
+    })?.valor;
+
+    if (!valordefault) return;
+
+    const campo = fd?.valores.find((v) => {
+      return v.atributo[0].nombre === "campo";
+    })?.valor;
+
+    const operador = fd?.valores.find((v) => {
+      return v.atributo[0].nombre === "operador";
+    })?.valor;
+
+    if (operador === "like") valordefault = valordefault?.concat("%");
+
+    query.where(campo, operador ? operador : "=", valordefault);
+  });
+
+  //aplica filtros solicitados
+  const filtros_solicitados_id_a = Object.keys(queryFiltros).filter((k) => {
+    if (queryFiltros[k] === "null") return false;
+    if (queryFiltros[k] === "undefined") return false;
+    return !!queryFiltros[k].trim();
+  });
+
+  filtros_solicitados_id_a.forEach((id_a) => {
+    const filtro = filtros_e.find((fil) => fil.id_a === id_a);
+
+    if (!filtro) return;
+
+    const campo = filtro?.valores.find((v) => {
+      return v.atributo[0].nombre === "campo";
+    })?.valor;
+
+    const operador = filtro?.valores.find((v) => {
+      return v.atributo[0].nombre === "operador";
+    })?.valor;
+
+    if (operador === "like")
+      queryFiltros[id_a] = queryFiltros[id_a].concat("%");
+
+    query.where(campo, operador ? operador : "=", queryFiltros[id_a]);
+  });
+
+  return query;
 };
 
 const armarListado = async (
   listado: SConf,
   conf: SConf,
   bouncer: any,
-  queryFiltros
+  queryFiltros: any
 ) => {
   let opcionesListado = {};
   let datos = [];
@@ -67,8 +117,8 @@ const armarListado = async (
     .find((val) => val.atributo.find((a) => a.id === 15))
     ?.toObject().valor;
 
-  let columnas = await getColumnas(listado, bouncer);
-  let filtros_aplicables = await getFiltros(listado, bouncer);
+  let columnas = await verificarPermisos(listado, bouncer, 4);
+  let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
 
   const campos = columnas
     ?.map((col) => {
@@ -83,13 +133,15 @@ const armarListado = async (
       (o) => o.id_conf_h === col.id
     )?.orden;
 
+    cabecera["id_a"] = col.id_a;
+
     col?.valores.forEach((val) => {
       cabecera[val.atributo[0].nombre] = val.valor;
     });
     return cabecera;
   });
 
-  const filtros = filtros_aplicables.map((fil) => {
+  const filtros = filtros_aplicables?.map((fil) => {
     let filters = {};
 
     filters["orden"] = listado?.orden.find(
@@ -104,20 +156,16 @@ const armarListado = async (
     return filters;
   });
 
-  const aplicarFiltros = (queryFiltros, query, filtros_aplicable: SConf[]) => {
-    const filtros_id_a = Object.keys(queryFiltros);
+  if (campos.length !== 0) {
+    let query = eval(modelo).query().select(campos);
 
-    filtros_id_a.forEach((id_a) => {
-      const filtro = filtros_aplicables.find((fil) => fil.id_a === id_a);
-      console.log(filtro, id_a);
-    });
-
-    return;
-  };
-
-  aplicarFiltros(queryFiltros, "", filtros_aplicables);
-
-  if (campos.length !== 0) datos = await eval(modelo).query().select(campos);
+    datos = await aplicarFiltros(
+      queryFiltros,
+      query,
+      filtros_aplicables,
+      listado
+    );
+  }
 
   return { datos, cabeceras, filtros, opcionesListado, conf };
 };
