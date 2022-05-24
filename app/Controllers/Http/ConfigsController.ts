@@ -31,6 +31,33 @@ const verificarPermisos = async (listado: SConf, bouncer: any, tipoId) => {
   return sconf_habilitados?.filter((f) => f);
 };
 
+const extraerElementos = ({
+  sc_hijos,
+  sc_padre,
+}: {
+  sc_hijos: SConf[];
+  sc_padre: SConf;
+}) => {
+  return sc_hijos.map((c: SConf) => {
+    let item = {};
+    item["orden"] =
+      sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+
+    item["id_a"] = c.id_a;
+
+    c.valores.forEach((val) => {
+      item[val.atributo[0].nombre] = val.valor;
+    });
+
+    item["elementos"] = extraerElementos({
+      sc_hijos: c.sub_conf,
+      sc_padre: c,
+    });
+
+    return item;
+  });
+};
+
 const aplicarFiltros = (
   queryFiltros: {},
   query: any,
@@ -102,6 +129,7 @@ const armarListado = async (
 ) => {
   let opcionesListado = {};
   let datos = [];
+  let sql = "";
 
   if (!(await bouncer.allows("AccesoConf", listado))) return;
 
@@ -113,12 +141,14 @@ const armarListado = async (
     (o) => o.id_conf_h === listado?.id
   )?.orden;
 
-  const modelo = listado?.valores
-    .find((val) => val.atributo.find((a) => a.id === 15))
-    ?.toObject().valor;
+  opcionesListado["id_a"] = conf?.id_a;
 
   let columnas = await verificarPermisos(listado, bouncer, 4);
   let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
+
+  const modelo = listado?.valores
+    .find((val) => val.atributo.find((a) => a.id === 15))
+    ?.toObject().valor;
 
   const campos = columnas
     ?.map((col) => {
@@ -126,48 +156,27 @@ const armarListado = async (
     })
     .filter((c) => c);
 
-  const cabeceras = columnas?.map((col) => {
-    let cabecera = {};
-
-    cabecera["orden"] = listado?.orden.find(
-      (o) => o.id_conf_h === col.id
-    )?.orden;
-
-    cabecera["id_a"] = col.id_a;
-
-    col?.valores.forEach((val) => {
-      cabecera[val.atributo[0].nombre] = val.valor;
-    });
-    return cabecera;
+  const cabeceras = extraerElementos({
+    sc_hijos: columnas,
+    sc_padre: listado,
   });
 
-  const filtros = filtros_aplicables?.map((fil) => {
-    let filters = {};
-
-    filters["orden"] = listado?.orden.find(
-      (o) => o.id_conf_h === fil.id
-    )?.orden;
-
-    filters["id_a"] = fil.id_a;
-
-    fil?.valores.forEach((val) => {
-      filters[val.atributo[0].nombre] = val.valor;
-    });
-    return filters;
+  const filtros = extraerElementos({
+    sc_hijos: filtros_aplicables,
+    sc_padre: listado,
   });
 
   if (campos.length !== 0) {
     let query = eval(modelo).query().select(campos);
 
-    datos = await aplicarFiltros(
-      queryFiltros,
-      query,
-      filtros_aplicables,
-      listado
-    );
+    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
+
+    datos = await query;
+
+    if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
   }
 
-  return { datos, cabeceras, filtros, opcionesListado, conf };
+  return { datos, cabeceras, filtros, opcionesListado, conf, sql };
 };
 
 export default class ConfigsController {
