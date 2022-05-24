@@ -141,7 +141,7 @@ const armarListado = async (
     (o) => o.id_conf_h === listado?.id
   )?.orden;
 
-  opcionesListado["id_a"] = conf?.id_a;
+  opcionesListado["id_a"] = listado.id_a;
 
   let columnas = await verificarPermisos(listado, bouncer, 4);
   let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
