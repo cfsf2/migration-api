@@ -128,10 +128,15 @@ const armarListado = async (
   queryFiltros: any
 ) => {
   let opcionesListado = {};
+  let opcionesPantalla = {};
   let datos = [];
   let sql = "";
 
   if (!(await bouncer.allows("AccesoConf", listado))) return;
+
+  conf?.valores.forEach((val) => {
+    opcionesPantalla[val.atributo[0].nombre] = val.valor;
+  });
 
   listado?.valores.forEach((val) => {
     opcionesListado[val.atributo[0].nombre] = val.valor;
@@ -176,7 +181,15 @@ const armarListado = async (
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
   }
 
-  return { datos, cabeceras, filtros, opcionesListado, conf, sql };
+  return {
+    cabeceras,
+    filtros,
+    opcionesListado,
+    opcionesPantalla,
+    datos,
+    conf,
+    sql,
+  };
 };
 
 export default class ConfigsController {
