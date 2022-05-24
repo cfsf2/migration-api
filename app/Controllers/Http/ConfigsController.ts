@@ -174,6 +174,9 @@ const armarListado = async (
   if (campos.length !== 0) {
     let query = eval(modelo).query().select(campos);
 
+    // aplicarPreloads - left join
+    // aplicarFiltrosdDeListado - where obligatorios
+    // aplicar groupsBy
     query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
 
     datos = await query;
