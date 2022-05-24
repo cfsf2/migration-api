@@ -66,11 +66,9 @@ const aplicarFiltros = (
 ) => {
   //aplica filtros por defecto
   const filtros_solicitados = Object.keys(queryFiltros);
-  const filtros_default = listado?.sub_conf
-    .filter((sc) => sc.tipo.id === 3)
-    .filter((filtro_d) => {
-      return !filtros_solicitados.includes(filtro_d.id_a);
-    });
+  const filtros_default = filtros_e.filter((filtro_d) => {
+    return !filtros_solicitados.includes(filtro_d.id_a);
+  });
 
   filtros_default.forEach((fd) => {
     let valordefault = fd?.valores.find((v) => {
