@@ -64,6 +64,14 @@ const aplicarFiltros = (
   filtros_e: SConf[], // filtros para los que tiene permiso
   listado: SConf
 ) => {
+  //aplica filtros obligatorios de listado
+  const where = listado.valores.find(
+    (v) => v.atributo[0].nombre === "where"
+  )?.valor;
+
+  if (where) {
+    query.whereRaw(where);
+  }
   //aplica filtros por defecto
   const filtros_solicitados = Object.keys(queryFiltros);
   const filtros_default = filtros_e.filter((filtro_d) => {
