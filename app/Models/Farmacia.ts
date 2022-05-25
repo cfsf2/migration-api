@@ -841,4 +841,6 @@ export default class Farmacia extends BaseModel {
     throughForeignKey: "id",
   })
   public servicios: HasManyThrough<typeof Servicio>;
+
+  public serializeExtras = true;
 }

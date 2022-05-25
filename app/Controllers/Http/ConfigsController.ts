@@ -46,6 +46,7 @@ const extraerElementos = ({
     item["id_a"] = c.id_a;
 
     c.valores.forEach((val) => {
+      //console.log(val.atributo[0].nombre, val.valor);
       item[val.atributo[0].nombre] = val.valor;
     });
 
@@ -167,6 +168,18 @@ const armarListado = async (
     })
     .filter((c) => c);
 
+  const leftJoins = Array.from(
+    new Set(
+      columnas
+        ?.map((col) => {
+          return col?.valores
+            .find((v) => v.atributo[0].id === 11)
+            ?.valor.trim();
+        })
+        .filter((c) => c)
+    )
+  );
+
   const cabeceras = extraerElementos({
     sc_hijos: columnas,
     sc_padre: listado,
@@ -181,12 +194,29 @@ const armarListado = async (
     let query = eval(modelo).query().select(campos);
 
     // aplicarPreloads - left join
+    if (leftJoins.length > 0) {
+      leftJoins.forEach((leftJoin) => {
+        query.joinRaw("left join " + leftJoin);
+      });
+    }
     // aplicarFiltrosdDeListado - where obligatorios
     // aplicar groupsBy
     query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
 
     datos = await query;
+    if (leftJoins.length > 0) {
+      datos = datos.map((dato: any, i) => {
+        const meta = Object.keys(dato["$extras"]);
+        let d = dato.toObject();
+        meta.forEach((m) => (d[m] = dato["$extras"][m]));
 
+        if (i === 1) {
+          console.log(d);
+        }
+        delete d["$extras"];
+        return d;
+      });
+    }
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
   }
 
