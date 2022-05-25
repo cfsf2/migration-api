@@ -209,12 +209,8 @@ const armarListado = async (
         const meta = Object.keys(dato["$extras"]);
         let d = dato.toObject();
         meta.forEach((m) => (d[m] = dato["$extras"][m]));
-
-        if (i === 1) {
-          console.log(d);
-        }
         delete d["$extras"];
-        return d;
+        return d as never;
       });
     }
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
