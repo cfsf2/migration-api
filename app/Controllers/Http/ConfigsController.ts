@@ -202,19 +202,11 @@ const armarListado = async (
     // aplicar groupsBy
 
     //aplicarFiltros
-    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
+    if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
+
+    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado); //.paginate(1, 15);
 
     datos = await query;
-    if (/*leftJoins.length > 0*/ true) {
-      datos = datos.map((dato: any, i) => {
-        const meta = Object.keys(dato["$extras"]);
-        let d = dato.toObject();
-        meta.forEach((m) => (d[m] = dato["$extras"][m]));
-        delete d["$extras"];
-        return d as never;
-      });
-    }
-    if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
   }
 
   return {
