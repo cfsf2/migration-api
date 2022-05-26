@@ -72,11 +72,11 @@ const aplicaWhere = async (
   if (operador === "fecha") {
     const fechas = valor.split(",");
     if (fechas.length !== 2) return;
-    console.log("Estoy dentro del if", fechas);
 
-    const desde = valor[0].replace("T", " ").replace("z", "");
-    const hasta = valor[1].replace("T", " ").replace("z", "");
-    console.log("desde: ", desde, " hasta: ", hasta);
+    const desde = DateTime.fromISO(fechas[0]).toSQL();
+    const hasta = DateTime.fromISO(fechas[1])
+      .set({ hour: 23, minute: 59 })
+      .toSQL();
 
     query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
     //.whereNotNull(campo);
