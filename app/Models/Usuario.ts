@@ -21,7 +21,12 @@ import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
 import UsuarioPerfil from "./UsuarioPerfil";
-import { AccionCRUD, eliminarKeysVacios, enumaBool, guardarDatosAuditoria } from "App/Helper/funciones";
+import {
+  AccionCRUD,
+  eliminarKeysVacios,
+  enumaBool,
+  guardarDatosAuditoria,
+} from "App/Helper/funciones";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -253,7 +258,7 @@ export default class Usuario extends BaseModel {
         },
       };
     } catch (err) {
-      console.log(err)
+      console.log(err);
       return {
         body: {
           type: "fail",
@@ -267,7 +272,7 @@ export default class Usuario extends BaseModel {
     id,
     usuarioData,
     response,
-    usuarioAuth
+    usuarioAuth,
   }: {
     id: number;
     usuarioData: any;
@@ -299,7 +304,7 @@ export default class Usuario extends BaseModel {
     id_usuario,
     username,
     data,
-    usuarioAuth
+    usuarioAuth,
   }: {
     username?: string;
     id_usuario?: number;
@@ -387,15 +392,15 @@ export default class Usuario extends BaseModel {
       if (!perfilUsuario) {
         const perfilUsuario = new UsuarioPerfil();
         perfilUsuario.merge({
-            id_usuario: usuario.id,
-            id_perfil: Number(data.perfil),
-          })
-          guardarDatosAuditoria({
-            objeto: perfilUsuario,
-            usuario: usuarioAuth,
-            accion: AccionCRUD.editar,
-          })
-          perfilUsuario.save();
+          id_usuario: usuario.id,
+          id_perfil: Number(data.perfil),
+        });
+        guardarDatosAuditoria({
+          objeto: perfilUsuario,
+          usuario: usuarioAuth,
+          accion: AccionCRUD.editar,
+        });
+        perfilUsuario.save();
       }
     }
     return usuario;
@@ -405,7 +410,7 @@ export default class Usuario extends BaseModel {
     id,
     username,
     password,
-    usuarioAuth
+    usuarioAuth,
   }: {
     id?: number;
     username?: string;
@@ -560,8 +565,12 @@ export default class Usuario extends BaseModel {
   public user_rol: string[];
 
   public serializeExtras() {
-    return {
-      _id: this.$extras._id?.toString(),
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }
