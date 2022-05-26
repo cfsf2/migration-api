@@ -3,6 +3,8 @@
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
+import { DatabaseQueryBuilderContract } from "@ioc:Adonis/Lucid/Database";
+import { DateTime } from "luxon";
 
 let Servicio = S;
 let Farmacia = F;
@@ -59,9 +61,36 @@ const extraerElementos = ({
   });
 };
 
+const aplicaWhere = async (
+  query: DatabaseQueryBuilderContract,
+  campo: string,
+  operador: string,
+  valor: string
+) => {
+  if (operador === "like") valor = valor?.concat("%");
+
+  if (operador === "fecha") {
+    const fechas = valor.split(",");
+    if (fechas.length !== 2) return;
+    console.log("Estoy dentro del if", fechas);
+
+    const desde = valor[0].replace("T", " ").replace("z", "");
+    const hasta = valor[1].replace("T", " ").replace("z", "");
+    console.log("desde: ", desde, " hasta: ", hasta);
+
+    query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
+    //.whereNotNull(campo);
+    return query;
+  }
+
+  query.where(campo, operador ? operador : "=", valor);
+
+  return query;
+};
+
 const aplicarFiltros = (
   queryFiltros: {},
-  query: any,
+  query: DatabaseQueryBuilderContract,
   filtros_e: SConf[], // filtros para los que tiene permiso
   listado: SConf
 ) => {
@@ -88,15 +117,13 @@ const aplicarFiltros = (
 
     const campo = fd?.valores.find((v) => {
       return v.atributo[0].nombre === "campo";
-    })?.valor;
+    })?.valor as string;
 
     const operador = fd?.valores.find((v) => {
       return v.atributo[0].nombre === "operador";
-    })?.valor;
+    })?.valor as string;
 
-    if (operador === "like") valordefault = valordefault?.concat("%");
-
-    query.where(campo, operador ? operador : "=", valordefault);
+    aplicaWhere(query, campo, operador, valordefault);
   });
 
   //aplica filtros solicitados
@@ -113,16 +140,13 @@ const aplicarFiltros = (
 
     const campo = filtro?.valores.find((v) => {
       return v.atributo[0].nombre === "campo";
-    })?.valor;
+    })?.valor as string;
 
     const operador = filtro?.valores.find((v) => {
       return v.atributo[0].nombre === "operador";
-    })?.valor;
+    })?.valor as string;
 
-    if (operador === "like")
-      queryFiltros[id_a] = queryFiltros[id_a].concat("%");
-
-    query.where(campo, operador ? operador : "=", queryFiltros[id_a]);
+    aplicaWhere(query, campo, operador, queryFiltros[id_a]);
   });
 
   return query;
@@ -196,7 +220,7 @@ const armarListado = async (
     // aplicarPreloads - left join
     if (leftJoins.length > 0) {
       leftJoins.forEach((leftJoin) => {
-        query.joinRaw("left join " + leftJoin);
+        query.joinRaw(leftJoin);
       });
     }
     // aplicar groupsBy
