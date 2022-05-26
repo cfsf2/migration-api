@@ -199,12 +199,13 @@ const armarListado = async (
         query.joinRaw("left join " + leftJoin);
       });
     }
-    // aplicarFiltrosdDeListado - where obligatorios
     // aplicar groupsBy
+
+    //aplicarFiltros
     query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
 
     datos = await query;
-    if (leftJoins.length > 0) {
+    if (/*leftJoins.length > 0*/ true) {
       datos = datos.map((dato: any, i) => {
         const meta = Object.keys(dato["$extras"]);
         let d = dato.toObject();
