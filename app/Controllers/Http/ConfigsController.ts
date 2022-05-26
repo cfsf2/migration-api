@@ -74,11 +74,12 @@ const aplicaWhere = async (
     if (fechas.length !== 2) return;
 
     const desde = DateTime.fromISO(fechas[0]).toSQL();
-    const hasta = DateTime.fromISO(fechas[1])
-      .set({ hour: 23, minute: 59 })
-      .toSQL();
+    const hasta = DateTime.fromISO(fechas[1]).plus({ days: 1 }).toSQL();
 
-    query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
+    query
+      .where(campo, ">=", desde)
+      .andWhere(campo, "<=", hasta)
+      .orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
   }
