@@ -69,17 +69,29 @@ const aplicaWhere = async (
 ) => {
   if (operador === "like") valor = valor?.concat("%");
 
-  if (operador === "fecha") {
+  if (operador === "fecha" || operador === "fecha_hora") {
     const fechas = valor.split(",");
     if (fechas.length !== 2) return;
 
     const desde = DateTime.fromISO(fechas[0]).toSQL();
-    const hasta = DateTime.fromISO(fechas[1]).plus({ days: 1 }).toSQL();
+    const hasta = DateTime.fromISO(fechas[1])
+      .plus({ days: operador === "fecha_hora" ? 0 : 1 })
+      .toSQL();
 
     query
       .where(campo, ">=", desde)
       .andWhere(campo, "<=", hasta)
       .orderBy(campo, "desc");
+    //.whereNotNull(campo);
+    return query;
+  }
+
+  if (operador === "fecha_simple") {
+    // const fechas = valor.split(",");
+
+    const fecha = DateTime.fromISO(valor).toSQL();
+
+    query.where(campo, operador, fecha).orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
   }
