@@ -312,7 +312,8 @@ const armarListado = async (
     // aplicar groupsBy
     if (groupsBy.length > 0) {
       groupsBy.forEach(({ groupBy, having }) => {
-        query.groupBy(groupBy).having(having);
+        query.groupBy(groupBy);
+        if (having) query.having(having);
       });
     }
     // aplicar order del listado
