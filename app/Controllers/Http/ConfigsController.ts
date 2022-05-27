@@ -146,6 +146,7 @@ const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
   campo: string,
   operador: string,
+  tipo: string,
   valor: string
 ) => {
   if (operador === "like") valor = valor?.concat("%");
@@ -167,12 +168,12 @@ const aplicaWhere = async (
     return query;
   }
 
-  if (operador === "fecha_simple") {
+  if (tipo === "fecha_simple") {
     // const fechas = valor.split(",");
 
     const fecha = DateTime.fromISO(valor).toSQL();
 
-    query.where(campo, operador, fecha).orderBy(campo, "desc");
+    query.where(campo, operador ? operador : "=", fecha).orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
   }
@@ -217,7 +218,11 @@ const aplicarFiltros = (
       return v.atributo[0].nombre === "operador";
     })?.valor as string;
 
-    aplicaWhere(query, campo, operador, valordefault);
+    const tipo = fd?.valores.find((v) => {
+      return v.atributo[0].nombre === "tipo";
+    })?.valor as string;
+
+    aplicaWhere(query, campo, operador, tipo, valordefault);
   });
 
   //aplica filtros solicitados
@@ -240,7 +245,11 @@ const aplicarFiltros = (
       return v.atributo[0].nombre === "operador";
     })?.valor as string;
 
-    aplicaWhere(query, campo, operador, queryFiltros[id_a]);
+    const tipo = filtro?.valores.find((v) => {
+      return v.atributo[0].nombre === "tipo";
+    })?.valor as string;
+
+    aplicaWhere(query, campo, operador, tipo, queryFiltros[id_a]);
   });
 
   return query;
