@@ -52,9 +52,8 @@ const extraerElementos = ({
     c.valores.forEach(async (val) => {
       //console.log(val.atributo[0].nombre, val.valor);
       if (val.sql === "s" && val.valor && val.valor.trim() !== "") {
-        return (item[val.atributo[0].nombre] = await Database.rawQuery(
-          val.valor
-        ))[0];
+        let lista = await Database.rawQuery(val.valor);
+        return (item[val.atributo[0].nombre] = lista[0]);
       }
       item[val.atributo[0].nombre] = val.valor;
     });
