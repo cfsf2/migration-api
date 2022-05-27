@@ -75,7 +75,7 @@ const aplicaWhere = async (
 
     const desde = DateTime.fromISO(fechas[0]).toSQL();
     const hasta = DateTime.fromISO(fechas[1])
-      .plus({ days: operador === "fecha_hora" ? 0 : 1 })
+      .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
       .toSQL();
 
     query
