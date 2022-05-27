@@ -3,7 +3,9 @@
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
-import { DatabaseQueryBuilderContract } from "@ioc:Adonis/Lucid/Database";
+import Database, {
+  DatabaseQueryBuilderContract,
+} from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 
 let Servicio = S;
@@ -47,8 +49,13 @@ const extraerElementos = ({
 
     item["id_a"] = c.id_a;
 
-    c.valores.forEach((val) => {
+    c.valores.forEach(async (val) => {
       //console.log(val.atributo[0].nombre, val.valor);
+      if (val.sql === "s" && val.valor && val.valor.trim() !== "") {
+        return (item[val.atributo[0].nombre] = await Database.rawQuery(
+          val.valor
+        ))[0];
+      }
       item[val.atributo[0].nombre] = val.valor;
     });
 
@@ -59,6 +66,80 @@ const extraerElementos = ({
 
     return item;
   });
+};
+
+const getLeftJoins = ({
+  columnas,
+  listado,
+}: {
+  columnas: SConf[];
+  listado: SConf;
+}): string[] => {
+  let leftJoins = [];
+  const confs = columnas.concat(listado);
+  confs?.forEach((conf) =>
+    leftJoins.push(
+      conf?.valores.find((v) => v.atributo[0].id === 11)?.valor.trim() as never
+    )
+  );
+  // leftJoins.push(
+  //   listado.valores.find((v) => v?.atributo[0].id === 11)?.valor.trim() as never
+  // );
+  return Array.from(new Set(leftJoins.filter((c) => c)));
+};
+
+interface gp {
+  groupBy: string;
+  having: string;
+}
+
+const getOrder = (listado: SConf) => {
+  let orders = [];
+  const confs = [listado];
+  confs?.forEach((conf) =>
+    orders.push(
+      conf?.valores.find((v) => v.atributo[0].id === 9)?.valor.trim() as never
+    )
+  );
+  // orders.push(
+  //   listado.valores.find((v) => v?.atributo[0].id === 11)?.valor.trim() as never
+  // );
+  return Array.from(new Set(orders.filter((c) => c)));
+};
+
+const getGroupBy = ({
+  columnas,
+  listado,
+}: {
+  columnas: SConf[];
+  listado: SConf;
+}): gp[] => {
+  let groupsBy: gp[] = [];
+  const confs = columnas.concat(listado);
+  confs?.forEach((conf) => {
+    let gp: gp = { groupBy: "", having: "" };
+    gp.groupBy = conf?.valores
+      .find((v) => v.atributo[0].id === 23)
+      ?.valor.trim() as never;
+    gp.having = conf?.valores
+      .find((v) => v.atributo[0].id === 24)
+      ?.valor.trim() as never;
+
+    groupsBy.push(gp);
+  });
+
+  // [listado].forEach((l) => {
+  //   let gp: gp = { groupBy: "", having: "" };
+  //   gp.groupBy = l.valores
+  //     .find((v) => v?.atributo[0].id === 23)
+  //     ?.valor.trim() as never;
+  //   gp.having = l.valores
+  //     .find((v) => v?.atributo[0].id === 24)
+  //     ?.valor.trim() as never;
+  //   groupsBy.push(gp);
+  // });
+
+  return Array.from(new Set(groupsBy.filter((c) => c.groupBy)));
 };
 
 const aplicaWhere = async (
@@ -205,17 +286,9 @@ const armarListado = async (
     })
     .filter((c) => c);
 
-  const leftJoins = Array.from(
-    new Set(
-      columnas
-        ?.map((col) => {
-          return col?.valores
-            .find((v) => v.atributo[0].id === 11)
-            ?.valor.trim();
-        })
-        .filter((c) => c)
-    )
-  );
+  const leftJoins: string[] = getLeftJoins({ columnas, listado });
+  const groupsBy: gp[] = getGroupBy({ columnas, listado });
+  const order = getOrder(listado);
 
   const cabeceras = extraerElementos({
     sc_hijos: columnas,
@@ -237,6 +310,17 @@ const armarListado = async (
       });
     }
     // aplicar groupsBy
+    if (groupsBy.length > 0) {
+      groupsBy.forEach(({ groupBy, having }) => {
+        query.groupBy(groupBy).having(having);
+      });
+    }
+    // aplicar order del listado
+    if (order.length > 0) {
+      order.forEach((order) => {
+        query.orderBy(order, "desc");
+      });
+    }
 
     //aplicarFiltros
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
@@ -283,3 +367,16 @@ export default class ConfigsController {
     return armarListado(listado, conf, bouncer, queryFiltros);
   }
 }
+
+//leftjoins
+// Array.from(
+//   new Set(
+//     columnas
+//       ?.map((col) => {
+//         return col?.valores
+//           .find((v) => v.atributo[0].id === 11)
+//           ?.valor.trim();
+//       })
+//       .filter((c) => c)
+//   )
+// );
