@@ -132,7 +132,12 @@ export default class FarmaciasController {
 
   public async mig_create({ request, bouncer, auth }: HttpContextContract) {
     //await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
-    return Farmacia.crearFarmacia(request.body(), auth);
+    try {
+      return Farmacia.crearFarmacia(request.body(), auth);
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 
   public async mig_admin_passwords({ bouncer }) {
