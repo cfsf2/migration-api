@@ -673,8 +673,6 @@ export default class Farmacia extends BaseModel {
         cp: nuevaFarmacia.cp,
       });
 
-      console.log(farmaciaN);
-
       guardarDatosAuditoria({
         objeto: farmaciaN,
         usuario: usuarioAuth,

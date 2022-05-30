@@ -50,19 +50,24 @@ export default class FarmaciasController {
   }
 
   public async mig_mail({ request }: HttpContextContract) {
-    Mail.send((message) => {
-      message
-        .from("farmageoapp@gmail.com")
-        .to(request.body().destinatario)
-        .subject(request.body().asunto)
-        .html(
-          generarHtml({
-            titulo: "Nueva solicitud de registro de farmacia",
-            // imagen: '',
-            texto: `${request.body().html}`,
-          })
-        );
-    });
+    try {
+      Mail.send((message) => {
+        message
+          .from("farmageoapp@gmail.com")
+          .to(request.body().destinatario)
+          .subject(request.body().asunto)
+          .html(
+            generarHtml({
+              titulo: "Nueva solicitud de registro de farmacia",
+              // imagen: '',
+              texto: `${request.body().html}`,
+            })
+          );
+      });
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 
   public async mig_updatePerfil({
@@ -72,7 +77,7 @@ export default class FarmaciasController {
     auth,
   }: HttpContextContract) {
     const usuario = await auth.authenticate();
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
 
     const { username, id } = request.qs();
     try {
@@ -95,7 +100,7 @@ export default class FarmaciasController {
     auth,
   }: HttpContextContract) {
     const usuario = await auth.authenticate();
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_ADMIN_UPDATE);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_ADMIN_UPDATE);
 
     const data: {
       farmacia: any;
