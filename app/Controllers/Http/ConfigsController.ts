@@ -55,10 +55,21 @@ const extraerElementos = ({
         let lista = await Database.rawQuery(val.valor);
         return (item[val.atributo[0].nombre] = lista[0]);
       }
+
+      if (val.atributo[0].nombre === "radio_labels") {
+        const opciones = val.valor.split("|").map((op, i) => {
+          return {
+            label: op.trim(),
+            value: i,
+          };
+        });
+        item["radio_opciones"] = opciones;
+      }
+
       item[val.atributo[0].nombre] = val.valor;
     });
 
-    item["elementos"] = extraerElementos({
+    item["sc_hijos"] = extraerElementos({
       sc_hijos: c.sub_conf,
       sc_padre: c,
     });
