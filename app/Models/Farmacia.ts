@@ -635,16 +635,16 @@ export default class Farmacia extends BaseModel {
   static async crearFarmacia(nuevaFarmacia, auth) {
     const usuarioAuth = await auth.authenticate();
 
-    const usuario = await Usuario.findByOrFail(
-      "usuario",
-      nuevaFarmacia.usuario
-    );
-    const localidad = await Localidad.findByOrFail(
-      "nombre",
-      nuevaFarmacia.localidad
-    );
-    const farmaciaN = new Farmacia();
     try {
+      const usuario = await Usuario.findByOrFail(
+        "usuario",
+        nuevaFarmacia.usuario
+      );
+      const localidad = await Localidad.findByOrFail(
+        "nombre",
+        nuevaFarmacia.localidad
+      );
+      const farmaciaN = new Farmacia();
       const { lat, lng: log } = await getCoordenadas({
         calle: nuevaFarmacia.calle,
         numero: nuevaFarmacia.numero,
