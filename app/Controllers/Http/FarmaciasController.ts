@@ -162,7 +162,7 @@ export default class FarmaciasController {
   }
 
   public async existeUsuario({ request, bouncer }: HttpContextContract) {
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     const existe = await Usuario.findBy("usuario", request.params().usuario);
 
     if (existe) return true;
