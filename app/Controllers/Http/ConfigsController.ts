@@ -157,7 +157,8 @@ const aplicaWhere = async (
   campo: string,
   operador: string,
   tipo: string,
-  valor: string
+  valor: string,
+  conf: SConf
 ) => {
   if (operador === "like") valor = valor?.concat("%");
 
@@ -186,6 +187,16 @@ const aplicaWhere = async (
     query.where(campo, operador ? operador : "=", fecha).orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
+  }
+
+  if (tipo === "radio") {
+    const radio_where_a = conf.valores
+      .find((v) => v.atributo[0].nombre === "radio_where")
+      ?.valor.split("|");
+
+    const radio_where_o = Object.assign({}, radio_where_a);
+
+    return query.whereRaw(radio_where_o[Number(valor)].trim());
   }
 
   query.where(campo, operador ? operador : "=", valor);
@@ -232,7 +243,7 @@ const aplicarFiltros = (
       return v.atributo[0].nombre === "tipo";
     })?.valor as string;
 
-    aplicaWhere(query, campo, operador, tipo, valordefault);
+    aplicaWhere(query, campo, operador, tipo, valordefault, fd);
   });
 
   //aplica filtros solicitados
@@ -259,7 +270,7 @@ const aplicarFiltros = (
       return v.atributo[0].nombre === "tipo";
     })?.valor as string;
 
-    aplicaWhere(query, campo, operador, tipo, queryFiltros[id_a]);
+    aplicaWhere(query, campo, operador, tipo, queryFiltros[id_a], filtro);
   });
 
   return query;
@@ -343,9 +354,12 @@ const armarListado = async (
     }
 
     //aplicarFiltros
+
+    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
+
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
 
-    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado); //.paginate(1, 15);
+    query.paginate(1, 15);
 
     datos = await query;
   }
