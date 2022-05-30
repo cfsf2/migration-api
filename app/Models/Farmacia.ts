@@ -640,7 +640,7 @@ export default class Farmacia extends BaseModel {
         "usuario",
         nuevaFarmacia.usuario
       );
-      const localidad = await Localidad.findByOrFail(
+      const localidad = await Localidad.findBy(
         "nombre",
         nuevaFarmacia.localidad
       );
@@ -657,7 +657,7 @@ export default class Farmacia extends BaseModel {
         id_usuario: usuario.id,
         nombrefarmaceutico: nuevaFarmacia.nombrefarmaceutico,
         matricula: nuevaFarmacia.matricula,
-        id_localidad: localidad.id,
+        id_localidad: localidad?.id,
         nombre: nuevaFarmacia.nombre,
         cuit: nuevaFarmacia.cuit,
         cufe: nuevaFarmacia.cufe,
@@ -796,7 +796,7 @@ export default class Farmacia extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_localidad: number;
+  public id_localidad?: number;
 
   @column()
   public id_usuario: number;

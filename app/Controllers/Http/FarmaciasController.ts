@@ -8,6 +8,8 @@ import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
 
+import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
+
 export default class FarmaciasController {
   public async index() {
     return await Farmacia.query()
@@ -51,6 +53,17 @@ export default class FarmaciasController {
 
   public async mig_mail({ request }: HttpContextContract) {
     try {
+      try {
+        await validator.validate({
+          schema: schema.create({
+            destinatario: schema.string({ trim: true }, [rules.email()]),
+          }),
+          data: request.body(),
+        });
+      } catch (err) {
+        console.log(err);
+        return;
+      }
       Mail.send((message) => {
         message
           .from("farmageoapp@gmail.com")
@@ -89,6 +102,7 @@ export default class FarmaciasController {
         })
       );
     } catch (err) {
+      console.log(err);
       return err;
     }
   }
@@ -131,7 +145,7 @@ export default class FarmaciasController {
   }
 
   public async mig_create({ request, bouncer, auth }: HttpContextContract) {
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
     try {
       return Farmacia.crearFarmacia(request.body(), auth);
     } catch (err) {
@@ -141,7 +155,7 @@ export default class FarmaciasController {
   }
 
   public async mig_admin_passwords({ bouncer }) {
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     return await Database.from("tbl_farmacia")
       .leftJoin("tbl_usuario", "id_usuario", "tbl_usuario.id")
       .select("tbl_farmacia.password", "tbl_usuario.usuario");
@@ -156,7 +170,7 @@ export default class FarmaciasController {
   }
 
   public async mig_admin_farmacia({ request, bouncer }: HttpContextContract) {
-    //await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
+    await bouncer.authorize("AccesoRuta", Permiso.FARMACIAS_ADMIN_GET);
     const farmacia = await Farmacia.traerFarmacias({
       id: request.params().id,
       admin: request.url().includes("admin"),
