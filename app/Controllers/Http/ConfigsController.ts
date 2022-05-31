@@ -85,36 +85,30 @@ const getLeftJoins = ({
   columnas: SConf[];
   listado: SConf;
 }): string[] => {
-  let leftJoins = [];
-  const confs = columnas.concat(listado);
-  confs?.forEach((conf) =>
-    leftJoins.push(
-      conf?.valores.find((v) => v.atributo[0].id === 11)?.valor.trim() as never
-    )
-  );
-  // leftJoins.push(
-  //   listado.valores.find((v) => v?.atributo[0].id === 11)?.valor.trim() as never
-  // );
-  return Array.from(new Set(leftJoins.filter((c) => c)));
+  return getAtributosById([listado, columnas], 11);
 };
 
 interface gp {
   groupBy: string;
-  having: string;
+  having: string | undefined;
 }
 
-const getOrder = (listado: SConf) => {
-  let orders = [];
-  const confs = [listado];
-  confs?.forEach((conf) =>
-    orders.push(
-      conf?.valores.find((v) => v.atributo[0].id === 9)?.valor.trim() as never
+const getOrder = (listado: SConf): string[] | number[] => {
+  return getAtributosById([listado], 9);
+};
+
+const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
+  const sc = sconfs.flat(10);
+
+  let atributos = [];
+
+  sc?.forEach((conf) =>
+    atributos.push(
+      conf?.valores.find((v) => v.atributo[0].id === id)?.valor.trim() as never
     )
   );
-  // orders.push(
-  //   listado.valores.find((v) => v?.atributo[0].id === 11)?.valor.trim() as never
-  // );
-  return Array.from(new Set(orders.filter((c) => c)));
+
+  return Array.from(new Set(atributos.filter((c) => c)));
 };
 
 const getGroupBy = ({
@@ -128,38 +122,42 @@ const getGroupBy = ({
   const confs = columnas.concat(listado);
   confs?.forEach((conf) => {
     let gp: gp = { groupBy: "", having: "" };
-    gp.groupBy = conf?.valores
-      .find((v) => v.atributo[0].id === 23)
-      ?.valor.trim() as never;
-    gp.having = conf?.valores
-      .find((v) => v.atributo[0].id === 24)
-      ?.valor.trim() as never;
+    gp.groupBy = getAtributoById({ id: 23, conf });
+    gp.having = getAtributoById({ id: 24, conf }) as string | undefined;
 
     groupsBy.push(gp);
   });
 
-  // [listado].forEach((l) => {
-  //   let gp: gp = { groupBy: "", having: "" };
-  //   gp.groupBy = l.valores
-  //     .find((v) => v?.atributo[0].id === 23)
-  //     ?.valor.trim() as never;
-  //   gp.having = l.valores
-  //     .find((v) => v?.atributo[0].id === 24)
-  //     ?.valor.trim() as never;
-  //   groupsBy.push(gp);
-  // });
-
   return Array.from(new Set(groupsBy.filter((c) => c.groupBy)));
+};
+
+const getAtributo = ({
+  atributo,
+  conf,
+}: {
+  atributo: string;
+  conf: SConf;
+}): string => {
+  return conf.valores.find((v) => {
+    return v.atributo[0].nombre === atributo;
+  })?.valor as string;
+};
+
+const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
+  return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
 };
 
 const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
-  campo: string,
-  operador: string,
-  tipo: string,
   valor: string,
   conf: SConf
 ) => {
+  const campo = getAtributo({ atributo: "campo", conf });
+
+  const operador = getAtributo({ atributo: "operador", conf });
+
+  const tipo = getAtributo({ atributo: "tipo", conf });
+
   if (operador === "like") valor = valor?.concat("%");
 
   if (operador === "fecha" || operador === "fecha_hora") {
@@ -231,19 +229,7 @@ const aplicarFiltros = (
 
     if (!valordefault) return;
 
-    const campo = fd?.valores.find((v) => {
-      return v.atributo[0].nombre === "campo";
-    })?.valor as string;
-
-    const operador = fd?.valores.find((v) => {
-      return v.atributo[0].nombre === "operador";
-    })?.valor as string;
-
-    const tipo = fd?.valores.find((v) => {
-      return v.atributo[0].nombre === "tipo";
-    })?.valor as string;
-
-    aplicaWhere(query, campo, operador, tipo, valordefault, fd);
+    aplicaWhere(query, valordefault, fd);
   });
 
   //aplica filtros solicitados
@@ -258,19 +244,7 @@ const aplicarFiltros = (
 
     if (!filtro) return;
 
-    const campo = filtro?.valores.find((v) => {
-      return v.atributo[0].nombre === "campo";
-    })?.valor as string;
-
-    const operador = filtro?.valores.find((v) => {
-      return v.atributo[0].nombre === "operador";
-    })?.valor as string;
-
-    const tipo = filtro?.valores.find((v) => {
-      return v.atributo[0].nombre === "tipo";
-    })?.valor as string;
-
-    aplicaWhere(query, campo, operador, tipo, queryFiltros[id_a], filtro);
+    aplicaWhere(query, queryFiltros[id_a], filtro);
   });
 
   return query;
@@ -310,12 +284,7 @@ const armarListado = async (
     .find((val) => val.atributo.find((a) => a.id === 15))
     ?.toObject().valor;
 
-  const campos = columnas
-    ?.map((col) => {
-      return col?.valores.find((v) => v.atributo[0].id === 7)?.valor;
-    })
-    .filter((c) => c);
-
+  const campos = getAtributosById([columnas], 7);
   const leftJoins: string[] = getLeftJoins({ columnas, listado });
   const groupsBy: gp[] = getGroupBy({ columnas, listado });
   const order = getOrder(listado);
@@ -359,7 +328,7 @@ const armarListado = async (
 
     if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
 
-    query.paginate(1, 15);
+    //await query.paginate(1, 15);
 
     datos = await query;
   }
@@ -370,7 +339,7 @@ const armarListado = async (
     opcionesListado,
     opcionesPantalla,
     datos,
-    conf,
+    conf: (await bouncer.allows("AccesoRuta", "GET_CONF")) ? conf : null,
     sql,
   };
 };
