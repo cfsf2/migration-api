@@ -56,6 +56,10 @@ const extraerElementos = ({
         return (item[val.atributo[0].nombre] = lista[0]);
       }
 
+      if (val.evaluar === "s") {
+        console.log("EVALUAME LOCOO");
+      }
+
       if (val.atributo[0].nombre === "radio_labels") {
         const opciones = val.valor.split("|").map((op, i) => {
           return {
@@ -93,10 +97,6 @@ interface gp {
   having: string | undefined;
 }
 
-const getOrder = (listado: SConf): string[] | number[] => {
-  return getAtributosById([listado], 9);
-};
-
 const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
   const sc = sconfs.flat(10);
 
@@ -118,6 +118,10 @@ const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
   });
 
   return Array.from(new Set(atributos.filter((c) => c))).flat(20);
+};
+
+const getOrder = (listado: SConf): string[] | number[] => {
+  return getAtributosById([listado], 9);
 };
 
 const getGroupBy = ({
