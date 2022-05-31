@@ -102,13 +102,22 @@ const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
 
   let atributos = [];
 
-  sc?.forEach((conf) =>
+  sc?.forEach((conf) => {
     atributos.push(
       conf?.valores.find((v) => v.atributo[0].id === id)?.valor.trim() as never
-    )
-  );
+    );
+    if (conf.sub_conf.length > 0) {
+      conf.sub_conf.forEach((sc) =>
+        atributos.push(
+          sc?.valores
+            .find((v) => v.atributo[0].id === id)
+            ?.valor.trim() as never
+        )
+      );
+    }
+  });
 
-  return Array.from(new Set(atributos.filter((c) => c)));
+  return Array.from(new Set(atributos.filter((c) => c))).flat(20);
 };
 
 const getGroupBy = ({
@@ -326,7 +335,7 @@ const armarListado = async (
 
     query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
 
-    if (await bouncer.allows("AccesoRuta", "GET_SQL")) sql = query.toQuery();
+    sql = query.toQuery();
 
     //await query.paginate(1, 15);
 
@@ -339,8 +348,8 @@ const armarListado = async (
     opcionesListado,
     opcionesPantalla,
     datos,
-    conf: (await bouncer.allows("AccesoRuta", "GET_CONF")) ? conf : null,
-    sql,
+    conf: (await bouncer.allows("AccesoRuta", "GET_CONF")) ? conf : undefined,
+    sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
   };
 };
 
