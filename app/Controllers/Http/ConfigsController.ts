@@ -52,6 +52,11 @@ const extraerElementos = ({
     c.valores.forEach(async (val) => {
       //console.log(val.atributo[0].nombre, val.valor);
       if (val.sql === "s" && val.valor && val.valor.trim() !== "") {
+        if (val.atributo[0].nombre === "campo")
+          return (item[val.atributo[0].nombre] = val.valor
+            .split("as")
+            .pop())?.trim();
+
         let lista = await Database.rawQuery(val.valor);
         return (item[val.atributo[0].nombre] = lista[0]);
       }
@@ -160,12 +165,36 @@ const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
   return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
 };
 
+const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
+  return conf.valores.find((v) => v.atributo[0].id === id);
+};
+interface select {
+  campo: string;
+  sql: string;
+}
+
+const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
+  let selects: any[] = [];
+  const confs = sc_confs.flat(20);
+
+  confs.forEach((conf) => {
+    let select: select = { campo: "", sql: "" };
+    select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
+    select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
+    selects.push(select);
+    if (conf.sub_conf.length > 0) {
+      selects.push(getSelect(conf.sub_conf, 7));
+    }
+  });
+  return Array.from(new Set(selects.flat(20).filter((c) => c.campo)));
+};
+
 const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
   valor: string,
   conf: SConf
 ) => {
-  const campo = getAtributo({ atributo: "campo", conf });
+  const campo = getAtributoById({ id: 7, conf });
 
   const operador = getAtributo({ atributo: "operador", conf });
 
@@ -297,7 +326,7 @@ const armarListado = async (
     .find((val) => val.atributo.find((a) => a.id === 15))
     ?.toObject().valor;
 
-  const campos = getAtributosById([columnas], 7);
+  const campos = getSelect([columnas], 7);
   const leftJoins: string[] = getLeftJoins({ columnas, listado });
   const groupsBy: gp[] = getGroupBy({ columnas, listado });
   const order = getOrder(listado);
@@ -313,7 +342,21 @@ const armarListado = async (
   });
 
   if (campos.length !== 0) {
-    let query = eval(modelo).query().select(campos);
+    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+    let query = eval(modelo).query();
+
+    //aplicaSelects
+    campos.forEach((campo) => {
+      if (campo.sql === "n") {
+        query.select(campo.campo);
+      }
+      if (campo.sql === "s") {
+        query.select(Database.raw(`${campo.campo} as ${}`));
+        console.log(query.toSQL());
+      }
+    });
 
     // aplicarPreloads - left join
     if (leftJoins.length > 0) {
@@ -342,7 +385,6 @@ const armarListado = async (
     sql = query.toQuery();
 
     //await query.paginate(1, 15);
-
     datos = await query;
   }
 
