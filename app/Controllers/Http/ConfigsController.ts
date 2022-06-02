@@ -171,6 +171,7 @@ const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
 interface select {
   campo: string;
   sql: string;
+  alias: string;
 }
 
 const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
@@ -178,19 +179,22 @@ const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
   const confs = sc_confs.flat(20);
 
   confs.forEach((conf) => {
-    let select: select = { campo: "", sql: "" };
+    let select: select = { campo: "", sql: "", alias: "" };
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
     select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
+    select.alias = getAtributo({ atributo: "campo_alias", conf });
     selects.push(select);
 
     const valoresSQL = conf.valores.filter((v) => v.sql === "s");
 
     valoresSQL.forEach((v) => {
-      let vselect: select = { campo: "", sql: "" };
+      let vselect: select = { campo: "", sql: "", alias: "" };
       vselect.campo = v.valor;
       vselect.sql = v.sql;
-
-      //console.log(valoresSQL.flat(20));
+      vselect.alias = getAtributo({
+        atributo: v.atributo[0].nombre.concat("_alias"),
+        conf,
+      });
 
       selects.push(vselect);
     });
@@ -362,9 +366,10 @@ const armarListado = async (
 
     //aplicaSelects
     campos.forEach((campo) => {
-      query.select(Database.raw(`${campo.campo}`));
-
-      console.log(query.toSQL().sql);
+      query.select(
+        Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
+      );
+      //console.log(query.toSQL().sql);
     });
 
     // aplicarPreloads - left join
@@ -394,6 +399,7 @@ const armarListado = async (
     sql = query.toQuery();
 
     //await query.paginate(1, 15);
+
     datos = await query;
   }
 
@@ -430,8 +436,12 @@ export default class ConfigsController {
     // para listado
 
     const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
-
-    return armarListado(listado, conf, bouncer, queryFiltros);
+    try {
+      return armarListado(listado, conf, bouncer, queryFiltros);
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 }
 
