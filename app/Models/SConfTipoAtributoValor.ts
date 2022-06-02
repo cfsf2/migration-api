@@ -30,6 +30,8 @@ export default class SConfTipoAtributoValor extends BaseModel {
 
   @column()
   public sql: string;
+  @column()
+  public subquery: string;
 
   @hasOne(() => SConf, {
     foreignKey: "id",

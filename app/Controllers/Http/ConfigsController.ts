@@ -51,12 +51,7 @@ const extraerElementos = ({
 
     c.valores.forEach(async (val) => {
       //console.log(val.atributo[0].nombre, val.valor);
-      if (val.sql === "s" && val.valor && val.valor.trim() !== "") {
-        if (val.atributo[0].nombre === "campo")
-          return (item[val.atributo[0].nombre] = val.valor
-            .split("as")
-            .pop())?.trim();
-
+      if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
         let lista = await Database.rawQuery(val.valor);
         return (item[val.atributo[0].nombre] = lista[0]);
       }
@@ -168,6 +163,11 @@ const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
 const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
   return conf.valores.find((v) => v.atributo[0].id === id);
 };
+
+const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
+  return conf.valores.filter((v) => v.sql === "s");
+};
+
 interface select {
   campo: string;
   sql: string;
@@ -182,6 +182,19 @@ const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
     select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
     selects.push(select);
+
+    const valoresSQL = conf.valores.filter((v) => v.sql === "s");
+
+    valoresSQL.forEach((v) => {
+      let vselect: select = { campo: "", sql: "" };
+      vselect.campo = v.valor;
+      vselect.sql = v.sql;
+
+      //console.log(valoresSQL.flat(20));
+
+      selects.push(vselect);
+    });
+
     if (conf.sub_conf.length > 0) {
       selects.push(getSelect(conf.sub_conf, 7));
     }
@@ -349,13 +362,9 @@ const armarListado = async (
 
     //aplicaSelects
     campos.forEach((campo) => {
-      if (campo.sql === "n") {
-        query.select(campo.campo);
-      }
-      if (campo.sql === "s") {
-        query.select(Database.raw(`${campo.campo} as ${}`));
-        console.log(query.toSQL());
-      }
+      query.select(Database.raw(`${campo.campo}`));
+
+      console.log(query.toSQL().sql);
     });
 
     // aplicarPreloads - left join
