@@ -7,11 +7,8 @@ import { enumaBool } from "App/Helper/funciones";
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
     const laboratorios = await Database.from("tbl_laboratorio as l")
-      .select("*", 
-      "l.id as _id", 
-      "l.id as id", 
-      "l.ts_timestamp as fechaalta")
-      .if(id, (query) => query.where("id", id))
+      .select("*", "l.id as _id", "l.id as id", "l.ts_creacion as fechaalta")
+      .if(id, (query) => query.where("id", id as number))
       .orderBy("fechaalta", "desc");
 
     let result = laboratorios.map((l) => {
@@ -49,9 +46,6 @@ export default class Laboratorio extends BaseModel {
 
   @column()
   public url: string;
-
-  @column.dateTime({ autoCreate: true })
-  public ts_timestamp: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
