@@ -182,7 +182,9 @@ const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
     let select: select = { campo: "", sql: "", alias: "" };
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
     select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
-    select.alias = getAtributo({ atributo: "campo_alias", conf });
+    select.alias = getAtributo({ atributo: "campo_alias", conf })
+      ? getAtributo({ atributo: "campo_alias", conf })
+      : conf.id_a;
     selects.push(select);
 
     const valoresSQL = conf.valores.filter((v) => v.sql === "s");
@@ -397,7 +399,7 @@ const armarListado = async (
     query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
 
     sql = query.toQuery();
-
+    console.log(sql);
     //await query.paginate(1, 15);
 
     datos = await query;
