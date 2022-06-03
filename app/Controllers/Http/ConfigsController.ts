@@ -21,18 +21,45 @@ const preloadRecursivo = (query) => {
 };
 
 const verificarPermisos = async (listado: SConf, bouncer: any, tipoId) => {
-  const sconfs_pedidos = listado?.sub_conf.filter(
-    (sc) => sc.tipo.id === tipoId
-  );
-  const sconf_habilitados = await Promise.all(
-    sconfs_pedidos?.map(async (sc) => {
-      if (!(await bouncer.allows("AccesoConf", sc)))
-        return false as unknown as SConf;
-      return sc;
-    })
-  );
+  const sconfs_pedidos = listado
+    .toJSON()
+    .sub_conf.filter((sc) => sc.tipo.id === tipoId);
 
-  return sconf_habilitados?.filter((f) => f);
+  const sconf_habilitados = (
+    await Promise.all(
+      sconfs_pedidos.map(async (sc) => {
+        if (!(await bouncer.allows("AccesoConf", sc))) {
+          return false;
+        }
+
+        sc.sub_conf = await verificarPermisoConf(sc.sub_conf, bouncer);
+
+        return sc;
+      })
+    )
+  )?.filter((c) => c);
+
+  return sconf_habilitados;
+};
+
+const verificarPermisoConf = async (sub_confs, bouncer) => {
+  const sc = (
+    await Promise.all(
+      sub_confs.map(async (sch) => {
+        const per = await bouncer.allows("AccesoConf", sch);
+        if (!per) return per;
+
+        if (sch.tipo.id === 5) {
+        }
+
+        sch.sub_conf = await verificarPermisoConf(sch.sub_conf, bouncer);
+
+        return sch;
+      })
+    )
+  )?.filter((c) => c);
+
+  return sc;
 };
 
 const extraerElementos = ({
@@ -411,7 +438,7 @@ const armarListado = async (
     opcionesListado,
     opcionesPantalla,
     datos,
-    conf: (await bouncer.allows("AccesoRuta", "GET_CONF")) ? conf : undefined,
+    conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
     sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
   };
 };

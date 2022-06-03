@@ -99,7 +99,7 @@ export const { actions } = Bouncer.define(
 
           return false;
         case "n":
-          // console.log("nadie", clearanceLevel, conf.permiso, conf.id_a);
+          //console.log("nadie", clearanceLevel, conf.permiso, conf.id_a);
           return false;
         case "p":
           // console.log(
