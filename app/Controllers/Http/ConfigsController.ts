@@ -50,6 +50,17 @@ const verificarPermisoConf = async (sub_confs, bouncer) => {
         if (!per) return per;
 
         if (sch.tipo.id === 5) {
+          if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
+            const conf = await SConf.findByOrFail(
+              "id_a",
+              getAtributo({ atributo: "enlace_id_a", conf: sch })
+            );
+            const tienePermisoDeDestino = await bouncer.allows(
+              "AccesoConf",
+              conf
+            );
+            if (!tienePermisoDeDestino) return false;
+          }
         }
 
         sch.sub_conf = await verificarPermisoConf(sch.sub_conf, bouncer);
@@ -450,7 +461,7 @@ export default class ConfigsController {
     console.log(queryFiltros);
 
     if (!config) {
-      return { datos: [], cabeceras: [], filtros: [] };
+      return respuestaVacia;
     }
     const conf = await SConf.query()
       .where("id_a", config)
@@ -463,6 +474,7 @@ export default class ConfigsController {
       .firstOrFail();
 
     // para listado
+    if (!(await bouncer.allows("AccesoConf", conf))) return respuestaVacia;
 
     const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
     try {
@@ -473,6 +485,14 @@ export default class ConfigsController {
     }
   }
 }
+
+const respuestaVacia = {
+  datos: [],
+  cabeceras: [],
+  filtros: [],
+  opcionesListado: {},
+  opcionesPantalla: {},
+};
 
 //leftjoins
 // Array.from(
