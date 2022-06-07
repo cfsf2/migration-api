@@ -4,7 +4,12 @@ import Usuario from "./Usuario";
 import Laboratorio from "./Laboratorio";
 import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProductoInstitucion from "./TransferProductoInstitucion";
-import { AccionCRUD, eliminarKeysVacios, enumaBool, guardarDatosAuditoria } from "App/Helper/funciones";
+import {
+  AccionCRUD,
+  eliminarKeysVacios,
+  enumaBool,
+  guardarDatosAuditoria,
+} from "App/Helper/funciones";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -26,6 +31,7 @@ export default class TransferProducto extends BaseModel {
         "tp.habilitado as habilitado",
         "tp.nombre as nombre",
         "tp.codigo as codigo",
+        "tp.imagen as imagen",
         "tp.ts_creacion as fechaalta",
         "tp.ts_creacion as fecha_alta",
         "tp.ts_modificacion as fecha_modificacion",
@@ -57,7 +63,7 @@ export default class TransferProducto extends BaseModel {
 
     return trasfersProducto.map((t) => {
       t._id = t._id.toString();
-      t.laboratorioid = t.laboratorioid?.toString()
+      t.laboratorioid = t.laboratorioid?.toString();
       return enumaBool(t);
     });
   }
@@ -75,6 +81,7 @@ export default class TransferProducto extends BaseModel {
         nombre: data.nombre,
         habilitado: "s",
         presentacion: data.presentacion,
+        imagen: data.imagen,
         cantidad_minima: data.cantidad_minima,
         descuento_porcentaje: data.descuento_porcentaje,
         precio: data.precio,
@@ -93,7 +100,7 @@ export default class TransferProducto extends BaseModel {
           id_transfer_producto: nuevoPF.id,
           id_institucion: i,
         });
-        
+
         institucionPF.save();
       });
       return;
@@ -116,6 +123,7 @@ export default class TransferProducto extends BaseModel {
             : "n"
           : null,
       presentacion: data.productosTransfers.presentacion,
+      imagen: data.productosTransfers.imagen,
       cantidad_minima: data.productosTransfers.cantidad_minima,
       descuento_porcentaje: data.productosTransfers.descuento_porcentaje,
       precio: data.productosTransfers.precio,
@@ -174,6 +182,9 @@ export default class TransferProducto extends BaseModel {
 
   @column()
   public nombre: string;
+
+  @column()
+  public imagen: string;
 
   @column()
   public habilitado: string;

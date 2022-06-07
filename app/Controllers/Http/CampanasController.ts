@@ -22,6 +22,13 @@ export default class CampanasController {
       .apply((scopes) => scopes.vigente());
   }
 
+  public async todas({ request }: HttpContextContract) {
+    return await Campana.query()
+      .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
+      .preload("orientados")
+      .preload("atributos");
+  }
+
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
     const requerimientoSchema = schema.create({
       id_campana: schema.number(),
