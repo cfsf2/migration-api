@@ -82,7 +82,10 @@ export const { actions } = Bouncer.define(
     if (tienePerfilFarmacia) {
       return tienePerfilFarmacia.habilitado === "s" && us.habilitado === "s";
     }
-
+    if (us.esfarmacia === "n" && us.admin === "n") {
+      console.log("Hola soy un cliente web");
+      return true;
+    }
     return false;
   });
 

@@ -36,11 +36,11 @@ export default class AuthController {
       await usuario[0].save();
 
       response.permisos = Array.from(
-        new Set(usuario[0].perfil[0].permisos.map((p) => p.tipo))
+        new Set(usuario[0].perfil[0]?.permisos.map((p) => p.tipo))
       );
       response.user_display_name = usuario[0].give_user_display_name();
 
-      response.user_rol = [usuario[0].perfil[0].tipo];
+      response.user_rol = [usuario[0].perfil[0]?.tipo];
       response.user_email = response.email;
 
       response.token = log.token;
