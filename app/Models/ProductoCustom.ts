@@ -13,7 +13,7 @@ export default class ProductoCustom extends BaseModel {
   @column()
   public descripcion: string;
 
-  @column()
+  @column({ serializeAs: "esPromocion" })
   public es_promocion: string;
 
   @column()

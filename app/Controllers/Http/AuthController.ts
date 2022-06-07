@@ -4,9 +4,15 @@ import { enumaBool } from "App/Helper/funciones";
 import Perfil from "App/Models/Perfil";
 import { DateTime } from "luxon";
 import { Permiso } from "App/Helper/permisos";
+import Farmacia from "App/Models/Farmacia";
 
 export default class AuthController {
-  public async mig_loginwp({ request, response, auth }: HttpContextContract) {
+  public async mig_loginwp({
+    request,
+    response,
+    auth,
+    bouncer,
+  }: HttpContextContract) {
     const { username, password } = request.only(["username", "password"]);
 
     try {
@@ -30,23 +36,16 @@ export default class AuthController {
       await usuario[0].save();
 
       response.permisos = Array.from(
-        new Set(usuario[0].perfil[0].permisos.map((p) => p.tipo))
+        new Set(usuario[0].perfil[0]?.permisos.map((p) => p.tipo))
       );
       response.user_display_name = usuario[0].give_user_display_name();
 
-      response.user_rol = [usuario[0].perfil[0].tipo];
+      response.user_rol = [usuario[0].perfil[0]?.tipo];
       response.user_email = response.email;
 
       response.token = log.token;
 
-      // jwt.sign(
-      //   { user: response.toObject() },
-      //   process.env.JWTSECRET,
-      //   {
-      //     expiresIn: process.env.JWTEXPIRESIN,
-      //   }
-      // );
-
+      await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
       console.log(error);

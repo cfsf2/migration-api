@@ -34,7 +34,7 @@ export default class Usuario extends BaseModel {
   static async traerPerfilDeUsuario({
     usuarioNombre,
   }: {
-    usuarioNombre?: string;
+    usuarioNombre: string;
   }) {
     if (usuarioNombre === "No%20Registrado") return;
 
@@ -129,8 +129,8 @@ export default class Usuario extends BaseModel {
         rules.email(),
         rules.unique({ table: "tbl_usuario", column: "email" }),
       ]),
-      telefono: schema.string({}, [rules.mobile({ locale: ["es-AR"] })]),
-      celular: schema.string({}, [rules.mobile({ locale: ["es-AR"] })]),
+      telefono: schema.string({}, [rules.maxLength(10), rules.minLength(10)]),
+      celular: schema.string({}, [rules.maxLength(10), rules.minLength(10)]),
       password: schema.string(),
       habilitado: schema.string.optional(),
       dni: schema.number.optional(),

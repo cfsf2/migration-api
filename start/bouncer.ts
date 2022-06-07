@@ -7,6 +7,7 @@
 
 import Bouncer from "@ioc:Adonis/Addons/Bouncer";
 import { Permiso } from "App/Helper/permisos";
+import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
 
@@ -72,6 +73,21 @@ export const { actions } = Bouncer.define(
       return Bouncer.deny("Acceso no autorizado", 401);
     }
   )
+  .define("esAdmin", async (_usuario: Usuario, us: Usuario) => {
+    if (!!(us.$preloaded.perfil as any).find((p) => p.id === 1)) {
+      return us.habilitado === "s";
+    }
+    const tienePerfilFarmacia = await Farmacia.findBy("id_usuario", us.id);
+
+    if (tienePerfilFarmacia) {
+      return tienePerfilFarmacia.habilitado === "s" && us.habilitado === "s";
+    }
+    if (us.esfarmacia === "n" && us.admin === "n") {
+      console.log("Hola soy un cliente web");
+      return true;
+    }
+    return false;
+  })
   .define(
     "AccesoConf",
     async (usuario: Usuario, conf: SConf) => {

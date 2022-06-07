@@ -45,44 +45,39 @@ export default class Pedido extends BaseModel {
         return query.where("tbl_pedido.id", idPedido);
       });
 
-    const newPedido = await Promise.all( 
+    const newPedido = await Promise.all(
       datos.map(async (p) => {
-          const pedidosSolicitado = await Database.from(
-            "tbl_pedido_producto_pack as ppp"
-          )
-            .select("*")
-            .leftJoin("tbl_producto_pack as pp", "ppp.id_productospack", "pp.id")
-            .where("ppp.id_pedido", p.id);
+        const pedidosSolicitado = await Database.from(
+          "tbl_pedido_producto_pack as ppp"
+        )
+          .select("*")
+          .leftJoin("tbl_producto_pack as pp", "ppp.id_productospack", "pp.id")
+          .where("ppp.id_pedido", p.id);
 
-          const usuarioCliente = await Usuario.findBy("usuario", p.username)
+        const usuarioCliente = await Usuario.findBy("usuario", p.username);
 
-          if(!usuarioCliente){
+        if (!usuarioCliente) {
+          p.datos_cliente = (await JSON.parse(p.datos_cliente))[0]?.apellido
+            ? await JSON.parse(p.datos_cliente)
+            : [{ apellido: null }];
+        } else {
+          p.datos_cliente = [usuarioCliente];
+        }
 
-            p.datos_cliente = (await JSON.parse(p.datos_cliente))[0]?.apellido
-              ? await JSON.parse(p.datos_cliente)
-              : [{ apellido: null }];
-          } else {
-            p.datos_cliente = [usuarioCliente]
-          }
+        if (pedidosSolicitado.length === 0) {
+          p.gruposproductos = await JSON.parse(p.gruposproductos);
+          return p;
+        }
 
-          if (pedidosSolicitado.length === 0) {
-            p.gruposproductos = await JSON.parse(p.gruposproductos);
-            return p;
-          }
+        p.gruposproductos = [{ productos: [] }];
+        p.gruposproductos[0].productos = pedidosSolicitado;
+        p._id = p._id.toString();
 
-         
-          p.gruposproductos = [{ productos: [] }];
-          p.gruposproductos[0].productos = pedidosSolicitado;
-          p._id = p._id.toString()
-          
-          return p
-        })
-      )
-    console.log(await newPedido[0])
-    return  newPedido.map(p=>
-      enumaBool(p)
-      
-    )
+        return p;
+      })
+    );
+    // console.log(await newPedido[0])
+    return newPedido.map((p) => enumaBool(p));
   }
 
   static async actualizarPedido({ id, pedidoCambios, auth }) {

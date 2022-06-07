@@ -635,16 +635,16 @@ export default class Farmacia extends BaseModel {
   static async crearFarmacia(nuevaFarmacia, auth) {
     const usuarioAuth = await auth.authenticate();
 
-    const usuario = await Usuario.findByOrFail(
-      "usuario",
-      nuevaFarmacia.usuario
-    );
-    const localidad = await Localidad.findByOrFail(
-      "nombre",
-      nuevaFarmacia.localidad
-    );
-    const farmaciaN = new Farmacia();
     try {
+      const usuario = await Usuario.findByOrFail(
+        "usuario",
+        nuevaFarmacia.usuario
+      );
+      const localidad = await Localidad.findBy(
+        "nombre",
+        nuevaFarmacia.localidad
+      );
+      const farmaciaN = new Farmacia();
       const { lat, lng: log } = await getCoordenadas({
         calle: nuevaFarmacia.calle,
         numero: nuevaFarmacia.numero,
@@ -657,7 +657,7 @@ export default class Farmacia extends BaseModel {
         id_usuario: usuario.id,
         nombrefarmaceutico: nuevaFarmacia.nombrefarmaceutico,
         matricula: nuevaFarmacia.matricula,
-        id_localidad: localidad.id,
+        id_localidad: localidad?.id,
         nombre: nuevaFarmacia.nombre,
         cuit: nuevaFarmacia.cuit,
         cufe: nuevaFarmacia.cufe,
@@ -672,8 +672,6 @@ export default class Farmacia extends BaseModel {
         id_perfil_farmageo: 2,
         cp: nuevaFarmacia.cp,
       });
-
-      console.log(farmaciaN);
 
       guardarDatosAuditoria({
         objeto: farmaciaN,
@@ -798,7 +796,7 @@ export default class Farmacia extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
-  public id_localidad: number;
+  public id_localidad?: number;
 
   @column()
   public id_usuario: number;
