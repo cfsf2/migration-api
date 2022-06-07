@@ -36,6 +36,9 @@ export default class ProductoCustom extends BaseModel {
   @column()
   public en_papelera: string;
 
+  @column({ serializeAs: "esPromocion" })
+  public es_promocion: string;
+
   @column()
   public id_categoria: number;
 
