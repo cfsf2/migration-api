@@ -4,9 +4,15 @@ import { enumaBool } from "App/Helper/funciones";
 import Perfil from "App/Models/Perfil";
 import { DateTime } from "luxon";
 import { Permiso } from "App/Helper/permisos";
+import Farmacia from "App/Models/Farmacia";
 
 export default class AuthController {
-  public async mig_loginwp({ request, response, auth }: HttpContextContract) {
+  public async mig_loginwp({
+    request,
+    response,
+    auth,
+    bouncer,
+  }: HttpContextContract) {
     const { username, password } = request.only(["username", "password"]);
 
     try {
@@ -39,14 +45,9 @@ export default class AuthController {
 
       response.token = log.token;
 
-      // jwt.sign(
-      //   { user: response.toObject() },
-      //   process.env.JWTSECRET,
-      //   {
-      //     expiresIn: process.env.JWTEXPIRESIN,
-      //   }
-      // );
-
+      if (await bouncer.denies("esAdmin", usuario[0])) {
+        await Farmacia.findByOrFail("id_usuario", usuario[0].id);
+      }
       return response;
     } catch (error) {
       console.log(error);
