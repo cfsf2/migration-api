@@ -45,9 +45,7 @@ export default class AuthController {
 
       response.token = log.token;
 
-      if (await bouncer.denies("esAdmin", usuario[0])) {
-        await Farmacia.findByOrFail("id_usuario", usuario[0].id);
-      }
+      await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
       console.log(error);
