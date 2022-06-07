@@ -435,7 +435,7 @@ const ProductosCustom = async () => {
           sku: producto.sku,
           en_papelera: producto.en_papelera,
           inventario: producto.inventario,
-          esPromocion: producto.esPromocion ? producto.esPromocion : false,
+          es_promocion: producto.esPromocion ? producto.esPromocion : false,
         }
       ).then((r) => {
         if (producto.esPromocion) console.log(r);
@@ -453,7 +453,7 @@ const ProductosCustom = async () => {
         sku: producto.sku,
         en_papelera: producto.en_papelera,
         inventario: producto.inventario,
-        esPromocion: producto.esPromocion,
+        es_promocion: producto.esPromocion,
         idsql: i,
       });
     }
@@ -1519,7 +1519,7 @@ const tbl_producto_custom = () => {
     const sql = (
       p
     ) => `INSERT INTO tbl_producto_custom (id, descripcion, nombre, 
-        imagen, habilitado, favorito, precio, sku, inventario, esPromocion, en_papelera, id_categoria)
+        imagen, habilitado, favorito, precio, sku, inventario, es_promocion, en_papelera, id_categoria)
       VALUES (${p.idsql}, ${
       p.descripcion && p.descripcion !== ""
         ? stringOnull(mysql_real_escape_string(p.descripcion))
@@ -1547,7 +1547,7 @@ const tbl_producto_custom = () => {
       p.sku ? stringOnull(p.sku.toString().slice(0, 45)) : null
     }, tbl_producto_custom.inventario = ${inventario(
       p.inventario
-    )}, tbl_producto_custom.esPromocion = ${stringOnull(
+    )}, tbl_producto_custom.es_promocion = ${stringOnull(
       p.esPromocion ? "s" : "n"
     )}, tbl_producto_custom.en_papelera = ${stringOnull(
       p.en_papelera ? "s" : "n"
