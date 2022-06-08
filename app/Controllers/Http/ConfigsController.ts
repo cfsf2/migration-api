@@ -1,15 +1,12 @@
-// import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
+import {
+  armarListado,
+  armarVista,
+  listado,
+  vista,
+} from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import Database, {
-  DatabaseQueryBuilderContract,
-} from "@ioc:Adonis/Lucid/Database";
-import { DateTime } from "luxon";
-
-let Servicio = S;
-let Farmacia = F;
 
 const preloadRecursivo = (query) => {
   return query
@@ -20,449 +17,47 @@ const preloadRecursivo = (query) => {
     .preload("sub_conf", (query) => preloadRecursivo(query));
 };
 
-const verificarPermisos = async (listado: SConf, bouncer: any, tipoId) => {
-  const sconfs_pedidos = listado
-    .toJSON()
-    .sub_conf.filter((sc) => sc.tipo.id === tipoId);
-
-  const sconf_habilitados = (
-    await Promise.all(
-      sconfs_pedidos.map(async (sc) => {
-        if (!(await bouncer.allows("AccesoConf", sc))) {
-          return false;
-        }
-
-        sc.sub_conf = await verificarPermisoConf(sc.sub_conf, bouncer);
-
-        return sc;
-      })
-    )
-  )?.filter((c) => c);
-
-  return sconf_habilitados;
-};
-
-const verificarPermisoConf = async (sub_confs, bouncer) => {
-  const sc = (
-    await Promise.all(
-      sub_confs.map(async (sch) => {
-        const per = await bouncer.allows("AccesoConf", sch);
-        if (!per) return per;
-
-        if (sch.tipo.id === 5) {
-          if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
-            const conf = await SConf.findByOrFail(
-              "id_a",
-              getAtributo({ atributo: "enlace_id_a", conf: sch })
-            );
-            const tienePermisoDeDestino = await bouncer.allows(
-              "AccesoConf",
-              conf
-            );
-            if (!tienePermisoDeDestino) return false;
-          }
-        }
-
-        sch.sub_conf = await verificarPermisoConf(sch.sub_conf, bouncer);
-
-        return sch;
-      })
-    )
-  )?.filter((c) => c);
-
-  return sc;
-};
-
-const extraerElementos = ({
-  sc_hijos,
-  sc_padre,
-}: {
-  sc_hijos: SConf[];
-  sc_padre: SConf;
-}) => {
-  return sc_hijos.map((c: SConf) => {
-    let item = {};
-    item["orden"] =
-      sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
-
-    item["id_a"] = c.id_a;
-
-    c.valores.forEach(async (val) => {
-      //console.log(val.atributo[0].nombre, val.valor);
-      if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-        let lista = await Database.rawQuery(val.valor);
-        return (item[val.atributo[0].nombre] = lista[0]);
-      }
-
-      if (val.evaluar === "s") {
-        console.log("EVALUAME LOCOO");
-      }
-
-      if (val.atributo[0].nombre === "radio_labels") {
-        const opciones = val.valor.split("|").map((op, i) => {
-          return {
-            label: op.trim(),
-            value: i,
-          };
-        });
-        item["radio_opciones"] = opciones;
-      }
-
-      item[val.atributo[0].nombre] = val.valor;
-    });
-
-    item["sc_hijos"] = extraerElementos({
-      sc_hijos: c.sub_conf,
-      sc_padre: c,
-    });
-
-    return item;
-  });
-};
-
-const getLeftJoins = ({
-  columnas,
-  listado,
-}: {
-  columnas: SConf[];
-  listado: SConf;
-}): string[] => {
-  return getAtributosById([listado, columnas], 11);
-};
-
-interface gp {
-  groupBy: string;
-  having: string | undefined;
-}
-
-const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
-  const sc = sconfs.flat(10);
-
-  let atributos = [];
-
-  sc?.forEach((conf) => {
-    atributos.push(
-      conf?.valores.find((v) => v.atributo[0].id === id)?.valor.trim() as never
-    );
-    if (conf.sub_conf.length > 0) {
-      conf.sub_conf.forEach((sc) =>
-        atributos.push(
-          sc?.valores
-            .find((v) => v.atributo[0].id === id)
-            ?.valor.trim() as never
-        )
-      );
-    }
-  });
-
-  return Array.from(new Set(atributos.filter((c) => c))).flat(20);
-};
-
-const getOrder = (listado: SConf): string[] | number[] => {
-  return getAtributosById([listado], 9);
-};
-
-const getGroupBy = ({
-  columnas,
-  listado,
-}: {
-  columnas: SConf[];
-  listado: SConf;
-}): gp[] => {
-  let groupsBy: gp[] = [];
-  const confs = columnas.concat(listado);
-  confs?.forEach((conf) => {
-    let gp: gp = { groupBy: "", having: "" };
-    gp.groupBy = getAtributoById({ id: 23, conf });
-    gp.having = getAtributoById({ id: 24, conf }) as string | undefined;
-
-    groupsBy.push(gp);
-  });
-
-  return Array.from(new Set(groupsBy.filter((c) => c.groupBy)));
-};
-
-const getAtributo = ({
-  atributo,
-  conf,
-}: {
-  atributo: string;
-  conf: SConf;
-}): string => {
-  return conf.valores.find((v) => {
-    return v.atributo[0].nombre === atributo;
-  })?.valor as string;
-};
-
-const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
-  return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
-};
-
-const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
-  return conf.valores.find((v) => v.atributo[0].id === id);
-};
-
-const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
-  return conf.valores.filter((v) => v.sql === "s");
-};
-
-interface select {
-  campo: string;
-  sql: string;
-  alias: string;
-}
-
-const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
-  let selects: any[] = [];
-  const confs = sc_confs.flat(20);
-
-  confs.forEach((conf) => {
-    let select: select = { campo: "", sql: "", alias: "" };
-    select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
-    select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
-    select.alias = getAtributo({ atributo: "campo_alias", conf })
-      ? getAtributo({ atributo: "campo_alias", conf })
-      : conf.id_a;
-    selects.push(select);
-
-    const valoresSQL = conf.valores.filter((v) => v.sql === "s");
-
-    valoresSQL.forEach((v) => {
-      let vselect: select = { campo: "", sql: "", alias: "" };
-      vselect.campo = v.valor;
-      vselect.sql = v.sql;
-      vselect.alias = getAtributo({
-        atributo: v.atributo[0].nombre.concat("_alias"),
-        conf,
-      });
-
-      selects.push(vselect);
-    });
-
-    if (conf.sub_conf.length > 0) {
-      selects.push(getSelect(conf.sub_conf, 7));
-    }
-  });
-  return Array.from(new Set(selects.flat(20).filter((c) => c.campo)));
-};
-
-const aplicaWhere = async (
-  query: DatabaseQueryBuilderContract,
-  valor: string,
-  conf: SConf
-) => {
-  const campo = getAtributoById({ id: 7, conf });
-
-  const operador = getAtributo({ atributo: "operador", conf });
-
-  const tipo = getAtributo({ atributo: "tipo", conf });
-
-  if (operador === "like") valor = valor?.concat("%");
-
-  if (operador === "fecha" || operador === "fecha_hora") {
-    const fechas = valor.split(",");
-    if (fechas.length !== 2) return;
-
-    const desde = DateTime.fromISO(fechas[0]).toSQL();
-    const hasta = DateTime.fromISO(fechas[1])
-      .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
-      .toSQL();
-
-    query
-      .where(campo, ">=", desde)
-      .andWhere(campo, "<=", hasta)
-      .orderBy(campo, "desc");
-    //.whereNotNull(campo);
-    return query;
-  }
-
-  if (tipo === "fecha_simple") {
-    // const fechas = valor.split(",");
-
-    const fecha = DateTime.fromISO(valor).toSQL();
-
-    query.where(campo, operador ? operador : "=", fecha).orderBy(campo, "desc");
-    //.whereNotNull(campo);
-    return query;
-  }
-
-  if (tipo === "radio") {
-    const radio_where_a = conf.valores
-      .find((v) => v.atributo[0].nombre === "radio_where")
-      ?.valor.split("|");
-
-    const radio_where_o = Object.assign({}, radio_where_a);
-
-    return query.whereRaw(radio_where_o[Number(valor)].trim());
-  }
-
-  query.where(campo, operador ? operador : "=", valor);
-
-  return query;
-};
-
-const aplicarFiltros = (
-  queryFiltros: {},
-  query: DatabaseQueryBuilderContract,
-  filtros_e: SConf[], // filtros para los que tiene permiso
-  listado: SConf
-) => {
-  //aplica filtros obligatorios de listado
-  const where = listado.valores.find(
-    (v) => v.atributo[0].nombre === "where"
-  )?.valor;
-
-  if (where) {
-    query.whereRaw(where);
-  }
-  //aplica filtros por defecto
-  const filtros_solicitados = Object.keys(queryFiltros);
-  const filtros_default = filtros_e.filter((filtro_d) => {
-    return !filtros_solicitados.includes(filtro_d.id_a);
-  });
-
-  filtros_default.forEach((fd) => {
-    let valordefault = fd?.valores.find((v) => {
-      return v.atributo[0].nombre === "default";
-    })?.valor;
-
-    if (!valordefault) return;
-
-    aplicaWhere(query, valordefault, fd);
-  });
-
-  //aplica filtros solicitados
-  const filtros_solicitados_id_a = Object.keys(queryFiltros).filter((k) => {
-    if (queryFiltros[k] === "null") return false;
-    if (queryFiltros[k] === "undefined") return false;
-    return !!queryFiltros[k].trim();
-  });
-
-  filtros_solicitados_id_a.forEach((id_a) => {
-    const filtro = filtros_e.find((fil) => fil.id_a === id_a);
-
-    if (!filtro) return;
-
-    aplicaWhere(query, queryFiltros[id_a], filtro);
-  });
-
-  return query;
-};
-
-const armarListado = async (
-  listado: SConf,
-  conf: SConf,
-  bouncer: any,
-  queryFiltros: any
-) => {
-  let opcionesListado = {};
-  let opcionesPantalla = {};
-  let datos = [];
-  let sql = "";
-
-  if (!(await bouncer.allows("AccesoConf", listado))) return;
-
-  conf?.valores.forEach((val) => {
-    opcionesPantalla[val.atributo[0].nombre] = val.valor;
-  });
-
-  listado?.valores.forEach((val) => {
-    opcionesListado[val.atributo[0].nombre] = val.valor;
-  });
-
-  opcionesListado["orden"] = conf?.orden.find(
-    (o) => o.id_conf_h === listado?.id
-  )?.orden;
-
-  opcionesListado["id_a"] = listado.id_a;
-
-  let columnas = await verificarPermisos(listado, bouncer, 4);
-  let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
-
-  const modelo = listado?.valores
-    .find((val) => val.atributo.find((a) => a.id === 15))
-    ?.toObject().valor;
-
-  const campos = getSelect([columnas], 7);
-  const leftJoins: string[] = getLeftJoins({ columnas, listado });
-  const groupsBy: gp[] = getGroupBy({ columnas, listado });
-  const order = getOrder(listado);
-
-  const cabeceras = extraerElementos({
-    sc_hijos: columnas,
-    sc_padre: listado,
-  });
-
-  const filtros = extraerElementos({
-    sc_hijos: filtros_aplicables,
-    sc_padre: listado,
-  });
-
-  if (campos.length !== 0) {
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    let query = eval(modelo).query();
-
-    //aplicaSelects
-    campos.forEach((campo) => {
-      query.select(
-        Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
-      );
-      //console.log(query.toSQL().sql);
-    });
-
-    // aplicarPreloads - left join
-    if (leftJoins.length > 0) {
-      leftJoins.forEach((leftJoin) => {
-        query.joinRaw(leftJoin);
-      });
-    }
-    // aplicar groupsBy
-    if (groupsBy.length > 0) {
-      groupsBy.forEach(({ groupBy, having }) => {
-        query.groupBy(groupBy);
-        if (having) query.having(having);
-      });
-    }
-    // aplicar order del listado
-    if (order.length > 0) {
-      order.forEach((order) => {
-        query.orderBy(order, "desc");
-      });
-    }
-
-    //aplicarFiltros
-
-    query = aplicarFiltros(queryFiltros, query, filtros_aplicables, listado);
-
-    sql = query.toQuery();
-    console.log(sql);
-    //await query.paginate(1, 15);
-
-    datos = await query;
-  }
-
-  return {
-    cabeceras,
-    filtros,
-    opcionesListado,
-    opcionesPantalla,
-    datos,
-    conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
-    sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
-  };
-};
-
 export default class ConfigsController {
-  public async Config({ request, bouncer }) {
+  public async Config({ request, bouncer }: HttpContextContract) {
     const config = request.qs().pantalla;
     const queryFiltros = request.qs();
-    console.log(queryFiltros);
+
+    if (!config) {
+      return listadoVacio;
+    }
+    const conf = await SConf.query()
+      .where("id_a", config)
+      .andWhere("id_tipo", 1)
+      .preload("conf_permiso")
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => preloadRecursivo(query))
+      .firstOrFail();
+
+    // para listado
+    if (!(await bouncer.allows("AccesoConf", conf))) return listadoVacio;
+
+    const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
+    try {
+      return armarListado(listado, conf, bouncer, queryFiltros);
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  public async ConfigPantalla({ request, bouncer }: HttpContextContract) {
+    const config = request.params().pantalla;
+
+    const id_a_solicitados = request.body(); // como hago para recibir varios ids para distintas vistas y como se a que vista corresponde cada id??
+
+    const queryFiltros = request.qs(); // siempre undefined porque pasamos todo por post
 
     if (!config) {
       return respuestaVacia;
     }
+
     const conf = await SConf.query()
       .where("id_a", config)
       .andWhere("id_tipo", 1)
@@ -476,9 +71,35 @@ export default class ConfigsController {
     // para listado
     if (!(await bouncer.allows("AccesoConf", conf))) return respuestaVacia;
 
-    const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
+    const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
+    const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
+
     try {
-      return armarListado(listado, conf, bouncer, queryFiltros);
+      const respuesta: respuesta = respuestaVacia;
+
+      const listadosArmados = await Promise.all(
+        listados.map(async (listado) => {
+          return await armarListado(listado, conf, bouncer, id_a_solicitados);
+        })
+      );
+
+      const vistasArmadas = await Promise.all(
+        vistas.map(async (vista) => {
+          return armarVista(vista, id_a_solicitados.id, conf, bouncer);
+        })
+      );
+
+      conf?.valores.forEach((val) => {
+        respuesta.opciones[val.atributo[0].nombre] = val.valor;
+      });
+
+      let configuraciones: any[] = [];
+      configuraciones = configuraciones.concat(listadosArmados);
+      configuraciones = configuraciones.concat(vistasArmadas);
+
+      respuesta.configuraciones = configuraciones;
+
+      return respuesta;
     } catch (err) {
       console.log(err);
       return err;
@@ -486,23 +107,19 @@ export default class ConfigsController {
   }
 }
 
-const respuestaVacia = {
+const respuestaVacia: respuesta = {
+  configuraciones: [],
+  opciones: {},
+};
+
+const listadoVacio: listado = {
   datos: [],
   cabeceras: [],
   filtros: [],
-  opcionesListado: {},
-  opcionesPantalla: {},
+  opciones: {},
 };
 
-//leftjoins
-// Array.from(
-//   new Set(
-//     columnas
-//       ?.map((col) => {
-//         return col?.valores
-//           .find((v) => v.atributo[0].id === 11)
-//           ?.valor.trim();
-//       })
-//       .filter((c) => c)
-//   )
-// );
+export interface respuesta {
+  configuraciones: any[];
+  opciones: {};
+}
