@@ -427,7 +427,7 @@ export const armarVista = async (
 
   const modelo = getAtributo({ atributo: "modelo", conf: vista });
 
-  const campos = getSelect([vista], 7);
+  const campos = getSelect([columnas], 7);
   const leftJoins: string[] = getLeftJoins({ columnas, conf: vista });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: vista });
   const order = getOrder(vista);
@@ -442,6 +442,7 @@ export const armarVista = async (
 
     //aplicaSelects
     campos.forEach((campo) => {
+      console.log(campo);
       query.select(
         Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
       );
