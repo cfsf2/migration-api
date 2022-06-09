@@ -67,9 +67,11 @@ const verificarPermisoConf = async (sub_confs, bouncer) => {
 const extraerElementos = ({
   sc_hijos,
   sc_padre,
+  bouncer,
 }: {
   sc_hijos: SConf[];
   sc_padre: SConf;
+  bouncer: any;
 }) => {
   return sc_hijos.map((c: SConf) => {
     let item = {};
@@ -101,7 +103,11 @@ const extraerElementos = ({
         item["radio_opciones"] = opciones;
       }
 
-      if (atributoNombre === "enlace_id_a") {
+      if (atributoNombre === "enlace_id_a_opcional") {
+        const conf = await SConf.findByOrFail("id_a", val.valor);
+        const per = await bouncer.allows("AccesoConf", conf);
+
+        console.log(per, val.valor);
       }
 
       item[atributoNombre] = val.valor;
@@ -110,6 +116,7 @@ const extraerElementos = ({
     item["sc_hijos"] = extraerElementos({
       sc_hijos: c.sub_conf,
       sc_padre: c,
+      bouncer,
     });
 
     return item;
@@ -390,14 +397,16 @@ export const armarVista = async (
   opciones["tipo"] = vista.tipo;
 
   let columnas = await verificarPermisos(vista, bouncer, 4);
+  let enlaces = await verificarPermisos(vista, bouncer, 6);
   vistaFinal.cabeceras = extraerElementos({
     sc_hijos: columnas,
     sc_padre: vista,
+    bouncer,
   });
 
   const modelo = getAtributo({ atributo: "modelo", conf: vista });
 
-  const campos = getSelect([columnas], 7);
+  const campos = getSelect([vista], 7);
   const leftJoins: string[] = getLeftJoins({ columnas, conf: vista });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: vista });
   const order = getOrder(vista);
