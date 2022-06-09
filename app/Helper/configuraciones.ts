@@ -324,7 +324,6 @@ const aplicarFiltros = (
     const filtros_solicitados_id_a = Object.keys(queryFiltros).filter((k) => {
       if (queryFiltros[k] === "null") return false;
       if (queryFiltros[k] === "undefined") return false;
-      console.log(queryFiltros, k);
       return !!queryFiltros[k].toString().trim();
     });
 

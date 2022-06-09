@@ -21,13 +21,11 @@ export default class ConfigsController {
   public async Config({ request, bouncer }: HttpContextContract) {
     const config = request.qs().pantalla;
     const queryFiltros = request.qs();
-
     if (!config) {
       return listadoVacio;
     }
     const conf = await SConf.query()
       .where("id_a", config)
-      .andWhere("id_tipo", 1)
       .preload("conf_permiso")
       .preload("tipo")
       .preload("orden")
@@ -38,12 +36,23 @@ export default class ConfigsController {
     // para listado
     if (!(await bouncer.allows("AccesoConf", conf))) return listadoVacio;
 
-    const listado = conf.sub_conf.find((sc) => sc.tipo.id === 2) as SConf;
-    try {
-      return armarListado(listado, conf, bouncer, queryFiltros);
-    } catch (err) {
-      console.log(err);
-      return err;
+    if (conf.tipo.id === 2) {
+      console.log("pidio Listado");
+      try {
+        return armarListado(conf, conf, bouncer, queryFiltros);
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
+    if (conf.tipo.id === 6) {
+      console.log("pidio Vista");
+      try {
+        return armarVista(conf, request.body().id, conf, bouncer);
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
     }
   }
 
