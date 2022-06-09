@@ -80,16 +80,18 @@ const extraerElementos = ({
 
     c.valores.forEach(async (val) => {
       //console.log(val.atributo[0].nombre, val.valor);
-      if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-        let lista = await Database.rawQuery(val.valor);
-        return (item[val.atributo[0].nombre] = lista[0]);
-      }
+      const atributoNombre = val.atributo[0].nombre;
 
       if (val.evaluar === "s") {
-        console.log("EVALUAME LOCOO");
+        val.valor = eval(val.valor);
       }
 
-      if (val.atributo[0].nombre === "radio_labels") {
+      if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
+        let lista = await Database.rawQuery(val.valor);
+        return (item[atributoNombre] = lista[0]);
+      }
+
+      if (atributoNombre === "radio_labels") {
         const opciones = val.valor.split("|").map((op, i) => {
           return {
             label: op.trim(),
@@ -99,7 +101,10 @@ const extraerElementos = ({
         item["radio_opciones"] = opciones;
       }
 
-      item[val.atributo[0].nombre] = val.valor;
+      if (atributoNombre === "enlace_id_a") {
+      }
+
+      item[atributoNombre] = val.valor;
     });
 
     item["sc_hijos"] = extraerElementos({
@@ -314,7 +319,6 @@ const aplicarFiltros = (
 
   if (where) {
     if (where.evaluar === "s") {
-      console.log(eval(where.valor), id, where.valor);
       return query.whereRaw(eval(where.valor));
     }
     query.whereRaw(where.valor);
@@ -403,7 +407,8 @@ export const armarVista = async (
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    let query = eval(modelo).query().where("id", id);
+    const tabla = getAtributo({ atributo: "tabla", conf: vista });
+    let query = eval(modelo).query().where(`${tabla}.id`, id);
 
     //aplicaSelects
     campos.forEach((campo) => {
