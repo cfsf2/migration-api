@@ -46,4 +46,14 @@ export default class FarmaciaServicio extends BaseModel {
     localKey: "id_servicio",
   })
   public servicio: HasOne<typeof Servicio>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

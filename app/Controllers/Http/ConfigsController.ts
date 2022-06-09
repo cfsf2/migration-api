@@ -20,6 +20,7 @@ const preloadRecursivo = (query) => {
 export default class ConfigsController {
   public async Config({ request, bouncer }: HttpContextContract) {
     const config = request.qs().pantalla;
+    const id = request.body().id;
     const queryFiltros = request.qs();
     if (!config) {
       return listadoVacio;
@@ -39,7 +40,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 2) {
       console.log("pidio Listado");
       try {
-        return armarListado(conf, conf, bouncer, queryFiltros);
+        return armarListado(conf, conf, bouncer, queryFiltros, id);
       } catch (err) {
         console.log(err);
         return err;
@@ -88,7 +89,13 @@ export default class ConfigsController {
 
       const listadosArmados = await Promise.all(
         listados.map(async (listado) => {
-          return await armarListado(listado, conf, bouncer, id_a_solicitados);
+          return await armarListado(
+            listado,
+            conf,
+            bouncer,
+            queryFiltros,
+            id_a_solicitados.id
+          );
         })
       );
 

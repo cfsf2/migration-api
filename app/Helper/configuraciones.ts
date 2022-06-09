@@ -5,9 +5,11 @@ import { DateTime } from "luxon";
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
+import FS from "App/Models/FarmaciaServicio";
 
 let Servicio = S;
 let Farmacia = F;
+let FarmaciaServicio = FS;
 
 const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   const sconfs_pedidos = conf
@@ -187,6 +189,16 @@ const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
   return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
 };
 
+const getFullAtributo = ({
+  atributo,
+  conf,
+}: {
+  atributo: string;
+  conf: SConf;
+}) => {
+  return conf.valores.find((v) => v.atributo[0].nombre === atributo);
+};
+
 const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
   return conf.valores.find((v) => v.atributo[0].id === id);
 };
@@ -293,14 +305,19 @@ const aplicaWhere = async (
 const aplicarFiltros = (
   query: DatabaseQueryBuilderContract,
   configuracion: SConf,
+  id?: number,
   queryFiltros?: {},
   filtros_e?: SConf[] // filtros para los que tiene permiso
 ) => {
   //aplica filtros obligatorios de configuracion
-  const where = getAtributo({ conf: configuracion, atributo: "where" });
+  const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where) {
-    query.whereRaw(where);
+    if (where.evaluar === "s") {
+      console.log(eval(where.valor), id, where.valor);
+      return query.whereRaw(eval(where.valor));
+    }
+    query.whereRaw(where.valor);
   }
 
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
@@ -324,7 +341,7 @@ const aplicarFiltros = (
     const filtros_solicitados_id_a = Object.keys(queryFiltros).filter((k) => {
       if (queryFiltros[k] === "null") return false;
       if (queryFiltros[k] === "undefined") return false;
-      return !!queryFiltros[k].toString().trim();
+      return !!queryFiltros[k]?.toString().trim();
     });
 
     filtros_solicitados_id_a.forEach((id_a) => {
@@ -381,7 +398,6 @@ export const armarVista = async (
   const groupsBy: gp[] = getGroupBy({ columnas, conf: vista });
   const order = getOrder(vista);
 
-  console.log(id, campos.length);
   if (campos.length !== 0 && id) {
     console.log("Vista ", vista.id_a, " buscando datos de id: ", id);
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
@@ -435,7 +451,8 @@ export const armarListado = async (
   listado: SConf,
   conf: SConf,
   bouncer: any,
-  queryFiltros: any
+  queryFiltros: any,
+  id: number
 ) => {
   let opciones = {};
   let opcionesPantalla = {};
@@ -517,7 +534,13 @@ export const armarListado = async (
 
     //aplicarFiltros
 
-    query = aplicarFiltros(query, listado, queryFiltros, filtros_aplicables);
+    query = aplicarFiltros(
+      query,
+      listado,
+      id,
+      queryFiltros,
+      filtros_aplicables
+    );
 
     sql = query.toQuery();
     // console.log("listado sql: ", sql);
@@ -531,8 +554,8 @@ export const armarListado = async (
     filtros,
     opciones,
     datos,
-    conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
     sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
+    conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
   };
 };
 
