@@ -33,6 +33,26 @@ const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   return sconf_habilitados;
 };
 
+const verificarPermisosHijos = async (conf: SConf, bouncer: any) => {
+  const sconfs_pedidos = conf.toJSON().sub_conf;
+
+  const sconf_habilitados = (
+    await Promise.all(
+      sconfs_pedidos.map(async (sc) => {
+        if (!(await bouncer.allows("AccesoConf", sc))) {
+          return false;
+        }
+
+        sc.sub_conf = await verificarPermisoConf(sc.sub_conf, bouncer);
+
+        return sc;
+      })
+    )
+  )?.filter((c) => c);
+
+  return sconf_habilitados;
+};
+
 const verificarPermisoConf = async (sub_confs, bouncer) => {
   const sc = (
     await Promise.all(
@@ -107,7 +127,8 @@ const extraerElementos = ({
         const conf = await SConf.findByOrFail("id_a", val.valor);
         const per = await bouncer.allows("AccesoConf", conf);
 
-        console.log(per, val.valor);
+        if (!per) return (item[atributoNombre] = undefined);
+        return (item["enlace_id_a"] = val.valor);
       }
 
       item[atributoNombre] = val.valor;
@@ -396,8 +417,8 @@ export const armarVista = async (
   opciones["orden"] = conf?.orden.find((o) => o.id_conf_h === vista?.id)?.orden;
   opciones["tipo"] = vista.tipo;
 
-  let columnas = await verificarPermisos(vista, bouncer, 4);
-  let enlaces = await verificarPermisos(vista, bouncer, 6);
+  let columnas = await verificarPermisosHijos(vista, bouncer);
+
   vistaFinal.cabeceras = extraerElementos({
     sc_hijos: columnas,
     sc_padre: vista,
@@ -505,11 +526,13 @@ export const armarListado = async (
   const cabeceras = extraerElementos({
     sc_hijos: columnas,
     sc_padre: listado,
+    bouncer,
   });
 
   const filtros = extraerElementos({
     sc_hijos: filtros_aplicables,
     sc_padre: listado,
+    bouncer,
   });
 
   if (campos.length !== 0) {
