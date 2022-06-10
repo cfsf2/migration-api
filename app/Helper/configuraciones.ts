@@ -10,6 +10,7 @@ import FS from "App/Models/FarmaciaServicio";
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
+let _SConf = SConf;
 
 const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   const sconfs_pedidos = conf
@@ -442,7 +443,7 @@ export const armarVista = async (
 
     //aplicaSelects
     campos.forEach((campo) => {
-      console.log(campo);
+      // console.log(campo);
       query.select(
         Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
       );
