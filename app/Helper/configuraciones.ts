@@ -438,8 +438,8 @@ export const armarVista = async (
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    const tabla = getAtributo({ atributo: "tabla", conf: vista });
-    let query = eval(modelo).query().where(`${tabla}.id`, id);
+    const parametro = getAtributo({ atributo: "parametro", conf: vista });
+    let query = eval(modelo).query().where(`${parametro}.id`, id);
 
     //aplicaSelects
     campos.forEach((campo) => {
