@@ -151,14 +151,64 @@ const getLeftJoins = ({
 }: {
   columnas: SConf[];
   conf: SConf;
-}): string[] => {
-  return getAtributosById([conf, columnas], 11);
+}): at[] => {
+  return getFullAtributosById([conf, columnas], 11);
 };
+
+interface at {
+  valor: string;
+  sql: string;
+  subquery: string;
+  evaluar: string;
+}
 
 interface gp {
   groupBy: string;
   having: string | undefined;
 }
+
+const getFullAtributosById = (
+  sconfs: (SConf | SConf[])[],
+  id: number
+): any[] => {
+  const sc = sconfs.flat(20);
+
+  let atributos: (at | at[])[] = [];
+
+  sc.forEach((conf) => {
+    let atributo = { valor: "", sql: "", evaluar: "", subquery: "" };
+
+    atributo.valor = conf?.valores
+      .find((v) => v.atributo[0].id === id)
+      ?.valor.trim() as string;
+    atributo.sql = conf?.valores
+      .find((v) => v.atributo[0].id === id)
+      ?.sql.trim() as string;
+    atributo.evaluar = conf?.valores
+      .find((v) => v.atributo[0].id === id)
+      ?.evaluar.trim() as string;
+    atributo.subquery = conf?.valores
+      .find((v) => v.atributo[0].id === id)
+      ?.subquery.trim() as string;
+
+    atributos.push(atributo);
+
+    if (conf.sub_conf.length > 0) {
+      atributos.push(getFullAtributosById(conf.sub_conf, id));
+    }
+  });
+
+  return Array.from(
+    new Set(
+      atributos
+        .flat(20)
+        .filter((c, i, a) => {
+          return a.findIndex((s) => s.valor === c.valor) === i;
+        })
+        .filter((c) => c.valor)
+    )
+  );
+};
 
 const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
   const sc = sconfs.flat(10);
@@ -431,7 +481,7 @@ export const armarVista = async (
   const modelo = getAtributo({ atributo: "modelo", conf: vista });
 
   const campos = getSelect([columnas], 7);
-  const leftJoins: string[] = getLeftJoins({ columnas, conf: vista });
+  const leftJoins = getLeftJoins({ columnas, conf: vista });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: vista });
   const order = getOrder(vista);
 
@@ -440,7 +490,7 @@ export const armarVista = async (
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    let query = eval(modelo).query().where(`${parametro}.id`, id);
+    let query = eval(modelo).query().where(`${parametro}`, id);
 
     //aplicaSelects
     campos.forEach((campo) => {
@@ -454,7 +504,10 @@ export const armarVista = async (
     // aplicarPreloads - left join
     if (leftJoins.length > 0) {
       leftJoins.forEach((leftJoin) => {
-        query.joinRaw(leftJoin);
+        if (leftJoin.evaluar === "s") {
+          return query.joinRaw(eval(leftJoin.valor));
+        }
+        query.joinRaw(leftJoin.valor);
       });
     }
     // aplicar groupsBy
@@ -522,7 +575,7 @@ export const armarListado = async (
     ?.toObject().valor;
 
   const campos = getSelect([columnas], 7);
-  const leftJoins: string[] = getLeftJoins({ columnas, conf: listado });
+  const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
   const order = getOrder(listado);
 
@@ -555,7 +608,10 @@ export const armarListado = async (
     // aplicarPreloads - left join
     if (leftJoins.length > 0) {
       leftJoins.forEach((leftJoin) => {
-        query.joinRaw(leftJoin);
+        if (leftJoin.evaluar === "s") {
+          return query.joinRaw(eval(leftJoin.valor));
+        }
+        query.joinRaw(leftJoin.valor);
       });
     }
     // aplicar groupsBy
