@@ -198,16 +198,10 @@ const getFullAtributosById = (
     }
   });
 
-  return Array.from(
-    new Set(
-      atributos
-        .flat(20)
-        .filter((c, i, a) => {
-          return a.findIndex((s) => s.valor === c.valor) === i;
-        })
-        .filter((c) => c.valor)
-    )
-  );
+  return [...new Set(atributos.flat(20).map((s) => JSON.stringify(s)))]
+    .map((s) => JSON.parse(s))
+    .flat(20)
+    .filter((c) => c.valor);
 };
 
 const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
