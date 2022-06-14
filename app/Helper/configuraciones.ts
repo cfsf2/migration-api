@@ -405,6 +405,8 @@ export const armarVista = async (
     cabeceras: [],
   };
 
+  const parametro = getAtributo({ atributo: "parametro", conf: vista });
+
   if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
   conf?.valores.forEach((val) => {
@@ -438,7 +440,6 @@ export const armarVista = async (
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    const parametro = getAtributo({ atributo: "parametro", conf: vista });
     let query = eval(modelo).query().where(`${parametro}.id`, id);
 
     //aplicaSelects
