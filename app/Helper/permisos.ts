@@ -81,3 +81,10 @@ export enum Permiso {
 
   INICIO = "INICIO",
 }
+
+export enum acciones {
+  alta = "alta",
+  baja = "baja",
+  modificar = "modificar",
+  ver = "ver",
+}

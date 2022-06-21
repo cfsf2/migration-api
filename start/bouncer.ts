@@ -10,6 +10,7 @@ import { Permiso } from "App/Helper/permisos";
 import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
+import { acciones } from "App/Helper/permisos";
 
 /*
 |--------------------------------------------------------------------------
@@ -90,7 +91,7 @@ export const { actions } = Bouncer.define(
   })
   .define(
     "AccesoConf",
-    async (usuario: Usuario, conf: SConf) => {
+    async (usuario: Usuario, conf: SConf, accion?: acciones) => {
       const clearanceLevel = conf.permiso;
       if (!clearanceLevel) {
         console.log("sin clearance");
@@ -98,32 +99,15 @@ export const { actions } = Bouncer.define(
       }
       switch (clearanceLevel) {
         case undefined:
-          // console.log("undefined", clearanceLevel, conf.permiso, conf.id_a);
           return false;
         case "t":
-          //  console.log("todos", clearanceLevel, conf.permiso, conf.id_a);
           return true;
         case "u":
-          // console.log(
-          //   "usuario logueado",
-          //   clearanceLevel,
-          //   conf.permiso,
-          //   conf.id_a,
-          //   usuario
-          // );
           if (usuario) return true;
-
           return false;
         case "n":
-          //console.log("nadie", clearanceLevel, conf.permiso, conf.id_a);
           return false;
         case "p":
-          // console.log(
-          //   "Con Permiso",
-          //   clearanceLevel,
-          //   conf.id_a,
-          //   conf.conf_permiso.permiso.nombre
-          // );
           const perfiles = await usuario
             .related("perfil")
             .query()
@@ -136,11 +120,6 @@ export const { actions } = Bouncer.define(
           });
 
           if (Array.isArray(conf.permiso)) {
-            // if (
-            //   permisos.some((p: { nombre: string }) =>
-            //     conf.conf_permiso.permiso.includes(p.nombre as Permiso)
-            //   )
-            // )
             return true;
             return false;
           }
@@ -150,12 +129,53 @@ export const { actions } = Bouncer.define(
               (p: { nombre: string }) =>
                 p.nombre === conf.conf_permiso.permiso.nombre
             ) !== -1
-          )
-            return true;
+          ) {
+            // Si solo hay un permiso por configuracion
+            if (accion === acciones.ver) {
+              return (async () => {
+                switch (conf.conf_permiso[accion]) {
+                  case "n":
+                    return false;
+                  case "t":
+                    return true;
+                  case "u":
+                    if (usuario) return true;
+                    return false;
+                  case "p":
+                    const perfiles = await usuario
+                      .related("perfil")
+                      .query()
+                      .preload("permisos");
+
+                    let permisosUsuario: any = [];
+
+                    perfiles.forEach((perfil) => {
+                      perfil.permisos.forEach((permiso) =>
+                        permisosUsuario.push(permiso)
+                      );
+                    });
+
+                    if (Array.isArray(conf.permiso)) {
+                      return true;
+                      return false;
+                    }
+
+                    if (
+                      permisosUsuario.findIndex(
+                        (p: { nombre: string }) =>
+                          p.nombre === conf.conf_permiso.permiso.nombre
+                      ) !== -1
+                    )
+                      return true;
+                  default:
+                    return Bouncer.deny("Acceso no autorizado", 401);
+                }
+              })();
+            }
+          }
 
           return Bouncer.deny("Acceso no autorizado", 401);
         default:
-          // console.log("default", clearanceLevel, conf.permiso, conf.id_a);
           return false;
       }
     },

@@ -6,11 +6,13 @@ import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
+import SCTPV from "App/Models/SConfTipoAtributoValor";
 
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
 let _SConf = SConf;
+let SConfTipoAtributoValor = SCTPV;
 
 const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   const sconfs_pedidos = conf
@@ -679,3 +681,43 @@ export interface vista {
   sql?: string;
   conf?: SConf;
 }
+
+export const modificar = async (id, valor, conf) => {
+  const tabla = getAtributo({ atributo: "update_tabla", conf });
+  const modelo = getAtributo({ atributo: "update_modelo", conf });
+
+  const campo = getAtributo({ atributo: "update_campo", conf });
+  const columna = getAtributo({ atributo: "update_id_nombre", conf });
+
+  if (modelo && campo) {
+    const registro = ((await eval(modelo).findOrFail(id)) as SConf).toJSON();
+
+    registro.merge({
+      [campo]: valor,
+    });
+
+    try {
+      await registro.save();
+      return { registroModificado: registro, modificado: true };
+    } catch (err) {
+      console.log(err);
+      return { registroModificado: err, modificado: false };
+    }
+  }
+
+  if (!modelo && tabla && campo && id) {
+    try {
+      const registro = await Database.rawQuery(
+        `UPDATE ${tabla} SET ${campo} = ${valor} WHERE ${
+          columna ? columna : "id"
+        } = ${id}`
+      );
+      return { registroModificado: registro, modificado: true };
+    } catch (err) {
+      return {
+        registroModificado: err,
+        modificado: false,
+      };
+    }
+  }
+};

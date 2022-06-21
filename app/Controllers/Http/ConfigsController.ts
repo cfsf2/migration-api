@@ -5,8 +5,10 @@ import {
   armarVista,
   listado,
   vista,
+  modificar,
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
+import { acciones } from "App/Helper/permisos";
 
 const preloadRecursivo = (query) => {
   return query
@@ -120,6 +122,24 @@ export default class ConfigsController {
       console.log(err);
       return err;
     }
+  }
+
+  public async Update({ request, response, bouncer }: HttpContextContract) {
+    const { valor, update_id, id_a } = request.params();
+
+    const config = await SConf.findByOrFail("id_a", id_a);
+
+    if (!config) return "No hay tal configuracion";
+
+    if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
+      return "No tiene permisos para esta config";
+
+    const res = await modificar(update_id, valor, config);
+
+    if (res?.modificado) {
+      return response.accepted(res?.registroModificado);
+    }
+    return res?.registroModificado;
   }
 }
 
