@@ -16,7 +16,6 @@ import {
 import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
-import Database from "@ioc:Adonis/Lucid/Database";
 import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
@@ -27,6 +26,7 @@ import {
   enumaBool,
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Usuario extends BaseModel {
   public static table = "tbl_usuario";
@@ -552,6 +552,7 @@ export default class Usuario extends BaseModel {
     const ap = this.apellido ? this.apellido : "";
     return this.nombre + " " + ap;
   }
+
   @column()
   public user_display_name: string;
 

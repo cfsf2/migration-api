@@ -6,11 +6,11 @@
  */
 
 import Bouncer from "@ioc:Adonis/Addons/Bouncer";
-import { Permiso } from "App/Helper/permisos";
+import { Permiso, acciones } from "App/Helper/permisos";
 import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
-import { acciones } from "App/Helper/permisos";
+import { arrayPermisos } from "App/Helper/funciones";
 
 /*
 |--------------------------------------------------------------------------
@@ -44,16 +44,7 @@ export const { actions } = Bouncer.define(
   .define(
     "AccesoRuta",
     async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
-      const perfiles = await usuario
-        .related("perfil")
-        .query()
-        .preload("permisos");
-
-      let permisos: any = [];
-
-      perfiles.forEach((perfil) => {
-        perfil.permisos.forEach((permiso) => permisos.push(permiso));
-      });
+      const permisos = await arrayPermisos(usuario);
 
       if (Array.isArray(permiso)) {
         if (
@@ -108,71 +99,20 @@ export const { actions } = Bouncer.define(
         case "n":
           return false;
         case "p":
-          const perfiles = await usuario
-            .related("perfil")
-            .query()
-            .preload("permisos");
-
-          let permisosUsuario: any = [];
-
-          perfiles.forEach((perfil) => {
-            perfil.permisos.forEach((permiso) => permisosUsuario.push(permiso));
-          });
-
           if (Array.isArray(conf.permiso)) {
             return true;
             return false;
           }
+
+          const permisosUsuario = await arrayPermisos(usuario);
 
           if (
             permisosUsuario.findIndex(
               (p: { nombre: string }) =>
                 p.nombre === conf.conf_permiso.permiso.nombre
             ) !== -1
-          ) {
-            // Si solo hay un permiso por configuracion
-            if (accion === acciones.ver) {
-              return (async () => {
-                switch (conf.conf_permiso[accion]) {
-                  case "n":
-                    return false;
-                  case "t":
-                    return true;
-                  case "u":
-                    if (usuario) return true;
-                    return false;
-                  case "p":
-                    const perfiles = await usuario
-                      .related("perfil")
-                      .query()
-                      .preload("permisos");
-
-                    let permisosUsuario: any = [];
-
-                    perfiles.forEach((perfil) => {
-                      perfil.permisos.forEach((permiso) =>
-                        permisosUsuario.push(permiso)
-                      );
-                    });
-
-                    if (Array.isArray(conf.permiso)) {
-                      return true;
-                      return false;
-                    }
-
-                    if (
-                      permisosUsuario.findIndex(
-                        (p: { nombre: string }) =>
-                          p.nombre === conf.conf_permiso.permiso.nombre
-                      ) !== -1
-                    )
-                      return true;
-                  default:
-                    return Bouncer.deny("Acceso no autorizado", 401);
-                }
-              })();
-            }
-          }
+          )
+            return true;
 
           return Bouncer.deny("Acceso no autorizado", 401);
         default:

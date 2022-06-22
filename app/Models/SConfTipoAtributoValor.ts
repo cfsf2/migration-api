@@ -6,6 +6,7 @@ import {
   HasOne,
   hasOne,
 } from "@ioc:Adonis/Lucid/Orm";
+import { DateTime } from "luxon";
 import SAtributo from "./SAtributo";
 import SConf from "./SConf";
 import STipoAtributo from "./STipoAtributo";
@@ -30,8 +31,21 @@ export default class SConfTipoAtributoValor extends BaseModel {
 
   @column()
   public sql: string;
+
   @column()
   public subquery: string;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
 
   @hasOne(() => SConf, {
     foreignKey: "id",

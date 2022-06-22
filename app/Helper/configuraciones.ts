@@ -7,6 +7,8 @@ import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
+import Usuario from "App/Models/Usuario";
+import { AccionCRUD, arrayPermisos, guardarDatosAuditoria } from "./funciones";
 
 let Servicio = S;
 let Farmacia = F;
@@ -91,10 +93,12 @@ const extraerElementos = ({
   sc_hijos,
   sc_padre,
   bouncer,
+  usuario,
 }: {
   sc_hijos: SConf[];
   sc_padre: SConf;
   bouncer: any;
+  usuario?: Usuario;
 }) => {
   return sc_hijos.map((c: SConf) => {
     let item = {};
@@ -141,6 +145,7 @@ const extraerElementos = ({
       sc_hijos: c.sub_conf,
       sc_padre: c,
       bouncer,
+      usuario,
     });
 
     return item;
@@ -260,6 +265,13 @@ const getAtributo = ({
   atributo: string;
   conf: SConf;
 }): string => {
+  if (!conf.valores) {
+    console.log(
+      "Configuracion no tiene valores?? No, te olvidaste los preload papu"
+    );
+    return "";
+  }
+
   return conf.valores.find((v) => {
     return v.atributo[0].nombre === atributo;
   })?.valor as string;
@@ -438,7 +450,8 @@ export const armarVista = async (
   vista: SConf,
   id: number,
   conf: SConf,
-  bouncer: any
+  bouncer: any,
+  usuario?: Usuario
 ): Promise<vista> => {
   let opciones = {};
   let datos = [];
@@ -472,6 +485,7 @@ export const armarVista = async (
     sc_hijos: columnas,
     sc_padre: vista,
     bouncer,
+    usuario,
   });
 
   const modelo = getAtributo({ atributo: "modelo", conf: vista });
@@ -539,7 +553,8 @@ export const armarListado = async (
   conf: SConf,
   bouncer: any,
   queryFiltros: any,
-  id: number
+  id: number,
+  usuario?: Usuario
 ) => {
   let opciones = {};
   let opcionesPantalla = {};
@@ -579,12 +594,14 @@ export const armarListado = async (
     sc_hijos: columnas,
     sc_padre: listado,
     bouncer,
+    usuario,
   });
 
   const filtros = extraerElementos({
     sc_hijos: filtros_aplicables,
     sc_padre: listado,
     bouncer,
+    usuario,
   });
 
   if (campos.length !== 0) {
@@ -682,7 +699,7 @@ export interface vista {
   conf?: SConf;
 }
 
-export const modificar = async (id, valor, conf) => {
+export const modificar = async (id, valor, conf, usuario) => {
   const tabla = getAtributo({ atributo: "update_tabla", conf });
   const modelo = getAtributo({ atributo: "update_modelo", conf });
 
@@ -690,15 +707,20 @@ export const modificar = async (id, valor, conf) => {
   const columna = getAtributo({ atributo: "update_id_nombre", conf });
 
   if (modelo && campo) {
-    const registro = ((await eval(modelo).findOrFail(id)) as SConf).toJSON();
+    const registro = await eval(modelo).findOrFail(id);
 
     registro.merge({
       [campo]: valor,
     });
 
     try {
+      guardarDatosAuditoria({
+        usuario,
+        objeto: registro,
+        accion: AccionCRUD.editar,
+      });
       await registro.save();
-      return { registroModificado: registro, modificado: true };
+      return { registroModificado: registro.toJSON(), modificado: true };
     } catch (err) {
       console.log(err);
       return { registroModificado: err, modificado: false };

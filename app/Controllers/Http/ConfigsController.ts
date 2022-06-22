@@ -59,7 +59,7 @@ export default class ConfigsController {
     }
   }
 
-  public async ConfigPantalla({ request, bouncer }: HttpContextContract) {
+  public async ConfigPantalla({ request, bouncer, auth }: HttpContextContract) {
     const config = request.params().pantalla;
 
     const id_a_solicitados = request.body(); // como hago para recibir varios ids para distintas vistas y como se a que vista corresponde cada id??
@@ -96,14 +96,21 @@ export default class ConfigsController {
             conf,
             bouncer,
             queryFiltros,
-            id_a_solicitados.id
+            id_a_solicitados.id,
+            auth.user
           );
         })
       );
 
       const vistasArmadas = await Promise.all(
         vistas.map(async (vista) => {
-          return armarVista(vista, id_a_solicitados.id, conf, bouncer);
+          return armarVista(
+            vista,
+            id_a_solicitados.id,
+            conf,
+            bouncer,
+            auth.user
+          );
         })
       );
 
@@ -124,17 +131,29 @@ export default class ConfigsController {
     }
   }
 
-  public async Update({ request, response, bouncer }: HttpContextContract) {
-    const { valor, update_id, id_a } = request.params();
+  public async Update({
+    request,
+    response,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
+    const { valor, update_id, id_a } = request.body();
 
-    const config = await SConf.findByOrFail("id_a", id_a);
+    const config = await SConf.query()
+      .where("id_a", id_a)
+      .preload("conf_permiso")
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => preloadRecursivo(query))
+      .firstOrFail();
 
     if (!config) return "No hay tal configuracion";
 
     if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
       return "No tiene permisos para esta config";
 
-    const res = await modificar(update_id, valor, config);
+    const res = await modificar(update_id, valor, config, auth.user);
 
     if (res?.modificado) {
       return response.accepted(res?.registroModificado);

@@ -4,4 +4,4 @@ Route.post("config/", "ConfigsController.Config");
 
 Route.post("pantalla/:pantalla", "ConfigsController.ConfigPantalla");
 
-Route.post("guardar", "ConfigController.Update");
+Route.post("guardar", "ConfigsController.Update");

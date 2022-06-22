@@ -84,6 +84,7 @@ export const guardarDatosAuditoria = ({
   objeto,
   accion,
 }: GuardarDatosAuditoria) => {
+  console.log(usuario);
   switch (accion) {
     case AccionCRUD.crear:
       objeto.merge({
@@ -101,4 +102,15 @@ export const guardarDatosAuditoria = ({
     default:
       break;
   }
+};
+
+export const arrayPermisos = async (usuario) => {
+  const perfiles = await usuario.related("perfil").query().preload("permisos");
+
+  let permisosUsuario: any = [];
+
+  perfiles.forEach((perfil) => {
+    perfil.permisos.forEach((permiso) => permisosUsuario.push(permiso));
+  });
+  return permisosUsuario;
 };
