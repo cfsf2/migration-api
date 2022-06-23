@@ -94,6 +94,19 @@ export default class SConf extends BaseModel {
   })
   public usuario_creacion: HasOne<typeof Usuario>;
 
+  public getAtributo({ atributo }: { atributo: string }): string {
+    if (!this.valores) {
+      console.log(
+        "Configuracion no tiene valores?? No, te olvidaste los preload papu"
+      );
+      return "";
+    }
+
+    return this.valores.find((v) => {
+      return v.atributo[0].nombre === atributo;
+    })?.valor as string;
+  }
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
     localKey: "id_usuario_modificacion",

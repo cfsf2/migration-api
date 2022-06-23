@@ -139,26 +139,65 @@ export default class ConfigsController {
   }: HttpContextContract) {
     const { valor, update_id, id_a } = request.body();
 
-    const config = await SConf.query()
-      .where("id_a", id_a)
-      .preload("conf_permiso")
-      .preload("tipo")
-      .preload("orden")
-      .preload("valores", (query) => query.preload("atributo"))
-      .preload("sub_conf", (query) => preloadRecursivo(query))
-      .firstOrFail();
+    try {
+      const usuario = await auth.authenticate();
 
-    if (!config) return "No hay tal configuracion";
+      const config = await SConf.query()
+        .where("id_a", id_a)
+        .preload("conf_permiso")
+        .preload("tipo")
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => preloadRecursivo(query))
+        .firstOrFail();
 
-    if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
-      return "No tiene permisos para esta config";
+      if (!config) return "No hay tal configuracion";
 
-    const res = await modificar(update_id, valor, config, auth.user);
+      if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
+        return "No tiene permisos para esta config";
 
-    if (res?.modificado) {
-      return response.accepted(res?.registroModificado);
+      const res = await modificar(update_id, valor, config, usuario);
+
+      if (res?.modificado) {
+        return response.accepted(res?.registroModificado);
+      }
+      return res?.registroModificado;
+    } catch (err) {
+      console.log(err);
+      return err;
     }
-    return res?.registroModificado;
+  }
+
+  public async Insert({
+    request,
+    response,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
+    const { valor, update_id, id_a } = request.body();
+
+    try {
+      const usuario = await auth.authenticate();
+
+      const config = await SConf.query()
+        .where("id_a", id_a)
+        .preload("conf_permiso")
+        .preload("tipo")
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => preloadRecursivo(query))
+        .firstOrFail();
+
+      if (!config) return "No hay tal configuracion";
+
+      if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
+        return "No tiene permisos para esta config";
+
+      return "Hiciste un Insert! --- bueno no";
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 }
 

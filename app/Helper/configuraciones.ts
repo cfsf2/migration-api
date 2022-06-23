@@ -464,7 +464,7 @@ export const armarVista = async (
     cabeceras: [],
   };
 
-  const parametro = getAtributo({ atributo: "parametro", conf: vista });
+  const parametro = vista.getAtributo({ atributo: "parametro" });
 
   if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
@@ -488,7 +488,7 @@ export const armarVista = async (
     usuario,
   });
 
-  const modelo = getAtributo({ atributo: "modelo", conf: vista });
+  const modelo = vista.getAtributo({ atributo: "modelo" });
 
   const campos = getSelect([columnas], 7);
   const leftJoins = getLeftJoins({ columnas, conf: vista });
@@ -699,7 +699,12 @@ export interface vista {
   conf?: SConf;
 }
 
-export const modificar = async (id, valor, conf, usuario) => {
+export const modificar = async (
+  id: number,
+  valor: any,
+  conf: SConf,
+  usuario: Usuario
+) => {
   const tabla = getAtributo({ atributo: "update_tabla", conf });
   const modelo = getAtributo({ atributo: "update_modelo", conf });
 
@@ -730,9 +735,9 @@ export const modificar = async (id, valor, conf, usuario) => {
   if (!modelo && tabla && campo && id) {
     try {
       const registro = await Database.rawQuery(
-        `UPDATE ${tabla} SET ${campo} = ${valor} WHERE ${
-          columna ? columna : "id"
-        } = ${id}`
+        `UPDATE ${tabla} SET ${campo} = ${valor}, id_usuario_modificacion = ${
+          usuario.id
+        } WHERE ${columna ? columna : "id"} = ${id}`
       );
       return { registroModificado: registro, modificado: true };
     } catch (err) {
@@ -742,4 +747,14 @@ export const modificar = async (id, valor, conf, usuario) => {
       };
     }
   }
+};
+
+export const insertar = (valor: any, conf: SConf, usuario: Usuario) => {
+  let tabla = conf.getAtributo({ atributo: "insert_tabla" });
+  if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
+
+  let modelo = getAtributo({ atributo: "insert_modelo", conf });
+  if (!modelo) modelo = getAtributo({ atributo: "update_modelo", conf });
+
+  let campo = getAtributo({ atributo: "update_campo", conf });
 };
