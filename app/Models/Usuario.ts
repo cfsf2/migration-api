@@ -29,6 +29,8 @@ import {
 import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Usuario extends BaseModel {
+  public Permisos: {};
+
   public static table = "tbl_usuario";
 
   static async traerPerfilDeUsuario({
@@ -553,7 +555,7 @@ export default class Usuario extends BaseModel {
     return this.nombre + " " + ap;
   }
 
-  public async Permisos() {
+  public async _Permisos() {
     const perfiles = await this.related("perfil").query().preload("permisos");
 
     let permisosUsuario: any = {};

@@ -105,6 +105,10 @@ const extraerElementos = ({
   return Promise.all(
     sc_hijos.map(async (sconf: SConf) => {
       let c = sconf;
+      let item = {};
+      item["orden"] =
+        sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+
       const condicionConf = getFullAtributo({
         atributo: "condicionConf",
         conf: c,
@@ -118,16 +122,15 @@ const extraerElementos = ({
           datos[0]?.$extras[
             getAtributo({ atributo: "condicionConf_alias", conf: c })
           ];
+
+        if (!resultadoCondicion) return;
+
         const sc = (await SConf.findByIda({
           id_a: resultadoCondicion,
         })) as SConf;
         console.log(resultadoCondicion);
         c = sc;
       }
-
-      let item = {};
-      item["orden"] =
-        sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
 
       item["id_a"] = c.id_a;
 
@@ -186,9 +189,11 @@ const extraerElementos = ({
 const getLeftJoins = ({
   columnas,
   conf,
+  usuario,
 }: {
   columnas: SConf[];
   conf: SConf;
+  usuario?: Usuario;
 }): at[] => {
   return getFullAtributosById([conf, columnas], 11);
 };
@@ -272,9 +277,11 @@ const getOrder = (conf: SConf): string[] | number[] => {
 const getGroupBy = ({
   columnas,
   conf,
+  usuario,
 }: {
   columnas: SConf[];
   conf: SConf;
+  usuario?: Usuario;
 }): gp[] => {
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
@@ -336,7 +343,11 @@ interface select {
   alias: string;
 }
 
-const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
+const getSelect = (
+  sc_confs: (SConf | SConf[])[],
+  id: number,
+  usuario?: Usuario
+) => {
   let selects: any[] = [];
   const confs = sc_confs.flat(20);
 
@@ -353,7 +364,11 @@ const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
 
     valoresSQL.forEach((v) => {
       let vselect: select = { campo: "", sql: "", alias: "" };
+
       vselect.campo = v.valor;
+      if (v.evaluar === "s") {
+        vselect.campo = eval(v.valor);
+      }
       vselect.sql = v.sql;
       vselect.alias = getAtributo({
         atributo: v.atributo[0].nombre.concat("_alias"),
@@ -364,7 +379,7 @@ const getSelect = (sc_confs: (SConf | SConf[])[], id: number) => {
     });
 
     if (conf.sub_conf.length > 0) {
-      selects.push(getSelect(conf.sub_conf, 7));
+      selects.push(getSelect(conf.sub_conf, 7, usuario));
     }
   });
   return Array.from(new Set(selects.flat(20).filter((c) => c.campo)));
@@ -514,9 +529,9 @@ export const armarVista = async (
 
   const modelo = vista.getAtributo({ atributo: "modelo" });
 
-  const campos = getSelect([columnas], 7);
-  const leftJoins = getLeftJoins({ columnas, conf: vista });
-  const groupsBy: gp[] = getGroupBy({ columnas, conf: vista });
+  const campos = getSelect([columnas], 7, usuario);
+  const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
+  const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
   const order = getOrder(vista);
 
   if (campos.length !== 0 && id) {
@@ -568,13 +583,15 @@ export const armarVista = async (
 
     vistaFinal.datos = await query;
 
-    vistaFinal.cabeceras = await extraerElementos({
-      sc_hijos: columnas,
-      sc_padre: vista,
-      bouncer,
-      usuario,
-      datos: vistaFinal.datos,
-    });
+    vistaFinal.cabeceras = (
+      await extraerElementos({
+        sc_hijos: columnas,
+        sc_padre: vista,
+        bouncer,
+        usuario,
+        datos: vistaFinal.datos,
+      })
+    ).filter((c) => c);
   }
 
   return vistaFinal;
