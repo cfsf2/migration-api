@@ -8,18 +8,17 @@ import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import Usuario from "App/Models/Usuario";
-import {
-  AccionCRUD,
-  arrayPermisos,
-  guardarDatosAuditoria,
-  Update,
-} from "./funciones";
+import U from "./Update";
+import I from "./Insertar";
 
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
+
+let Update = U;
+let Insertar = I;
 
 const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   const sconfs_pedidos = conf
@@ -769,10 +768,14 @@ export const modificar = async (
   usuario: Usuario
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
+  try {
+    if (!funcion) return Update.update({ usuario, id, valor, conf });
 
-  if (!funcion) return Update.update({ usuario, id, valor, conf });
-
-  return eval(funcion)({ usuario, id, valor, conf });
+    return eval(funcion)({ usuario, id, valor, conf });
+  } catch (err) {
+    console.log(err);
+    return err;
+  }
 };
 
 export const insertar = (valor: any, conf: SConf, usuario: Usuario) => {
