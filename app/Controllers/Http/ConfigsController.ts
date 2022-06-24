@@ -170,7 +170,7 @@ export default class ConfigsController {
     bouncer,
     auth,
   }: HttpContextContract) {
-    const { valor, valores, insert_ids, id_a } = request.body();
+    const { valor, insert_ids, id_a } = request.body();
 
     try {
       const usuario = await auth.authenticate();
@@ -189,7 +189,7 @@ export default class ConfigsController {
       if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
         return "No tiene permisos para esta config";
 
-      return insertar(valor, valores, config, usuario);
+      return insertar(valor, insert_ids, config, usuario);
     } catch (err) {
       console.log(err);
       return err;

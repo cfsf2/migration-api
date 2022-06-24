@@ -18,7 +18,7 @@ let SConfTipoAtributoValor = SCTPV;
 export class Insertar {
   constructor() {}
 
-  public static async insertar({ valor, valores, conf, usuario }) {
+  public static async insertar({ valor, insert_ids, conf, usuario }) {
     let tabla = conf.getAtributo({ atributo: "insert_tabla" });
     if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
@@ -30,12 +30,12 @@ export class Insertar {
     let campo = getAtributo({ atributo: "campo", conf });
     let camposArray = campos.split("|").map((c) => c.trim());
 
-    const valoresArray = valores.split("|").map((v) => v.trim());
+    const insert_idsArray = insert_ids.split("|").map((v) => v.trim());
 
-    if (modelo && valoresArray.length === 0) {
+    if (modelo && insert_idsArray.length === 0) {
       const objeto = {};
       objeto[campo] = valor;
-      valores.forEach((v, i) => (objeto[camposArray[i]] = v));
+      insert_ids.forEach((v, i) => (objeto[camposArray[i]] = v));
 
       try {
         const registro = new modelo();
@@ -56,13 +56,13 @@ export class Insertar {
         return { registroCreado: err, creado: false };
       }
     }
-    if (tabla && valores.length !== "") {
+    if (tabla && insert_ids.length !== "") {
       try {
         const registro = await Database.rawQuery(
           `INSERT IGNORE INTO ${tabla} (${campos.replace(
             "|",
             ","
-          )}) VALUES (${valores.replace("|", ",")})`
+          )}) VALUES (${insert_ids.replace("|", ",")})`
         );
         return { registroCreado: registro.toJSON(), creado: true };
       } catch (err) {
