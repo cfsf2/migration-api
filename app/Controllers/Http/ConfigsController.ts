@@ -169,7 +169,7 @@ export default class ConfigsController {
     bouncer,
     auth,
   }: HttpContextContract) {
-    const { valor, update_id, id_a } = request.body();
+    const { valores, id_a } = request.body();
 
     try {
       const usuario = await auth.authenticate();

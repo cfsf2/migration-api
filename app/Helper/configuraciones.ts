@@ -778,12 +778,8 @@ export const modificar = async (
   }
 };
 
-export const insertar = (valor: any, conf: SConf, usuario: Usuario) => {
-  let tabla = conf.getAtributo({ atributo: "insert_tabla" });
-  if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
+export const insertar = (valores: any, conf: SConf, usuario: Usuario) => {
+  const funcion = getAtributo({ atributo: "insert_funcion", conf });
 
-  let modelo = getAtributo({ atributo: "insert_modelo", conf });
-  if (!modelo) modelo = getAtributo({ atributo: "update_modelo", conf });
-
-  let campo = getAtributo({ atributo: "update_campo", conf });
+  if (!funcion) return Insertar.insertar({ valores, conf, usuario });
 };

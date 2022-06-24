@@ -18,14 +18,35 @@ let SConfTipoAtributoValor = SCTPV;
 export class Insertar {
   constructor() {}
 
-  public static insertar({ valores, conf }) {
-    const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
-    const modelo = getAtributo({ atributo: "update_modelo", conf: conf });
-    const campo = getAtributo({ atributo: "update_campo", conf: conf });
-    const columna = getAtributo({
-      atributo: "update_id_nombre",
-      conf: conf,
-    });
+  public static insertar({ valores, conf, usuario }) {
+    let tabla = conf.getAtributo({ atributo: "insert_tabla" });
+    if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
+
+    let modelo = getAtributo({ atributo: "insert_modelo", conf });
+    if (!modelo) modelo = getAtributo({ atributo: "update_modelo", conf });
+
+    let campos = getAtributo({ atributo: "insert_campos", conf });
+    let camposArray = campos.split("|").map((c) => c.trim());
+
+    const valoresArray = valores.split("|").map((v) => v.trim());
+
+    if (modelo && valoresArray.length === 0) {
+      const objeto = {};
+      valores.forEach((v, i) => (objeto[campos[i]] = v));
+    }
+    if (tabla && valores.length !== "") {
+      try {
+        Database.raw(
+          `INSERT IGNORE INTO ${tabla} (${campos.replace(
+            "|",
+            ","
+          )}) VALUES (${valores.replace("|", ",")})`
+        );
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
   }
 }
 
