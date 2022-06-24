@@ -8,7 +8,12 @@ import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import Usuario from "App/Models/Usuario";
-import { AccionCRUD, arrayPermisos, guardarDatosAuditoria } from "./funciones";
+import {
+  AccionCRUD,
+  arrayPermisos,
+  guardarDatosAuditoria,
+  Update,
+} from "./funciones";
 
 let Servicio = S;
 let Farmacia = F;
@@ -128,7 +133,7 @@ const extraerElementos = ({
         const sc = (await SConf.findByIda({
           id_a: resultadoCondicion,
         })) as SConf;
-        console.log(resultadoCondicion);
+
         c = sc;
       }
 
@@ -296,7 +301,7 @@ const getGroupBy = ({
   return Array.from(new Set(groupsBy.filter((c) => c.groupBy)));
 };
 
-const getAtributo = ({
+export const getAtributo = ({
   atributo,
   conf,
 }: {
@@ -365,6 +370,15 @@ const getSelect = (
     valoresSQL.forEach((v) => {
       let vselect: select = { campo: "", sql: "", alias: "" };
 
+      console.log(v.atributo[0].nombre);
+      if (v.atributo[0].nombre === "insert_ids") {
+        console.log(
+          getAtributo({
+            atributo: v.atributo[0].nombre.concat("_alias"),
+            conf,
+          })
+        );
+      }
       vselect.campo = v.valor;
       if (v.evaluar === "s") {
         vselect.campo = eval(v.valor);
@@ -754,48 +768,11 @@ export const modificar = async (
   conf: SConf,
   usuario: Usuario
 ) => {
-  const tabla = getAtributo({ atributo: "update_tabla", conf });
-  const modelo = getAtributo({ atributo: "update_modelo", conf });
+  const funcion = getAtributo({ atributo: "update_funcion", conf });
 
-  const campo = getAtributo({ atributo: "update_campo", conf });
-  const columna = getAtributo({ atributo: "update_id_nombre", conf });
+  if (!funcion) return Update.update({ usuario, id, valor, conf });
 
-  if (modelo && campo) {
-    const registro = await eval(modelo).findOrFail(id);
-
-    registro.merge({
-      [campo]: valor,
-    });
-
-    try {
-      guardarDatosAuditoria({
-        usuario,
-        objeto: registro,
-        accion: AccionCRUD.editar,
-      });
-      await registro.save();
-      return { registroModificado: registro.toJSON(), modificado: true };
-    } catch (err) {
-      console.log(err);
-      return { registroModificado: err, modificado: false };
-    }
-  }
-
-  if (!modelo && tabla && campo && id) {
-    try {
-      const registro = await Database.rawQuery(
-        `UPDATE ${tabla} SET ${campo} = ${valor}, id_usuario_modificacion = ${
-          usuario.id
-        } WHERE ${columna ? columna : "id"} = ${id}`
-      );
-      return { registroModificado: registro, modificado: true };
-    } catch (err) {
-      return {
-        registroModificado: err,
-        modificado: false,
-      };
-    }
-  }
+  return eval(funcion)({ usuario, id, valor, conf });
 };
 
 export const insertar = (valor: any, conf: SConf, usuario: Usuario) => {
