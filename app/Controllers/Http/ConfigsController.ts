@@ -174,7 +174,6 @@ export default class ConfigsController {
 
     try {
       const usuario = await auth.authenticate();
-
       const config = await SConf.query()
         .where("id_a", id_a)
         .preload("conf_permiso")
@@ -186,10 +185,15 @@ export default class ConfigsController {
 
       if (!config) return "No hay tal configuracion";
 
-      if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
+      if (!(await bouncer.allows("AccesoConf", config, acciones.alta)))
         return "No tiene permisos para esta config";
 
-      return insertar(valor, insert_ids, config, usuario);
+      const res = await insertar(valor, insert_ids, config, usuario);
+
+      if (res?.creado) {
+        return response.accepted(res?.registroCreado);
+      }
+      return res?.registroCreado;
     } catch (err) {
       console.log(err);
       return err;

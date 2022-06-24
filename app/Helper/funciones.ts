@@ -84,7 +84,6 @@ export const guardarDatosAuditoria = ({
   objeto,
   accion,
 }: GuardarDatosAuditoria) => {
-  console.log(usuario);
   switch (accion) {
     case AccionCRUD.crear:
       objeto.merge({

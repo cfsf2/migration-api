@@ -369,15 +369,6 @@ const getSelect = (
     valoresSQL.forEach((v) => {
       let vselect: select = { campo: "", sql: "", alias: "" };
 
-      console.log(v.atributo[0].nombre);
-      if (v.atributo[0].nombre === "insert_ids") {
-        console.log(
-          getAtributo({
-            atributo: v.atributo[0].nombre.concat("_alias"),
-            conf,
-          })
-        );
-      }
       vselect.campo = v.valor;
       if (v.evaluar === "s") {
         vselect.campo = eval(v.valor);

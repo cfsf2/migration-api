@@ -27,15 +27,18 @@ export class Insertar {
       modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
 
     let campos = getAtributo({ atributo: "insert_campos", conf });
-    let campo = getAtributo({ atributo: "campo", conf });
+    let campo = getAtributo({ atributo: "insert_campo", conf });
+    if (!campo) campo = getAtributo({ atributo: "update_campo", conf });
+
     let camposArray = campos.split("|").map((c) => c.trim());
 
     const insert_idsArray = insert_ids.split("|").map((v) => v.trim());
 
-    if (modelo && insert_idsArray.length === 0) {
+    if (modelo && insert_idsArray.length > 0) {
       const objeto = {};
       objeto[campo] = valor;
-      insert_ids.forEach((v, i) => (objeto[camposArray[i]] = v));
+
+      insert_idsArray.forEach((v, i) => (objeto[camposArray[i]] = v));
 
       try {
         const registro = new modelo();
@@ -50,21 +53,21 @@ export class Insertar {
 
         await registro.save();
 
-        return { registroCreado: registro.toJSON(), creado: true };
+        return { registroCreado: registro, creado: true };
       } catch (err) {
         console.log(err);
         return { registroCreado: err, creado: false };
       }
     }
-    if (tabla && insert_ids.length !== "") {
+    if (tabla && insert_ids !== "") {
       try {
         const registro = await Database.rawQuery(
           `INSERT IGNORE INTO ${tabla} (${campos.replace(
             "|",
             ","
-          )}) VALUES (${insert_ids.replace("|", ",")})`
+          )}, ${campo}) VALUES (${insert_ids.replace("|", ",")}, ${valor})`
         );
-        return { registroCreado: registro.toJSON(), creado: true };
+        return { registroCreado: registro, creado: true };
       } catch (err) {
         console.log(err);
         return { registroCreado: err, creado: false };
