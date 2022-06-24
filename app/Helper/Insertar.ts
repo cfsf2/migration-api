@@ -18,33 +18,56 @@ let SConfTipoAtributoValor = SCTPV;
 export class Insertar {
   constructor() {}
 
-  public static insertar({ valores, conf, usuario }) {
+  public static async insertar({ valor, valores, conf, usuario }) {
     let tabla = conf.getAtributo({ atributo: "insert_tabla" });
     if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-    let modelo = getAtributo({ atributo: "insert_modelo", conf });
-    if (!modelo) modelo = getAtributo({ atributo: "update_modelo", conf });
+    let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
+    if (!modelo)
+      modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
 
     let campos = getAtributo({ atributo: "insert_campos", conf });
+    let campo = getAtributo({ atributo: "campo", conf });
     let camposArray = campos.split("|").map((c) => c.trim());
 
     const valoresArray = valores.split("|").map((v) => v.trim());
 
     if (modelo && valoresArray.length === 0) {
       const objeto = {};
-      valores.forEach((v, i) => (objeto[campos[i]] = v));
+      objeto[campo] = valor;
+      valores.forEach((v, i) => (objeto[camposArray[i]] = v));
+
+      try {
+        const registro = new modelo();
+
+        registro.merge(objeto);
+
+        guardarDatosAuditoria({
+          usuario,
+          objeto: registro,
+          accion: AccionCRUD.crear,
+        });
+
+        await registro.save();
+
+        return { registroCreado: registro.toJSON(), creado: true };
+      } catch (err) {
+        console.log(err);
+        return { registroCreado: err, creado: false };
+      }
     }
     if (tabla && valores.length !== "") {
       try {
-        Database.raw(
+        const registro = await Database.rawQuery(
           `INSERT IGNORE INTO ${tabla} (${campos.replace(
             "|",
             ","
           )}) VALUES (${valores.replace("|", ",")})`
         );
+        return { registroCreado: registro.toJSON(), creado: true };
       } catch (err) {
         console.log(err);
-        return err;
+        return { registroCreado: err, creado: false };
       }
     }
   }

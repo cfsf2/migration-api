@@ -778,8 +778,15 @@ export const modificar = async (
   }
 };
 
-export const insertar = (valores: any, conf: SConf, usuario: Usuario) => {
+export const insertar = (
+  valor: any,
+  valores: any,
+  conf: SConf,
+  usuario: Usuario
+) => {
   const funcion = getAtributo({ atributo: "insert_funcion", conf });
 
-  if (!funcion) return Insertar.insertar({ valores, conf, usuario });
+  if (!funcion) return Insertar.insertar({ valor, valores, conf, usuario });
+
+  return eval(funcion)({ valor, valores, conf, usuario });
 };
