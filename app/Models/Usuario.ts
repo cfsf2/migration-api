@@ -553,6 +553,19 @@ export default class Usuario extends BaseModel {
     return this.nombre + " " + ap;
   }
 
+  public async Permisos() {
+    const perfiles = await this.related("perfil").query().preload("permisos");
+
+    let permisosUsuario: any = {};
+
+    perfiles.forEach((perfil) => {
+      perfil.permisos.forEach(
+        (permiso) => (permisosUsuario[permiso.nombre] = 1)
+      );
+    });
+    return permisosUsuario;
+  }
+
   @column()
   public user_display_name: string;
 

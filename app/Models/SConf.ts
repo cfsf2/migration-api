@@ -107,6 +107,27 @@ export default class SConf extends BaseModel {
     })?.valor as string;
   }
 
+  private static preloadRecursivo(query) {
+    return query
+      .preload("conf_permiso", (query) => query.preload("permiso"))
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => this.preloadRecursivo(query));
+  }
+
+  public static async findByIda({ id_a }) {
+    return (
+      await this.query()
+        .where("id_a", id_a)
+        .preload("conf_permiso", (query) => query.preload("permiso"))
+        .preload("tipo")
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => this.preloadRecursivo(query))
+    ).pop();
+  }
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
     localKey: "id_usuario_modificacion",

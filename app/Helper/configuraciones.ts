@@ -94,62 +94,93 @@ const extraerElementos = ({
   sc_padre,
   bouncer,
   usuario,
+  datos,
 }: {
   sc_hijos: SConf[];
   sc_padre: SConf;
   bouncer: any;
   usuario?: Usuario;
+  datos?: any[];
 }) => {
-  return sc_hijos.map((c: SConf) => {
-    let item = {};
-    item["orden"] =
-      sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+  return Promise.all(
+    sc_hijos.map(async (sconf: SConf) => {
+      let c = sconf;
+      const condicionConf = getFullAtributo({
+        atributo: "condicionConf",
+        conf: c,
+      });
 
-    item["id_a"] = c.id_a;
-
-    c.valores.forEach(async (val) => {
-      //console.log(val.atributo[0].nombre, val.valor);
-      const atributoNombre = val.atributo[0].nombre;
-
-      if (val.evaluar === "s") {
-        val.valor = eval(val.valor);
+      if (condicionConf) {
+        if (condicionConf.evaluar === "s") {
+          condicionConf.valor = eval(condicionConf.valor);
+        }
+        const resultadoCondicion =
+          datos[0]?.$extras[
+            getAtributo({ atributo: "condicionConf_alias", conf: c })
+          ];
+        const sc = (await SConf.findByIda({
+          id_a: resultadoCondicion,
+        })) as SConf;
+        console.log(resultadoCondicion);
+        c = sc;
       }
 
-      if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-        let lista = await Database.rawQuery(val.valor);
-        return (item[atributoNombre] = lista[0]);
-      }
+      let item = {};
+      item["orden"] =
+        sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
 
-      if (atributoNombre === "radio_labels") {
-        const opciones = val.valor.split("|").map((op, i) => {
-          return {
-            label: op.trim(),
-            value: i,
-          };
-        });
-        item["radio_opciones"] = opciones;
-      }
+      item["id_a"] = c.id_a;
 
-      if (atributoNombre === "enlace_id_a_opcional") {
-        const conf = await SConf.findByOrFail("id_a", val.valor);
-        const per = await bouncer.allows("AccesoConf", conf);
+      c.valores.forEach(async (val) => {
+        //console.log(val.atributo[0].nombre, val.valor);
+        const atributoNombre = val.atributo[0].nombre;
 
-        if (!per) return (item[atributoNombre] = undefined);
-        return (item["enlace_id_a"] = val.valor);
-      }
+        if (
+          atributoNombre.startsWith("update") &&
+          !atributoNombre.startsWith("update_id")
+        )
+          return (item[atributoNombre] = undefined);
 
-      item[atributoNombre] = val.valor;
-    });
+        if (val.evaluar === "s") {
+          val.valor = eval(val.valor);
+        }
 
-    item["sc_hijos"] = extraerElementos({
-      sc_hijos: c.sub_conf,
-      sc_padre: c,
-      bouncer,
-      usuario,
-    });
+        if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
+          let lista = await Database.rawQuery(val.valor);
+          return (item[atributoNombre] = lista[0]);
+        }
 
-    return item;
-  });
+        if (atributoNombre === "radio_labels") {
+          const opciones = val.valor.split("|").map((op, i) => {
+            return {
+              label: op.trim(),
+              value: i,
+            };
+          });
+          item["radio_opciones"] = opciones;
+        }
+
+        if (atributoNombre === "enlace_id_a_opcional") {
+          const conf = await SConf.findByOrFail("id_a", val.valor);
+          const per = await bouncer.allows("AccesoConf", conf);
+
+          if (!per) return (item[atributoNombre] = undefined);
+          return (item["enlace_id_a"] = val.valor);
+        }
+
+        item[atributoNombre] = val.valor;
+      });
+
+      item["sc_hijos"] = await extraerElementos({
+        sc_hijos: c.sub_conf,
+        sc_padre: c,
+        bouncer,
+        usuario,
+      });
+
+      return item;
+    })
+  );
 };
 
 const getLeftJoins = ({
@@ -481,13 +512,6 @@ export const armarVista = async (
 
   let columnas = await verificarPermisosHijos(vista, bouncer);
 
-  vistaFinal.cabeceras = extraerElementos({
-    sc_hijos: columnas,
-    sc_padre: vista,
-    bouncer,
-    usuario,
-  });
-
   const modelo = vista.getAtributo({ atributo: "modelo" });
 
   const campos = getSelect([columnas], 7);
@@ -543,6 +567,14 @@ export const armarVista = async (
     //await query.paginate(1, 15);
 
     vistaFinal.datos = await query;
+
+    vistaFinal.cabeceras = await extraerElementos({
+      sc_hijos: columnas,
+      sc_padre: vista,
+      bouncer,
+      usuario,
+      datos: vistaFinal.datos,
+    });
   }
 
   return vistaFinal;
@@ -590,14 +622,14 @@ export const armarListado = async (
   const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
   const order = getOrder(listado);
 
-  const cabeceras = extraerElementos({
+  const cabeceras = await extraerElementos({
     sc_hijos: columnas,
     sc_padre: listado,
     bouncer,
     usuario,
   });
 
-  const filtros = extraerElementos({
+  const filtros = await extraerElementos({
     sc_hijos: filtros_aplicables,
     sc_padre: listado,
     bouncer,

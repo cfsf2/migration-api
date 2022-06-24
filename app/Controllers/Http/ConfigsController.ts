@@ -61,8 +61,9 @@ export default class ConfigsController {
 
   public async ConfigPantalla({ request, bouncer, auth }: HttpContextContract) {
     const config = request.params().pantalla;
+    const usuario = await auth.authenticate();
 
-    const id_a_solicitados = request.body(); // como hago para recibir varios ids para distintas vistas y como se a que vista corresponde cada id??
+    const id_a_solicitados = request.body();
 
     const queryFiltros = request.qs(); // siempre undefined porque pasamos todo por post
 
@@ -97,20 +98,14 @@ export default class ConfigsController {
             bouncer,
             queryFiltros,
             id_a_solicitados.id,
-            auth.user
+            usuario
           );
         })
       );
 
       const vistasArmadas = await Promise.all(
         vistas.map(async (vista) => {
-          return armarVista(
-            vista,
-            id_a_solicitados.id,
-            conf,
-            bouncer,
-            auth.user
-          );
+          return armarVista(vista, id_a_solicitados.id, conf, bouncer, usuario);
         })
       );
 
