@@ -59,7 +59,7 @@ export class Insertar {
         return { registroCreado: err, creado: false };
       }
     }
-    if (tabla && insert_ids !== "") {
+    if (!modelo && tabla && insert_ids !== "") {
       try {
         const registro = await Database.rawQuery(
           `INSERT IGNORE INTO ${tabla} (${campos.replace(

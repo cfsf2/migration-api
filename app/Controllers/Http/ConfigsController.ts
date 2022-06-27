@@ -21,8 +21,9 @@ const preloadRecursivo = (query) => {
 };
 
 export default class ConfigsController {
-  public async Config({ request, bouncer }: HttpContextContract) {
+  public async Config({ request, bouncer, auth }: HttpContextContract) {
     const config = request.qs().pantalla;
+    const usuario = await auth.authenticate();
     const id = request.body().id;
     const queryFiltros = request.qs();
     if (!config) {
@@ -43,7 +44,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 2) {
       console.log("pidio Listado");
       try {
-        return armarListado(conf, conf, bouncer, queryFiltros, id);
+        return armarListado(conf, conf, bouncer, queryFiltros, id, usuario);
       } catch (err) {
         console.log(err);
         return err;
@@ -52,7 +53,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 6) {
       console.log("pidio Vista");
       try {
-        return armarVista(conf, request.body().id, conf, bouncer);
+        return armarVista(conf, id, conf, bouncer, usuario);
       } catch (err) {
         console.log(err);
         return err;
@@ -113,6 +114,7 @@ export default class ConfigsController {
       conf?.valores.forEach((val) => {
         respuesta.opciones[val.atributo[0].nombre] = val.valor;
       });
+      respuesta.opciones["id_a"] = conf.id_a;
 
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);

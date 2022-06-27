@@ -528,6 +528,7 @@ export const armarVista = async (
 
   opciones["orden"] = conf?.orden.find((o) => o.id_conf_h === vista?.id)?.orden;
   opciones["tipo"] = vista.tipo;
+  opciones["id_a"] = vista.id_a;
 
   let columnas = await verificarPermisosHijos(vista, bouncer);
 
