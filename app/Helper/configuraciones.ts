@@ -142,11 +142,11 @@ const extraerElementos = ({
         //console.log(val.atributo[0].nombre, val.valor);
         const atributoNombre = val.atributo[0].nombre;
 
-        if (
-          atributoNombre.startsWith("update") &&
-          !atributoNombre.startsWith("update_id")
-        )
-          return (item[atributoNombre] = undefined);
+        // if (
+        //   atributoNombre.startsWith("update") &&
+        //   !atributoNombre.startsWith("update_id")
+        // )
+        //   return (item[atributoNombre] = undefined);
 
         if (val.evaluar === "s") {
           val.valor = eval(val.valor);

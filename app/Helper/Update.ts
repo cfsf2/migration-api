@@ -37,13 +37,12 @@ export class Update {
     });
 
     if (modelo && campo) {
-      const registro = await eval(modelo).findOrFail(id);
-
-      registro.merge({
-        [campo]: valor,
-      });
-
       try {
+        const registro = await eval(modelo).findOrFail(id);
+
+        registro.merge({
+          [campo]: valor,
+        });
         guardarDatosAuditoria({
           usuario,
           objeto: registro,
@@ -52,8 +51,12 @@ export class Update {
         await registro.save();
         return { registroModificado: registro.toJSON(), modificado: true };
       } catch (err) {
-        console.log(err);
-        return { registroModificado: err, modificado: false };
+        console.log("update error", err);
+        return {
+          registroModificado: {},
+          modificado: false,
+          error: err.message,
+        };
       }
     }
 
@@ -67,33 +70,23 @@ export class Update {
         return { registroModificado: registro, modificado: true };
       } catch (err) {
         return {
-          registroModificado: err,
+          registroModificado: {},
           modificado: false,
+          error: err.message,
         };
       }
     }
   }
 
-  public static async updateYMensajear({}: {
-    usuario: Usuario;
-    id: any;
-    valor: string | number;
-    conf: SConf;
-  }) {
+  public static async error() {
     try {
-      console.log("MENSAJE MENSAJE");
-      console.log("MENSAJE MENSAJE");
-      console.log("MENSAJE MENSAJE");
-      console.log("MENSAJE MENSAJE");
-      console.log("MENSAJE MENSAJE");
-
-      return {
-        registroModificado: { mensaje: "Aca no pasa nada muchacho" },
-        modificado: true,
-      };
+      throw new Error("Nada de esto fue un error");
     } catch (err) {
-      console.log(err);
-      return { registroModificado: err, modificado: false };
+      return {
+        registroCreado: "Esto ha sido un error",
+        creado: false,
+        error: err.message,
+      };
     }
   }
 }

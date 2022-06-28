@@ -159,7 +159,7 @@ export default class ConfigsController {
       if (res?.modificado) {
         return response.accepted(res?.registroModificado);
       }
-      return res?.registroModificado;
+      return response.badRequest(res);
     } catch (err) {
       console.log(err);
       return err;
@@ -195,7 +195,7 @@ export default class ConfigsController {
       if (res?.creado) {
         return response.accepted(res?.registroCreado);
       }
-      return res?.registroCreado;
+      return response.badRequest(res);
     } catch (err) {
       console.log(err);
       return err;

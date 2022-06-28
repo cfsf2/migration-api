@@ -70,8 +70,20 @@ export class Insertar {
         return { registroCreado: registro, creado: true };
       } catch (err) {
         console.log(err);
-        return { registroCreado: err, creado: false };
+        return { registroCreado: err, creado: false, error: err.message };
       }
+    }
+  }
+
+  public static async error() {
+    try {
+      throw new Error("Nada de esto fue un error");
+    } catch (err) {
+      return {
+        registroCreado: "Esto ha sido un error",
+        creado: false,
+        error: err.message,
+      };
     }
   }
 }
