@@ -88,6 +88,7 @@ export default class ConfigsController {
 
     const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
     const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
+    const pantallas = conf.sub_conf.filter((sc) => sc.tipo.id === 1) as SConf[];
 
     try {
       const respuesta: respuesta = respuestaVacia;
@@ -111,14 +112,66 @@ export default class ConfigsController {
         })
       );
 
+      const pantallasArmadas = await Promise.all(
+        pantallas.map(async (pantalla) => {
+          const p = {
+            opciones: { id_a: pantalla.id_a, tipo: pantalla.tipo },
+            configuraciones: [],
+          };
+
+          const _listados = pantalla.sub_conf.filter(
+            (sc) => sc.tipo.id === 2
+          ) as SConf[];
+          const _vistas = pantalla.sub_conf.filter(
+            (sc) => sc.tipo.id === 6
+          ) as SConf[];
+
+          const _listadosArmados = await Promise.all(
+            _listados.map(async (listado) => {
+              return await armarListado(
+                listado,
+                conf,
+                bouncer,
+                queryFiltros,
+                id_a_solicitados.id,
+                usuario
+              );
+            })
+          );
+
+          const _vistasArmadas = await Promise.all(
+            _vistas.map(async (vista) => {
+              return armarVista(
+                vista,
+                id_a_solicitados.id,
+                conf,
+                bouncer,
+                usuario
+              );
+            })
+          );
+
+          pantalla?.valores.forEach((val) => {
+            p.opciones[val.atributo[0].nombre] = val.valor;
+          });
+          p.configuraciones = [];
+          p.configuraciones = p.configuraciones.concat(_listadosArmados);
+          p.configuraciones = p.configuraciones.concat(_vistasArmadas);
+
+          return p;
+        })
+      );
+
       conf?.valores.forEach((val) => {
         respuesta.opciones[val.atributo[0].nombre] = val.valor;
       });
+
       respuesta.opciones["id_a"] = conf.id_a;
 
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);
       configuraciones = configuraciones.concat(vistasArmadas);
+      configuraciones = configuraciones.concat(pantallasArmadas);
 
       respuesta.configuraciones = configuraciones;
 
