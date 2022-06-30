@@ -98,7 +98,7 @@ const extraerElementos = ({
   sc_padre,
   bouncer,
   usuario,
-  datos,
+  datos = [],
 }: {
   sc_hijos: SConf[];
   sc_padre: SConf;
@@ -107,86 +107,110 @@ const extraerElementos = ({
   datos?: any[];
 }) => {
   return Promise.all(
-    sc_hijos.map(async (sconf: SConf) => {
-      let c = sconf;
-      let item = {};
-      item["orden"] =
-        sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+    sc_hijos
+      .map(async (sconf: SConf) => {
+        let c = sconf;
+        let item = {};
+        item["orden"] =
+          sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
 
-      const condicionConf = getFullAtributo({
-        atributo: "condicionConf",
-        conf: c,
-      });
+        const condicionConf = getFullAtributo({
+          atributo: "condicionConf",
+          conf: c,
+        });
 
-      if (condicionConf) {
-        if (condicionConf.evaluar === "s") {
-          condicionConf.valor = eval(condicionConf.valor);
-        }
-        const resultadoCondicion =
-          datos[0]?.$extras[
-            getAtributo({ atributo: "condicionConf_alias", conf: c })
-          ];
+        if (condicionConf) {
+          if (condicionConf.evaluar === "s") {
+            condicionConf.valor = eval(condicionConf.valor);
+          }
+          const resultadoCondicion =
+            datos[0]?.$extras[
+              getAtributo({ atributo: "condicionConf_alias", conf: c })
+            ];
 
-        if (!resultadoCondicion) return;
+          if (!resultadoCondicion) return;
 
-        const sc = (await SConf.findByIda({
-          id_a: resultadoCondicion,
-        })) as SConf;
+          const sc = (await SConf.findByIda({
+            id_a: resultadoCondicion,
+          })) as SConf;
 
-        c = sc;
-      }
-
-      item["id_a"] = c.id_a;
-
-      c.valores.forEach(async (val) => {
-        //console.log(val.atributo[0].nombre, val.valor);
-        const atributoNombre = val.atributo[0].nombre;
-
-        // if (
-        //   atributoNombre.startsWith("update") &&
-        //   !atributoNombre.startsWith("update_id")
-        // )
-        //   return (item[atributoNombre] = undefined);
-
-        if (val.evaluar === "s") {
-          val.valor = eval(val.valor);
+          c = sc;
         }
 
-        if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-          let lista = await Database.rawQuery(val.valor);
-          return (item[atributoNombre] = lista[0]);
-        }
+        item["id_a"] = c.id_a;
 
-        if (atributoNombre === "radio_labels") {
-          const opciones = val.valor.split("|").map((op, i) => {
-            return {
-              label: op.trim(),
-              value: i,
-            };
-          });
-          item["radio_opciones"] = opciones;
-        }
+        await Promise.all(
+          c.valores.map(async (val) => {
+            //console.log(val.atributo[0].nombre, val.valor);
+            const atributoNombre = val.atributo[0].nombre;
 
-        if (atributoNombre === "enlace_id_a_opcional") {
-          const conf = await SConf.findByOrFail("id_a", val.valor);
-          const per = await bouncer.allows("AccesoConf", conf);
+            // if (
+            //   atributoNombre.startsWith("update") &&
+            //   !atributoNombre.startsWith("update_id")
+            // )
+            //   return (item[atributoNombre] = undefined);
 
-          if (!per) return (item[atributoNombre] = undefined);
-          return (item["enlace_id_a"] = val.valor);
-        }
+            if (val.evaluar === "s") {
+              val.valor = eval(val.valor);
+            }
 
-        item[atributoNombre] = val.valor;
-      });
+            if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
+              let lista = await Database.rawQuery(val.valor);
 
-      item["sc_hijos"] = await extraerElementos({
-        sc_hijos: c.sub_conf,
-        sc_padre: c,
-        bouncer,
-        usuario,
-      });
+              val.valor = lista[0];
+            }
 
-      return item;
-    })
+            if (atributoNombre === "opciones") {
+              const label_null = getAtributo({
+                atributo: "select_label_null",
+                conf: c,
+              });
+              const value_null = getAtributo({
+                atributo: "select_value_null",
+                conf: c,
+              });
+
+              if (label_null || value_null) {
+                const opcion_null = {
+                  value: value_null ? value_null : null,
+                  label: label_null ? label_null : "Ninguno",
+                };
+
+                if (Array.isArray(val.valor)) val.valor.push(opcion_null);
+              }
+            }
+
+            if (atributoNombre === "radio_labels") {
+              const opciones = val.valor.split("|").map((op, i) => {
+                return {
+                  label: op.trim(),
+                  value: i,
+                };
+              });
+              item["radio_opciones"] = opciones;
+            }
+
+            if (atributoNombre === "enlace_id_a_opcional") {
+              const conf = await SConf.findByOrFail("id_a", val.valor);
+              const per = await bouncer.allows("AccesoConf", conf);
+
+              if (!per) return (item[atributoNombre] = undefined);
+              return (item["enlace_id_a"] = val.valor);
+            }
+            item[atributoNombre] = val.valor;
+          })
+        );
+
+        item["sc_hijos"] = await extraerElementos({
+          sc_hijos: c.sub_conf,
+          sc_padre: c,
+          bouncer,
+          usuario,
+        });
+
+        return item;
+      })
+      .filter((c) => c)
   );
 };
 
@@ -644,20 +668,6 @@ export const armarListado = async (
   const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
   const order = getOrder(listado);
 
-  const cabeceras = await extraerElementos({
-    sc_hijos: columnas,
-    sc_padre: listado,
-    bouncer,
-    usuario,
-  });
-
-  const filtros = await extraerElementos({
-    sc_hijos: filtros_aplicables,
-    sc_padre: listado,
-    bouncer,
-    usuario,
-  });
-
   if (campos.length !== 0) {
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
     // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
@@ -711,6 +721,22 @@ export const armarListado = async (
 
     datos = await query;
   }
+
+  const cabeceras = await extraerElementos({
+    sc_hijos: columnas,
+    sc_padre: listado,
+    bouncer,
+    usuario,
+    datos,
+  });
+
+  const filtros = await extraerElementos({
+    sc_hijos: filtros_aplicables,
+    sc_padre: listado,
+    bouncer,
+    usuario,
+    datos,
+  });
 
   return {
     cabeceras,
