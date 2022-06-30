@@ -114,7 +114,10 @@ export default class ConfigsController {
 
       const pantallasArmadas = await Promise.all(
         pantallas.map(async (pantalla) => {
-          const p = {
+          const p: {
+            opciones: {};
+            configuraciones: any[];
+          } = {
             opciones: { id_a: pantalla.id_a, tipo: pantalla.tipo },
             configuraciones: [],
           };
