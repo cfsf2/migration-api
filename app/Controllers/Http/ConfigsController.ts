@@ -130,7 +130,7 @@ export default class ConfigsController {
             _listados.map(async (listado) => {
               return await armarListado(
                 listado,
-                conf,
+                pantalla,
                 bouncer,
                 queryFiltros,
                 id_a_solicitados.id,
@@ -144,16 +144,17 @@ export default class ConfigsController {
               return armarVista(
                 vista,
                 id_a_solicitados.id,
-                conf,
+                pantalla,
                 bouncer,
                 usuario
               );
             })
           );
 
-          pantalla?.valores.forEach((val) => {
-            p.opciones[val.atributo[0].nombre] = val.valor;
-          });
+          p.opciones["orden"] = conf?.orden.find(
+            (o) => o.id_conf_h === pantalla?.id
+          )?.orden;
+
           p.configuraciones = [];
           p.configuraciones = p.configuraciones.concat(_listadosArmados);
           p.configuraciones = p.configuraciones.concat(_vistasArmadas);
