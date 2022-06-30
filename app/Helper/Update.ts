@@ -61,9 +61,13 @@ export class Update {
     }
 
     if (!modelo && tabla && campo && id) {
+      const s = "`";
+
       try {
         const registro = await Database.rawQuery(
-          `UPDATE ${tabla} SET ${campo} = ${valor}, id_usuario_modificacion = ${
+          `UPDATE ${tabla} SET ${s
+            .concat(campo)
+            .concat(s)} = '${valor}', id_usuario_modificacion = ${
             usuario.id
           } WHERE ${columna ? columna : "id"} = ${id}`
         );
