@@ -61,7 +61,12 @@ export default class ConfigsController {
     }
   }
 
-  public async ConfigPantalla({ request, bouncer, auth }: HttpContextContract) {
+  public async ConfigPantalla({
+    request,
+    response,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
     const config = request.params().pantalla;
     const usuario = await auth.authenticate();
 
@@ -88,7 +93,9 @@ export default class ConfigsController {
 
     const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
     const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
-    const pantallas = conf.sub_conf.filter((sc) => sc.tipo.id === 1) as SConf[];
+    const contenedores = conf.sub_conf.filter(
+      (sc) => sc.tipo.id === 7
+    ) as SConf[];
 
     try {
       const respuesta: respuesta = respuestaVacia;
@@ -112,8 +119,8 @@ export default class ConfigsController {
         })
       );
 
-      const pantallasArmadas = await Promise.all(
-        pantallas.map(async (pantalla) => {
+      const contenedoresArmadas = await Promise.all(
+        contenedores.map(async (pantalla) => {
           const p: {
             opciones: {};
             configuraciones: any[];
@@ -175,14 +182,14 @@ export default class ConfigsController {
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);
       configuraciones = configuraciones.concat(vistasArmadas);
-      configuraciones = configuraciones.concat(pantallasArmadas);
+      configuraciones = configuraciones.concat(contenedoresArmadas);
 
       respuesta.configuraciones = configuraciones;
 
       return respuesta;
     } catch (err) {
       console.log(err);
-      return err;
+      return response.badRequest(err);
     }
   }
 
@@ -219,7 +226,7 @@ export default class ConfigsController {
       return response.badRequest(res);
     } catch (err) {
       console.log(err);
-      return err;
+      return response.badRequest(err);
     }
   }
 
