@@ -59,6 +59,53 @@ export default class ConfigsController {
         return err;
       }
     }
+    if (conf.tipo.id === 7) {
+      console.log("Pidio contenedor", config);
+      let contenedor = conf;
+      const p: {
+        opciones: {};
+        configuraciones: any[];
+      } = {
+        opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
+        configuraciones: [],
+      };
+
+      const _listados = contenedor.sub_conf.filter(
+        (sc) => sc.tipo.id === 2
+      ) as SConf[];
+      const _vistas = contenedor.sub_conf.filter(
+        (sc) => sc.tipo.id === 6
+      ) as SConf[];
+
+      const _listadosArmados = await Promise.all(
+        _listados.map(async (listado) => {
+          return await armarListado(
+            listado,
+            contenedor,
+            bouncer,
+            queryFiltros,
+            id,
+            usuario
+          );
+        })
+      );
+
+      const _vistasArmadas = await Promise.all(
+        _vistas.map(async (vista) => {
+          return armarVista(vista, id, contenedor, bouncer, usuario);
+        })
+      );
+
+      p.opciones["orden"] = conf?.orden.find(
+        (o) => o.id_conf_h === contenedor?.id
+      )?.orden;
+
+      p.configuraciones = [];
+      p.configuraciones = p.configuraciones.concat(_listadosArmados);
+      p.configuraciones = p.configuraciones.concat(_vistasArmadas);
+
+      return p;
+    }
   }
 
   public async ConfigPantalla({
@@ -120,19 +167,19 @@ export default class ConfigsController {
       );
 
       const contenedoresArmadas = await Promise.all(
-        contenedores.map(async (pantalla) => {
+        contenedores.map(async (contenedor) => {
           const p: {
             opciones: {};
             configuraciones: any[];
           } = {
-            opciones: { id_a: pantalla.id_a, tipo: pantalla.tipo },
+            opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
             configuraciones: [],
           };
 
-          const _listados = pantalla.sub_conf.filter(
+          const _listados = contenedor.sub_conf.filter(
             (sc) => sc.tipo.id === 2
           ) as SConf[];
-          const _vistas = pantalla.sub_conf.filter(
+          const _vistas = contenedor.sub_conf.filter(
             (sc) => sc.tipo.id === 6
           ) as SConf[];
 
@@ -140,7 +187,7 @@ export default class ConfigsController {
             _listados.map(async (listado) => {
               return await armarListado(
                 listado,
-                pantalla,
+                contenedor,
                 bouncer,
                 queryFiltros,
                 id_a_solicitados.id,
@@ -154,7 +201,7 @@ export default class ConfigsController {
               return armarVista(
                 vista,
                 id_a_solicitados.id,
-                pantalla,
+                contenedor,
                 bouncer,
                 usuario
               );
@@ -162,7 +209,7 @@ export default class ConfigsController {
           );
 
           p.opciones["orden"] = conf?.orden.find(
-            (o) => o.id_conf_h === pantalla?.id
+            (o) => o.id_conf_h === contenedor?.id
           )?.orden;
 
           p.configuraciones = [];
@@ -273,9 +320,9 @@ const respuestaVacia: respuesta = {
 };
 
 const listadoVacio: listado = {
-  datos: [],
-  cabeceras: [],
-  filtros: [],
+  datos: [{}],
+  cabeceras: [{}],
+  filtros: [{}],
   opciones: {},
 };
 

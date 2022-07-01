@@ -20,6 +20,12 @@ export default class FarmaciaServicio extends BaseModel {
   public ts_modificacion: DateTime;
 
   @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column()
   public id_farmacia: Number;
 
   @column()
@@ -27,11 +33,13 @@ export default class FarmaciaServicio extends BaseModel {
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_creacion",
   })
   public usuario_creacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
+    localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
 

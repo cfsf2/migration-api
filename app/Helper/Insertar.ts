@@ -32,7 +32,10 @@ export class Insertar {
 
     let camposArray = campos.split("|").map((c) => c.trim());
 
-    const insert_idsArray = insert_ids.split("|").map((v) => v.trim());
+    const insert_idsArray = insert_ids
+      .toString()
+      .split("|")
+      .map((v) => v.trim());
 
     if (modelo && insert_idsArray.length > 0) {
       const objeto = {};

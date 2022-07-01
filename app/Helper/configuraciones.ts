@@ -528,7 +528,7 @@ export const armarVista = async (
   usuario?: Usuario
 ): Promise<vista> => {
   let opciones = {};
-  let datos = [];
+  let datos = [{}];
   let sql = "";
 
   let vistaFinal: vista = {
@@ -611,17 +611,16 @@ export const armarVista = async (
     //await query.paginate(1, 15);
 
     vistaFinal.datos = await query;
-
-    vistaFinal.cabeceras = (
-      await extraerElementos({
-        sc_hijos: columnas,
-        sc_padre: vista,
-        bouncer,
-        usuario,
-        datos: vistaFinal.datos,
-      })
-    ).filter((c) => c);
   }
+  vistaFinal.cabeceras = (
+    await extraerElementos({
+      sc_hijos: columnas,
+      sc_padre: vista,
+      bouncer,
+      usuario,
+      datos: vistaFinal.datos,
+    })
+  ).filter((c) => c);
 
   return vistaFinal;
 };
