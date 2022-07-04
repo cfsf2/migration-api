@@ -99,12 +99,14 @@ const extraerElementos = ({
   bouncer,
   usuario,
   datos = [],
+  id,
 }: {
   sc_hijos: SConf[];
   sc_padre: SConf;
   bouncer: any;
   usuario?: Usuario;
   datos?: any[];
+  id?: number;
 }) => {
   return Promise.all(
     sc_hijos
@@ -152,6 +154,7 @@ const extraerElementos = ({
 
             if (val.evaluar === "s") {
               val.valor = eval(val.valor);
+              console.log(val.valor);
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
@@ -169,11 +172,16 @@ const extraerElementos = ({
                 atributo: "select_value_null",
                 conf: c,
               });
+              const disabled = getAtributo({
+                atributo: "select_default_disabled",
+                conf: c,
+              });
 
               if (label_null || value_null) {
                 const opcion_null = {
                   value: value_null ? value_null : null,
                   label: label_null ? label_null : "Ninguno",
+                  disabled: disabled === "true",
                 };
 
                 if (Array.isArray(val.valor)) val.valor.push(opcion_null);
@@ -538,6 +546,8 @@ export const armarVista = async (
     cabeceras: [],
   };
 
+  console.log("vino este id ", id);
+
   const parametro = vista.getAtributo({ atributo: "parametro" });
 
   if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
@@ -619,6 +629,7 @@ export const armarVista = async (
       bouncer,
       usuario,
       datos: vistaFinal.datos,
+      id,
     })
   ).filter((c) => c);
 
@@ -727,6 +738,7 @@ export const armarListado = async (
     bouncer,
     usuario,
     datos,
+    id,
   });
 
   const filtros = await extraerElementos({
@@ -735,6 +747,7 @@ export const armarListado = async (
     bouncer,
     usuario,
     datos,
+    id,
   });
 
   return {
