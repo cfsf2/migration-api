@@ -64,11 +64,25 @@ export class Insertar {
     }
     if (!modelo && tabla && insert_ids !== "") {
       try {
+        const onDuplicateUpdate = (() => {
+          let duplicateUpdate = "";
+          camposArray.forEach((c, i) => {
+            duplicateUpdate = duplicateUpdate.concat(
+              `${c} = ${insert_idsArray[i]},`
+            );
+          });
+          duplicateUpdate = duplicateUpdate.concat(`${campo} = ${valor}`);
+          return duplicateUpdate;
+        })();
+
         const registro = await Database.rawQuery(
           `INSERT IGNORE INTO ${tabla} (${campos.replace(
             "|",
             ","
-          )}, ${campo}) VALUES (${insert_ids.replace("|", ",")}, ${valor})`
+          )}, ${campo}) VALUES (${insert_ids.replace("|", ",")}, ${valor}) 
+          ON DUPLICATE KEY UPDATE
+          ${onDuplicateUpdate}
+          `
         );
         return { registroCreado: registro, creado: true };
       } catch (err) {
