@@ -7,6 +7,7 @@ import {
   vista,
   modificar,
   insertar,
+  eliminar,
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones } from "App/Helper/permisos";
@@ -305,6 +306,42 @@ export default class ConfigsController {
 
       if (res?.creado) {
         return response.accepted(res?.registroCreado);
+      }
+      return response.badRequest(res);
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
+  }
+
+  public async Delete({
+    request,
+    response,
+    bouncer,
+    auth,
+  }: HttpContextContract) {
+    const { id_a, delete_id } = request.body();
+
+    try {
+      const usuario = await auth.authenticate();
+      const config = await SConf.query()
+        .where("id_a", id_a)
+        .preload("conf_permiso")
+        .preload("tipo")
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => preloadRecursivo(query))
+        .firstOrFail();
+
+      if (!config) return "No hay tal configuracion";
+
+      if (!(await bouncer.allows("AccesoConf", config, acciones.baja)))
+        return "No tiene permisos para esta config";
+
+      const res = await eliminar(delete_id, config, usuario);
+
+      if (res?.eliminado) {
+        return response.accepted(res?.registroEliminado);
       }
       return response.badRequest(res);
     } catch (err) {

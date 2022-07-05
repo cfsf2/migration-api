@@ -10,6 +10,7 @@ import SCTPV from "App/Models/SConfTipoAtributoValor";
 import Usuario from "App/Models/Usuario";
 import U from "./Update";
 import I from "./Insertar";
+import D from "./Eliminar";
 
 let Servicio = S;
 let Farmacia = F;
@@ -19,6 +20,7 @@ let SConfTipoAtributoValor = SCTPV;
 
 let Update = U;
 let Insertar = I;
+let Eliminar = D;
 
 const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
   const sconfs_pedidos = conf
@@ -572,68 +574,74 @@ export const armarVista = async (
   const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
   const order = getOrder(vista);
+  try {
+    if (campos.length !== 0 && id) {
+      console.log("Vista ", vista.id_a, " buscando datos de id: ", id);
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      let query = eval(modelo).query().where(`${parametro}`, id);
 
-  if (campos.length !== 0 && id) {
-    console.log("Vista ", vista.id_a, " buscando datos de id: ", id);
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    let query = eval(modelo).query().where(`${parametro}`, id);
-
-    //aplicaSelects
-    campos.forEach((campo) => {
-      // console.log(campo);
-      query.select(
-        Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
-      );
-      //console.log(query.toSQL().sql);
-    });
-
-    // aplicarPreloads - left join
-    if (leftJoins.length > 0) {
-      leftJoins.forEach((leftJoin) => {
-        if (leftJoin.evaluar === "s") {
-          return query.joinRaw(eval(leftJoin.valor));
-        }
-        query.joinRaw(leftJoin.valor);
+      //aplicaSelects
+      campos.forEach((campo) => {
+        // console.log(campo);
+        query.select(
+          Database.raw(
+            `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
+          )
+        );
+        //console.log(query.toSQL().sql);
       });
+
+      // aplicarPreloads - left join
+      if (leftJoins.length > 0) {
+        leftJoins.forEach((leftJoin) => {
+          if (leftJoin.evaluar === "s") {
+            return query.joinRaw(eval(leftJoin.valor));
+          }
+          query.joinRaw(leftJoin.valor);
+        });
+      }
+      // aplicar groupsBy
+      if (groupsBy.length > 0) {
+        groupsBy.forEach(({ groupBy, having }) => {
+          query.groupBy(groupBy);
+          if (having) query.having(having);
+        });
+      }
+      // aplicar order del listado
+      if (order.length > 0) {
+        order.forEach((order) => {
+          query.orderBy(order, "desc");
+        });
+      }
+
+      //aplicarFiltros
+
+      query = aplicarFiltros(query, vista);
+
+      vistaFinal.sql = query.toQuery();
+      // console.log("vista sql: ", vistaFinal.sql);
+      //await query.paginate(1, 15);
+
+      vistaFinal.datos = await query;
     }
-    // aplicar groupsBy
-    if (groupsBy.length > 0) {
-      groupsBy.forEach(({ groupBy, having }) => {
-        query.groupBy(groupBy);
-        if (having) query.having(having);
-      });
-    }
-    // aplicar order del listado
-    if (order.length > 0) {
-      order.forEach((order) => {
-        query.orderBy(order, "desc");
-      });
-    }
+    vistaFinal.cabeceras = (
+      await extraerElementos({
+        sc_hijos: columnas,
+        sc_padre: vista,
+        bouncer,
+        usuario,
+        datos: vistaFinal.datos,
+        id,
+      })
+    ).filter((c) => c);
 
-    //aplicarFiltros
-
-    query = aplicarFiltros(query, vista);
-
-    vistaFinal.sql = query.toQuery();
-    // console.log("vista sql: ", vistaFinal.sql);
-    //await query.paginate(1, 15);
-
-    vistaFinal.datos = await query;
+    return vistaFinal;
+  } catch (err) {
+    console.log(err);
+    return err;
   }
-  vistaFinal.cabeceras = (
-    await extraerElementos({
-      sc_hijos: columnas,
-      sc_padre: vista,
-      bouncer,
-      usuario,
-      datos: vistaFinal.datos,
-      id,
-    })
-  ).filter((c) => c);
-
-  return vistaFinal;
 };
 
 export const armarListado = async (
@@ -678,86 +686,93 @@ export const armarListado = async (
   const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
   const order = getOrder(listado);
 
-  if (campos.length !== 0) {
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-    let query = eval(modelo).query();
+  try {
+    if (campos.length !== 0) {
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
+      let query = eval(modelo).query();
 
-    //aplicaSelects
-    campos.forEach((campo) => {
-      query.select(
-        Database.raw(`${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`)
+      //aplicaSelects
+      campos.forEach((campo) => {
+        query.select(
+          Database.raw(
+            `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
+          )
+        );
+        //console.log(query.toSQL().sql);
+      });
+
+      // aplicarPreloads - left join
+      if (leftJoins.length > 0) {
+        leftJoins.forEach((leftJoin) => {
+          if (leftJoin.evaluar === "s") {
+            return query.joinRaw(eval(leftJoin.valor));
+          }
+          query.joinRaw(leftJoin.valor);
+        });
+      }
+      // aplicar groupsBy
+      if (groupsBy.length > 0) {
+        groupsBy.forEach(({ groupBy, having }) => {
+          query.groupBy(groupBy);
+          if (having) query.having(having);
+        });
+      }
+      // aplicar order del listado
+      if (order.length > 0) {
+        order.forEach((order) => {
+          query.orderBy(order, "desc");
+        });
+      }
+
+      //aplicarFiltros
+
+      query = aplicarFiltros(
+        query,
+        listado,
+        id,
+        queryFiltros,
+        filtros_aplicables
       );
-      //console.log(query.toSQL().sql);
+
+      sql = query.toQuery();
+      // console.log("listado sql: ", sql);
+      //await query.paginate(1, 15);
+
+      datos = await query;
+    }
+
+    const cabeceras = await extraerElementos({
+      sc_hijos: columnas,
+      sc_padre: listado,
+      bouncer,
+      usuario,
+      datos,
+      id,
     });
 
-    // aplicarPreloads - left join
-    if (leftJoins.length > 0) {
-      leftJoins.forEach((leftJoin) => {
-        if (leftJoin.evaluar === "s") {
-          return query.joinRaw(eval(leftJoin.valor));
-        }
-        query.joinRaw(leftJoin.valor);
-      });
-    }
-    // aplicar groupsBy
-    if (groupsBy.length > 0) {
-      groupsBy.forEach(({ groupBy, having }) => {
-        query.groupBy(groupBy);
-        if (having) query.having(having);
-      });
-    }
-    // aplicar order del listado
-    if (order.length > 0) {
-      order.forEach((order) => {
-        query.orderBy(order, "desc");
-      });
-    }
-
-    //aplicarFiltros
-
-    query = aplicarFiltros(
-      query,
-      listado,
+    const filtros = await extraerElementos({
+      sc_hijos: filtros_aplicables,
+      sc_padre: listado,
+      bouncer,
+      usuario,
+      datos,
       id,
-      queryFiltros,
-      filtros_aplicables
-    );
+    });
 
-    sql = query.toQuery();
-    // console.log("listado sql: ", sql);
-    //await query.paginate(1, 15);
-
-    datos = await query;
+    return {
+      cabeceras,
+      filtros,
+      opciones,
+      datos,
+      sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
+      conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
+    };
+  } catch (err) {
+    console.log(err);
+    return err;
   }
-
-  const cabeceras = await extraerElementos({
-    sc_hijos: columnas,
-    sc_padre: listado,
-    bouncer,
-    usuario,
-    datos,
-    id,
-  });
-
-  const filtros = await extraerElementos({
-    sc_hijos: filtros_aplicables,
-    sc_padre: listado,
-    bouncer,
-    usuario,
-    datos,
-    id,
-  });
-
-  return {
-    cabeceras,
-    filtros,
-    opciones,
-    datos,
-    sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
-    conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
-  };
 };
 
 const listadoVacio: listado = {
@@ -819,4 +834,12 @@ export const insertar = (
   if (!funcion) return Insertar.insertar({ valor, insert_ids, conf, usuario });
 
   return eval(funcion)({ valor, insert_ids, conf, usuario });
+};
+
+export const eliminar = (delete_id: number, conf: SConf, usuario: Usuario) => {
+  const funcion = getAtributo({ atributo: "delete_funcion", conf });
+
+  if (!funcion) return Eliminar.eliminar({ delete_id, conf, usuario });
+
+  return eval(funcion)({ delete_id, conf, usuario });
 };

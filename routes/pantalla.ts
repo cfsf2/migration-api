@@ -7,3 +7,5 @@ Route.post("pantalla/:pantalla", "ConfigsController.ConfigPantalla");
 Route.post("guardar", "ConfigsController.Update");
 
 Route.post("insertar", "ConfigsController.Insert");
+
+Route.post("eliminar", "ConfigsController.Delete");
