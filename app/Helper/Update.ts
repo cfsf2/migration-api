@@ -5,6 +5,8 @@ import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import Usuario from "App/Models/Usuario";
+import SCC from "App/Models/SConfCpsc";
+
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 
@@ -13,6 +15,7 @@ let Farmacia = F;
 let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
+let SConfCpsc = SCC;
 
 export class Update {
   constructor() {}

@@ -7,7 +7,9 @@ import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
+import SCC from "App/Models/SConfCpsc";
 import Usuario from "App/Models/Usuario";
+
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
@@ -17,6 +19,7 @@ let Farmacia = F;
 let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
+let SConfCpsc = SCC;
 
 let Update = U;
 let Insertar = I;
