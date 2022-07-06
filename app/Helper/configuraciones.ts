@@ -203,6 +203,30 @@ const extraerElementos = ({
               item["radio_opciones"] = opciones;
             }
 
+            if (atributoNombre === "radio_opciones_labels") {
+              if (val.subquery === "s") return;
+              const atrRadioOpcionesValores = getFullAtributo({
+                atributo: "radio_opciones_valores",
+                conf: sconf,
+              }) as any;
+
+              let valores = atrRadioOpcionesValores?.valor.split(
+                "|"
+              ) as string[];
+
+              if (atrRadioOpcionesValores.evaluar === "s") {
+                valores = valores.map((v) => {
+                  return eval(v);
+                });
+              }
+
+              const opciones = val.valor.split("|").map((op, i) => {
+                return { label: op, value: valores[i] };
+              });
+
+              return (item["radio_opciones"] = opciones);
+            }
+
             if (atributoNombre === "enlace_id_a_opcional") {
               const conf = await SConf.findByOrFail("id_a", val.valor);
               const per = await bouncer.allows("AccesoConf", conf);
