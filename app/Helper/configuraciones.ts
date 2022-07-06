@@ -221,7 +221,10 @@ const extraerElementos = ({
               }
 
               const opciones = val.valor.split("|").map((op, i) => {
-                return { label: op, value: valores[i] };
+                let valor = valores[i] as any;
+                if (typeof valor === "string") valor = valor.trim();
+                valor = Number(valor);
+                return { label: op.trim(), value: valor };
               });
 
               return (item["radio_opciones"] = opciones);
