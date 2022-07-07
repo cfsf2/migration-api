@@ -38,18 +38,30 @@ export class Update {
       atributo: "update_id_nombre",
       conf: conf,
     });
+    const registrarCambios = getAtributo({
+      atributo: "update_registro_cambios",
+      conf: conf,
+    });
 
     if (modelo && campo) {
       try {
         const registro = await eval(modelo).findOrFail(id);
+        const valorAnterior = registro[campo];
 
         registro.merge({
           [campo]: valor,
         });
+
         guardarDatosAuditoria({
           usuario,
           objeto: registro,
           accion: AccionCRUD.editar,
+          registroCambios: {
+            registrarCambios,
+            tabla,
+            campo,
+            valorAnterior,
+          },
         });
         await registro.save();
         return { registroModificado: registro.toJSON(), modificado: true };

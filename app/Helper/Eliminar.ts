@@ -25,11 +25,28 @@ export class Eliminar {
     const tabla = conf.getAtributo({ atributo: "delete_tabla" });
     const delete_id_nombre = conf.getAtributo({ atributo: "delete_id_nombre" });
 
+    const registrarCambios = getAtributo({
+      atributo: "update_registro_cambios",
+      conf: conf,
+    });
+
     if (!delete_id) throw { message: "No hay delete_id para eliminar" };
 
     try {
       if (modelo && delete_id) {
         const registro = await eval(modelo).findOrFail(delete_id);
+
+        await guardarDatosAuditoria({
+          usuario,
+          objeto: registro,
+          accion: AccionCRUD.baja,
+          registroCambios: {
+            registrarCambios,
+            tabla,
+            valorAnterior: registro,
+          },
+        });
+
         await registro.delete();
 
         return { registroEliminado: registro, eliminado: true, error: "" };

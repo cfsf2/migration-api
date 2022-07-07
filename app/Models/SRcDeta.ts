@@ -3,6 +3,8 @@ import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
 import SRc from "./SRc";
 
 export default class SRcDeta extends BaseModel {
+  public static table = "s_rc_deta";
+
   @column({ isPrimary: true })
   public id: number;
 

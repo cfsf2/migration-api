@@ -801,7 +801,6 @@ export default class Farmacia extends BaseModel {
   @column()
   public id_usuario: number;
 
-  @column()
   public usuarioUsuario: string;
 
   //foreing key
