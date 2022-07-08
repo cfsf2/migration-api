@@ -120,6 +120,8 @@ export default class ConfigsController {
 
     const id_a_solicitados = request.body();
 
+    const id = id_a_solicitados.id;
+
     const queryFiltros = request.qs(); // siempre undefined porque pasamos todo por post
 
     if (!config) {
@@ -163,7 +165,7 @@ export default class ConfigsController {
 
       const vistasArmadas = await Promise.all(
         vistas.map(async (vista) => {
-          return armarVista(vista, id_a_solicitados.id, conf, bouncer, usuario);
+          return armarVista(vista, id, conf, bouncer, usuario);
         })
       );
 
@@ -224,6 +226,9 @@ export default class ConfigsController {
       let opciones = {};
       opciones["id_a"] = conf.id_a;
       conf?.valores.forEach((val) => {
+        if (val.evaluar === "s") {
+          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+        }
         opciones[val.atributo[0].nombre] = val.valor;
       });
       respuesta.opciones = opciones;

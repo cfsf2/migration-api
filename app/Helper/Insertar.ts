@@ -21,31 +21,31 @@ export class Insertar {
   constructor() {}
 
   public static async insertar({ valor, insert_ids, conf, usuario }) {
-    let tabla = conf.getAtributo({ atributo: "insert_tabla" });
-    if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
+    try {
+      let tabla = conf.getAtributo({ atributo: "insert_tabla" });
+      if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-    let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
-    if (!modelo)
-      modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
+      let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
+      if (!modelo)
+        modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
 
-    let campos = getAtributo({ atributo: "insert_campos", conf });
-    let campo = getAtributo({ atributo: "insert_campo", conf });
-    if (!campo) campo = getAtributo({ atributo: "update_campo", conf });
+      let campos = getAtributo({ atributo: "insert_campos", conf });
+      let campo = getAtributo({ atributo: "insert_campo", conf });
+      if (!campo) campo = getAtributo({ atributo: "update_campo", conf });
 
-    let camposArray = campos.split("|").map((c) => c.trim());
+      let camposArray = campos.split("|").map((c) => c.trim());
 
-    const insert_idsArray = insert_ids
-      .toString()
-      .split("|")
-      .map((v) => v.trim());
+      const insert_idsArray = insert_ids
+        .toString()
+        .split("|")
+        .map((v) => v.trim());
 
-    if (modelo && insert_idsArray.length > 0) {
-      const objeto = {};
-      objeto[campo] = valor;
+      if (modelo && insert_idsArray.length > 0) {
+        const objeto = {};
+        objeto[campo] = valor;
 
-      insert_idsArray.forEach((v, i) => (objeto[camposArray[i]] = v));
+        insert_idsArray.forEach((v, i) => (objeto[camposArray[i]] = v));
 
-      try {
         const registro = new modelo();
 
         registro.merge(objeto);
@@ -59,13 +59,8 @@ export class Insertar {
         await registro.save();
 
         return { registroCreado: registro, creado: true };
-      } catch (err) {
-        console.log(err);
-        return { registroCreado: err, creado: false };
       }
-    }
-    if (!modelo && tabla && insert_ids !== "") {
-      try {
+      if (!modelo && tabla && insert_ids !== "") {
         const onDuplicateUpdate = (() => {
           let duplicateUpdate = "";
           camposArray.forEach((c, i) => {
@@ -87,10 +82,10 @@ export class Insertar {
           `
         );
         return { registroCreado: registro, creado: true };
-      } catch (err) {
-        console.log(err);
-        return { registroCreado: err, creado: false, error: err.message };
       }
+    } catch (err) {
+      console.log(err);
+      return { registroCreado: err, creado: false, error: err.message };
     }
   }
 

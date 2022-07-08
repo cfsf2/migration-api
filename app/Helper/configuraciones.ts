@@ -522,7 +522,6 @@ const aplicarFiltros = (
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where && where.valor.trim() !== "") {
-    console.log("donde esta raw", where.valor);
     if (where.evaluar === "s") {
       return query.whereRaw(eval(where.valor));
     }
@@ -587,10 +586,16 @@ export const armarVista = async (
   if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
   conf?.valores.forEach((val) => {
+    if (val.evaluar === "s") {
+      return (opciones[val.atributo[0].nombre] = eval(val.valor));
+    }
     opciones[val.atributo[0].nombre] = val.valor;
   });
 
   vista?.valores.forEach((val) => {
+    if (val.evaluar === "s") {
+      return (opciones[val.atributo[0].nombre] = eval(val.valor));
+    }
     opciones[val.atributo[0].nombre] = val.valor;
   });
 
@@ -697,10 +702,16 @@ export const armarListado = async (
   if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
   conf?.valores.forEach((val) => {
+    if (val.evaluar === "s") {
+      return (opciones[val.atributo[0].nombre] = eval(val.valor));
+    }
     opcionesPantalla[val.atributo[0].nombre] = val.valor;
   });
 
   listado?.valores.forEach((val) => {
+    if (val.evaluar === "s") {
+      return (opciones[val.atributo[0].nombre] = eval(val.valor));
+    }
     opciones[val.atributo[0].nombre] = val.valor;
   });
 
@@ -730,7 +741,6 @@ export const armarListado = async (
 
       //aplicaSelects
       campos.forEach((campo) => {
-        console.log(campo);
         query.select(
           Database.raw(
             `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
@@ -777,7 +787,6 @@ export const armarListado = async (
       //await query.paginate(1, 15);
 
       datos = await await query;
-      console.log(datos.length);
     }
 
     const cabeceras = await extraerElementos({
