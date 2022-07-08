@@ -651,11 +651,17 @@ export const armarVista = async (
 
       query = aplicarFiltros(query, vista);
 
-      vistaFinal.sql = query.toQuery();
-      // console.log("vista sql: ", vistaFinal.sql);
-      //await query.paginate(1, 15);
+      const sql = query.toQuery();
+      (vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        ? sql
+        : undefined),
+        (vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+          ? vista
+          : undefined),
+        // console.log("vista sql: ", vistaFinal.sql);
+        //await query.paginate(1, 15);
 
-      vistaFinal.datos = await query;
+        (vistaFinal.datos = await query);
     }
     vistaFinal.cabeceras = (
       await extraerElementos({
@@ -724,6 +730,7 @@ export const armarListado = async (
 
       //aplicaSelects
       campos.forEach((campo) => {
+        console.log(campo);
         query.select(
           Database.raw(
             `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
@@ -769,7 +776,8 @@ export const armarListado = async (
       // console.log("listado sql: ", sql);
       //await query.paginate(1, 15);
 
-      datos = await query;
+      datos = await await query;
+      console.log(datos.length);
     }
 
     const cabeceras = await extraerElementos({
@@ -809,6 +817,7 @@ const listadoVacio: listado = {
   cabeceras: [],
   filtros: [],
   opciones: {},
+  sql: undefined,
 };
 
 const vistaVacia = {

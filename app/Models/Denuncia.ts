@@ -6,9 +6,8 @@ import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Denuncia extends BaseModel {
   static async traerDenuncias() {
-    const datos = await Database.from("tbl_denuncia")
-    .select("*");
-    
+    const datos = await Database.from("tbl_denuncia").select("*");
+
     return datos;
   }
   public static table = "tbl_denuncia";
@@ -78,4 +77,14 @@ export default class Denuncia extends BaseModel {
     localKey: "id_usuario_denunciado",
   })
   public usuario_denunciado: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

@@ -27,4 +27,14 @@ export default class Localidad extends BaseModel {
     localKey: "id_departamento",
   })
   public departamento: HasOne<typeof Departamento>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

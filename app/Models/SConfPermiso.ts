@@ -63,4 +63,14 @@ export default class SConfPermiso extends BaseModel {
     foreignKey: "id",
   })
   public permiso: HasOne<typeof Permiso>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

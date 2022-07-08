@@ -331,10 +331,12 @@ export default class Pedido extends BaseModel {
   public estado_pedido: HasOne<typeof EstadoPedido>;
 
   public serializeExtras() {
-    return {
-      _id: this.$extras._id?.toString(),
-      fechaalta: this.$extras?.fechaalta,
-      estado: this.$extras?.estado,
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }

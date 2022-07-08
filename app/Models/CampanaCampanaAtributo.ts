@@ -50,4 +50,14 @@ export default class CampanaCampanaAtributo extends BaseModel {
     serializeAs: "atributos",
   })
   public atributo: HasOne<typeof CampanaAtributo>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

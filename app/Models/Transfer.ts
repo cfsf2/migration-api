@@ -232,8 +232,12 @@ export default class Transfer extends BaseModel {
   public productos: HasManyThrough<typeof TransferProducto>;
 
   public serializeExtras() {
-    return {
-      _id: this.$extras._id?.toString(),
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }
