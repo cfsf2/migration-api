@@ -18,7 +18,7 @@ export default class SRcDetas extends BaseSchema {
         .onDelete("RESTRICT")
         .onUpdate("RESTRICT");
       table.string("campo", 100).notNullable();
-      table.string("valor", 100).notNullable();
+      table.string("valor", 100);
     });
   }
 

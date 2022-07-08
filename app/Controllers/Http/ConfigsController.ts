@@ -61,7 +61,7 @@ export default class ConfigsController {
       }
     }
     if (conf.tipo.id === 7) {
-      console.log("Pidio contenedor", config);
+      console.log("Pidio contenedor", config.id_a);
       let contenedor = conf;
       const p: {
         opciones: {};
@@ -221,11 +221,12 @@ export default class ConfigsController {
         })
       );
 
+      let opciones = {};
+      opciones["id_a"] = conf.id_a;
       conf?.valores.forEach((val) => {
-        respuesta.opciones[val.atributo[0].nombre] = val.valor;
+        opciones[val.atributo[0].nombre] = val.valor;
       });
-
-      respuesta.opciones["id_a"] = conf.id_a;
+      respuesta.opciones = opciones;
 
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);

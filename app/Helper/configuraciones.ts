@@ -9,6 +9,8 @@ import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import SCC from "App/Models/SConfCpsc";
 import Usuario from "App/Models/Usuario";
+import SRC from "App/Models/SRc";
+import SRD from "App/Models/SRcDeta";
 
 import U from "./Update";
 import I from "./Insertar";
@@ -20,6 +22,8 @@ let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
+let SRc = SRC;
+let SRcDeta = SRD;
 
 let Update = U;
 let Insertar = I;
@@ -159,7 +163,6 @@ const extraerElementos = ({
 
             if (val.evaluar === "s") {
               val.valor = eval(val.valor);
-              console.log(val.valor);
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
@@ -518,7 +521,8 @@ const aplicarFiltros = (
   //aplica filtros obligatorios de configuracion
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
-  if (where) {
+  if (where && where.valor.trim() !== "") {
+    console.log("donde esta raw", where.valor);
     if (where.evaluar === "s") {
       return query.whereRaw(eval(where.valor));
     }
@@ -578,8 +582,6 @@ export const armarVista = async (
     cabeceras: [],
   };
 
-  console.log("vino este id ", id);
-
   const parametro = vista.getAtributo({ atributo: "parametro" });
 
   if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
@@ -606,7 +608,6 @@ export const armarVista = async (
   const order = getOrder(vista);
   try {
     if (campos.length !== 0 && id) {
-      console.log("Vista ", vista.id_a, " buscando datos de id: ", id);
       // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
       // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
       // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
@@ -707,9 +708,7 @@ export const armarListado = async (
   let columnas = await verificarPermisos(listado, bouncer, 4);
   let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
 
-  const modelo = listado?.valores
-    .find((val) => val.atributo.find((a) => a.id === 15))
-    ?.toObject().valor;
+  const modelo = listado.getAtributo({ atributo: "modelo" });
 
   const campos = getSelect([columnas], 7);
   const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
@@ -843,14 +842,10 @@ export const modificar = async (
   usuario: Usuario
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
-  try {
-    if (!funcion) return Update.update({ usuario, id, valor, conf });
 
-    return eval(funcion)({ usuario, id, valor, conf });
-  } catch (err) {
-    console.log(err);
-    return err;
-  }
+  if (!funcion) return Update.update({ usuario, id, valor, conf });
+
+  return eval(funcion)({ usuario, id, valor, conf });
 };
 
 export const insertar = (

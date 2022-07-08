@@ -84,8 +84,8 @@ export interface GuardarDatosAuditoria {
   registroCambios?: {
     registrarCambios: string;
     campo?: string;
-    tabla: string;
-    valorAnterior: any;
+    tabla?: string;
+    valorAnterior?: any;
   };
 }
 
@@ -148,7 +148,10 @@ export const guardarDatosAuditoria = async ({
         typeof registroCambios?.registrarCambios === "string" &&
         registroCambios?.registrarCambios.trim() !== "s"
       )
-        return;
+        return console.log(
+          "no debe guardar",
+          registroCambios?.registrarCambios
+        );
 
       if (!registroCambios?.tabla || !registroCambios?.valorAnterior) return;
 
