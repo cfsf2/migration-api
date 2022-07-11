@@ -2,7 +2,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 export default class UsuarioPermiso {
   public async handle(
-    { auth }: HttpContextContract,
+    { auth, request }: HttpContextContract,
     next: () => Promise<void>
   ) {
     // code for middleware goes here. ABOVE THE NEXT CALL
@@ -10,6 +10,8 @@ export default class UsuarioPermiso {
       auth.user.Permisos = await auth.user?._Permisos();
 
     global.usuario = auth.user;
+    global.filtros = request.qs();
+
     await next();
   }
 }
