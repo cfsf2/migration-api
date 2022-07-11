@@ -1,4 +1,4 @@
-import Database, {
+import Datab, {
   DatabaseQueryBuilderContract,
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
@@ -16,6 +16,7 @@ import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 
+const Database = Datab;
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
@@ -412,6 +413,8 @@ interface select {
   campo: string;
   sql: string;
   alias: string;
+  evaluar: string;
+  subquery: string;
 }
 
 const getSelect = (
@@ -423,9 +426,17 @@ const getSelect = (
   const confs = sc_confs.flat(20);
 
   confs.forEach((conf) => {
-    let select: select = { campo: "", sql: "", alias: "" };
+    let select: select = {
+      campo: "",
+      sql: "",
+      alias: "",
+      evaluar: "",
+      subquery: "",
+    };
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
     select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
+    select.evaluar = getFullAtributoById({ id: id, conf })?.evaluar as string;
+    select.subquery = getFullAtributoById({ id: id, conf })?.subquery as string;
     select.alias = getAtributo({ atributo: "campo_alias", conf })
       ? getAtributo({ atributo: "campo_alias", conf })
       : conf.id_a;
@@ -434,7 +445,13 @@ const getSelect = (
     const valoresSQL = conf.valores.filter((v) => v.sql === "s");
 
     valoresSQL.forEach((v) => {
-      let vselect: select = { campo: "", sql: "", alias: "" };
+      let vselect: select = {
+        campo: "",
+        sql: "",
+        alias: "",
+        evaluar: "",
+        subquery: "",
+      };
 
       vselect.campo = v.valor;
       if (v.evaluar === "s") {
@@ -465,7 +482,7 @@ const aplicaWhere = async (
 
   const operador = getAtributo({ atributo: "operador", conf });
 
-  const tipo = getAtributo({ atributo: "tipo", conf });
+  const tipo = getAtributo({ atributo: "componente", conf });
 
   if (operador === "like") valor = valor?.concat("%");
 
@@ -483,6 +500,7 @@ const aplicaWhere = async (
       .andWhere(campo, "<=", hasta)
       .orderBy(campo, "desc");
     //.whereNotNull(campo);
+
     return query;
   }
 
@@ -490,7 +508,6 @@ const aplicaWhere = async (
     // const fechas = valor.split(",");
 
     const fecha = DateTime.fromISO(valor).toSQL();
-
     query.where(campo, operador ? operador : "=", fecha).orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
@@ -507,7 +524,6 @@ const aplicaWhere = async (
   }
 
   query.where(campo, operador ? operador : "=", valor);
-
   return query;
 };
 
@@ -692,7 +708,8 @@ export const armarListado = async (
   bouncer: any,
   queryFiltros: any,
   id: number,
-  usuario?: Usuario
+  usuario?: Usuario,
+  solo_conf?: string
 ) => {
   let opciones = {};
   let opcionesPantalla = {};
@@ -740,7 +757,13 @@ export const armarListado = async (
       let query = eval(modelo).query();
 
       //aplicaSelects
-      campos.forEach((campo) => {
+      campos.forEach(async (campo) => {
+        if (campo.evaluar === "s") {
+          campo.campo = eval(campo.campo);
+        }
+        if (campo.subquery === "s") {
+          return query.select(Database.raw(campo.campo));
+        }
         query.select(
           Database.raw(
             `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
@@ -785,8 +808,9 @@ export const armarListado = async (
       sql = query.toQuery();
       // console.log("listado sql: ", sql);
       //await query.paginate(1, 15);
-
-      datos = await await query;
+      if (solo_conf === "n") {
+        datos = await await query;
+      }
     }
 
     const cabeceras = await extraerElementos({

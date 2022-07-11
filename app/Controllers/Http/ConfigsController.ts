@@ -45,7 +45,15 @@ export default class ConfigsController {
     if (conf.tipo.id === 2) {
       console.log("pidio Listado");
       try {
-        return armarListado(conf, conf, bouncer, queryFiltros, id, usuario);
+        return armarListado(
+          conf,
+          conf,
+          bouncer,
+          queryFiltros,
+          id,
+          usuario,
+          "n"
+        );
       } catch (err) {
         console.log(err);
         return err;
@@ -86,7 +94,8 @@ export default class ConfigsController {
             bouncer,
             queryFiltros,
             id,
-            usuario
+            usuario,
+            "n"
           );
         })
       );
@@ -119,6 +128,7 @@ export default class ConfigsController {
     const usuario = await auth.authenticate();
 
     const id_a_solicitados = request.body();
+    console.log(request.params());
 
     const id = id_a_solicitados.id;
 
@@ -152,13 +162,18 @@ export default class ConfigsController {
 
       const listadosArmados = await Promise.all(
         listados.map(async (listado) => {
+          let solo_conf = "s";
+          if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
+            solo_conf = "n";
+          }
           return await armarListado(
             listado,
             conf,
             bouncer,
             queryFiltros,
             id_a_solicitados.id,
-            usuario
+            usuario,
+            solo_conf
           );
         })
       );
@@ -188,13 +203,18 @@ export default class ConfigsController {
 
           const _listadosArmados = await Promise.all(
             _listados.map(async (listado) => {
+              let solo_conf = "s";
+              if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
+                solo_conf = "n";
+              }
               return await armarListado(
                 listado,
                 contenedor,
                 bouncer,
                 queryFiltros,
                 id_a_solicitados.id,
-                usuario
+                usuario,
+                solo_conf
               );
             })
           );
