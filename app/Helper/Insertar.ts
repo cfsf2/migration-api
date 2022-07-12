@@ -5,7 +5,7 @@ import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
-import Usuario from "App/Models/Usuario";
+import U from "App/Models/Usuario";
 import SCC from "App/Models/SConfCpsc";
 
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
@@ -16,6 +16,7 @@ let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
+let Usuario = U;
 
 export class Insertar {
   constructor() {}
