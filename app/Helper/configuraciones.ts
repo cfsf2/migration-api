@@ -572,10 +572,14 @@ const aplicarFiltros = (
       const filtro = filtros_e.find((fil) => fil.id_a === id_a);
 
       if (!filtro) return;
-      console.log(
-        getAtributo({ atributo: "permite_null", conf: filtro }),
-        id_a
-      );
+
+      const permiteNull = getAtributo({
+        atributo: "permite_null",
+        conf: filtro,
+      });
+
+      //  if (permiteNull === "n") throw new Error(`El ${id_a} es obligatorio`);
+
       aplicaWhere(query, queryFiltros[id_a], filtro);
     });
   }
@@ -718,6 +722,7 @@ export const armarListado = async (
   let opcionesPantalla = {};
   let datos = [];
   let sql = "";
+  let res = listadoVacio;
 
   if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
@@ -746,11 +751,65 @@ export const armarListado = async (
   let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
 
   const modelo = listado.getAtributo({ atributo: "modelo" });
-
   const campos = getSelect([columnas], 7);
   const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
   const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
   const order = getOrder(listado);
+
+  //Chequear filtros obligatorios
+  if (solo_conf === "n") {
+    const filtrosObligatorios = filtros_aplicables
+      .filter((f) => getAtributo({ atributo: "permite_null", conf: f }) === "n")
+      .map((f) => f.id_a);
+
+    const filtrosOpcionalesNull = filtros_aplicables
+      .filter(
+        (f) => getAtributo({ atributo: "opcionales_null", conf: f }) === "s"
+      )
+      .map((f) => f.id_a);
+
+    if (filtrosObligatorios.length > 0) {
+      let filtros_obligatorios_insatisfechos = filtrosObligatorios.filter(
+        (k) => !queryFiltros[k] || queryFiltros[k] === null
+      );
+
+      const found = Object.keys(queryFiltros).some(
+        (r) => filtrosOpcionalesNull.indexOf(r) >= 0
+      ); // si Algun filtro opcional esta satisfecho
+
+      if (found) {
+        filtros_obligatorios_insatisfechos =
+          filtros_obligatorios_insatisfechos.filter(
+            (f) => !filtrosOpcionalesNull.includes(f)
+          ); // filtra todos los insatisfechos opcionales
+      }
+
+      if (filtros_obligatorios_insatisfechos.length > 0) {
+        const error = `Los filtros ${filtros_obligatorios_insatisfechos.toString()} son obligatorios`;
+        const cabeceras = await extraerElementos({
+          sc_hijos: columnas,
+          sc_padre: listado,
+          bouncer,
+          usuario,
+          datos,
+          id,
+        });
+
+        const filtros = await extraerElementos({
+          sc_hijos: filtros_aplicables,
+          sc_padre: listado,
+          bouncer,
+          usuario,
+          datos,
+          id,
+        });
+        res.cabeceras = cabeceras;
+        res.filtros = filtros;
+        res.error = error;
+        return global.$_RESPONSE.status(410).send(res);
+      }
+    }
+  }
 
   try {
     if (campos.length !== 0) {
@@ -857,13 +916,15 @@ const listadoVacio: listado = {
   filtros: [],
   opciones: {},
   sql: undefined,
+  error: "",
 };
 
 const vistaVacia = {
-  opciones: {},
   datos: [],
-  sql: "",
   cabeceras: [],
+  opciones: {},
+  sql: "",
+  error: "",
 };
 
 export interface listado {
@@ -873,6 +934,7 @@ export interface listado {
   opciones: {};
   sql?: string;
   conf?: SConf;
+  error: string;
 }
 
 export interface vista {
@@ -881,6 +943,7 @@ export interface vista {
   opciones: {};
   sql?: string;
   conf?: SConf;
+  error: { message: string };
 }
 
 export const modificar = async (
