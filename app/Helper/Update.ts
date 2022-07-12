@@ -27,7 +27,7 @@ export class Update {
     valor,
     conf,
   }: {
-    usuario: Usuario;
+    usuario: U;
     id: any;
     valor: string | number;
     conf: SConf;
