@@ -9,8 +9,8 @@ export default class UsuarioPermiso {
     if (typeof auth.user !== "undefined")
       auth.user.Permisos = await auth.user?._Permisos();
 
-    global.usuario = auth.user;
-    global.filtros = request.qs();
+    global.$_usuario = auth.user;
+    global.$_filtros = request.qs();
 
     await next();
   }

@@ -572,7 +572,10 @@ const aplicarFiltros = (
       const filtro = filtros_e.find((fil) => fil.id_a === id_a);
 
       if (!filtro) return;
-
+      console.log(
+        getAtributo({ atributo: "permite_null", conf: filtro }),
+        id_a
+      );
       aplicaWhere(query, queryFiltros[id_a], filtro);
     });
   }
@@ -761,9 +764,12 @@ export const armarListado = async (
         if (campo.evaluar === "s") {
           campo.campo = eval(campo.campo);
         }
+
         if (campo.subquery === "s") {
-          return query.select(Database.raw(campo.campo));
+          const subquery = await Database.rawQuery(campo.campo);
+          return query.select(`"${subquery[0]}"`);
         }
+
         query.select(
           Database.raw(
             `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
