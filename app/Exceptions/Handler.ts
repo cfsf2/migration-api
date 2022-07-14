@@ -32,7 +32,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     if (error.code === "E_VALIDATION_FAILURE") {
       return ctx.response.status(422).send(error.messages);
     }
-
+    if (error.code === "ER_BAD_FIELD_ERROR") {
+      return ctx.response.status(422).send(error.messages);
+    }
+    console.log("Aca vino un error??? ", Object.keys(ctx));
     /**
      * Forward rest of the exceptions to the parent class
      */

@@ -1,13 +1,12 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 import {
-  armarListado,
-  armarVista,
   listado,
   vista,
   modificar,
   insertar,
   eliminar,
+  ConfBuilder,
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones } from "App/Helper/permisos";
@@ -47,7 +46,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 2) {
       console.log("pidio Listado");
       try {
-        return armarListado(
+        return ConfBuilder.armarListado(
           ctx,
           conf,
           conf,
@@ -65,7 +64,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 6) {
       console.log("pidio Vista");
       try {
-        return armarVista(ctx, conf, id, conf, bouncer, usuario);
+        return ConfBuilder.armarVista(ctx, conf, id, conf, bouncer, usuario);
       } catch (err) {
         console.log(err);
         return err;
@@ -91,7 +90,7 @@ export default class ConfigsController {
 
       const _listadosArmados = await Promise.all(
         _listados.map(async (listado) => {
-          return await armarListado(
+          return await ConfBuilder.armarListado(
             ctx,
             listado,
             contenedor,
@@ -106,7 +105,14 @@ export default class ConfigsController {
 
       const _vistasArmadas = await Promise.all(
         _vistas.map(async (vista) => {
-          return armarVista(ctx, vista, id, contenedor, bouncer, usuario);
+          return ConfBuilder.armarVista(
+            ctx,
+            vista,
+            id,
+            contenedor,
+            bouncer,
+            usuario
+          );
         })
       );
 
@@ -165,7 +171,7 @@ export default class ConfigsController {
           if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
             solo_conf = "n";
           }
-          return await armarListado(
+          return await ConfBuilder.armarListado(
             ctx,
             listado,
             conf,
@@ -180,7 +186,7 @@ export default class ConfigsController {
 
       const vistasArmadas = await Promise.all(
         vistas.map(async (vista) => {
-          return armarVista(ctx, vista, id, conf, bouncer, usuario);
+          return ConfBuilder.armarVista(ctx, vista, id, conf, bouncer, usuario);
         })
       );
 
@@ -207,7 +213,7 @@ export default class ConfigsController {
               if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
                 solo_conf = "n";
               }
-              return await armarListado(
+              return await ConfBuilder.armarListado(
                 ctx,
                 listado,
                 contenedor,
@@ -222,7 +228,7 @@ export default class ConfigsController {
 
           const _vistasArmadas = await Promise.all(
             _vistas.map(async (vista) => {
-              return armarVista(
+              return ConfBuilder.armarVista(
                 ctx,
                 vista,
                 id_a_solicitados.id,
