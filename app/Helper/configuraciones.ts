@@ -107,6 +107,7 @@ const verificarPermisoConf = async (sub_confs, bouncer) => {
 };
 
 const extraerElementos = ({
+  ctx,
   sc_hijos,
   sc_padre,
   bouncer,
@@ -114,6 +115,7 @@ const extraerElementos = ({
   datos = [],
   id,
 }: {
+  ctx: HttpContextContract;
   sc_hijos: SConf[];
   sc_padre: SConf;
   bouncer: any;
@@ -171,7 +173,10 @@ const extraerElementos = ({
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
               let lista = await Database.rawQuery(val.valor);
-
+              ctx.$_sql.push({
+                sql: Database.rawQuery(val.valor).toQuery(),
+                conf: c.id_a,
+              });
               val.valor = lista[0];
             }
 
@@ -249,6 +254,7 @@ const extraerElementos = ({
         );
 
         item["sc_hijos"] = await extraerElementos({
+          ctx,
           sc_hijos: c.sub_conf,
           sc_padre: c,
           bouncer,
@@ -531,6 +537,7 @@ const aplicaWhere = async (
 };
 
 const aplicarFiltros = (
+  ctx: HttpContextContract,
   query: DatabaseQueryBuilderContract,
   configuracion: SConf,
   id?: number,
@@ -590,6 +597,7 @@ const aplicarFiltros = (
 };
 
 export const armarVista = async (
+  ctx: HttpContextContract,
   vista: SConf,
   id: number,
   conf: SConf,
@@ -681,11 +689,12 @@ export const armarVista = async (
 
       //aplicarFiltros
 
-      query = aplicarFiltros(query, vista);
+      query = aplicarFiltros(ctx, query, vista);
 
-      const sql = query.toQuery();
+      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
+
       (vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
-        ? sql
+        ? ctx.$_sql
         : undefined),
         (vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
           ? vista
@@ -697,6 +706,7 @@ export const armarVista = async (
     }
     vistaFinal.cabeceras = (
       await extraerElementos({
+        ctx,
         sc_hijos: columnas,
         sc_padre: vista,
         bouncer,
@@ -714,6 +724,7 @@ export const armarVista = async (
 };
 
 export const armarListado = async (
+  ctx: HttpContextContract,
   listado: SConf,
   conf: SConf,
   bouncer: any,
@@ -727,8 +738,6 @@ export const armarListado = async (
   let datos = [];
   let sql = "";
   let res = listadoVacio;
-
-  var { $_filtros } = HttpContext.get() as HttpContextContract;
 
   if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
@@ -793,6 +802,7 @@ export const armarListado = async (
       if (filtros_obligatorios_insatisfechos.length > 0) {
         const error = `Los filtros ${filtros_obligatorios_insatisfechos.toString()} son obligatorios`;
         const cabeceras = await extraerElementos({
+          ctx,
           sc_hijos: columnas,
           sc_padre: listado,
           bouncer,
@@ -802,6 +812,7 @@ export const armarListado = async (
         });
 
         const filtros = await extraerElementos({
+          ctx,
           sc_hijos: filtros_aplicables,
           sc_padre: listado,
           bouncer,
@@ -812,7 +823,10 @@ export const armarListado = async (
         res.cabeceras = cabeceras;
         res.filtros = filtros;
         res.error = error;
-        return global.$_RESPONSE.status(410).send(res);
+        res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+          ? ctx.$_sql
+          : undefined;
+        return ctx.response.status(410).send(res);
       }
     }
   }
@@ -869,6 +883,7 @@ export const armarListado = async (
       //aplicarFiltros
 
       query = aplicarFiltros(
+        ctx,
         query,
         listado,
         id,
@@ -876,7 +891,7 @@ export const armarListado = async (
         filtros_aplicables
       );
 
-      sql = query.toQuery();
+      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
       // console.log("listado sql: ", sql);
       //await query.paginate(1, 15);
       if (solo_conf === "n") {
@@ -885,6 +900,7 @@ export const armarListado = async (
     }
 
     const cabeceras = await extraerElementos({
+      ctx,
       sc_hijos: columnas,
       sc_padre: listado,
       bouncer,
@@ -894,6 +910,7 @@ export const armarListado = async (
     });
 
     const filtros = await extraerElementos({
+      ctx,
       sc_hijos: filtros_aplicables,
       sc_padre: listado,
       bouncer,
@@ -907,7 +924,9 @@ export const armarListado = async (
       filtros,
       opciones,
       datos,
-      sql: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? sql : undefined,
+      sql: (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        ? ctx.$_sql
+        : undefined,
       conf: (await bouncer.allows("AccesoRuta", "GET_SQL")) ? conf : undefined,
     };
   } catch (err) {
@@ -938,7 +957,7 @@ export interface listado {
   cabeceras: any[];
   filtros: any[];
   opciones: {};
-  sql?: string;
+  sql?: any;
   conf?: SConf;
   error: string;
 }
@@ -947,12 +966,13 @@ export interface vista {
   datos: any[];
   cabeceras: any[];
   opciones: {};
-  sql?: string;
+  sql?: any;
   conf?: SConf;
   error: string;
 }
 
 export const modificar = async (
+  ctx: HttpContextContract,
   id: number,
   valor: any,
   conf: SConf,
@@ -966,6 +986,7 @@ export const modificar = async (
 };
 
 export const insertar = (
+  ctx: HttpContextContract,
   valor: any,
   insert_ids: any,
   conf: SConf,
@@ -978,7 +999,12 @@ export const insertar = (
   return eval(funcion)({ valor, insert_ids, conf, usuario });
 };
 
-export const eliminar = (delete_id: number, conf: SConf, usuario: Usuario) => {
+export const eliminar = (
+  ctx: HttpContextContract,
+  delete_id: number,
+  conf: SConf,
+  usuario: Usuario
+) => {
   const funcion = getAtributo({ atributo: "delete_funcion", conf });
 
   if (!funcion) return Eliminar.eliminar({ delete_id, conf, usuario });

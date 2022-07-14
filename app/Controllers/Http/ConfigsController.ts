@@ -22,7 +22,9 @@ const preloadRecursivo = (query) => {
 };
 
 export default class ConfigsController {
-  public async Config({ request, bouncer, auth }: HttpContextContract) {
+  public async Config(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
+
     const config = request.qs().pantalla;
     const usuario = await auth.authenticate();
     const id = request.body().id;
@@ -46,6 +48,7 @@ export default class ConfigsController {
       console.log("pidio Listado");
       try {
         return armarListado(
+          ctx,
           conf,
           conf,
           bouncer,
@@ -62,7 +65,7 @@ export default class ConfigsController {
     if (conf.tipo.id === 6) {
       console.log("pidio Vista");
       try {
-        return armarVista(conf, id, conf, bouncer, usuario);
+        return armarVista(ctx, conf, id, conf, bouncer, usuario);
       } catch (err) {
         console.log(err);
         return err;
@@ -89,6 +92,7 @@ export default class ConfigsController {
       const _listadosArmados = await Promise.all(
         _listados.map(async (listado) => {
           return await armarListado(
+            ctx,
             listado,
             contenedor,
             bouncer,
@@ -102,7 +106,7 @@ export default class ConfigsController {
 
       const _vistasArmadas = await Promise.all(
         _vistas.map(async (vista) => {
-          return armarVista(vista, id, contenedor, bouncer, usuario);
+          return armarVista(ctx, vista, id, contenedor, bouncer, usuario);
         })
       );
 
@@ -118,12 +122,8 @@ export default class ConfigsController {
     }
   }
 
-  public async ConfigPantalla({
-    request,
-    response,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async ConfigPantalla(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
     const config = request.params().pantalla;
     const usuario = await auth.authenticate();
 
@@ -166,6 +166,7 @@ export default class ConfigsController {
             solo_conf = "n";
           }
           return await armarListado(
+            ctx,
             listado,
             conf,
             bouncer,
@@ -179,7 +180,7 @@ export default class ConfigsController {
 
       const vistasArmadas = await Promise.all(
         vistas.map(async (vista) => {
-          return armarVista(vista, id, conf, bouncer, usuario);
+          return armarVista(ctx, vista, id, conf, bouncer, usuario);
         })
       );
 
@@ -207,6 +208,7 @@ export default class ConfigsController {
                 solo_conf = "n";
               }
               return await armarListado(
+                ctx,
                 listado,
                 contenedor,
                 bouncer,
@@ -221,6 +223,7 @@ export default class ConfigsController {
           const _vistasArmadas = await Promise.all(
             _vistas.map(async (vista) => {
               return armarVista(
+                ctx,
                 vista,
                 id_a_solicitados.id,
                 contenedor,
@@ -271,12 +274,8 @@ export default class ConfigsController {
     return global;
   }
 
-  public async Update({
-    request,
-    response,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async Update(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
     const { valor, update_id, id_a } = request.body();
 
     try {
@@ -296,7 +295,7 @@ export default class ConfigsController {
       if (!(await bouncer.allows("AccesoConf", config, acciones.modificar)))
         return "No tiene permisos para esta config";
 
-      const res = await modificar(update_id, valor, config, usuario);
+      const res = await modificar(ctx, update_id, valor, config, usuario);
 
       if (res?.modificado) {
         return response.accepted(res?.registroModificado);
@@ -308,12 +307,8 @@ export default class ConfigsController {
     }
   }
 
-  public async Insert({
-    request,
-    response,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async Insert(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
     const { valor, insert_ids, id_a } = request.body();
 
     try {
@@ -332,7 +327,7 @@ export default class ConfigsController {
       if (!(await bouncer.allows("AccesoConf", config, acciones.alta)))
         return "No tiene permisos para esta config";
 
-      const res = await insertar(valor, insert_ids, config, usuario);
+      const res = await insertar(ctx, valor, insert_ids, config, usuario);
 
       if (res?.creado) {
         return response.accepted(res?.registroCreado);
@@ -344,12 +339,8 @@ export default class ConfigsController {
     }
   }
 
-  public async Delete({
-    request,
-    response,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async Delete(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
     const { id_a, delete_id } = request.body();
 
     try {
@@ -368,7 +359,7 @@ export default class ConfigsController {
       if (!(await bouncer.allows("AccesoConf", config, acciones.baja)))
         return "No tiene permisos para esta config";
 
-      const res = await eliminar(delete_id, config, usuario);
+      const res = await eliminar(ctx, delete_id, config, usuario);
 
       if (res?.eliminado) {
         return response.accepted(res?.registroEliminado);
