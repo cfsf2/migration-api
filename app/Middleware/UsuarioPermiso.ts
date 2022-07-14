@@ -1,21 +1,16 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 export default class UsuarioPermiso {
-  public async handle(
-    { auth, request, response }: HttpContextContract,
-    next: () => Promise<void>
-  ) {
+  public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
     // code for middleware goes here. ABOVE THE NEXT CALL
-    if (typeof auth.user !== "undefined")
-      auth.user.Permisos = await auth.user?._Permisos();
+    if (typeof ctx.auth.user !== "undefined")
+      ctx.auth.user.Permisos = await ctx.auth.user?._Permisos();
 
-    global.$_usuario = auth.user;
-    global.$_filtros = {
+    ctx.$_filtros = {
       solicitados: {},
       filtrosObligatorios: [],
     };
-    global.$_filtros.solicitados = request.qs();
-    global.$_RESPONSE = response;
+    ctx.$_filtros.solicitados = ctx.request.qs();
 
     await next();
   }

@@ -9,3 +9,5 @@ Route.post("guardar", "ConfigsController.Update");
 Route.post("insertar", "ConfigsController.Insert");
 
 Route.post("eliminar", "ConfigsController.Delete");
+
+Route.get("test", "ConfigsController.Test");

@@ -128,7 +128,6 @@ export default class ConfigsController {
     const usuario = await auth.authenticate();
 
     const id_a_solicitados = request.body();
-    console.log(request.params());
 
     const id = id_a_solicitados.id;
 
@@ -267,6 +266,11 @@ export default class ConfigsController {
     }
   }
 
+  public async Test() {
+    global.TEST = "ESTA VARIABLE GLOBAL LA SETIE A LAS " + new Date();
+    return global;
+  }
+
   public async Update({
     request,
     response,
@@ -387,6 +391,7 @@ const listadoVacio: listado = {
   cabeceras: [{}],
   filtros: [{}],
   opciones: {},
+  error: "",
 };
 
 export interface respuesta {

@@ -2,6 +2,9 @@ import Datab, {
   DatabaseQueryBuilderContract,
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
+import HttpContext from "@ioc:Adonis/Core/HttpContext";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
@@ -602,6 +605,7 @@ export const armarVista = async (
     datos,
     sql,
     cabeceras: [],
+    error: "",
   };
 
   const parametro = vista.getAtributo({ atributo: "parametro" });
@@ -723,6 +727,8 @@ export const armarListado = async (
   let datos = [];
   let sql = "";
   let res = listadoVacio;
+
+  var { $_filtros } = HttpContext.get() as HttpContextContract;
 
   if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
@@ -943,7 +949,7 @@ export interface vista {
   opciones: {};
   sql?: string;
   conf?: SConf;
-  error: { message: string };
+  error: string;
 }
 
 export const modificar = async (
