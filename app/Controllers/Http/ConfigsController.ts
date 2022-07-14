@@ -270,8 +270,7 @@ export default class ConfigsController {
 
       return respuesta;
     } catch (err) {
-      console.log(err);
-      return response.badRequest(err);
+      return err;
     }
   }
 

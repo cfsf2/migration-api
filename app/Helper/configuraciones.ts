@@ -17,6 +17,7 @@ import SRD from "App/Models/SRcDeta";
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 const Database = Datab;
 let Servicio = S;
@@ -934,7 +935,7 @@ export class ConfBuilder {
       };
     } catch (err) {
       console.log(err);
-      return err;
+      throw await new ExceptionHandler().handle(err, ctx);
     }
   };
 

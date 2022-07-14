@@ -33,7 +33,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       return ctx.response.status(422).send(error.messages);
     }
     if (error.code === "ER_BAD_FIELD_ERROR") {
-      return ctx.response.status(422).send(error.messages);
+      return ctx.response.status(422).send(error);
     }
     console.log("Aca vino un error??? ", Object.keys(ctx));
     /**
