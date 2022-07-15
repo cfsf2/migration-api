@@ -9,7 +9,7 @@ export default class UncaughtError {
       } catch (err) {
         throw new ExceptionHandler().handle(err, ctx);
       }
-      process.exit(1);
+      // process.exit(1);
     });
     await next();
   }
