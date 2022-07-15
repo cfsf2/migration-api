@@ -10,6 +10,7 @@ import {
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones } from "App/Helper/permisos";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 const preloadRecursivo = (query) => {
   return query
@@ -308,7 +309,7 @@ export default class ConfigsController {
       return response.badRequest(res);
     } catch (err) {
       console.log(err);
-      return response.badRequest(err);
+      return;
     }
   }
 

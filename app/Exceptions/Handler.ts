@@ -16,6 +16,7 @@
 import Logger from "@ioc:Adonis/Core/Logger";
 import HttpExceptionHandler from "@ioc:Adonis/Core/HttpExceptionHandler";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import SErrorMysql from "App/Models/SErrorMysql";
 
 export default class ExceptionHandler extends HttpExceptionHandler {
   protected statusPages = {
@@ -30,12 +31,38 @@ export default class ExceptionHandler extends HttpExceptionHandler {
      * Self handle the validation exception
      */
     if (error.code === "E_VALIDATION_FAILURE") {
-      return ctx.response.status(422).send(error.messages);
-    }
-    if (error.code === "ER_BAD_FIELD_ERROR") {
       return ctx.response.status(422).send(error);
     }
-    console.log("Aca vino un error??? ", Object.keys(ctx));
+    if (error.code === "ER_BAD_FIELD_ERROR") {
+      return ctx.response
+        .status(422)
+        .send({ error: { message: error.code }, sql: ctx.$_sql });
+    }
+    if (error.code === "ER_DUP_ENTRY") {
+      const errorKey = error.sqlMessage
+        .split("key")
+        .pop()
+        .replaceAll("'", "")
+        .trim();
+      const errorMensajeTraducido = await SErrorMysql.findBy(
+        "error_mysql",
+        errorKey
+      );
+
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : `${error.code}: Ya existe un registro con ese valor. No puede haber duplicados`;
+
+      return ctx.response.status(422).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+
+    return ctx.response
+      .status(411)
+      .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
+
     /**
      * Forward rest of the exceptions to the parent class
      */

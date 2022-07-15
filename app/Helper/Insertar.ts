@@ -21,7 +21,7 @@ let Usuario = U;
 export class Insertar {
   constructor() {}
 
-  public static async insertar({ valor, insert_ids, conf, usuario }) {
+  public static async insertar({ ctx, valor, insert_ids, conf, usuario }) {
     try {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });

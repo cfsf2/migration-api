@@ -897,7 +897,7 @@ export class ConfBuilder {
         // console.log("listado sql: ", sql);
         //await query.paginate(1, 15);
         if (solo_conf === "n") {
-          datos = await await query;
+          datos = await query;
         }
       }
 
@@ -1114,7 +1114,7 @@ export const modificar = async (
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
 
-  if (!funcion) return Update.update({ usuario, id, valor, conf });
+  if (!funcion) return Update.update({ ctx, usuario, id, valor, conf });
 
   return eval(funcion)({ usuario, id, valor, conf });
 };
@@ -1128,7 +1128,8 @@ export const insertar = (
 ) => {
   const funcion = getAtributo({ atributo: "insert_funcion", conf });
 
-  if (!funcion) return Insertar.insertar({ valor, insert_ids, conf, usuario });
+  if (!funcion)
+    return Insertar.insertar({ ctx, valor, insert_ids, conf, usuario });
 
   return eval(funcion)({ valor, insert_ids, conf, usuario });
 };
@@ -1141,7 +1142,7 @@ export const eliminar = (
 ) => {
   const funcion = getAtributo({ atributo: "delete_funcion", conf });
 
-  if (!funcion) return Eliminar.eliminar({ delete_id, conf, usuario });
+  if (!funcion) return Eliminar.eliminar({ ctx, delete_id, conf, usuario });
 
   return eval(funcion)({ delete_id, conf, usuario });
 };

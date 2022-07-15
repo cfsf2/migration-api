@@ -20,7 +20,7 @@ let SConfCpsc = SCC;
 export class Eliminar {
   constructor() {}
 
-  public static async eliminar({ delete_id, conf, usuario }) {
+  public static async eliminar({ ctx, delete_id, conf, usuario }) {
     const modelo = conf.getAtributo({ atributo: "delete_modelo" });
     const tabla = conf.getAtributo({ atributo: "delete_tabla" });
     const delete_id_nombre = conf.getAtributo({ atributo: "delete_id_nombre" });

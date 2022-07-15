@@ -10,6 +10,8 @@ import SCC from "App/Models/SConfCpsc";
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
+import ExceptionHandler from "App/Exceptions/Handler";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 let Servicio = S;
 let Farmacia = F;
@@ -23,11 +25,13 @@ export class Update {
   constructor() {}
 
   public static async update({
+    ctx,
     usuario,
     id,
     valor,
     conf,
   }: {
+    ctx: HttpContextContract;
     usuario: U;
     id: any;
     valor: string | number;
@@ -69,11 +73,7 @@ export class Update {
         return { registroModificado: registro.toJSON(), modificado: true };
       } catch (err) {
         console.log("update error", err);
-        return {
-          registroModificado: {},
-          modificado: false,
-          error: err.message,
-        };
+        throw await new ExceptionHandler().handle(err, ctx);
       }
     }
 
@@ -100,11 +100,13 @@ export class Update {
   }
 
   public static async password({
+    ctx,
     usuario,
     id,
     valor,
     conf,
   }: {
+    ctx: HttpContextContract;
     usuario: U;
     id: any;
     valor: string | number;
