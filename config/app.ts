@@ -37,7 +37,7 @@ export const appKey: string = Env.get("APP_KEY");
 |
 */
 export const http: ServerConfig = {
-  useAsyncLocalStorage: true,
+  useAsyncLocalStorage: false,
   /*
   |--------------------------------------------------------------------------
   | Allow method spoofing

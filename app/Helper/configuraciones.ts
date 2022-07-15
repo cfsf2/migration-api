@@ -1064,7 +1064,7 @@ export class ConfBuilder {
       return vistaFinal;
     } catch (err) {
       console.log(err);
-      return err;
+      throw err;
     }
   };
 }
