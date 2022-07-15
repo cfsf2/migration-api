@@ -20,7 +20,7 @@ export default class ProductoPack extends BaseModel {
     const datos = await Database.rawQuery(
       ` SELECT pp.*, 
       pp.id as _id,
-      pp.ts_creacion as fechaalta,
+      IF (pp.ts_creacion is NULL, '', pp.ts_creacion) as fechaalta,
       pp.precio_con_iva as precio_con_IVA,
       IF ( pp.id_categoria is NULL, '', pp.id_categoria ) as categoria_id, 
       IF ( pp.id_entidad is NULL, '', pp.id_entidad) as entidad_id 

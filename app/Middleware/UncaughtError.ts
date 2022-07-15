@@ -1,13 +1,13 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 
-export default class Error {
+export default class UncaughtError {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
     // code for middleware goes here. ABOVE THE NEXT CALL
-    process.on("uncaughtException", async (error) => {
+    process.on("uncaughtException", (err) => {
       try {
       } catch (err) {
-        throw await new ExceptionHandler().handle(error, ctx);
+        throw new ExceptionHandler().handle(err, ctx);
       }
     });
     await next();
