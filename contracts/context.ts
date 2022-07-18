@@ -6,5 +6,6 @@ declare module "@ioc:Adonis/Core/HttpContext" {
     };
     $_sql: { sql: string; conf: string }[];
     $_datos: any[];
+    usuario: any;
   }
 }

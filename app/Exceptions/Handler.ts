@@ -59,9 +59,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       });
     }
 
-    return ctx.response
-      .status(411)
-      .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
+    // return ctx.response
+    //   .status(411)
+    //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
 
     /**
      * Forward rest of the exceptions to the parent class

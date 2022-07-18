@@ -90,11 +90,7 @@ export class Update {
         );
         return { registroModificado: registro, modificado: true };
       } catch (err) {
-        return {
-          registroModificado: {},
-          modificado: false,
-          error: err.message,
-        };
+        throw await new ExceptionHandler().handle(err, ctx);
       }
     }
   }
@@ -177,11 +173,7 @@ export class Update {
         return { registroModificado: registro.toJSON(), modificado: true };
       } catch (err) {
         console.log("update error", err);
-        return {
-          registroModificado: {},
-          modificado: false,
-          error: err.message,
-        };
+        throw await new ExceptionHandler().handle(err, ctx);
       }
     }
 
@@ -198,11 +190,7 @@ export class Update {
         );
         return { registroModificado: registro, modificado: true };
       } catch (err) {
-        return {
-          registroModificado: {},
-          modificado: false,
-          error: err.message,
-        };
+        throw await new ExceptionHandler().handle(err, ctx);
       }
     }
   }

@@ -6,7 +6,7 @@ export default class UncaughtError {
     // code for middleware goes here. ABOVE THE NEXT CALL
     process
       .on("unhandledRejection", (reason, p) => {
-        console.error(reason, "Unhandled Rejection at Promise", p);
+        // console.error(reason, "Unhandled Rejection at Promise", p);
       })
       .on("uncaughtException", (err) => {
         console.log("Error no Capturado a tiempo");
