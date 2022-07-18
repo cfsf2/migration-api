@@ -5,6 +5,7 @@ import Perfil from "App/Models/Perfil";
 import { DateTime } from "luxon";
 import { Permiso } from "App/Helper/permisos";
 import Farmacia from "App/Models/Farmacia";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class AuthController {
   public async mig_loginwp({
@@ -13,9 +14,9 @@ export default class AuthController {
     auth,
     bouncer,
   }: HttpContextContract) {
-    const { username, password } = request.only(["username", "password"]);
-
     try {
+      const { username, password } = request.only(["username", "password"]);
+
       console.log(username, password);
       const log = await auth
         .use("api")
@@ -48,22 +49,22 @@ export default class AuthController {
       await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
-      console.log(error);
-      response.send({
-        statusCode: 500,
-        body: { message: error.responseText },
-      });
+      throw new ExceptionHandler();
     }
   }
 
   public async mig_perfiles({ request, bouncer }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.PERFILES_GET);
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.PERFILES_GET);
 
-    const { tipo } = request.qs();
-    return await Perfil.query()
-      .select("tbl_perfil.id as _id", "tbl_perfil.*")
-      .where("tipo", tipo)
-      .preload("permisos");
+      const { tipo } = request.qs();
+      return await Perfil.query()
+        .select("tbl_perfil.id as _id", "tbl_perfil.*")
+        .where("tipo", tipo)
+        .preload("permisos");
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async logout({ response, auth }: HttpContextContract) {

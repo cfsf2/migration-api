@@ -5,45 +5,58 @@ import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class CampanasController {
   public async index() {
-    return await Campana.query();
+    try {
+      return await Campana.query();
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async activas({ request }: HttpContextContract) {
-    const { idUsuario, habilitado } = request.qs();
-    return await Campana.query()
-      .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
-      .preload("orientados")
-      .preload("atributos")
-      .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
-      .apply((scopes) => scopes.habilitado(habilitado))
-      .apply((scopes) => scopes.vigente());
+    try {
+      const { idUsuario, habilitado } = request.qs();
+      return await Campana.query()
+        .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
+        .preload("orientados")
+        .preload("atributos")
+        .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
+        .apply((scopes) => scopes.habilitado(habilitado))
+        .apply((scopes) => scopes.vigente());
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async todas({ request }: HttpContextContract) {
-    return await Campana.query()
-      .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
-      .preload("orientados")
-      .preload("atributos");
+    try {
+      return await Campana.query()
+        .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
+        .preload("orientados")
+        .preload("atributos");
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async mig_nuevoReq({ request, response }: HttpContextContract) {
-    const requerimientoSchema = schema.create({
-      id_campana: schema.number(),
-      id_usuario: schema.number.nullable(),
-      id_farmacia: schema.number.nullable(),
-      celular: schema.string({}, [rules.minLength(10)]),
-    });
-
-    let random = () => {
-      return Math.random().toString(36).slice(2, 10).toUpperCase();
-    };
-
-    const requerimiento = new CampanaRequerimiento();
-
     try {
+      const requerimientoSchema = schema.create({
+        id_campana: schema.number(),
+        id_usuario: schema.number.nullable(),
+        id_farmacia: schema.number.nullable(),
+        celular: schema.string({}, [rules.minLength(10)]),
+      });
+
+      let random = () => {
+        return Math.random().toString(36).slice(2, 10).toUpperCase();
+      };
+
+      const requerimiento = new CampanaRequerimiento();
+
       await request.validate({ schema: requerimientoSchema });
       requerimiento.fill(request.body()); //fill toma los nombres de los campos directamente del request.body, Funciona porque los nombres son iguales en ambos lugares.
       requerimiento.codigo_promo = random();
@@ -56,7 +69,7 @@ export default class CampanasController {
       });
     } catch (error) {
       console.log(error);
-      return response.status(501).send(error);
+      throw new ExceptionHandler();
     }
   }
 
@@ -65,42 +78,49 @@ export default class CampanasController {
     response,
     bouncer,
   }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
-    const { id_campana, finalizado, id_usuario } = request.qs();
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
+      const { id_campana, finalizado, id_usuario } = request.qs();
+      const reqs = await CampanaRequerimiento.query()
+        .if(id_campana && id_campana !== "todas", (query) => {
+          query.where("id_campana", id_campana);
+        })
+        .if(finalizado && finalizado !== "todas", (query) => {
+          query.where("finalizado", finalizado);
+        })
+        .if(id_usuario && id_usuario !== "todas", (query) => {
+          query.where("id_usuario", id_usuario);
+        })
+        .preload("valor", (query) => query.preload("atributo"))
+        .preload("farmacia")
+        .preload("usuario");
 
-    const reqs = await CampanaRequerimiento.query()
-      .if(id_campana && id_campana !== "todas", (query) => {
-        query.where("id_campana", id_campana);
-      })
-      .if(finalizado && finalizado !== "todas", (query) => {
-        query.where("finalizado", finalizado);
-      })
-      .if(id_usuario && id_usuario !== "todas", (query) => {
-        query.where("id_usuario", id_usuario);
-      })
-      .preload("valor", (query) => query.preload("atributo"))
-      .preload("farmacia")
-      .preload("usuario");
-
-    return reqs.map((r) =>
-      r.serialize({
-        relations: {
-          valor: {
-            fields: ["valor", "sql"],
+      return reqs.map((r) =>
+        r.serialize({
+          relations: {
+            valor: {
+              fields: ["valor", "sql"],
+            },
           },
-        },
-      })
-    );
+        })
+      );
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async mig_requerimientos({ request, bouncer }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
-    const { id_campana, finalizado, id_usuario } = request.qs();
-    return CampanaRequerimiento.traerRequerimientos({
-      id_campana,
-      finalizado,
-      id_usuario,
-    });
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_GET);
+      const { id_campana, finalizado, id_usuario } = request.qs();
+      return CampanaRequerimiento.traerRequerimientos({
+        id_campana,
+        finalizado,
+        id_usuario,
+      });
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async update_requerimiento({
@@ -109,18 +129,22 @@ export default class CampanasController {
     auth,
     bouncer,
   }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_FINALIZADO);
-    const usuario = await auth.authenticate();
-    const { id, finalizado } = request.body();
-    const req = await CampanaRequerimiento.find(id);
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_FINALIZADO);
+      const usuario = await auth.authenticate();
+      const { id, finalizado } = request.body();
+      const req = await CampanaRequerimiento.find(id);
 
-    guardarDatosAuditoria({
-      objeto: req,
-      usuario: usuario,
-      accion: AccionCRUD.editar,
-    });
-    req?.merge(request.body());
-    req?.save();
-    return response.status(201).send("Actualizado Correctamente");
+      guardarDatosAuditoria({
+        objeto: req,
+        usuario: usuario,
+        accion: AccionCRUD.editar,
+      });
+      req?.merge(request.body());
+      req?.save();
+      return response.status(201).send("Actualizado Correctamente");
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 }

@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 import {
   AccionCRUD,
@@ -10,10 +11,18 @@ import Categoria from "App/Models/Categoria";
 
 export default class CategoriaController {
   public async index({}: HttpContextContract) {
-    return await Categoria.traerCategorias({ habilitado: "s" });
+    try {
+      return await Categoria.traerCategorias({ habilitado: "s" });
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
   public async mig_admin({}: HttpContextContract) {
-    return await Categoria.traerCategorias({});
+    try {
+      return await Categoria.traerCategorias({});
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
   }
 
   public async mig_agregar_categoria({
@@ -21,17 +30,17 @@ export default class CategoriaController {
     bouncer,
     auth,
   }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_CATEGORIA);
-    const usuario = await auth.authenticate();
-    const nuevaCategoria = new Categoria();
-
-    nuevaCategoria.merge({
-      habilitado: request.body().habilitado === "true" ? "s" : "n",
-      destacada: request.body().destacada === "true" ? "s" : "n",
-      nombre: request.body().nombre,
-    });
-
     try {
+      await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE_CATEGORIA);
+      const usuario = await auth.authenticate();
+      const nuevaCategoria = new Categoria();
+
+      nuevaCategoria.merge({
+        habilitado: request.body().habilitado === "true" ? "s" : "n",
+        destacada: request.body().destacada === "true" ? "s" : "n",
+        nombre: request.body().nombre,
+      });
+
       guardarDatosAuditoria({
         objeto: nuevaCategoria,
         usuario: usuario,
@@ -40,7 +49,7 @@ export default class CategoriaController {
       nuevaCategoria.save();
       return nuevaCategoria;
     } catch (error) {
-      return error;
+      throw new ExceptionHandler();
     }
   }
 
@@ -49,23 +58,23 @@ export default class CategoriaController {
     bouncer,
     auth,
   }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE_CATEGORIA);
-    const usuario = await auth.authenticate();
-    const { id } = request.qs();
-
-    let categoria = await Categoria.findOrFail(id);
-
-    let mergeObject: any = {
-      habilitado: request.body().habilitado === "true" ? "s" : "n",
-      destacada: request.body().destacada === "true" ? "s" : "n",
-      nombre: request.body().nombre,
-    };
-
-    mergeObject = eliminarKeysVacios(mergeObject);
-
-    categoria.merge(mergeObject);
-
     try {
+      await bouncer.authorize("AccesoRuta", Permiso.PDP_UPDATE_CATEGORIA);
+      const usuario = await auth.authenticate();
+      const { id } = request.qs();
+
+      let categoria = await Categoria.findOrFail(id);
+
+      let mergeObject: any = {
+        habilitado: request.body().habilitado === "true" ? "s" : "n",
+        destacada: request.body().destacada === "true" ? "s" : "n",
+        nombre: request.body().nombre,
+      };
+
+      mergeObject = eliminarKeysVacios(mergeObject);
+
+      categoria.merge(mergeObject);
+
       guardarDatosAuditoria({
         objeto: categoria,
         usuario: usuario,
@@ -74,7 +83,7 @@ export default class CategoriaController {
       categoria.save();
       return categoria;
     } catch (error) {
-      return error;
+      throw new ExceptionHandler();
     }
   }
 }
