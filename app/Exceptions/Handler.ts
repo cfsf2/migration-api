@@ -53,7 +53,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         ? errorMensajeTraducido.detalle
         : `${error.code}: Ya existe un registro con ese valor. No puede haber duplicados`;
 
-      return ctx.response.status(422).send({
+      return ctx.response.status(409).send({
         error: { message },
         sql: ctx.$_sql,
       });

@@ -1,5 +1,4 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import Usuario from "App/Models/Usuario";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
