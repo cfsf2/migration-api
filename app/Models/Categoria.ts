@@ -6,13 +6,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 export default class Categoria extends BaseModel {
   static async traerCategorias({ habilitado }: { habilitado?: string }) {
     const datos = await Database.from("tbl_categoria as ca")
-      .select(
-        "ca.habilitado",
-        "ca.destacada",
-        "ca.nombre",
-        "ca.id",
-        "ca.id as _id"
-      )
+      .select("ca.habilitado", "ca.destacada", "ca.nombre", "ca.id")
       .if(habilitado, (query) => {
         query.where("habilitado", "s");
       });
@@ -20,6 +14,7 @@ export default class Categoria extends BaseModel {
     const arrNuevo = datos.map((e) => {
       //ingreso al primer objeto
       //identifico sus keys
+      e._id = e.id.toString();
       const claves = Object.keys(e);
       //y luego ingreso al segundo a partir de sus propias keys
       claves.forEach((k) => {
