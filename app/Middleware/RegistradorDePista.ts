@@ -4,7 +4,7 @@ import SConf from "App/Models/SConf";
 
 export default class RegistradorDePista {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
-    if (ctx.usuario.id) {
+    if (ctx.usuario?.id) {
       if (!ctx.request.param("pantalla")) return await next();
 
       const pista = new SPista();

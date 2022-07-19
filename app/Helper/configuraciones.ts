@@ -13,6 +13,7 @@ import SCC from "App/Models/SConfCpsc";
 import Usuario from "App/Models/Usuario";
 import SRC from "App/Models/SRc";
 import SRD from "App/Models/SRcDeta";
+import SP from "App/Models/SPista";
 
 import U from "./Update";
 import I from "./Insertar";
@@ -28,6 +29,7 @@ let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
 let SRc = SRC;
 let SRcDeta = SRD;
+let SPista = SP;
 
 let Update = U;
 let Insertar = I;
@@ -613,7 +615,7 @@ export const armarVista = async (
     datos,
     sql,
     cabeceras: [],
-    error: "",
+    error: { message: "" },
   };
 
   const parametro = vista.getAtributo({ atributo: "parametro" });
