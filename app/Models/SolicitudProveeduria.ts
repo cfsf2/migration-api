@@ -38,7 +38,8 @@ export default class SolicitudProveeduria extends BaseModel {
       .leftJoin("tbl_farmacia as f", "sp.id_farmacia", "f.id")
       .leftJoin("tbl_estado_pedido as ep", "sp.id_estado_pedido", "ep.id")
       .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id")
-      .if(farmaciaid, (query) => query.where("sp.id_farmacia", farmaciaid));
+      .if(farmaciaid, (query) => query.where("sp.id_farmacia", farmaciaid))
+      .orderBy("fecha", "desc");
 
     const arraySolicitudes = await Promise.all(
       solicitudes.map(async (solicitud) => {
