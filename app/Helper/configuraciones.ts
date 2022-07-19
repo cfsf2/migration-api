@@ -824,7 +824,7 @@ export class ConfBuilder {
           });
           res.cabeceras = cabeceras;
           res.filtros = filtros;
-          res.error = error;
+          res.error = { message: error };
           res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
             ? ctx.$_sql
             : undefined;
@@ -1075,7 +1075,7 @@ const listadoVacio: listado = {
   filtros: [],
   opciones: {},
   sql: undefined,
-  error: "",
+  error: { message: "" },
 };
 
 const vistaVacia = {
@@ -1083,7 +1083,7 @@ const vistaVacia = {
   cabeceras: [],
   opciones: {},
   sql: "",
-  error: "",
+  error: { message: "" },
 };
 
 export interface listado {
@@ -1093,7 +1093,7 @@ export interface listado {
   opciones: {};
   sql?: any;
   conf?: SConf;
-  error: string;
+  error?: { message: string };
 }
 
 export interface vista {
@@ -1102,7 +1102,7 @@ export interface vista {
   opciones: {};
   sql?: any;
   conf?: SConf;
-  error: string;
+  error?: { message: string };
 }
 
 export const modificar = async (
