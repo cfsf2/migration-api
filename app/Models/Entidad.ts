@@ -18,6 +18,7 @@ export default class Entidad extends BaseModel {
 
     const arrNuevo = datos.map((e) => {
       e._id = e.id.toString();
+
       e.no_mostrar_en_proveeduria =
         e.no_mostrar_en_proveeduria === "s" ? false : true;
       return e;
