@@ -141,13 +141,13 @@ const extraerElementos = ({
           ]?.detalles.find((cc) => cc.id_conf === c.id);
         })();
 
-        item["orden"] = configuracionDeUsuario?.orden
-          ? configuracionDeUsuario.orden
-          : sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+        // item["orden"] = configuracionDeUsuario?.orden
+        //   ? configuracionDeUsuario.orden
+        //   : sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
 
-        item["mostrar"] = configuracionDeUsuario?.mostrar
-          ? configuracionDeUsuario.mostrar
-          : "s";
+        // item["mostrar"] = configuracionDeUsuario?.mostrar
+        //   ? configuracionDeUsuario.mostrar
+        //   : "s";
 
         item["default"] = configuracionDeUsuario?.default
           ? configuracionDeUsuario.default
@@ -389,11 +389,11 @@ const getOrder = ({
   ctx: HttpContextContract;
   conf: SConf;
 }): string[] | number[] => {
-  const usuarioOrder = ctx.usuario.configuracionesDeUsuario[conf.id_a].order;
+  const usuarioOrder = ctx.usuario.configuracionesDeUsuario[conf.id_a]?.order;
+
   if (usuarioOrder && usuarioOrder.trim() !== "") {
     return [usuarioOrder];
   }
-
   return getAtributosById([conf], 9);
 };
 
