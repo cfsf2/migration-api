@@ -8,7 +8,6 @@ export default class Entidad extends BaseModel {
     const datos = await Database.from("tbl_entidad as e")
       .select(
         "*",
-        "e.id as _id",
         "e.nombre as entidadnombre",
         "e.titulo as nombre",
         "e.mostrar_en_proveeduria as no_mostrar_en_proveeduria"
@@ -18,6 +17,8 @@ export default class Entidad extends BaseModel {
       });
 
     const arrNuevo = datos.map((e) => {
+      e._id = e.id.toString();
+
       e.no_mostrar_en_proveeduria =
         e.no_mostrar_en_proveeduria === "s" ? false : true;
       return e;
@@ -79,9 +80,12 @@ export default class Entidad extends BaseModel {
   public usuario_modificacion: HasOne<typeof Usuario>;
 
   public serializeExtras() {
-    //como si fuera parte del modelo, y de esta manera
-    return {
-      _id: this.$extras._id?.toString(),
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }
