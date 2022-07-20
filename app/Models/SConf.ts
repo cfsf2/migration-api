@@ -48,6 +48,18 @@ export default class SConf extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_creacion",
+  })
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
+
   @belongsTo(() => SConfPermiso, {
     localKey: "id_conf",
     foreignKey: "id",
@@ -88,12 +100,6 @@ export default class SConf extends BaseModel {
   })
   public sub_conf: HasManyThrough<typeof SConf>;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-    localKey: "id_usuario_creacion",
-  })
-  public usuario_creacion: HasOne<typeof Usuario>;
-
   public getAtributo({ atributo }: { atributo: string }): string {
     if (!this.valores) {
       console.log(
@@ -127,12 +133,6 @@ export default class SConf extends BaseModel {
         .preload("sub_conf", (query) => this.preloadRecursivo(query))
     ).pop();
   }
-
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-    localKey: "id_usuario_modificacion",
-  })
-  public usuario_modificacion: HasOne<typeof Usuario>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

@@ -19,6 +19,7 @@ import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import ExceptionHandler from "App/Exceptions/Handler";
+import SConfConfUsuario from "App/Models/SConfConfUsuario";
 
 const Database = Datab;
 let Servicio = S;
@@ -130,8 +131,19 @@ const extraerElementos = ({
       .map(async (sconf: SConf) => {
         let c = sconf;
         let item = {};
-        item["orden"] =
-          sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+        // Verificar Orden designado por usuario
+
+        const configuracionDeUsuario = ctx.usuario.configuracionesDeUsuario[
+          sc_padre.id_a
+        ]?.detalles.find((cc) => cc.id_conf === c.id);
+
+        item["orden"] = configuracionDeUsuario?.orden
+          ? configuracionDeUsuario.orden
+          : sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+
+        item["mostrar"] = configuracionDeUsuario?.mostrar
+          ? configuracionDeUsuario.mostrar
+          : "s";
 
         const condicionConf = getFullAtributo({
           atributo: "condicionConf",
@@ -353,7 +365,18 @@ const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
   return Array.from(new Set(atributos.filter((c) => c))).flat(20);
 };
 
-const getOrder = (conf: SConf): string[] | number[] => {
+const getOrder = ({
+  ctx,
+  conf,
+}: {
+  ctx: HttpContextContract;
+  conf: SConf;
+}): string[] | number[] => {
+  const usuarioOrder = ctx.usuario.configuracionesDeUsuario[conf.id_a].order;
+  if (usuarioOrder && usuarioOrder.trim() !== "") {
+    return [usuarioOrder];
+  }
+
   return getAtributosById([conf], 9);
 };
 
@@ -506,11 +529,9 @@ const aplicaWhere = async (
       .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
       .toSQL();
 
-    query
-      .where(campo, ">=", desde)
-      .andWhere(campo, "<=", hasta)
-      .orderBy(campo, "desc");
-    //.whereNotNull(campo);
+    query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
+    //  .orderBy(campo, "desc");
+    //  .whereNotNull(campo);
 
     return query;
   }
@@ -519,7 +540,8 @@ const aplicaWhere = async (
     // const fechas = valor.split(",");
 
     const fecha = DateTime.fromISO(valor).toSQL();
-    query.where(campo, operador ? operador : "=", fecha).orderBy(campo, "desc");
+    query.where(campo, operador ? operador : "=", fecha);
+    //.orderBy(campo, "desc");
     //.whereNotNull(campo);
     return query;
   }
@@ -598,133 +620,6 @@ const aplicarFiltros = (
   return query;
 };
 
-export const armarVista = async (
-  ctx: HttpContextContract,
-  vista: SConf,
-  id: number,
-  conf: SConf,
-  bouncer: any,
-  usuario?: Usuario
-): Promise<vista> => {
-  let opciones = {};
-  let datos = [{}];
-  let sql = "";
-
-  let vistaFinal: vista = {
-    opciones,
-    datos,
-    sql,
-    cabeceras: [],
-    error: { message: "" },
-  };
-
-  const parametro = vista.getAtributo({ atributo: "parametro" });
-
-  if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
-
-  conf?.valores.forEach((val) => {
-    if (val.evaluar === "s") {
-      return (opciones[val.atributo[0].nombre] = eval(val.valor));
-    }
-    opciones[val.atributo[0].nombre] = val.valor;
-  });
-
-  vista?.valores.forEach((val) => {
-    if (val.evaluar === "s") {
-      return (opciones[val.atributo[0].nombre] = eval(val.valor));
-    }
-    opciones[val.atributo[0].nombre] = val.valor;
-  });
-
-  opciones["orden"] = conf?.orden.find((o) => o.id_conf_h === vista?.id)?.orden;
-  opciones["tipo"] = vista.tipo;
-  opciones["id_a"] = vista.id_a;
-
-  let columnas = await verificarPermisosHijos(vista, bouncer);
-
-  const modelo = vista.getAtributo({ atributo: "modelo" });
-
-  const campos = getSelect([columnas], 7, usuario);
-  const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
-  const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
-  const order = getOrder(vista);
-  try {
-    if (campos.length !== 0 && id) {
-      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-      // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-      let query = eval(modelo).query().where(`${parametro}`, id);
-
-      //aplicaSelects
-      campos.forEach((campo) => {
-        // console.log(campo);
-        query.select(
-          Database.raw(
-            `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-          )
-        );
-        //console.log(query.toSQL().sql);
-      });
-
-      // aplicarPreloads - left join
-      if (leftJoins.length > 0) {
-        leftJoins.forEach((leftJoin) => {
-          if (leftJoin.evaluar === "s") {
-            return query.joinRaw(eval(leftJoin.valor));
-          }
-          query.joinRaw(leftJoin.valor);
-        });
-      }
-      // aplicar groupsBy
-      if (groupsBy.length > 0) {
-        groupsBy.forEach(({ groupBy, having }) => {
-          query.groupBy(groupBy);
-          if (having) query.having(having);
-        });
-      }
-      // aplicar order del listado
-      if (order.length > 0) {
-        order.forEach((order) => {
-          query.orderBy(order, "desc");
-        });
-      }
-
-      //aplicarFiltros
-
-      query = aplicarFiltros(ctx, query, vista);
-
-      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
-
-      (vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
-        ? ctx.$_sql
-        : undefined),
-        (vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
-          ? vista
-          : undefined),
-        // console.log("vista sql: ", vistaFinal.sql);
-        //await query.paginate(1, 15);
-
-        (vistaFinal.datos = await query);
-    }
-    vistaFinal.cabeceras = (
-      await extraerElementos({
-        ctx,
-        sc_hijos: columnas,
-        sc_padre: vista,
-        bouncer,
-        usuario,
-        datos: vistaFinal.datos,
-        id,
-      })
-    ).filter((c) => c);
-
-    return vistaFinal;
-  } catch (err) {
-    console.log(err);
-    return err;
-  }
-};
-
 export class ConfBuilder {
   public static armarListado = async (
     ctx: HttpContextContract,
@@ -743,6 +638,17 @@ export class ConfBuilder {
 
     if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
+    let configuracionDeUsuario = [] as any;
+    if (usuario) {
+      configuracionDeUsuario = await SConfConfUsuario.query()
+        .where("id_conf", listado.id)
+        .andWhere("id_usuario", usuario.id)
+        .preload("detalles");
+      ctx.usuario.configuracionesDeUsuario[listado.id_a] =
+        configuracionDeUsuario[0];
+      opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
+    }
+
     conf?.valores.forEach((val) => {
       if (val.evaluar === "s") {
         return (opciones[val.atributo[0].nombre] = eval(val.valor));
@@ -751,6 +657,7 @@ export class ConfBuilder {
     });
 
     listado?.valores.forEach((val) => {
+      //console.log(configuracionDeUsuario[0].detalles);
       if (val.evaluar === "s") {
         return (opciones[val.atributo[0].nombre] = eval(val.valor));
       }
@@ -771,7 +678,7 @@ export class ConfBuilder {
     const campos = getSelect([columnas], 7);
     const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
     const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
-    const order = getOrder(listado);
+    const order = getOrder({ ctx, conf: listado });
 
     //Chequear filtros obligatorios
     if (solo_conf === "n") {
@@ -880,7 +787,12 @@ export class ConfBuilder {
         // aplicar order del listado
         if (order.length > 0) {
           order.forEach((order) => {
-            query.orderBy(order, "desc");
+            const orderValores = order.split(",");
+
+            query.orderBy(
+              orderValores[0],
+              orderValores[1] ? orderValores[1].trim() : "desc"
+            );
           });
         }
 
@@ -958,7 +870,7 @@ export class ConfBuilder {
       datos,
       sql,
       cabeceras: [],
-      error: "",
+      error: { message: "" },
     };
 
     const parametro = vista.getAtributo({ atributo: "parametro" });
@@ -992,7 +904,7 @@ export class ConfBuilder {
     const campos = getSelect([columnas], 7, usuario);
     const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
     const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
-    const order = getOrder(vista);
+    const order = getOrder({ ctx, conf: vista });
     try {
       if (campos.length !== 0 && id) {
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------

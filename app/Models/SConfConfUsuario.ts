@@ -1,7 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasMany,
+  hasMany,
+  HasOne,
+  hasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import SConf from "./SConf";
+import SConfConfDeta from "./SConfConfDeta";
 
 export default class SConfConfUsuario extends BaseModel {
   public static table = "s_conf_conf_usuario";
@@ -56,4 +64,10 @@ export default class SConfConfUsuario extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  @hasMany(() => SConfConfDeta, {
+    foreignKey: "id_conf_conf_usuario",
+    localKey: "id",
+  })
+  public detalles: HasMany<typeof SConfConfDeta>;
 }

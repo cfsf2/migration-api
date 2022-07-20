@@ -6,6 +6,7 @@ export default class UsuarioPermiso {
     if (typeof ctx.auth.user !== "undefined") {
       ctx.auth.user.Permisos = await ctx.auth.user?._Permisos();
       ctx.usuario = ctx.auth.user;
+      ctx.usuario.configuracionesDeUsuario = {};
     }
     ctx.$_filtros = {
       solicitados: {},
