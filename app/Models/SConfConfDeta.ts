@@ -35,7 +35,7 @@ export default class SConfConfDeta extends BaseModel {
   public mostrar: string;
 
   @column()
-  public value: string;
+  public default: string;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;

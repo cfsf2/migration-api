@@ -133,9 +133,13 @@ const extraerElementos = ({
         let item = {};
         // Verificar Orden designado por usuario
 
-        const configuracionDeUsuario = ctx.usuario.configuracionesDeUsuario[
-          sc_padre.id_a
-        ]?.detalles.find((cc) => cc.id_conf === c.id);
+        const configuracionDeUsuario = (() => {
+          // if(sc_padre.getAtributo({atributo: ""}))
+
+          return ctx.usuario.configuracionesDeUsuario[
+            sc_padre.id_a
+          ]?.detalles.find((cc) => cc.id_conf === c.id);
+        })();
 
         item["orden"] = configuracionDeUsuario?.orden
           ? configuracionDeUsuario.orden
@@ -144,6 +148,10 @@ const extraerElementos = ({
         item["mostrar"] = configuracionDeUsuario?.mostrar
           ? configuracionDeUsuario.mostrar
           : "s";
+
+        item["default"] = configuracionDeUsuario?.default
+          ? configuracionDeUsuario.default
+          : undefined;
 
         const condicionConf = getFullAtributo({
           atributo: "condicionConf",
@@ -262,6 +270,15 @@ const extraerElementos = ({
 
               if (!per) return (item[atributoNombre] = undefined);
               return (item["enlace_id_a"] = val.valor);
+            }
+
+            if (
+              configuracionDeUsuario &&
+              configuracionDeUsuario[atributoNombre] &&
+              configuracionDeUsuario[atributoNombre] !== ""
+            ) {
+              return (item[atributoNombre] =
+                configuracionDeUsuario[atributoNombre]);
             }
             item[atributoNombre] = val.valor;
           })
@@ -589,6 +606,14 @@ const aplicarFiltros = (
       let valordefault = fd?.valores.find((v) => {
         return v.atributo[0].nombre === "default";
       })?.valor;
+
+      const usuarioDefault = ctx.usuario.configuracionesDeUsuario[
+        configuracion.id_a
+      ]?.detalles?.find((cc) => cc.id_conf === fd.id)?.default;
+
+      if (usuarioDefault && usuarioDefault.trim() !== "") {
+        valordefault = usuarioDefault;
+      }
 
       if (!valordefault) return;
 
