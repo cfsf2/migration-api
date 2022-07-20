@@ -134,11 +134,16 @@ const extraerElementos = ({
         // Verificar Orden designado por usuario
 
         const configuracionDeUsuario = (() => {
-          // if(sc_padre.getAtributo({atributo: ""}))
-
-          return ctx.usuario.configuracionesDeUsuario[
-            sc_padre.id_a
-          ]?.detalles.find((cc) => cc.id_conf === c.id);
+          if (
+            sc_padre.getAtributo({
+              atributo: "configuracion_usuario_activo",
+            }) === "s"
+          ) {
+            return ctx.usuario.configuracionesDeUsuario[
+              sc_padre.id_a
+            ]?.detalles.find((cc) => cc.id_conf === c.id);
+          }
+          return {};
         })();
 
         item["orden"] = configuracionDeUsuario?.orden
