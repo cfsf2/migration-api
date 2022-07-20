@@ -141,17 +141,22 @@ const extraerElementos = ({
           ]?.detalles.find((cc) => cc.id_conf === c.id);
         })();
 
-        // item["orden"] = configuracionDeUsuario?.orden
-        //   ? configuracionDeUsuario.orden
-        //   : sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
+        item["orden"] = configuracionDeUsuario?.orden
+          ? configuracionDeUsuario.orden
+          : sc_padre.orden.find((o) => o.id_conf_h === c.id)?.orden ?? 0;
 
-        // item["mostrar"] = configuracionDeUsuario?.mostrar
-        //   ? configuracionDeUsuario.mostrar
-        //   : "s";
+        item["mostrar"] = configuracionDeUsuario?.mostrar
+          ? configuracionDeUsuario.mostrar
+          : "s";
 
-        item["default"] = configuracionDeUsuario?.default
-          ? configuracionDeUsuario.default
-          : undefined;
+        if (
+          ctx.usuario.configuracionesDeUsuario[sc_padre.id_a]
+            ?.guardar_filtros === "s"
+        ) {
+          item["default"] = configuracionDeUsuario?.default
+            ? configuracionDeUsuario.default
+            : undefined;
+        }
 
         const condicionConf = getFullAtributo({
           atributo: "condicionConf",
@@ -607,12 +612,17 @@ const aplicarFiltros = (
         return v.atributo[0].nombre === "default";
       })?.valor;
 
-      const usuarioDefault = ctx.usuario.configuracionesDeUsuario[
-        configuracion.id_a
-      ]?.detalles?.find((cc) => cc.id_conf === fd.id)?.default;
+      if (
+        ctx.usuario.configuracionesDeUsuario[configuracion.id_a]
+          .guardar_filtros === "s"
+      ) {
+        const usuarioDefault = ctx.usuario.configuracionesDeUsuario[
+          configuracion.id_a
+        ]?.detalles?.find((cc) => cc.id_conf === fd.id)?.default;
 
-      if (usuarioDefault && usuarioDefault.trim() !== "") {
-        valordefault = usuarioDefault;
+        if (usuarioDefault && usuarioDefault.trim() !== "") {
+          valordefault = usuarioDefault;
+        }
       }
 
       if (!valordefault) return;
