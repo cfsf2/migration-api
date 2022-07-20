@@ -6,7 +6,7 @@ import auth from "Config/auth";
 
 export default class LaboratoriosController {
   public async mig_index({ bouncer }) {
-    await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
+    //await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
     return await Laboratorio.traerLaboratorios({});
   }
 

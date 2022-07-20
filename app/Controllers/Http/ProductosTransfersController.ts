@@ -6,7 +6,7 @@ import TransferProductoInstitucion from "App/Models/TransferProductoInstitucion"
 
 export default class ProductosTransfersController {
   public async mig_index({ bouncer }: HttpContextContract) {
-    await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_PRODS);
+    //await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_PRODS);
 
     return await TransferProducto.traerTrasferProducto({
       en_papelera: "n",
