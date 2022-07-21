@@ -15,6 +15,7 @@ export default class UsuarioPermiso {
     ctx.$_filtros.solicitados = ctx.request.qs();
     ctx.$_sql = [];
     ctx.$_datos = [];
+    ctx.$_errores = [];
 
     await next();
   }

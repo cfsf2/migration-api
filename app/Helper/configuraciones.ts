@@ -135,7 +135,8 @@ const extraerElementos = ({
 
         const configuracionDeUsuario = (() => {
           if (
-            sc_padre.getAtributo({
+            getAtributo({
+              conf: sc_padre,
               atributo: "configuracion_usuario_activo",
             }) === "s"
           ) {
@@ -619,7 +620,7 @@ const aplicarFiltros = (
 
       if (
         ctx.usuario.configuracionesDeUsuario[configuracion.id_a]
-          .guardar_filtros === "s"
+          ?.guardar_filtros === "s"
       ) {
         const usuarioDefault = ctx.usuario.configuracionesDeUsuario[
           configuracion.id_a
@@ -671,118 +672,140 @@ export class ConfBuilder {
     usuario?: Usuario,
     solo_conf?: string
   ) => {
-    let opciones = {};
-    let opcionesPantalla = {};
-    let datos = [];
-    let res = listadoVacio;
-
-    if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
-
-    let configuracionDeUsuario = [] as any;
-    if (usuario) {
-      configuracionDeUsuario = await SConfConfUsuario.query()
-        .where("id_conf", listado.id)
-        .andWhere("id_usuario", usuario.id)
-        .preload("detalles");
-      ctx.usuario.configuracionesDeUsuario[listado.id_a] =
-        configuracionDeUsuario[0];
-      opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
-    }
-
-    conf?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opcionesPantalla[val.atributo[0].nombre] = val.valor;
-    });
-
-    listado?.valores.forEach((val) => {
-      //console.log(configuracionDeUsuario[0].detalles);
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
-
-    opciones["orden"] = conf?.orden.find(
-      (o) => o.id_conf_h === listado?.id
-    )?.orden;
-
-    opciones["id_a"] = listado.id_a;
-    opciones["tipo"] = listado.tipo;
-
-    let columnas = await verificarPermisos(listado, bouncer, 4);
-    let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
-
-    const modelo = listado.getAtributo({ atributo: "modelo" });
-    const campos = getSelect([columnas], 7);
-    const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
-    const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
-    const order = getOrder({ ctx, conf: listado });
-
-    //Chequear filtros obligatorios
-    if (solo_conf === "n") {
-      const filtrosObligatorios = filtros_aplicables
-        .filter(
-          (f) => getAtributo({ atributo: "permite_null", conf: f }) === "n"
-        )
-        .map((f) => f.id_a);
-
-      const filtrosOpcionalesNull = filtros_aplicables
-        .filter(
-          (f) => getAtributo({ atributo: "opcionales_null", conf: f }) === "s"
-        )
-        .map((f) => f.id_a);
-
-      if (filtrosObligatorios.length > 0) {
-        let filtros_obligatorios_insatisfechos = filtrosObligatorios.filter(
-          (k) => !queryFiltros[k] || queryFiltros[k] === null
-        );
-
-        const found = Object.keys(queryFiltros).some(
-          (r) => filtrosOpcionalesNull.indexOf(r) >= 0
-        ); // si Algun filtro opcional esta satisfecho
-
-        if (found) {
-          filtros_obligatorios_insatisfechos =
-            filtros_obligatorios_insatisfechos.filter(
-              (f) => !filtrosOpcionalesNull.includes(f)
-            ); // filtra todos los insatisfechos opcionales
-        }
-
-        if (filtros_obligatorios_insatisfechos.length > 0) {
-          const error = `Los filtros ${filtros_obligatorios_insatisfechos.toString()} son obligatorios`;
-          const cabeceras = await extraerElementos({
-            ctx,
-            sc_hijos: columnas,
-            sc_padre: listado,
-            bouncer,
-            usuario,
-            datos,
-            id,
-          });
-
-          const filtros = await extraerElementos({
-            ctx,
-            sc_hijos: filtros_aplicables,
-            sc_padre: listado,
-            bouncer,
-            usuario,
-            datos,
-            id,
-          });
-          res.cabeceras = cabeceras;
-          res.filtros = filtros;
-          res.error = { message: error };
-          res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
-            ? ctx.$_sql
-            : undefined;
-          return ctx.response.status(410).send(res);
-        }
-      }
-    }
-
     try {
+      let opciones = { configuracion_usuario_activo: "n" };
+      let opcionesPantalla = {};
+      let datos = [];
+      let res = listadoVacio;
+
+      if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
+
+      let configuracionDeUsuario = [] as any;
+      if (usuario) {
+        configuracionDeUsuario = await SConfConfUsuario.query()
+          .where("id_conf", listado.id)
+          .andWhere("id_usuario", usuario.id)
+          .preload("detalles");
+        ctx.usuario.configuracionesDeUsuario[listado.id_a] =
+          configuracionDeUsuario[0];
+        opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
+      }
+
+      conf?.valores.forEach((val) => {
+        if (val.evaluar === "s") {
+          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+        }
+        opcionesPantalla[val.atributo[0].nombre] = val.valor;
+      });
+
+      listado?.valores.forEach((val) => {
+        if (val.evaluar === "s") {
+          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+        }
+        opciones[val.atributo[0].nombre] = val.valor;
+      });
+
+      if (
+        opciones.configuracion_usuario_activo === "s" &&
+        configuracionDeUsuario[0]
+      ) {
+        listado?.valores.forEach((val) => {
+          if (configuracionDeUsuario[0][val.atributo[0].nombre])
+            opciones[val.atributo[0].nombre] =
+              configuracionDeUsuario[0][val.atributo[0].nombre];
+          if (configuracionDeUsuario[0].iniciar_activo === "s") solo_conf = "n";
+        });
+      }
+
+      opciones["orden"] = conf?.orden.find(
+        (o) => o.id_conf_h === listado?.id
+      )?.orden;
+
+      opciones["id_a"] = listado.id_a;
+      opciones["tipo"] = listado.tipo;
+
+      let columnas = await verificarPermisos(listado, bouncer, 4);
+      let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
+
+      const modelo = listado.getAtributo({ atributo: "modelo" });
+      const campos = getSelect([columnas], 7);
+      const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
+      const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
+      const order = getOrder({ ctx, conf: listado });
+      //Chequear filtros obligatorios
+      if (solo_conf === "n") {
+        const filtrosObligatorios = filtros_aplicables
+          .filter(
+            (f) => getAtributo({ atributo: "permite_null", conf: f }) === "n"
+          )
+          .map((f) => {
+            return { id_a: f.id_a, id: f.id };
+          });
+
+        const filtrosOpcionalesNull = filtros_aplicables
+          .filter(
+            (f) => getAtributo({ atributo: "opcionales_null", conf: f }) === "s"
+          )
+          .map((f) => f.id_a);
+
+        if (filtrosObligatorios.length > 0) {
+          let filtros_obligatorios_insatisfechos = filtrosObligatorios.filter(
+            (k) => {
+              return !queryFiltros[k.id_a] || queryFiltros[k.id_a] === null;
+            }
+          );
+
+          const found = Object.keys(queryFiltros).some(
+            (r) => filtrosOpcionalesNull.indexOf(r) >= 0
+          ); // si Algun filtro opcional esta satisfecho
+
+          if (found) {
+            filtros_obligatorios_insatisfechos =
+              filtros_obligatorios_insatisfechos.filter(
+                (f) => !filtrosOpcionalesNull.includes(f)
+              ); // filtra todos los insatisfechos opcionales
+          }
+
+          if (filtros_obligatorios_insatisfechos.length > 0) {
+            const error = `Los filtros ${filtros_obligatorios_insatisfechos
+              .map((f) => f.id_a)
+              .toString()} son obligatorios`;
+            const cabeceras = await extraerElementos({
+              ctx,
+              sc_hijos: columnas,
+              sc_padre: listado,
+              bouncer,
+              usuario,
+              datos,
+              id,
+            });
+
+            const filtros = await extraerElementos({
+              ctx,
+              sc_hijos: filtros_aplicables,
+              sc_padre: listado,
+              bouncer,
+              usuario,
+              datos,
+              id,
+            });
+            res.cabeceras = cabeceras;
+            res.filtros = filtros;
+            res.opciones = opciones;
+            res.error = { message: error };
+            ctx.$_errores.push({
+              error: { message: error, continuar: true },
+              conf: listado.id_a,
+            });
+            res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+              ? ctx.$_sql
+              : undefined;
+            ctx.response.status(410);
+            return res;
+          }
+        }
+      }
+
       if (campos.length !== 0) {
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------

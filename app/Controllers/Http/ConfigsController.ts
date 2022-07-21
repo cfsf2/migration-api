@@ -163,7 +163,7 @@ export default class ConfigsController {
     ) as SConf[];
 
     try {
-      const respuesta: respuesta = respuestaVacia;
+      ctx.$_respuesta = respuestaVacia;
 
       const listadosArmados = await Promise.all(
         listados.map(async (listado) => {
@@ -259,24 +259,19 @@ export default class ConfigsController {
         }
         opciones[val.atributo[0].nombre] = val.valor;
       });
-      respuesta.opciones = opciones;
+      ctx.$_respuesta.opciones = opciones;
 
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);
       configuraciones = configuraciones.concat(vistasArmadas);
       configuraciones = configuraciones.concat(contenedoresArmadas);
 
-      respuesta.configuraciones = configuraciones;
-
-      return respuesta;
+      ctx.$_respuesta.configuraciones = configuraciones;
+      ctx.$_respuesta.error = ctx.$_errores[0]?.error;
+      return ctx.$_respuesta;
     } catch (err) {
       return err;
     }
-  }
-
-  public async Test() {
-    global.TEST = "ESTA VARIABLE GLOBAL LA SETIE A LAS " + new Date();
-    return global;
   }
 
   public async Update(ctx: HttpContextContract) {
@@ -380,6 +375,7 @@ export default class ConfigsController {
 const respuestaVacia: respuesta = {
   configuraciones: [],
   opciones: {},
+  error: {},
 };
 
 const listadoVacio: listado = {
@@ -387,10 +383,11 @@ const listadoVacio: listado = {
   cabeceras: [{}],
   filtros: [{}],
   opciones: {},
-  error: "",
+  error: { message: "" },
 };
 
 export interface respuesta {
   configuraciones: any[];
   opciones: {};
+  error: {};
 }
