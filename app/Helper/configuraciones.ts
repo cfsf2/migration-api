@@ -685,7 +685,7 @@ export class ConfBuilder {
         configuracionDeUsuario = await SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
-          .preload("detalles");
+          .preload("detalles", (query) => query.preload("conf"));
         ctx.usuario.configuracionesDeUsuario[listado.id_a] =
           configuracionDeUsuario[0];
         opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
@@ -713,7 +713,6 @@ export class ConfBuilder {
           if (configuracionDeUsuario[0][val.atributo[0].nombre])
             opciones[val.atributo[0].nombre] =
               configuracionDeUsuario[0][val.atributo[0].nombre];
-          if (configuracionDeUsuario[0].iniciar_activo === "s") solo_conf = "n";
         });
       }
 
@@ -732,6 +731,7 @@ export class ConfBuilder {
       const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
       const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
       const order = getOrder({ ctx, conf: listado });
+
       //Chequear filtros obligatorios
       if (solo_conf === "n") {
         const filtrosObligatorios = filtros_aplicables
