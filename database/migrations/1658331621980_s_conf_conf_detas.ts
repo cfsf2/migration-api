@@ -14,7 +14,7 @@ export default class SConfConfDetas extends BaseSchema {
       table.integer("id_conf").references("s_conf.id").notNullable();
       table.integer("orden");
       table.enum("mostrar", ["s", "n"]);
-      table.string("value", 256);
+      table.string("default", 256);
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
        */
