@@ -14,12 +14,13 @@ import Usuario from "App/Models/Usuario";
 import SRC from "App/Models/SRc";
 import SRD from "App/Models/SRcDeta";
 import SP from "App/Models/SPista";
+import SCCU from "App/Models/SConfConfUsuario";
+import SCCD from "App/Models/SConfConfDeta";
 
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import ExceptionHandler from "App/Exceptions/Handler";
-import SConfConfUsuario from "App/Models/SConfConfUsuario";
 
 const Database = Datab;
 let Servicio = S;
@@ -31,6 +32,8 @@ let SConfCpsc = SCC;
 let SRc = SRC;
 let SRcDeta = SRD;
 let SPista = SP;
+let SConfConfUsuario = SCCU;
+let SConfConfDeta = SCCD;
 
 let Update = U;
 let Insertar = I;
@@ -480,6 +483,7 @@ interface select {
 }
 
 const getSelect = (
+  ctx,
   sc_confs: (SConf | SConf[])[],
   id: number,
   usuario?: Usuario
@@ -529,7 +533,7 @@ const getSelect = (
     });
 
     if (conf.sub_conf.length > 0) {
-      selects.push(getSelect(conf.sub_conf, 7, usuario));
+      selects.push(getSelect(ctx, conf.sub_conf, 7, usuario));
     }
   });
   return Array.from(new Set(selects.flat(20).filter((c) => c.campo)));
@@ -727,7 +731,7 @@ export class ConfBuilder {
       let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
 
       const modelo = listado.getAtributo({ atributo: "modelo" });
-      const campos = getSelect([columnas], 7);
+      const campos = getSelect(ctx, [columnas], 7);
       const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
       const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
       const order = getOrder({ ctx, conf: listado });
@@ -870,7 +874,7 @@ export class ConfBuilder {
           filtros_aplicables
         );
 
-        ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
+        ctx.$_sql.push({ sql: query.toQuery(), conf: listado.id_a });
         // console.log("listado sql: ", sql);
         //await query.paginate(1, 15);
         if (solo_conf === "n") {
@@ -898,11 +902,34 @@ export class ConfBuilder {
         id,
       });
 
+      if (
+        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
+      ) {
+        const MenuConfiguracionDeListado = await SConf.query()
+          .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
+          .preload("conf_permiso")
+          .preload("tipo")
+          .preload("orden")
+          .preload("valores", (query) => query.preload("atributo"))
+          .preload("sub_conf", (query) => this.preloadRecursivo(query))
+          .firstOrFail();
+
+        const MenuConfiguracionDeListadoArmado = await this.armarContenedor({
+          ctx,
+          contenedor: MenuConfiguracionDeListado,
+          idListado: listado.id,
+          idVista: listado.id,
+        });
+
+        opciones["configuracionesDeListado"] = [
+          MenuConfiguracionDeListadoArmado,
+        ];
+      }
       return {
         cabeceras,
         filtros,
         opciones,
-        datos,
+        datos: datos,
         sql: (await bouncer.allows("AccesoRuta", "GET_SQL"))
           ? ctx.$_sql
           : undefined,
@@ -964,10 +991,11 @@ export class ConfBuilder {
 
     const modelo = vista.getAtributo({ atributo: "modelo" });
 
-    const campos = getSelect([columnas], 7, usuario);
+    const campos = getSelect(ctx, [columnas], 7, usuario);
     const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
     const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
     const order = getOrder({ ctx, conf: vista });
+
     try {
       if (campos.length !== 0 && id) {
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
@@ -1015,16 +1043,15 @@ export class ConfBuilder {
 
         ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
 
-        (vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
           ? ctx.$_sql
-          : undefined),
-          (vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
-            ? vista
-            : undefined),
-          // console.log("vista sql: ", vistaFinal.sql);
-          //await query.paginate(1, 15);
-
-          (vistaFinal.datos = await query);
+          : undefined;
+        vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+          ? vista
+          : undefined;
+        // console.log("vista sql: ", vistaFinal.sql);
+        //await query.paginate(1, 15);
+        vistaFinal.datos = await query;
       }
       vistaFinal.cabeceras = (
         await extraerElementos({
@@ -1043,6 +1070,84 @@ export class ConfBuilder {
       console.log(err);
       throw err;
     }
+  };
+
+  public static armarContenedor = async ({
+    ctx,
+    idListado,
+    idVista,
+    contenedor,
+  }: {
+    ctx: HttpContextContract;
+    contenedor: SConf;
+    idListado: number;
+    idVista: number;
+  }) => {
+    const p: {
+      opciones: {};
+      configuraciones: any[];
+    } = {
+      opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
+      configuraciones: [],
+    };
+
+    const _listados = contenedor.sub_conf.filter(
+      (sc) => sc.tipo.id === 2
+    ) as SConf[];
+    const _vistas = contenedor.sub_conf.filter(
+      (sc) => sc.tipo.id === 6
+    ) as SConf[];
+
+    const _listadosArmados = await Promise.all(
+      _listados.map(async (listado) => {
+        let solo_conf = "s";
+        if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
+          solo_conf = "n";
+        }
+        return await this.armarListado(
+          ctx,
+          listado,
+          contenedor,
+          ctx.bouncer,
+          ctx.$_filtros.solicitados,
+          idListado,
+          ctx.usuario,
+          solo_conf
+        );
+      })
+    );
+
+    const _vistasArmadas = await Promise.all(
+      _vistas.map(async (vista) => {
+        return this.armarVista(
+          ctx,
+          vista,
+          idVista,
+          contenedor,
+          ctx.bouncer,
+          ctx.usuario
+        );
+      })
+    );
+
+    p.opciones["orden"] = contenedor?.orden.find(
+      (o) => o.id_conf_h === contenedor?.id
+    )?.orden;
+
+    p.configuraciones = [];
+    p.configuraciones = p.configuraciones.concat(_listadosArmados);
+    p.configuraciones = p.configuraciones.concat(_vistasArmadas);
+
+    return p;
+  };
+
+  public static preloadRecursivo = (query) => {
+    return query
+      .preload("conf_permiso", (query) => query.preload("permiso"))
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => this.preloadRecursivo(query));
   };
 }
 

@@ -191,64 +191,14 @@ export default class ConfigsController {
       );
 
       const contenedoresArmadas = await Promise.all(
-        contenedores.map(async (contenedor) => {
-          const p: {
-            opciones: {};
-            configuraciones: any[];
-          } = {
-            opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
-            configuraciones: [],
-          };
-
-          const _listados = contenedor.sub_conf.filter(
-            (sc) => sc.tipo.id === 2
-          ) as SConf[];
-          const _vistas = contenedor.sub_conf.filter(
-            (sc) => sc.tipo.id === 6
-          ) as SConf[];
-
-          const _listadosArmados = await Promise.all(
-            _listados.map(async (listado) => {
-              let solo_conf = "s";
-              if (listado.getAtributo({ atributo: "iniciar_activo" }) === "s") {
-                solo_conf = "n";
-              }
-              return await ConfBuilder.armarListado(
-                ctx,
-                listado,
-                contenedor,
-                bouncer,
-                queryFiltros,
-                id_a_solicitados.id,
-                usuario,
-                solo_conf
-              );
-            })
-          );
-
-          const _vistasArmadas = await Promise.all(
-            _vistas.map(async (vista) => {
-              return ConfBuilder.armarVista(
-                ctx,
-                vista,
-                id_a_solicitados.id,
-                contenedor,
-                bouncer,
-                usuario
-              );
-            })
-          );
-
-          p.opciones["orden"] = conf?.orden.find(
-            (o) => o.id_conf_h === contenedor?.id
-          )?.orden;
-
-          p.configuraciones = [];
-          p.configuraciones = p.configuraciones.concat(_listadosArmados);
-          p.configuraciones = p.configuraciones.concat(_vistasArmadas);
-
-          return p;
-        })
+        contenedores.map(async (contenedor) =>
+          ConfBuilder.armarContenedor({
+            ctx,
+            idVista: id,
+            idListado: id,
+            contenedor,
+          })
+        )
       );
 
       let opciones = {};
