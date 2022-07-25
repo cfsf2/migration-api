@@ -53,6 +53,12 @@ export default class SConfConfUsuario extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
     localKey: "id_usuario_creacion",
