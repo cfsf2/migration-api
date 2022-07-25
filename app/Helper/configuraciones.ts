@@ -203,7 +203,7 @@ const extraerElementos = ({
             // )
             //   return (item[atributoNombre] = undefined);
 
-            if (val.evaluar === "s") {
+            if (val.evaluar === "s" && val.sql === "n") {
               val.valor = eval(val.valor);
             }
 
@@ -1068,7 +1068,7 @@ export class ConfBuilder {
       return vistaFinal;
     } catch (err) {
       console.log(err);
-      throw err;
+      throw await new ExceptionHandler().handle(err, ctx);
     }
   };
 
@@ -1198,7 +1198,7 @@ export const modificar = async (
 
   if (!funcion) return Update.update({ ctx, usuario, id, valor, conf });
 
-  return eval(funcion)({ usuario, id, valor, conf });
+  return eval(funcion)({ ctx, usuario, id, valor, conf });
 };
 
 export const insertar = (
@@ -1208,12 +1208,17 @@ export const insertar = (
   conf: SConf,
   usuario: Usuario
 ) => {
-  const funcion = getAtributo({ atributo: "insert_funcion", conf });
+  try {
+    const funcion = getAtributo({ atributo: "insert_funcion", conf });
 
-  if (!funcion)
-    return Insertar.insertar({ ctx, valor, insert_ids, conf, usuario });
+    if (!funcion)
+      return Insertar.insertar({ ctx, valor, insert_ids, conf, usuario });
 
-  return eval(funcion)({ valor, insert_ids, conf, usuario });
+    return eval(funcion)({ ctx, valor, insert_ids, conf, usuario });
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
 };
 
 export const eliminar = (
@@ -1226,5 +1231,5 @@ export const eliminar = (
 
   if (!funcion) return Eliminar.eliminar({ ctx, delete_id, conf, usuario });
 
-  return eval(funcion)({ delete_id, conf, usuario });
+  return eval(funcion)({ ctx, delete_id, conf, usuario });
 };

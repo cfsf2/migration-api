@@ -16,7 +16,22 @@ export default class UsuarioPermiso {
     ctx.$_sql = [];
     ctx.$_datos = [];
     ctx.$_errores = [];
+    ctx.$_conf = { estructura: {}, buscarPadre: buscarPadre };
 
     await next();
   }
 }
+
+const buscarPadre = ({ id, conf }: { id: string; conf: any }) => {
+  console.log(id, conf.id_a);
+  let padre = "";
+  const id_buscado = conf.sub_conf?.some((sc) => sc.id === id);
+
+  if (id_buscado) {
+    return conf;
+  }
+
+  conf.sub_conf?.forEach((sc) => (padre = buscarPadre({ id, conf: sc })));
+
+  return padre;
+};
