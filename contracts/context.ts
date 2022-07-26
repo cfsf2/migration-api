@@ -1,3 +1,5 @@
+import SConf from "App/Models/SConf";
+
 declare module "@ioc:Adonis/Core/HttpContext" {
   interface HttpContextContract {
     $_filtros: {
@@ -13,7 +15,8 @@ declare module "@ioc:Adonis/Core/HttpContext" {
     $_respuesta: { configuraciones: any[]; opciones: {}; error: {} };
     $_conf: {
       estructura: any;
-      buscarPadre: ({ id, conf }: { id: string; conf: any }) => {};
+      buscarPadre: ({ id, conf }: { id: number; conf: any }) => {};
+      getIDA: (id: number, estructura?: SConf) => string | undefined;
     };
 
     usuario: any;

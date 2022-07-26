@@ -39,7 +39,7 @@ export default class ConfigsController {
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => preloadRecursivo(query))
       .firstOrFail();
-
+    ctx.$_conf.estructura = conf;
     // para listado
     if (!(await bouncer.allows("AccesoConf", conf))) return listadoVacio;
 
