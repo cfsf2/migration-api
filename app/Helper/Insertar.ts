@@ -256,7 +256,7 @@ export class Insertar {
         .split("|")
         .map((v) => v.trim());
 
-      const trx = await Database.transaction();
+      // const trx = await Database.transaction();
 
       let SCCU = (
         await SConfConfUsuario.query()
@@ -310,7 +310,7 @@ export class Insertar {
             accion: AccionCRUD.crear,
           });
           try {
-            (await SCCD.save()).useTransaction(trx);
+            await SCCD.save(); //.useTransaction(trx);
           } catch (err) {
             if (err.code === "ER_DUP_ENTRY") {
               const SCCD = await SConfConfDeta.query()
@@ -334,11 +334,11 @@ export class Insertar {
                   valorAnterior,
                 },
               });
-              (await SCCD[0].save()).useTransaction(trx);
+              await SCCD[0].save(); //.useTransaction(trx);
               return { registroModificado: SCCD[0].toJSON(), creado: true };
             }
             console.log(err);
-            return err;
+            throw err;
           }
         })
       );
