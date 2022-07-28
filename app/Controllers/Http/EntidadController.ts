@@ -92,12 +92,12 @@ export default class EntidadController {
         rentabilidad: request.body().rentabilidad,
         mostrar_en_proveeduria:
           typeof request.body().no_mostrar_en_proveeduria !== "undefined"
-            ? request.body().no_mostrar_en_proveeduria === true
-              ? "s"
-              : "n"
+            ? request.body().no_mostrar_en_proveeduria === "true"
+              ? "n"
+              : "s"
             : null,
       };
-      console.log("habilitado? ; ", `${request.body().habilitado}`);
+      console.log("habilitado? ; ", `${request.body().mostrar_en_proveeduria}`);
 
       mergeObject = eliminarKeysVacios(mergeObject);
 
