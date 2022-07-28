@@ -301,9 +301,9 @@ export class Insertar {
 
           const SCCD = new SConfConfDeta();
 
-          if (filtroConf?.getAtributo({ atributo: "componente" }) === "fecha") {
-            valor[filtro] = JSON.stringify(valor[filtro]);
-          }
+          // if (filtroConf?.getAtributo({ atributo: "componente" }) === "fecha") {
+          //   valor[filtro] = JSON.stringify(valor[filtro]);
+          // }
 
           SCCD.merge({
             [campo]: valor[filtro],

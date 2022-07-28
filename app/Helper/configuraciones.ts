@@ -553,7 +553,8 @@ const aplicaWhere = async (
   if (operador === "like") valor = valor?.concat("%");
 
   if (operador === "fecha" || operador === "fecha_hora") {
-    const fechas = valor.split(",");
+    const fechas = JSON.parse(valor);
+
     if (fechas.length !== 2) return;
 
     const desde = DateTime.fromISO(fechas[0]).toSQL();
