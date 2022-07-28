@@ -267,11 +267,6 @@ export class Insertar {
           )
       )[0];
 
-      console.log(
-        ctx.usuario.id,
-        insert_idsArray[camposArray.indexOf("id_conf_madre")]
-      );
-
       if (!SCCU) {
         console.log(
           "No  hay SCCU",
@@ -295,10 +290,21 @@ export class Insertar {
 
       await Promise.all(
         Object.keys(valor).map(async (filtro) => {
-          const filtroConf = await _SConf.findBy("id_a", filtro);
+          const filtroConf = (
+            await _SConf
+              .query()
+              .where("id_a", filtro)
+              .preload("valores", (query) => query.preload("atributo"))
+          )[0];
+
           if (!filtroConf || filtroConf.id_tipo !== 3) return;
 
           const SCCD = new SConfConfDeta();
+
+          if (filtroConf?.getAtributo({ atributo: "componente" }) === "fecha") {
+            valor[filtro] = JSON.stringify(valor[filtro]);
+          }
+
           SCCD.merge({
             [campo]: valor[filtro],
             id_conf: filtroConf.id,
