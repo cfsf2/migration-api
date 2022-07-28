@@ -309,7 +309,8 @@ export default class Farmacia extends BaseModel {
 
       //Guarda datos de horarios
       const dias = await Dia.query();
-      const horarios = await FarmaciaDia.query()
+
+      const horariosQuery = FarmaciaDia.query()
         .select(
           "inicio",
           "fin",
@@ -325,6 +326,8 @@ export default class Farmacia extends BaseModel {
         )
         .where("tbl_farmacia.id", farmacia[0].id);
 
+      const horarios = await horariosQuery;
+
       const escribirHorarios = (dhorarios, horarios) => {
         let dbloques: {
           inicio: string;
@@ -337,7 +340,10 @@ export default class Farmacia extends BaseModel {
             dbloques.push({
               inicio: b.desde,
               fin: b.hasta,
-              dia: d.dia,
+              dia: d.dia
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase(),
               habilitado: d.habilitado,
             });
           });
@@ -345,7 +351,6 @@ export default class Farmacia extends BaseModel {
 
         dbloques.forEach((b, i) => {
           let hMod = horarios.find((h) => h.dia.nombre === b.dia); // bloque a modificar
-
           if (!hMod) {
             const hModNuevo = new FarmaciaDia();
 
