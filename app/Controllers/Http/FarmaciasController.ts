@@ -143,6 +143,7 @@ export default class FarmaciasController {
       });
       return response.created();
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }

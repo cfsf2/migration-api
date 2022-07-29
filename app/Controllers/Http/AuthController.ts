@@ -8,13 +8,9 @@ import Farmacia from "App/Models/Farmacia";
 import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class AuthController {
-  public async mig_loginwp({
-    request,
-    response,
-    auth,
-    bouncer,
-  }: HttpContextContract) {
+  public async mig_loginwp(ctx: HttpContextContract) {
     try {
+      const { request, auth, bouncer } = ctx;
       const { username, password } = request.only(["username", "password"]);
 
       console.log(username, password);
@@ -49,7 +45,8 @@ export default class AuthController {
       await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
-      throw new ExceptionHandler();
+      console.log(error);
+      throw new ExceptionHandler().handle(error, ctx);
     }
   }
 
