@@ -72,12 +72,6 @@ const verificarPermisos = async ({
     )
   )?.filter((c) => c);
 
-  sconf_habilitados.forEach(
-    (c) =>
-      (ctx.usuario.configuracionesPermitidas =
-        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
-  );
-
   return sconf_habilitados;
 };
 
@@ -109,12 +103,6 @@ const verificarPermisosHijos = async ({
       })
     )
   )?.filter((c) => c);
-
-  sconf_habilitados.forEach(
-    (c) =>
-      (ctx.usuario.configuracionesPermitidas =
-        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
-  );
 
   return sconf_habilitados;
 };
@@ -150,12 +138,6 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
       })
     )
   )?.filter((c) => c);
-
-  sc.forEach(
-    (c) =>
-      (ctx.usuario.configuracionesPermitidas =
-        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
-  );
 
   return sc;
 };

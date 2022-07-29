@@ -490,6 +490,8 @@ export default class Usuario extends BaseModel {
   @column()
   public confirmado: string;
 
+  public configuracionesPermitidas: string;
+
   @column()
   public telefono: string;
 

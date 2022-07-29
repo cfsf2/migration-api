@@ -92,9 +92,16 @@ export const { actions } = Bouncer.define(
         case undefined:
           return false;
         case "t":
+          usuario.configuracionesPermitidas =
+            usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+
           return true;
         case "u":
-          if (usuario) return true;
+          if (usuario) {
+            usuario.configuracionesPermitidas =
+              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+            return true;
+          }
           return false;
         case "n":
           return false;
@@ -111,8 +118,11 @@ export const { actions } = Bouncer.define(
               (p: { nombre: string }) =>
                 p.nombre === conf.conf_permiso.permiso.nombre
             ) !== -1
-          )
+          ) {
+            usuario.configuracionesPermitidas =
+              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
             return true;
+          }
 
           return Bouncer.deny("Acceso no autorizado", 401);
         default:
