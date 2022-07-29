@@ -559,6 +559,13 @@ export default class Farmacia extends BaseModel {
       data.farmacia.id
     );
 
+    if (usuario.usuario !== data.usuario.username) {
+      usuario.merge({
+        usuario: data.usuario.username,
+      });
+      await usuario.save();
+    }
+
     await this.actualizarFarmacia({
       usuario: usuario.usuario,
       d: data.farmacia,
@@ -614,6 +621,7 @@ export default class Farmacia extends BaseModel {
         });
         return await farmacia.save();
       } catch (error) {
+        console.log(error);
         return error;
       }
     }
