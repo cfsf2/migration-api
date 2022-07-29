@@ -419,20 +419,36 @@ export default class Usuario extends BaseModel {
     password: string;
     usuarioAuth: any;
   }) {
-    let usuario: Usuario = new Usuario();
-    if (id) {
-      usuario = await Usuario.findOrFail(id);
+    try {
+      let usuario: Usuario = new Usuario();
+
+      console.log(
+        "Usuario MOdelo id:",
+        id,
+        "username",
+        username,
+        "password",
+        password
+      );
+      if (id) {
+        usuario = await Usuario.findOrFail(id);
+      }
+      if (username) {
+        usuario = await Usuario.findByOrFail("usuario", username);
+      }
+      console.log(password);
+      usuario.merge({ password: password });
+
+      guardarDatosAuditoria({
+        objeto: usuario,
+        usuario: usuarioAuth,
+        accion: AccionCRUD.editar,
+      });
+      return usuario.save();
+    } catch (err) {
+      console.log(err);
+      return err;
     }
-    if (username) {
-      usuario = await Usuario.findByOrFail("usuario", username);
-    }
-    usuario.merge({ password: password });
-    guardarDatosAuditoria({
-      objeto: usuario,
-      usuario: usuarioAuth,
-      accion: AccionCRUD.editar,
-    });
-    return usuario.save();
   }
 
   @column({ isPrimary: true })
