@@ -39,7 +39,17 @@ let Update = U;
 let Insertar = I;
 let Eliminar = D;
 
-const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
+const verificarPermisos = async ({
+  ctx,
+  conf,
+  bouncer,
+  tipoId,
+}: {
+  ctx: HttpContextContract;
+  conf: SConf;
+  bouncer: any;
+  tipoId: number;
+}) => {
   const sconfs_pedidos = conf
     .toJSON()
     .sub_conf.filter((sc) => sc.tipo.id === tipoId);
@@ -51,17 +61,35 @@ const verificarPermisos = async (conf: SConf, bouncer: any, tipoId) => {
           return false;
         }
 
-        sc.sub_conf = await verificarPermisoConf(sc.sub_conf, bouncer);
+        sc.sub_conf = await verificarPermisoConf({
+          ctx,
+          sub_confs: sc.sub_conf,
+          bouncer,
+        });
 
         return sc;
       })
     )
   )?.filter((c) => c);
 
+  sconf_habilitados.forEach(
+    (c) =>
+      (ctx.usuario.configuracionesPermitidas =
+        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
+  );
+
   return sconf_habilitados;
 };
 
-const verificarPermisosHijos = async (conf: SConf, bouncer: any) => {
+const verificarPermisosHijos = async ({
+  ctx,
+  conf,
+  bouncer,
+}: {
+  ctx: HttpContextContract;
+  conf: SConf;
+  bouncer: any;
+}) => {
   const sconfs_pedidos = conf.toJSON().sub_conf;
 
   const sconf_habilitados = (
@@ -71,17 +99,27 @@ const verificarPermisosHijos = async (conf: SConf, bouncer: any) => {
           return false;
         }
 
-        sc.sub_conf = await verificarPermisoConf(sc.sub_conf, bouncer);
+        sc.sub_conf = await verificarPermisoConf({
+          ctx,
+          sub_confs: sc.sub_conf,
+          bouncer,
+        });
 
         return sc;
       })
     )
   )?.filter((c) => c);
 
+  sconf_habilitados.forEach(
+    (c) =>
+      (ctx.usuario.configuracionesPermitidas =
+        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
+  );
+
   return sconf_habilitados;
 };
 
-const verificarPermisoConf = async (sub_confs, bouncer) => {
+const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
   const sc = (
     await Promise.all(
       sub_confs.map(async (sch) => {
@@ -102,12 +140,22 @@ const verificarPermisoConf = async (sub_confs, bouncer) => {
           }
         }
 
-        sch.sub_conf = await verificarPermisoConf(sch.sub_conf, bouncer);
+        sch.sub_conf = await verificarPermisoConf({
+          ctx,
+          sub_confs: sch.sub_conf,
+          bouncer,
+        });
 
         return sch;
       })
     )
   )?.filter((c) => c);
+
+  sc.forEach(
+    (c) =>
+      (ctx.usuario.configuracionesPermitidas =
+        ctx.usuario.configuracionesPermitidas.concat(`,"${c.id_a}"`))
+  );
 
   return sc;
 };
@@ -728,8 +776,18 @@ export class ConfBuilder {
       opciones["id_a"] = listado.id_a;
       opciones["tipo"] = listado.tipo;
 
-      let columnas = await verificarPermisos(listado, bouncer, 4);
-      let filtros_aplicables = await verificarPermisos(listado, bouncer, 3);
+      let columnas = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 4,
+      });
+      let filtros_aplicables = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 3,
+      });
 
       const modelo = listado.getAtributo({ atributo: "modelo" });
       const campos = getSelect(ctx, [columnas], 7);
@@ -988,7 +1046,7 @@ export class ConfBuilder {
     opciones["tipo"] = vista.tipo;
     opciones["id_a"] = vista.id_a;
 
-    let columnas = await verificarPermisosHijos(vista, bouncer);
+    let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
 
     const modelo = vista.getAtributo({ atributo: "modelo" });
 

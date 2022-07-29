@@ -55,6 +55,7 @@ export default class UsuarioPermiso {
     ctx.$_datos = [];
     ctx.$_errores = [];
     ctx.$_conf = { estructura: {}, buscarPadre: buscarPadre, getIDA: id_a };
+    ctx.usuario.configuracionesPermitidas = `"INICIO"`;
 
     await next();
   }
