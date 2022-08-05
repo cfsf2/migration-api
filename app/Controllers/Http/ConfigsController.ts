@@ -127,8 +127,8 @@ export default class ConfigsController {
       return p;
     }
     if (conf.tipo.id === 9) {
-      console.log(9, "ARMARABM");
-      await ConfBuilder.armarABM({ ctx, conf });
+      console.log("pidioABM", conf.id_a);
+      return ConfBuilder.armarABM({ ctx, conf, abm: conf });
     }
   }
 
@@ -213,15 +213,15 @@ export default class ConfigsController {
         })
       );
 
-      let opciones = {};
-      opciones["id_a"] = conf.id_a;
-      conf?.valores.forEach((val) => {
-        if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
-        }
-        opciones[val.atributo[0].nombre] = val.valor;
-      });
-      ctx.$_respuesta.opciones = opciones;
+      // let opciones = {};
+      // opciones["id_a"] = conf.id_a;
+      // conf?.valores.forEach((val) => {
+      //   if (val.evaluar === "s") {
+      //     return (opciones[val.atributo[0].nombre] = eval(val.valor));
+      //   }
+      //   opciones[val.atributo[0].nombre] = val.valor;
+      // });
+      ctx.$_respuesta.opciones = ConfBuilder.setOpciones(ctx, conf, conf, id);
 
       let configuraciones: any[] = [];
       configuraciones = configuraciones.concat(listadosArmados);

@@ -3,6 +3,7 @@ import Datab, {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
@@ -1007,12 +1008,10 @@ export class ConfBuilder {
       error: { message: "" },
     };
 
-    const parametro = vista.getAtributo({ atributo: "parametro" });
-
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
 
+    const parametro = vista.getAtributo({ atributo: "parametro" });
     const modelo = vista.getAtributo({ atributo: "modelo" });
-
     const campos = getSelect(ctx, [columnas], 7, usuario);
     const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
     const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
@@ -1072,7 +1071,7 @@ export class ConfBuilder {
           ? vista
           : undefined;
         // console.log("vista sql: ", vistaFinal.sql);
-        //await query.paginate(1, 15);
+        // await query.paginate(1, 15);
         vistaFinal.datos = await query;
       }
       vistaFinal.cabeceras = (
@@ -1173,9 +1172,28 @@ export class ConfBuilder {
     conf: SConf;
   }) => {
     if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
-    const opciones = this.setOpciones(ctx, abm, conf);
 
-    return { opciones };
+    const opciones = this.setOpciones(ctx, abm, conf);
+    const opcionesPantalla = this.setOpciones(ctx, conf, conf);
+
+    const cabeceras = await extraerElementos({
+      ctx,
+      sc_hijos: abm.sub_conf,
+      sc_padre: abm,
+      bouncer: ctx.bouncer,
+      usuario: ctx.usuario,
+      id: ctx.request.body().id,
+    });
+
+    let columnas = await verificarPermisosHijos({
+      ctx,
+      conf: abm,
+      bouncer: ctx.bouncer,
+    });
+
+    const datos = await this.getDatos(ctx, abm, ctx.request.body().id);
+
+    return { opciones, opcionesPantalla, cabeceras, columnas, datos };
   };
 
   public static preloadRecursivo = (query) => {
@@ -1187,7 +1205,7 @@ export class ConfBuilder {
       .preload("sub_conf", (query) => this.preloadRecursivo(query));
   };
 
-  private static setOpciones = (ctx, conf_h, conf, id?: number) => {
+  public static setOpciones = (ctx, conf_h, conf, id?: number) => {
     const opciones = {};
 
     conf?.valores.forEach((val) => {
@@ -1210,6 +1228,40 @@ export class ConfBuilder {
     opciones["tipo"] = conf_h.tipo;
     opciones["id_a"] = conf_h.id_a;
     return opciones;
+  };
+
+  private static getDatos = async (
+    ctx: HttpContextContract,
+    conf: SConf,
+    id?: number
+  ) => {
+    const modelo = conf.getAtributo({ atributo: "modelo" });
+    const parametro = conf.getAtributo({ atributo: "parametro" });
+
+    const tabla = conf.getAtributo({ atributo: "tabla" });
+    const campos = getSelect(ctx, [conf], 7);
+    const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });
+    const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
+    const order = getOrder({ ctx, conf: conf });
+
+    if (modelo) {
+      const Modelo = eval(modelo) as typeof BaseModel;
+      const query = Modelo.query();
+
+      campos.forEach((campo) => {
+        query.select(
+          Database.raw(
+            `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
+          )
+        );
+      });
+
+      if (id) {
+        query.where(`${parametro}`, id);
+      }
+
+      return await query;
+    }
   };
 }
 
