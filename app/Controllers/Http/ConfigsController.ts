@@ -126,6 +126,10 @@ export default class ConfigsController {
 
       return p;
     }
+    if (conf.tipo.id === 9) {
+      console.log(9, "ARMARABM");
+      await ConfBuilder.armarABM({ ctx, conf });
+    }
   }
 
   public async ConfigPantalla(ctx: HttpContextContract) {
@@ -159,6 +163,7 @@ export default class ConfigsController {
 
     const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
     const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
+    const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
     const contenedores = conf.sub_conf.filter(
       (sc) => sc.tipo.id === 7
     ) as SConf[];
@@ -202,6 +207,12 @@ export default class ConfigsController {
         )
       );
 
+      const abmsArmados = await Promise.all(
+        abms.map(async (abm) => {
+          return ConfBuilder.armarABM({ ctx, conf, abm });
+        })
+      );
+
       let opciones = {};
       opciones["id_a"] = conf.id_a;
       conf?.valores.forEach((val) => {
@@ -216,6 +227,7 @@ export default class ConfigsController {
       configuraciones = configuraciones.concat(listadosArmados);
       configuraciones = configuraciones.concat(vistasArmadas);
       configuraciones = configuraciones.concat(contenedoresArmadas);
+      configuraciones = configuraciones.concat(abmsArmados);
 
       ctx.$_respuesta.configuraciones = configuraciones;
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;

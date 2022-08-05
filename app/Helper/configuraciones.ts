@@ -741,6 +741,12 @@ export class ConfBuilder {
         }
         opciones[val.atributo[0].nombre] = val.valor;
       });
+      opciones["orden"] = conf?.orden.find(
+        (o) => o.id_conf_h === listado?.id
+      )?.orden;
+
+      opciones["id_a"] = listado.id_a;
+      opciones["tipo"] = listado.tipo;
 
       if (
         opciones.configuracion_usuario_activo === "s" &&
@@ -752,13 +758,6 @@ export class ConfBuilder {
               configuracionDeUsuario[0][val.atributo[0].nombre];
         });
       }
-
-      opciones["orden"] = conf?.orden.find(
-        (o) => o.id_conf_h === listado?.id
-      )?.orden;
-
-      opciones["id_a"] = listado.id_a;
-      opciones["tipo"] = listado.tipo;
 
       let columnas = await verificarPermisos({
         ctx,
@@ -994,7 +993,9 @@ export class ConfBuilder {
     bouncer: any,
     usuario?: Usuario
   ): Promise<vista> => {
-    let opciones = {};
+    if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
+
+    let opciones = this.setOpciones(ctx, vista, conf, id);
     let datos = [{}];
     let sql = "";
 
@@ -1007,28 +1008,6 @@ export class ConfBuilder {
     };
 
     const parametro = vista.getAtributo({ atributo: "parametro" });
-
-    if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
-
-    conf?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
-
-    vista?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
-
-    opciones["orden"] = conf?.orden.find(
-      (o) => o.id_conf_h === vista?.id
-    )?.orden;
-    opciones["tipo"] = vista.tipo;
-    opciones["id_a"] = vista.id_a;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
 
@@ -1184,6 +1163,21 @@ export class ConfBuilder {
     return p;
   };
 
+  public static armarABM = async ({
+    ctx,
+    conf,
+    abm,
+  }: {
+    ctx: HttpContextContract;
+    abm: SConf;
+    conf: SConf;
+  }) => {
+    if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
+    const opciones = this.setOpciones(ctx, abm, conf);
+
+    return { opciones };
+  };
+
   public static preloadRecursivo = (query) => {
     return query
       .preload("conf_permiso", (query) => query.preload("permiso"))
@@ -1191,6 +1185,31 @@ export class ConfBuilder {
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => this.preloadRecursivo(query));
+  };
+
+  private static setOpciones = (ctx, conf_h, conf, id?: number) => {
+    const opciones = {};
+
+    conf?.valores.forEach((val) => {
+      if (val.evaluar === "s") {
+        return (opciones[val.atributo[0].nombre] = eval(val.valor));
+      }
+      opciones[val.atributo[0].nombre] = val.valor;
+    });
+
+    conf_h?.valores.forEach((val) => {
+      if (val.evaluar === "s") {
+        return (opciones[val.atributo[0].nombre] = eval(val.valor));
+      }
+      opciones[val.atributo[0].nombre] = val.valor;
+    });
+
+    opciones["orden"] = conf?.orden.find(
+      (o) => o.id_conf_h === conf_h?.id
+    )?.orden;
+    opciones["tipo"] = conf_h.tipo;
+    opciones["id_a"] = conf_h.id_a;
+    return opciones;
   };
 }
 
