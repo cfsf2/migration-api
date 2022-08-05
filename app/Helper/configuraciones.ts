@@ -720,7 +720,9 @@ export class ConfBuilder {
         configuracionDeUsuario = await SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
-          .preload("detalles", (query) => query.preload("conf"));
+          .preload("detalles", (query) =>
+            query.preload("conf", (query) => query.preload("tipo"))
+          );
         ctx.usuario.configuracionesDeUsuario[listado.id_a] =
           configuracionDeUsuario[0];
         opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
