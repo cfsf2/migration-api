@@ -1,5 +1,6 @@
 import Datab, {
   DatabaseQueryBuilderContract,
+  RawQuery,
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
@@ -530,6 +531,7 @@ const getSelect = (
       evaluar: "",
       subquery: "",
     };
+
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
     select.sql = getFullAtributoById({ id: id, conf })?.sql as string;
     select.evaluar = getFullAtributoById({ id: id, conf })?.evaluar as string;
@@ -1172,6 +1174,7 @@ export class ConfBuilder {
     conf: SConf;
   }) => {
     if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
+    let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf);
     const opcionesPantalla = this.setOpciones(ctx, conf, conf);
@@ -1185,15 +1188,26 @@ export class ConfBuilder {
       id: ctx.request.body().id,
     });
 
-    let columnas = await verificarPermisosHijos({
-      ctx,
-      conf: abm,
-      bouncer: ctx.bouncer,
-    });
+    if (ctx.request.body().id) {
+      datos = await this.getDatos(ctx, abm, ctx.request.body().id);
+    }
 
-    const datos = await this.getDatos(ctx, abm, ctx.request.body().id);
+    const sql = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+      ? ctx.$_sql
+      : undefined;
 
-    return { opciones, opcionesPantalla, cabeceras, columnas, datos };
+    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+      ? conf
+      : undefined;
+
+    return {
+      opciones,
+      opcionesPantalla,
+      cabeceras,
+      datos,
+      sql,
+      conf: arbolConf,
+    };
   };
 
   public static preloadRecursivo = (query) => {
@@ -1244,11 +1258,26 @@ export class ConfBuilder {
     const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
     const order = getOrder({ ctx, conf: conf });
 
+    let filtros_aplicables = await verificarPermisos({
+      ctx,
+      conf,
+      bouncer: ctx.bouncer,
+      tipoId: 3,
+    });
+
     if (modelo) {
       const Modelo = eval(modelo) as typeof BaseModel;
-      const query = Modelo.query();
+      let query = Modelo.query() as DatabaseQueryBuilderContract;
 
-      campos.forEach((campo) => {
+      campos.forEach(async (campo) => {
+        if (campo.evaluar === "s") {
+          campo.campo = eval(campo.campo);
+        }
+
+        if (campo.subquery === "s") {
+          const subquery = await Database.rawQuery(campo.campo);
+          return query.select(`"${subquery[0]}"`);
+        }
         query.select(
           Database.raw(
             `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
@@ -1256,9 +1285,48 @@ export class ConfBuilder {
         );
       });
 
+      // aplicarPreloads - left join
+      if (leftJoins.length > 0) {
+        leftJoins.forEach((leftJoin) => {
+          if (leftJoin.evaluar === "s") {
+            return query.joinRaw(eval(leftJoin.valor));
+          }
+          query.joinRaw(leftJoin.valor);
+        });
+      }
+      // aplicar groupsBy
+      if (groupsBy.length > 0) {
+        groupsBy.forEach(({ groupBy, having }) => {
+          query.groupBy(groupBy);
+          if (having) query.having(having as unknown as RawQuery); // ??
+        });
+      }
+      // aplicar order del listado
+      if (order.length > 0) {
+        order.forEach((order) => {
+          const orderValores = order.split(",");
+
+          query.orderBy(
+            orderValores[0],
+            orderValores[1] ? orderValores[1].trim() : "desc"
+          );
+        });
+      }
+
+      query = aplicarFiltros(
+        ctx,
+        query,
+        conf,
+        id,
+        ctx.request.qs(), // queryFiltros
+        filtros_aplicables
+      );
+
       if (id) {
         query.where(`${parametro}`, id);
       }
+
+      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
 
       return await query;
     }
@@ -1346,4 +1414,16 @@ export const eliminar = (
   if (!funcion) return Eliminar.eliminar({ ctx, delete_id, conf, usuario });
 
   return eval(funcion)({ ctx, delete_id, conf, usuario });
+};
+
+export const insertarABM = (ctx: HttpContextContract, formData: {}, conf) => {
+  try {
+    const funcion = getAtributo({ atributo: "insert_funcion", conf });
+    if (!funcion) return Insertar.insertarABM({ ctx, formData, conf });
+
+    return eval(funcion)({ ctx, formData, conf });
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
 };

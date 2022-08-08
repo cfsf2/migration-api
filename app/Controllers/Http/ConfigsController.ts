@@ -7,6 +7,7 @@ import {
   insertar,
   eliminar,
   ConfBuilder,
+  insertarABM,
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones } from "App/Helper/permisos";
@@ -213,14 +214,6 @@ export default class ConfigsController {
         })
       );
 
-      // let opciones = {};
-      // opciones["id_a"] = conf.id_a;
-      // conf?.valores.forEach((val) => {
-      //   if (val.evaluar === "s") {
-      //     return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      //   }
-      //   opciones[val.atributo[0].nombre] = val.valor;
-      // });
       ctx.$_respuesta.opciones = ConfBuilder.setOpciones(ctx, conf, conf, id);
 
       let configuraciones: any[] = [];
@@ -231,10 +224,50 @@ export default class ConfigsController {
 
       ctx.$_respuesta.configuraciones = configuraciones;
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;
+      ctx.$_respuesta.sql = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+        ? ctx.$_sql
+        : undefined;
       return ctx.$_respuesta;
     } catch (err) {
       return err;
     }
+  }
+
+  public async ABM_put(ctx: HttpContextContract) {
+    const { request, response, bouncer, auth } = ctx;
+    const config = request.params().config;
+
+    const usuario = await auth.authenticate();
+    const id = request.body().id;
+    const formData = request.body();
+
+    console.log(request.body(), config);
+
+    if (!config) {
+      return respuestaVacia;
+    }
+
+    const conf = await SConf.query()
+      .where("id_a", config)
+      .andWhere("id_tipo", 1)
+      .preload("conf_permiso")
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => preloadRecursivo(query))
+      .firstOrFail();
+
+    ctx.$_conf.estructura = conf;
+
+    if (!(await bouncer.allows("AccesoConf", conf)))
+      return response.status(409);
+
+    if (id) return;
+    if (!id) {
+      await insertarABM(ctx, formData, conf);
+    }
+
+    return "GUARDASTE CAPO";
   }
 
   public async Update(ctx: HttpContextContract) {

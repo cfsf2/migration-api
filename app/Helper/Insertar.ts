@@ -28,6 +28,9 @@ export class Insertar {
   constructor() {}
 
   public static async insertar({ ctx, valor, insert_ids, conf, usuario }) {
+    if (conf.tipo.id === 9)
+      return this.insertarABM({ ctx, formData: ctx.request.body(), conf });
+
     try {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
@@ -94,6 +97,12 @@ export class Insertar {
       console.log(err);
       return { registroCreado: err, creado: false, error: err.message };
     }
+  }
+
+  public static async insertarABM({ ctx, formData, conf }) {
+    console.log("INSERTAR ABM", formData);
+
+    return formData;
   }
 
   public static async insertarSConfConfDeta({

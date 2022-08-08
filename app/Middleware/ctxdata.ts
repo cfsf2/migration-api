@@ -56,6 +56,7 @@ export default class UsuarioPermiso {
     ctx.$_datos = [];
     ctx.$_errores = [];
     ctx.$_conf = { estructura: {}, buscarPadre: buscarPadre, getIDA: id_a };
+    ctx.$_id_general = ctx.request.body().id;
 
     await next();
   }

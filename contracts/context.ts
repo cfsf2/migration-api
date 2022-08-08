@@ -12,7 +12,13 @@ declare module "@ioc:Adonis/Core/HttpContext" {
       error: { message: string; continuar?: boolean };
       conf: string;
     }[];
-    $_respuesta: { configuraciones: any[]; opciones: {}; error: {} };
+    $_id_general: number | undefined;
+    $_respuesta: {
+      configuraciones: any[];
+      opciones: {};
+      error: {};
+      sql?: any[] | undefined;
+    };
     $_conf: {
       estructura: any;
       buscarPadre: ({ id, conf }: { id: number; conf: any }) => {};
