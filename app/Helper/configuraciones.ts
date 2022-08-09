@@ -774,6 +774,12 @@ export class ConfBuilder {
         bouncer,
         tipoId: 3,
       });
+      let listado_boton_admitidos = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 8,
+      });
 
       const modelo = listado.getAtributo({ atributo: "modelo" });
       const campos = getSelect(ctx, [columnas], 7);
@@ -838,9 +844,21 @@ export class ConfBuilder {
               datos,
               id,
             });
+
+            const listadoBotones = await extraerElementos({
+              ctx,
+              sc_hijos: listado_boton_admitidos,
+              sc_padre: listado,
+              bouncer,
+              usuario,
+              datos,
+              id,
+            });
+
             res.cabeceras = cabeceras;
             res.filtros = filtros;
             res.opciones = opciones;
+            res.listadoBotones = listadoBotones;
             res.error = { message: error };
             ctx.$_errores.push({
               error: { message: error, continuar: true },
@@ -947,6 +965,16 @@ export class ConfBuilder {
         id,
       });
 
+      const listadoBotones = await extraerElementos({
+        ctx,
+        sc_hijos: listado_boton_admitidos,
+        sc_padre: listado,
+        bouncer,
+        usuario,
+        datos,
+        id,
+      });
+
       if (
         getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
       ) {
@@ -973,6 +1001,7 @@ export class ConfBuilder {
       return {
         cabeceras,
         filtros,
+        listadoBotones,
         opciones,
         datos: datos,
         sql: (await bouncer.allows("AccesoRuta", "GET_SQL"))
@@ -1177,7 +1206,6 @@ export class ConfBuilder {
     let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf);
-    const opcionesPantalla = this.setOpciones(ctx, conf, conf);
 
     const cabeceras = await extraerElementos({
       ctx,
@@ -1202,7 +1230,6 @@ export class ConfBuilder {
 
     return {
       opciones,
-      opcionesPantalla,
       cabeceras,
       datos,
       sql,
@@ -1337,6 +1364,7 @@ const listadoVacio: listado = {
   datos: [],
   cabeceras: [],
   filtros: [],
+  listadoBotones: [],
   opciones: {},
   sql: undefined,
   error: { message: "" },
@@ -1351,6 +1379,7 @@ const vistaVacia = {
 };
 
 export interface listado {
+  listadoBotones: ({} | undefined)[];
   datos: any[];
   cabeceras: any[];
   filtros: any[];

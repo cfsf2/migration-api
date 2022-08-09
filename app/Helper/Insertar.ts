@@ -12,7 +12,7 @@ import SCCD from "App/Models/SConfConfDeta";
 
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import ExceptionHandler from "App/Exceptions/Handler";
-import { ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
 let Servicio = S;
 let Farmacia = F;
@@ -100,9 +100,50 @@ export class Insertar {
   }
 
   public static async insertarABM({ ctx, formData, conf }) {
-    console.log("INSERTAR ABM", formData);
+    try {
+      let tabla = conf.getAtributo({ atributo: "tabla" });
+      let Modelo = eval(
+        getAtributo({ atributo: "modelo", conf })
+      ) as typeof BaseModel;
 
-    return formData;
+      if (formData.id)
+        return {
+          error: {
+            message: "Hola esto es update y tu interfaz solo hace altas",
+          },
+        };
+
+      const nuevoRegistro = new Modelo();
+
+      await Promise.all(
+        Object.keys(formData).map(async (id_a) => {
+          const confCampo = await SConf.findByIda({ id_a });
+
+          if (!confCampo)
+            return { message: `Error no encuentro esta configuracion ${id_a}` };
+
+          const campo = getAtributo({
+            atributo: "update_campo",
+            conf: confCampo,
+          });
+
+          const componente = getAtributo({
+            atributo: "componente",
+            conf: confCampo,
+          });
+
+          if (componente === "radio") console.log("radio");
+
+          nuevoRegistro.merge({ [campo]: formData[id_a] });
+        })
+      );
+
+      await nuevoRegistro.save();
+      return { registroCreado: nuevoRegistro, creado: true };
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
+    }
   }
 
   public static async insertarSConfConfDeta({

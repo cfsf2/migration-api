@@ -31,7 +31,18 @@ export default class ExceptionHandler extends HttpExceptionHandler {
      * Self handle the validation exception
      */
     if (error.code === "E_VALIDATION_FAILURE") {
-      return ctx.response.status(422).send(error);
+      const message = "La Validacion ha fallado";
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+    if (error.code === "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD") {
+      const message = "El tipo de valor no corresponde al dato solicitado";
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
     }
     if (error.code === "ER_BAD_FIELD_ERROR") {
       return ctx.response

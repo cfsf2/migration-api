@@ -122,16 +122,23 @@ export default class SConf extends BaseModel {
       .preload("sub_conf", (query) => this.preloadRecursivo(query));
   }
 
-  public static async findByIda({ id_a }) {
-    return (
-      await this.query()
-        .where("id_a", id_a)
-        .preload("conf_permiso", (query) => query.preload("permiso"))
-        .preload("tipo")
-        .preload("orden")
-        .preload("valores", (query) => query.preload("atributo"))
-        .preload("sub_conf", (query) => this.preloadRecursivo(query))
-    ).pop();
+  public static async findByIda({ id_a }: { id_a: string }) {
+    try {
+      const res = (
+        await this.query()
+          .where("id_a", id_a)
+          .preload("conf_permiso", (query) => query.preload("permiso"))
+          .preload("tipo")
+          .preload("orden")
+          .preload("valores", (query) => query.preload("atributo"))
+          .preload("sub_conf", (query) => this.preloadRecursivo(query))
+      ).pop();
+
+      return res;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   public serializeExtras() {
