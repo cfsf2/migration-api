@@ -14,6 +14,7 @@ import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
 let Servicio = S;
 let Farmacia = F;
@@ -34,13 +35,18 @@ export class Update {
     id,
     valor,
     conf,
+    formData,
   }: {
     ctx: HttpContextContract;
     usuario: U;
     id: any;
     valor: string | number;
     conf: SConf;
+    formData?: {};
   }) {
+    if (conf.tipo.id === 9)
+      return this.updateABM({ ctx, formData: ctx.request.body(), conf });
+
     const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
     const modelo = getAtributo({ atributo: "update_modelo", conf: conf });
     const campo = getAtributo({ atributo: "update_campo", conf: conf });
@@ -96,6 +102,82 @@ export class Update {
       } catch (err) {
         throw await new ExceptionHandler().handle(err, ctx);
       }
+    }
+  }
+
+  public static async updateABM({
+    ctx,
+    formData,
+    conf,
+  }: {
+    ctx: HttpContextContract;
+    formData: Record<string, any>;
+    conf: SConf;
+  }) {
+    try {
+      const funcion = getAtributo({ atributo: "update_funcion", conf: conf });
+
+      if (funcion)
+        return await this[funcion]({
+          ctx,
+          formData,
+          conf,
+        });
+
+      const tabla = getAtributo({ atributo: "tabla", conf: conf });
+      const Modelo = eval(
+        getAtributo({ atributo: "modelo", conf: conf })
+      ) as typeof BaseModel;
+
+      const registro = await Modelo.findOrFail(ctx.$_id_general);
+
+      await Promise.all(
+        Object.keys(formData).map(async (id_a) => {
+          const configuracion = await SConf.findByIda({ id_a });
+          if (!configuracion)
+            return { message: `Error no encuentro esta configuracion ${id_a}` };
+
+          const campo = getAtributo({
+            atributo: "update_campo",
+            conf: configuracion,
+          });
+
+          const registrarCambios = getAtributo({
+            atributo: "update_registro_cambios",
+            conf: configuracion,
+          });
+
+          const valorAnterior = registro[campo];
+
+          guardarDatosAuditoria({
+            usuario: ctx.usuario,
+            objeto: registro,
+            accion: AccionCRUD.editar,
+            registroCambios: {
+              registrarCambios,
+              tabla,
+              campo,
+              valorAnterior,
+            },
+          });
+
+          // condiciones de la configuracion para guardar //
+          /*
+          /*
+          /*
+          /**/
+
+          registro.merge({
+            [campo]: formData[id_a],
+          });
+        })
+      );
+
+      await registro.save();
+      return { registroModificado: registro.toJSON(), modificado: true };
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
     }
   }
 

@@ -13,6 +13,8 @@ import SCCD from "App/Models/SConfConfDeta";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Update from "./Update";
 
 let Servicio = S;
 let Farmacia = F;
@@ -99,19 +101,24 @@ export class Insertar {
     }
   }
 
-  public static async insertarABM({ ctx, formData, conf }) {
+  public static async insertarABM({
+    ctx,
+    formData,
+    conf,
+  }: {
+    ctx: HttpContextContract;
+    formData: { id?: number };
+    conf: SConf;
+  }) {
     try {
       let tabla = conf.getAtributo({ atributo: "tabla" });
       let Modelo = eval(
         getAtributo({ atributo: "modelo", conf })
       ) as typeof BaseModel;
 
-      if (formData.id)
-        return {
-          error: {
-            message: "Hola esto es update y tu interfaz solo hace altas",
-          },
-        };
+      if (formData.id) {
+        return await Update.updateABM({ ctx, formData, conf });
+      }
 
       const nuevoRegistro = new Modelo();
 

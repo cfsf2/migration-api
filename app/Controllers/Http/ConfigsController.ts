@@ -325,8 +325,10 @@ export default class ConfigsController {
 
       const res = await insertar(ctx, valor, insert_ids, config, usuario);
 
-      if (res?.creado) {
-        return response.accepted(res?.registroCreado);
+      if (res?.creado || res?.modificado) {
+        return response.accepted(
+          res.registroCreado ? res.registroCreado : res.registroModificado
+        );
       }
       return response.badRequest(res);
     } catch (err) {
@@ -378,6 +380,7 @@ const listadoVacio: listado = {
   datos: [{}],
   cabeceras: [{}],
   filtros: [{}],
+  listadoBotones: [{}],
   opciones: {},
   error: { message: "" },
 };
