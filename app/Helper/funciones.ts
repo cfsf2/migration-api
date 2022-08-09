@@ -133,6 +133,7 @@ export const guardarDatosAuditoria = async ({
               valor: registroCambios.valorAnterior,
             })
             .save();
+          console.log(rc, rc_deta);
         }
         objeto.merge({
           id_usuario_modificacion: usuario.id,
