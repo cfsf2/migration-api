@@ -241,7 +241,7 @@ export default class ConfigsController {
     const id = request.body().id;
     const formData = request.body();
 
-    console.log(request.body(), config);
+    console.log("ABM PUT", request.body(), config);
 
     if (!config) {
       return respuestaVacia;
