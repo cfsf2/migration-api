@@ -134,10 +134,15 @@ export class Update {
       });
 
       if (!archivo || !archivo.isValid)
-        throw await new ExceptionHandler().handle(archivo?.errors[0], ctx);
+        throw await new ExceptionHandler().handle(
+          {
+            code: archivo?.errors[0].type,
+            message: archivo?.errors[0].message,
+          },
+          ctx
+        );
 
       const archivoNombre = (() => {
-        console.log(convencion_nombre);
         if (!convencion_nombre)
           return `${ctx.request.body().update_id}-${Date.now()}`;
 
