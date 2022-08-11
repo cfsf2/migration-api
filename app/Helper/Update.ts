@@ -136,9 +136,20 @@ export class Update {
       if (!archivo || !archivo.isValid)
         throw await new ExceptionHandler().handle(archivo?.errors[0], ctx);
 
-      const archivoNombre = `${ctx.request
-        .body()
-        .update_id.toString()}-${Date.now()}.${archivo.extname}`;
+      const archivoNombre = (() => {
+        let an = convencion_nombre;
+        const nombres = convencion_nombre.split("-");
+        if (nombres.includes("update_id") && ctx.request.body().update_id) {
+          an = an.replace("update_id", ctx.request.body().update_id.toString());
+        }
+        if (nombres.includes("id") && ctx.$_id_general) {
+          an = an.replace("id", ctx.$_id_general.toString());
+        }
+        if (nombres.includes("timestamp")) {
+          an = an.replace("timestamp", Date.now().toString());
+        }
+        return an;
+      })();
 
       await archivo.moveToDisk(
         `${carpeta}/`,

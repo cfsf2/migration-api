@@ -22,7 +22,7 @@ declare module "@ioc:Adonis/Core/HttpContext" {
     $_conf: {
       estructura: any;
       buscarPadre: ({ id, conf }: { id: number; conf: any }) => {};
-      buscarPadreData: (id_a: string) => string;
+      buscarPadreData: (id_a: string) => string | undefined;
       getIDA: (id: number, estructura?: SConf) => string | undefined;
     };
 
