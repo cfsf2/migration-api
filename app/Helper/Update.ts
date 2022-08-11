@@ -105,6 +105,68 @@ export class Update {
     }
   }
 
+  public static async archivo({
+    ctx,
+    conf,
+  }: {
+    ctx: HttpContextContract;
+    conf: SConf;
+  }) {
+    try {
+      const maxSize = conf.getAtributo({ atributo: "archivo_tamano_maximo" });
+
+      const carpeta = conf.getAtributo({ atributo: "archivo_carpeta" });
+
+      const formatos_permitidos = conf
+        .getAtributo({
+          atributo: "archivo_formatos_permitidos",
+        })
+        ?.split(",")
+        .map((c) => c.trim());
+
+      const convencion_nombre = conf.getAtributo({
+        atributo: "archivo_convencion_nombre",
+      });
+
+      const archivo = ctx.request.file("archivo", {
+        size: maxSize,
+        extnames: formatos_permitidos,
+      });
+
+      if (!archivo || !archivo.isValid)
+        throw await new ExceptionHandler().handle(archivo?.errors[0], ctx);
+
+      const archivoNombre = `${ctx.request
+        .body()
+        .update_id.toString()}-${Date.now()}.${archivo.extname}`;
+
+      await archivo.moveToDisk(
+        `${carpeta}/`,
+        {
+          name: archivoNombre,
+          contentType:
+            archivo.extname === "pdf"
+              ? "application/pdf"
+              : "binary/octet-stream",
+          cacheControl: "no-cache",
+          visibility: "public",
+        },
+        "s3"
+      );
+
+      return this.update({
+        ctx,
+        usuario: ctx.usuario,
+        id: ctx.request.body().update_id,
+        valor: `${carpeta}/${archivoNombre}`,
+        conf,
+      });
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
   public static async updateABM({
     ctx,
     formData,

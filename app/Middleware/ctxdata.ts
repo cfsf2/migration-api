@@ -37,8 +37,6 @@ export default class UsuarioPermiso {
         return padre;
       }
 
-      console.log(id_a, padre);
-
       conf.sub_conf?.forEach(
         (sc) => (padre = buscarPadreData({ id_a, conf: sc, padreData: padre }))
       );
