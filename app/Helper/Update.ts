@@ -137,8 +137,14 @@ export class Update {
         throw await new ExceptionHandler().handle(archivo?.errors[0], ctx);
 
       const archivoNombre = (() => {
+        console.log(convencion_nombre);
+        if (!convencion_nombre)
+          return `${ctx.request.body().update_id}-${Date.now()}`;
+
         let an = convencion_nombre;
+
         const nombres = convencion_nombre.split("-");
+
         if (nombres.includes("update_id") && ctx.request.body().update_id) {
           an = an.replace("update_id", ctx.request.body().update_id.toString());
         }
@@ -148,6 +154,13 @@ export class Update {
         if (nombres.includes("timestamp")) {
           an = an.replace("timestamp", Date.now().toString());
         }
+        if (nombres.includes("tabla")) {
+          an = an.replace(
+            "tabla",
+            conf.getAtributo({ atributo: "update_tabla" })
+          );
+        }
+
         return an;
       })();
 
@@ -165,7 +178,7 @@ export class Update {
         "s3"
       );
 
-      return this.update({
+      return await Update.update({
         ctx,
         usuario: ctx.usuario,
         id: ctx.request.body().update_id,
