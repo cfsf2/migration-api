@@ -144,7 +144,9 @@ export class Update {
 
       const archivoNombre = (() => {
         if (!convencion_nombre)
-          return `${ctx.request.body().update_id}-${Date.now()}`;
+          return `${ctx.request.body().update_id}-${Date.now()}.${
+            archivo.extname
+          }`;
 
         let an = convencion_nombre;
 
