@@ -761,6 +761,29 @@ export class ConfBuilder {
               configuracionDeUsuario[0][val.atributo[0].nombre];
         });
       }
+      if (
+        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
+      ) {
+        const MenuConfiguracionDeListado = await SConf.query()
+          .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
+          .preload("conf_permiso")
+          .preload("tipo")
+          .preload("orden")
+          .preload("valores", (query) => query.preload("atributo"))
+          .preload("sub_conf", (query) => this.preloadRecursivo(query))
+          .firstOrFail();
+
+        const MenuConfiguracionDeListadoArmado = await this.armarContenedor({
+          ctx,
+          contenedor: MenuConfiguracionDeListado,
+          idListado: listado.id,
+          idVista: listado.id,
+        });
+
+        opciones["configuracionesDeListado"] = [
+          MenuConfiguracionDeListadoArmado,
+        ];
+      }
 
       let columnas = await verificarPermisos({
         ctx,
@@ -975,29 +998,6 @@ export class ConfBuilder {
         id,
       });
 
-      if (
-        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
-      ) {
-        const MenuConfiguracionDeListado = await SConf.query()
-          .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
-          .preload("conf_permiso")
-          .preload("tipo")
-          .preload("orden")
-          .preload("valores", (query) => query.preload("atributo"))
-          .preload("sub_conf", (query) => this.preloadRecursivo(query))
-          .firstOrFail();
-
-        const MenuConfiguracionDeListadoArmado = await this.armarContenedor({
-          ctx,
-          contenedor: MenuConfiguracionDeListado,
-          idListado: listado.id,
-          idVista: listado.id,
-        });
-
-        opciones["configuracionesDeListado"] = [
-          MenuConfiguracionDeListadoArmado,
-        ];
-      }
       return {
         cabeceras,
         filtros,
