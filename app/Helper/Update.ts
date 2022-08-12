@@ -144,9 +144,7 @@ export class Update {
 
       const archivoNombre = (() => {
         if (!convencion_nombre)
-          return `${ctx.request.body().update_id}-${Date.now()}.${
-            archivo.extname
-          }`;
+          return `${ctx.request.body().update_id}-${Date.now()}`;
 
         let an = convencion_nombre;
 
@@ -168,7 +166,7 @@ export class Update {
           );
         }
 
-        return an;
+        return an.concat(`.${archivo.extname}`);
       })();
 
       await archivo.moveToDisk(

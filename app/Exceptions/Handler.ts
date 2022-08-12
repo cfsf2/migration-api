@@ -30,6 +30,18 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     /**
      * Self handle the validation exception
      */
+    let errorKey = {};
+    let errorMensajeTraducido: SErrorMysql | null = new SErrorMysql();
+
+    if (error.sqlMessage) {
+      errorKey = error.sqlMessage
+        ?.split("key")
+        .pop()
+        .replaceAll("'", "")
+        .trim();
+      errorMensajeTraducido = await SErrorMysql.findBy("error_mysql", errorKey);
+    }
+
     if (error.code === "E_VALIDATION_FAILURE") {
       const message = "La Validacion ha fallado";
       return ctx.response.status(409).send({
@@ -50,19 +62,25 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         .send({ error: { message: error.code }, sql: ctx.$_sql });
     }
     if (error.code === "ER_DUP_ENTRY") {
-      const errorKey = error.sqlMessage
-        .split("key")
-        .pop()
-        .replaceAll("'", "")
-        .trim();
-      const errorMensajeTraducido = await SErrorMysql.findBy(
-        "error_mysql",
-        errorKey
-      );
-
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle
         : `${error.code}: Ya existe un registro con ese valor. No puede haber duplicados`;
+
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+    if (error.code === "extname") {
+      const message = error.message;
+
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+    if (error.code === "E_REQUEST_ENTITY_TOO_LARGE") {
+      const message = "El archivo es demasiado grande";
 
       return ctx.response.status(409).send({
         error: { message },
