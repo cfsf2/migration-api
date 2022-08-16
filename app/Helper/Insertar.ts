@@ -427,6 +427,97 @@ export class Insertar {
       };
     }
   }
+
+  public static async archivo({
+    ctx,
+    conf,
+  }: {
+    ctx: HttpContextContract;
+    conf: SConf;
+  }) {
+    try {
+      const maxSize = conf.getAtributo({ atributo: "archivo_tamano_maximo" });
+
+      const carpeta = conf.getAtributo({ atributo: "archivo_carpeta" });
+
+      const formatos_permitidos = conf
+        .getAtributo({
+          atributo: "archivo_formatos_permitidos",
+        })
+        ?.split(",")
+        .map((c) => c.trim());
+
+      const convencion_nombre = conf.getAtributo({
+        atributo: "archivo_convencion_nombre",
+      });
+
+      const archivo = ctx.request.file("archivo", {
+        size: maxSize,
+        extnames: formatos_permitidos,
+      });
+
+      if (!archivo || !archivo.isValid)
+        throw await new ExceptionHandler().handle(
+          {
+            code: archivo?.errors[0].type,
+            message: archivo?.errors[0].message,
+          },
+          ctx
+        );
+
+      const archivoNombre = (() => {
+        if (!convencion_nombre)
+          return `${ctx.request.body().update_id}-${Date.now()}`;
+
+        let an = convencion_nombre;
+
+        const nombres = convencion_nombre.split("-");
+
+        if (nombres.includes("update_id") && ctx.request.body().update_id) {
+          an = an.replace("update_id", ctx.request.body().update_id.toString());
+        }
+        if (nombres.includes("id") && ctx.$_id_general) {
+          an = an.replace("id", ctx.$_id_general.toString());
+        }
+        if (nombres.includes("timestamp")) {
+          an = an.replace("timestamp", Date.now().toString());
+        }
+        if (nombres.includes("tabla")) {
+          an = an.replace(
+            "tabla",
+            conf.getAtributo({ atributo: "update_tabla" })
+          );
+        }
+
+        return an.concat(`.${archivo.extname}`);
+      })();
+
+      await archivo.moveToDisk(
+        `${carpeta}/`,
+        {
+          name: archivoNombre,
+          contentType:
+            archivo.extname === "pdf"
+              ? "application/pdf"
+              : "binary/octet-stream",
+          cacheControl: "no-cache",
+          visibility: "public",
+        },
+        "s3"
+      );
+
+      return await Insertar.insertar({
+        ctx,
+        usuario: ctx.usuario,
+        insert_ids: ctx.request.body().insert_ids,
+        valor: `${carpeta}/${archivoNombre}`,
+        conf,
+      });
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
+    }
+  }
 }
 
 export default Insertar;
