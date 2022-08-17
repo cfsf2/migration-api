@@ -1,4 +1,3 @@
-import { DateTime } from "luxon";
 import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
 
 export default class PerformanceStatus extends BaseModel {
