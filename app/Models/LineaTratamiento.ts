@@ -1,13 +1,25 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { DateTime } from "luxon";
+import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
 
 export default class LineaTratamiento extends BaseModel {
+  public static table = "tbl_linea_tratamiento";
+
   @column({ isPrimary: true })
-  public id: number
+  public id: number;
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
+  @column()
+  public nombre: string;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  @column()
+  public orden: number;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }
