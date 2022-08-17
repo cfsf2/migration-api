@@ -5,7 +5,7 @@ export default class LineaTratamiento extends BaseModel {
   public static table = "tbl_linea_tratamiento";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id_linea_tratamiento: number;
 
   @column()
   public nombre: string;

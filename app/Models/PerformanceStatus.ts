@@ -5,7 +5,7 @@ export default class PerformanceStatus extends BaseModel {
   public static table = "tbl_performance_status";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id_performance_status: number;
 
   @column()
   public nombre: string;
