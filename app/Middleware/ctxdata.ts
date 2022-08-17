@@ -40,7 +40,7 @@ export default class UsuarioPermiso {
       conf.sub_conf?.forEach(
         (sc) => (padre = buscarPadreData({ id_a, conf: sc, padreData: padre }))
       );
-      return;
+      return padre;
     };
 
     const id_a = (id: number, estructura?: SConf) => {
