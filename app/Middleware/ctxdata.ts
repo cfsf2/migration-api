@@ -17,29 +17,40 @@ export default class UsuarioPermiso {
       return padre;
     };
 
-    const buscarPadreData = ({
-      id_a,
-      conf,
-      padreData,
-    }: {
-      id_a: string;
-      conf: SConf;
-      padreData?: string;
-    }) => {
-      let padre = padreData;
+    const buscarPadreData = ({ id_a, conf }: { id_a: string; conf: SConf }) => {
+      let padre = conf.id_a;
+      let found = false;
+
       const id_buscado = conf.sub_conf?.some((sc) => sc.id_a === id_a);
 
-      if ([1, 2, 6, 7, 9].includes(conf.id_tipo)) {
-        padre = conf.id_a;
-      }
-
       if (id_buscado) {
+        if ([1, 2, 6, 7, 9].includes(conf.id_tipo)) {
+          return padre;
+        }
         return padre;
       }
 
-      conf.sub_conf?.forEach(
-        (sc) => (padre = buscarPadreData({ id_a, conf: sc, padreData: padre }))
-      );
+      const buscarP = (conf, padrastro) => {
+        conf.sub_conf.forEach((sc) => {
+          if (found) {
+            return (padre = padrastro);
+          }
+
+          if ([1, 2, 6, 7, 9].includes(sc.id_tipo)) {
+            padrastro = sc.id_a;
+          }
+
+          found = sc.sub_conf?.some((sc) => sc.id_a === id_a);
+
+          if (found) {
+            return (padre = padrastro);
+          }
+          return buscarP(sc, padrastro);
+        });
+      };
+
+      buscarP(conf, padre);
+
       return padre;
     };
 
