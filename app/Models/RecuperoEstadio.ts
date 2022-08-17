@@ -1,27 +1,36 @@
-import { DateTime } from "luxon";
-import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
-import Estadio from "./Estadio";
+import {
+  BaseModel,
+  belongsTo,
+  BelongsTo,
+  column,
+  HasOne,
+  hasOne,
+} from "@ioc:Adonis/Lucid/Orm";
+import Recupero from "./Recupero";
 
 export default class RecuperoEstadio extends BaseModel {
   public static table = "tbl_recupero_estadio";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id_recupero_estadio: number;
+
+  @column()
+  public id_recupero: number;
 
   @column()
   public id_estadio: number;
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime;
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime;
-
-  @hasOne(() => Estadio, {
+  @hasOne(() => RecuperoEstadio, {
     foreignKey: "id",
     localKey: "id_estadio",
   })
-  public estadio: HasOne<typeof Estadio>;
+  public estadio: HasOne<typeof RecuperoEstadio>;
+
+  @belongsTo(() => Recupero, {
+    foreignKey: "id_recupero",
+    localKey: "id",
+  })
+  public Recupero: BelongsTo<typeof Recupero>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

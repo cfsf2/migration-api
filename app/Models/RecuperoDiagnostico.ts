@@ -1,21 +1,37 @@
-import { DateTime } from "luxon";
-import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  BelongsTo,
+  belongsTo,
+  column,
+  HasOne,
+  hasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Diagnostico from "./Diagnostico";
+import Recupero from "./Recupero";
 
 export default class RecuperoDiagnostico extends BaseModel {
-  public static table = "tbl_recupero_dignosticos";
+  public static table = "tbl_recupero_diagnosticos";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id_recupero_diagnostico: number;
 
   @column()
-  public id_diagnostico: string;
+  public id_recupero: number;
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime;
+  @column()
+  public id_diagnostico: number;
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime;
+  @hasOne(() => Diagnostico, {
+    foreignKey: "id",
+    localKey: "id_diagnostico",
+  })
+  public diagnostico: HasOne<typeof Diagnostico>;
+
+  @belongsTo(() => Recupero, {
+    foreignKey: "id_recupero",
+    localKey: "id",
+  })
+  public Recupero: BelongsTo<typeof Recupero>;
 
   @hasOne(() => Diagnostico, {
     foreignKey: "id",
