@@ -1,5 +1,6 @@
 import { DateTime } from "luxon";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
+import Monodro from "./Monodro";
 
 export default class Recupero extends BaseModel {
   public static table = "tbl_recupero";
@@ -27,4 +28,20 @@ export default class Recupero extends BaseModel {
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+
+  @hasOne(()=> Monodro, {
+    foreignKey: "id",
+    localKey: "id_monodroga"
+  })
+  public monodroga: HasOne<typeof Monodro>
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }
