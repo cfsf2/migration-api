@@ -33,6 +33,12 @@ export default class RecuperoDiagnostico extends BaseModel {
   })
   public Recupero: BelongsTo<typeof Recupero>;
 
+  @hasOne(() => Diagnostico, {
+    foreignKey: "id",
+    localKey: "id_diagnostico",
+  })
+  public diagnostico: HasOne<typeof Diagnostico>;
+
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
     const extras = {};
