@@ -1,14 +1,42 @@
-import { getAtributo } from "./configuraciones";
 import Database from "@ioc:Adonis/Lucid/Database";
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
 import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
+import U from "App/Models/Usuario";
 import SCC from "App/Models/SConfCpsc";
-import Usuario from "App/Models/Usuario";
+import SCCU from "App/Models/SConfConfUsuario";
+import SCCD from "App/Models/SConfConfDeta";
 
+import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
+import ExceptionHandler from "App/Exceptions/Handler";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+
+import R from "App/Models/Recupero";
+import RD from "App/Models/RecuperoDiagnostico";
+import RE from "App/Models/RecuperoEstadio";
+import RLT from "App/Models/RecuperoLineaTratamiento";
+import RPS from "App/Models/RecuperoPerformanceStatus";
+import DGN from "App/Models/Diagnostico";
+import ESTD from "App/Models/Estadio";
+import LT from "App/Models/LineaTratamiento";
+import PS from "App/Models/PerformanceStatus";
+import M from "App/Models/Monodro";
+
+let Recupero = R;
+let RecuperoDiagnostico = RD;
+let RecuperoEstadio = RE;
+let RecuperoLineaTratamiento = RLT;
+let RecuperoPerformanceStatus = RPS;
+let Diagnostico = DGN;
+let Estadio = ESTD;
+let LineaTratamiento = LT;
+let PerformanceStatus = PS;
+let Monodro = M;
 
 let Servicio = S;
 let Farmacia = F;
@@ -16,6 +44,9 @@ let FarmaciaServicio = FS;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
+let Usuario = U;
+let SConfConfUsuario = SCCU;
+let SConfConfDeta = SCCD;
 
 export class Eliminar {
   constructor() {}

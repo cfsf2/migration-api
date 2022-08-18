@@ -19,12 +19,34 @@ import SP from "App/Models/SPista";
 import SCCU from "App/Models/SConfConfUsuario";
 import SCCD from "App/Models/SConfConfDeta";
 
+import R from "App/Models/Recupero";
+import RD from "App/Models/RecuperoDiagnostico";
+import RE from "App/Models/RecuperoEstadio";
+import RLT from "App/Models/RecuperoLineaTratamiento";
+import RPS from "App/Models/RecuperoPerformanceStatus";
+import DGN from "App/Models/Diagnostico";
+import ESTD from "App/Models/Estadio";
+import LT from "App/Models/LineaTratamiento";
+import PS from "App/Models/PerformanceStatus";
+import M from "App/Models/Monodro";
+
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import ExceptionHandler from "App/Exceptions/Handler";
 
 const Database = Datab;
+let Recupero = R;
+let RecuperoDiagnostico = RD;
+let RecuperoEstadio = RE;
+let RecuperoLineaTratamiento = RLT;
+let RecuperoPerformanceStatus = RPS;
+let Diagnostico = DGN;
+let Estadio = ESTD;
+let LineaTratamiento = LT;
+let PerformanceStatus = PS;
+let Monodro = M;
+
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
