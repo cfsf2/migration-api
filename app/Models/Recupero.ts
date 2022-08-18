@@ -21,7 +21,7 @@ export default class Recupero extends BaseModel {
   public static table = "tbl_recupero";
 
   @column({ isPrimary: true })
-  public id: number;
+  public id_recupero: number;
 
   @column()
   public id_monodroga: number;
