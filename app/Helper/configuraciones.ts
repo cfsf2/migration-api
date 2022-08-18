@@ -325,7 +325,11 @@ const extraerElementos = ({
               const opciones = val.valor.split("|").map((op, i) => {
                 let valor = valores[i] as any;
                 if (typeof valor === "string") valor = valor.trim();
-                valor = Number(valor);
+
+                const onlyNumbers = new RegExp("^[0-9]+$");
+                if (onlyNumbers.test(valor)) {
+                  valor = Number(valor);
+                }
                 return { label: op.trim(), value: valor };
               });
 
