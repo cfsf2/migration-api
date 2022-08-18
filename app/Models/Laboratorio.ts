@@ -7,11 +7,7 @@ import { enumaBool } from "App/Helper/funciones";
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
     const laboratorios = await Database.from("tbl_laboratorio as l")
-      .select("*", 
-      "l.id as _id", 
-      "l.id as id", 
-      "l.ts_timestamp as fechaalta"
-      )
+      .select("*", "l.id as _id", "l.id as id", "l.ts_timestamp as fechaalta")
       .if(id, (query) => query.where("id", id))
       .orderBy("fechaalta", "desc");
 
@@ -76,8 +72,12 @@ export default class Laboratorio extends BaseModel {
   public usuario_modificacion: HasOne<typeof Usuario>;
 
   public serializeExtras() {
-    return {
-      _id: this.$extras._id?.toString(),
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }

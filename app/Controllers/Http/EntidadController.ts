@@ -6,7 +6,6 @@ import {
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
-import Publicidad from "App/Models/Publicidad";
 import Entidad from "../../Models/Entidad";
 
 export default class EntidadController {

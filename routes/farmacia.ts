@@ -14,7 +14,14 @@ Route.get(
   match: /^[0-9]+$/,
   cast: (matricula) => Number(matricula),
 });
-Route.get("/farmacias/admin/:id", "FarmaciasController.ts.mig_admin_farmacia");
+
+Route.get(
+  "/farmacias/admin/:id",
+  "FarmaciasController.ts.mig_admin_farmacia"
+).where("id", {
+  match: /^[0-9]+$/,
+  cast: (matricula) => Number(matricula),
+});
 
 Route.post(
   "/farmacias/admin/passwords",

@@ -1,7 +1,6 @@
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
 import SConf from "./SConf";
-import STipoAtributo from "./STipoAtributo";
 import Usuario from "./Usuario";
 
 export default class SConfCpsc extends BaseModel {
@@ -14,10 +13,10 @@ export default class SConfCpsc extends BaseModel {
   public id_conf: number;
 
   @column()
-  public id_tipo_atributo: number;
+  public id_conf_h: number;
 
   @column()
-  public valor: string;
+  public orden: number;
 
   @column()
   public evaluar: string;
@@ -43,11 +42,11 @@ export default class SConfCpsc extends BaseModel {
   })
   public conf: HasOne<typeof SConf>;
 
-  @hasOne(() => STipoAtributo, {
-    localKey: "id_tipo_atributo",
+  @hasOne(() => SConf, {
+    localKey: "id_conf_h",
     foreignKey: "id",
   })
-  public tipo_atributo: HasOne<typeof STipoAtributo>;
+  public conf_h: HasOne<typeof SConf>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
@@ -60,4 +59,14 @@ export default class SConfCpsc extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

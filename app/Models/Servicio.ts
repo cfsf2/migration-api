@@ -35,4 +35,15 @@ export default class Servicio extends BaseModel {
     foreignKey: "id",
   })
   public id_usuario_modificacion: HasOne<typeof Usuario>;
+
+  // public serializeExtras = true;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

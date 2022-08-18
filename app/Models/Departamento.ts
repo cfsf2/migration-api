@@ -24,4 +24,14 @@ export default class Departamento extends BaseModel {
     localKey: "id_provincia",
   })
   public provincia: HasOne<typeof Provincia>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

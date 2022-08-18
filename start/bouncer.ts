@@ -6,9 +6,11 @@
  */
 
 import Bouncer from "@ioc:Adonis/Addons/Bouncer";
-import { Permiso } from "App/Helper/permisos";
+import { Permiso, acciones } from "App/Helper/permisos";
 import Farmacia from "App/Models/Farmacia";
+import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
+import { arrayPermisos } from "App/Helper/funciones";
 
 /*
 |--------------------------------------------------------------------------
@@ -42,16 +44,7 @@ export const { actions } = Bouncer.define(
   .define(
     "AccesoRuta",
     async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
-      const perfiles = await usuario
-        .related("perfil")
-        .query()
-        .preload("permisos");
-
-      let permisos: any = [];
-
-      perfiles.forEach((perfil) => {
-        perfil.permisos.forEach((permiso) => permisos.push(permiso));
-      });
+      const permisos = await arrayPermisos(usuario);
 
       if (Array.isArray(permiso)) {
         if (
@@ -76,7 +69,6 @@ export const { actions } = Bouncer.define(
     if (!!(us.$preloaded.perfil as any).find((p) => p.id === 1)) {
       return us.habilitado === "s";
     }
-
     const tienePerfilFarmacia = await Farmacia.findBy("id_usuario", us.id);
 
     if (tienePerfilFarmacia) {
@@ -87,7 +79,58 @@ export const { actions } = Bouncer.define(
       return true;
     }
     return false;
-  });
+  })
+  .define(
+    "AccesoConf",
+    async (usuario: Usuario, conf: SConf, accion?: acciones) => {
+      const clearanceLevel = conf.permiso;
+      if (!clearanceLevel) {
+        console.log("sin clearance");
+        return false;
+      }
+      switch (clearanceLevel) {
+        case undefined:
+          return false;
+        case "t":
+          usuario.configuracionesPermitidas =
+            usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+
+          return true;
+        case "u":
+          if (usuario) {
+            usuario.configuracionesPermitidas =
+              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+            return true;
+          }
+          return false;
+        case "n":
+          return false;
+        case "p":
+          if (Array.isArray(conf.permiso)) {
+            return true;
+            return false;
+          }
+
+          const permisosUsuario = await arrayPermisos(usuario);
+
+          if (
+            permisosUsuario.findIndex(
+              (p: { nombre: string }) =>
+                p.nombre === conf.conf_permiso.permiso.nombre
+            ) !== -1
+          ) {
+            usuario.configuracionesPermitidas =
+              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+            return true;
+          }
+
+          return Bouncer.deny("Acceso no autorizado", 401);
+        default:
+          return false;
+      }
+    },
+    { allowGuest: true }
+  );
 
 /*
 |--------------------------------------------------------------------------

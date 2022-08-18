@@ -814,6 +814,8 @@ export default class Farmacia extends BaseModel {
   @column()
   public id_usuario: number;
 
+  public usuarioUsuario: string;
+
   //foreing key
   @hasOne(() => Usuario, {
     foreignKey: "id",
@@ -852,4 +854,16 @@ export default class Farmacia extends BaseModel {
     throughForeignKey: "id",
   })
   public servicios: HasManyThrough<typeof Servicio>;
+
+  // public serializeExtras = true;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

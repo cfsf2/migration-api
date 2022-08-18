@@ -3,11 +3,18 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  hasMany,
+  HasMany,
+  HasManyThrough,
+  hasManyThrough,
   hasOne,
   HasOne,
 } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import Permiso from "./Permiso";
+import SConfCpsc from "./SConfCpsc";
 import SConfPermiso from "./SConfPermiso";
+import SConfTipoAtributoValor from "./SConfTipoAtributoValor";
 import STipo from "./STipo";
 import Usuario from "./Usuario";
 
@@ -26,7 +33,7 @@ export default class SConf extends BaseModel {
   @column()
   public id_a: string;
 
-  @column()
+  @column({ serializeAs: null })
   public id_tipo: number;
 
   @column()
@@ -41,6 +48,18 @@ export default class SConf extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
 
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_creacion",
+  })
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
+
   @belongsTo(() => SConfPermiso, {
     localKey: "id_conf",
     foreignKey: "id",
@@ -53,15 +72,82 @@ export default class SConf extends BaseModel {
   })
   public tipo: HasOne<typeof STipo>;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-    localKey: "id_usuario_creacion",
+  @hasManyThrough([() => Permiso, () => SConfPermiso], {
+    localKey: "id",
+    foreignKey: "id_conf",
+    throughLocalKey: "id_permiso",
+    throughForeignKey: "id",
   })
-  public usuario_creacion: HasOne<typeof Usuario>;
+  public permiso_string: HasManyThrough<typeof Permiso>;
 
-  @hasOne(() => Usuario, {
-    foreignKey: "id",
-    localKey: "id_usuario_modificacion",
+  @hasMany(() => SConfCpsc, {
+    localKey: "id",
+    foreignKey: "id_conf",
   })
-  public usuario_modificacion: HasOne<typeof Usuario>;
+  public orden: HasMany<typeof SConfCpsc>;
+
+  @hasMany(() => SConfTipoAtributoValor, {
+    localKey: "id",
+    foreignKey: "id_conf",
+  })
+  public valores: HasMany<typeof SConfTipoAtributoValor>;
+
+  @hasManyThrough([() => SConf, () => SConfCpsc], {
+    localKey: "id",
+    foreignKey: "id_conf",
+    throughLocalKey: "id_conf_h",
+    throughForeignKey: "id",
+  })
+  public sub_conf: HasManyThrough<typeof SConf>;
+
+  public getAtributo({ atributo }: { atributo: string }): string {
+    if (!this.valores) {
+      console.log(
+        "Configuracion no tiene valores?? No, te olvidaste los preload papu"
+      );
+      return "";
+    }
+
+    return this.valores.find((v) => {
+      return v.atributo[0].nombre === atributo;
+    })?.valor as string;
+  }
+
+  private static preloadRecursivo(query) {
+    return query
+      .preload("conf_permiso", (query) => query.preload("permiso"))
+      .preload("tipo")
+      .preload("orden")
+      .preload("valores", (query) => query.preload("atributo"))
+      .preload("sub_conf", (query) => this.preloadRecursivo(query));
+  }
+
+  public static async findByIda({ id_a }: { id_a: string }) {
+    try {
+      const res = (
+        await this.query()
+          .where("id_a", id_a)
+          .preload("conf_permiso", (query) => query.preload("permiso"))
+          .preload("tipo")
+          .preload("orden")
+          .preload("valores", (query) => query.preload("atributo"))
+          .preload("sub_conf", (query) => this.preloadRecursivo(query))
+      ).pop();
+
+      return res;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  }
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

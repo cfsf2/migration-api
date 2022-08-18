@@ -117,7 +117,7 @@ export default class Publicidad extends BaseModel {
 
     return result;
   }
-  
+
   static async traerNovedadesFarmacias({
     id_farmacia,
   }: {
@@ -135,7 +135,7 @@ export default class Publicidad extends BaseModel {
       .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
       .where("f.id", id_farmacia)
       .where("p.id_publicidad_tipo", 1)
-      .orderBy("fecha_alta", 'desc')
+      .orderBy("fecha_alta", "desc");
 
     return publicidades;
   }
@@ -216,4 +216,14 @@ export default class Publicidad extends BaseModel {
     // serializeAs: "Instituciones",
   })
   public instituciones: HasManyThrough<typeof Institucion>;
+
+  public serializeExtras() {
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
+  }
 }

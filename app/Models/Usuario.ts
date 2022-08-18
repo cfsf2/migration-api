@@ -16,7 +16,6 @@ import {
 import Localidad from "./Localidad";
 import CampanaRequerimiento from "./CampanaRequerimiento";
 import Hash from "@ioc:Adonis/Core/Hash";
-import Database from "@ioc:Adonis/Lucid/Database";
 import { ResponseContract } from "@ioc:Adonis/Core/Response";
 import { RequestContract } from "@ioc:Adonis/Core/Request";
 import Perfil from "./Perfil";
@@ -27,8 +26,11 @@ import {
   enumaBool,
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class Usuario extends BaseModel {
+  public Permisos: {};
+
   public static table = "tbl_usuario";
 
   static async traerPerfilDeUsuario({
@@ -488,6 +490,8 @@ export default class Usuario extends BaseModel {
   @column()
   public confirmado: string;
 
+  public configuracionesPermitidas: string;
+
   @column()
   public telefono: string;
 
@@ -568,6 +572,20 @@ export default class Usuario extends BaseModel {
     const ap = this.apellido ? this.apellido : "";
     return this.nombre + " " + ap;
   }
+
+  public async _Permisos() {
+    const perfiles = await this.related("perfil").query().preload("permisos");
+
+    let permisosUsuario: any = {};
+
+    perfiles.forEach((perfil) => {
+      perfil.permisos.forEach(
+        (permiso) => (permisosUsuario[permiso.nombre] = 1)
+      );
+    });
+    return permisosUsuario;
+  }
+
   @column()
   public user_display_name: string;
 
@@ -581,8 +599,12 @@ export default class Usuario extends BaseModel {
   public user_rol: string[];
 
   public serializeExtras() {
-    return {
-      _id: this.$extras._id?.toString(),
-    };
+    const keys = Object.keys(this.$extras);
+    const extras = {};
+    keys.forEach((k) => {
+      if (k === "_id") return (extras[k] = this.$extras[k].toString());
+      extras[k] = this.$extras[k];
+    });
+    return extras;
   }
 }
