@@ -117,7 +117,7 @@ export const guardarDatosAuditoria = async ({
             return;
 
           const rc = new SRc();
-          console.log(objeto);
+
           await rc
             .merge({
               id_registro: objeto.$primaryKeyValue,

@@ -405,6 +405,80 @@ export class Update {
       };
     }
   }
+
+  public static async habilitar({
+    ctx,
+    conf,
+    id,
+    usuario,
+  }: {
+    ctx: HttpContextContract;
+    conf: SConf;
+    usuario: U;
+    id: number;
+  }) {
+    const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
+    const Modelo = eval(
+      getAtributo({ atributo: "update_modelo", conf: conf })
+    ) as typeof BaseModel;
+    const campo = getAtributo({ atributo: "update_campo", conf: conf });
+    const columna = getAtributo({
+      atributo: "update_id_nombre",
+      conf: conf,
+    });
+    const registrarCambios = getAtributo({
+      atributo: "update_registro_cambios",
+      conf: conf,
+    });
+
+    if (Modelo && campo) {
+      try {
+        const registro = await Modelo.findOrFail(id);
+        const valorAnterior = registro[campo];
+
+        const valor = valorAnterior === "s" ? "n" : "s";
+
+        registro.merge({
+          [campo]: valor,
+        });
+
+        guardarDatosAuditoria({
+          usuario,
+          objeto: registro,
+          accion: AccionCRUD.editar,
+          registroCambios: {
+            registrarCambios,
+            tabla,
+            campo,
+            valorAnterior,
+          },
+        });
+        await registro.save();
+        return { registroModificado: registro.toJSON(), modificado: true };
+      } catch (err) {
+        console.log("update error", err);
+        throw await new ExceptionHandler().handle(err, ctx);
+      }
+    }
+
+    if (!Modelo && tabla && campo && id) {
+      const s = "`";
+
+      try {
+        const registro = await Database.query().from(tabla).where("id", id);
+        const registroM = await Database.rawQuery(
+          `UPDATE ${tabla} SET ${s.concat(campo).concat(s)} = '${
+            registro[campo] === "s" ? "n" : "s"
+          }', id_usuario_modificacion = ${usuario.id} WHERE ${
+            columna ? columna : "id"
+          } = ${id}`
+        );
+        return { registroModificado: registroM, modificado: true };
+      } catch (err) {
+        throw await new ExceptionHandler().handle(err, ctx);
+      }
+    }
+  }
 }
 
 export default Update;
