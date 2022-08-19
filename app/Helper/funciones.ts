@@ -117,9 +117,10 @@ export const guardarDatosAuditoria = async ({
             return;
 
           const rc = new SRc();
+          console.log(objeto);
           await rc
             .merge({
-              id_registro: objeto.id,
+              id_registro: objeto.$primaryKeyValue,
               tabla: registroCambios.tabla,
               id_usuario: usuario.id,
             })
@@ -161,7 +162,7 @@ export const guardarDatosAuditoria = async ({
       try {
         await rc
           .merge({
-            id_registro: objeto.id,
+            id_registro: objeto.$primaryKeyValue,
             tabla: registroCambios.tabla,
             id_usuario: usuario.id,
           })

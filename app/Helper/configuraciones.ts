@@ -140,15 +140,22 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
 
         if (sch.tipo.id === 5) {
           if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
-            const conf = await SConf.findByOrFail(
-              "id_a",
-              getAtributo({ atributo: "enlace_id_a", conf: sch })
-            );
-            const tienePermisoDeDestino = await bouncer.allows(
-              "AccesoConf",
-              conf
-            );
-            if (!tienePermisoDeDestino) return false;
+            try {
+              const conf = await SConf.findByOrFail(
+                "id_a",
+                getAtributo({ atributo: "enlace_id_a", conf: sch })
+              );
+              const tienePermisoDeDestino = await bouncer.allows(
+                "AccesoConf",
+                conf
+              );
+              if (!tienePermisoDeDestino) return false;
+            } catch (err) {
+              console.log(
+                err,
+                getAtributo({ atributo: "enlace_id_a", conf: sch })
+              );
+            }
           }
         }
 
