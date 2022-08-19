@@ -406,7 +406,7 @@ export class Update {
     }
   }
 
-  public static async habilitar({
+  public static async habilitarRecupero({
     ctx,
     conf,
     id,
@@ -434,6 +434,14 @@ export class Update {
     if (Modelo && campo) {
       try {
         const registro = await Modelo.findOrFail(id);
+
+        const recuperoDiagnosticos = await RecuperoDiagnostico.findBy(
+          "id_recupero",
+          registro.$primaryKeyValue
+        );
+
+        console.log(recuperoDiagnosticos);
+
         const valorAnterior = registro[campo];
 
         const valor = valorAnterior === "s" ? "n" : "s";
