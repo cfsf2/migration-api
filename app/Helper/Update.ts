@@ -102,7 +102,8 @@ export class Update {
           },
         });
         await registro.save();
-        return { registroModificado: registro.toJSON(), modificado: true };
+
+        return { registroModificado: registro, modificado: true };
       } catch (err) {
         console.log("update error", err);
         throw await new ExceptionHandler().handle(err, ctx);
@@ -440,7 +441,15 @@ export class Update {
           registro.$primaryKeyValue
         );
 
-        console.log(recuperoDiagnosticos);
+        if (!recuperoDiagnosticos) {
+          registro.merge({
+            habilitado: "n",
+          });
+          await registro.save();
+          throw {
+            code: "recupero_sin_diagnostico",
+          };
+        }
 
         const valorAnterior = registro[campo];
 

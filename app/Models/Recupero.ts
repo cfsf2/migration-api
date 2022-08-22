@@ -86,7 +86,6 @@ export default class Recupero extends BaseModel {
     const keys = Object.keys(this.$extras);
     const extras = {};
     keys.forEach((k) => {
-      if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
     extras["id"] = this.$primaryKeyValue;

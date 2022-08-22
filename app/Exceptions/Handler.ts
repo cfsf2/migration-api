@@ -33,6 +33,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     let errorKey = {};
     let errorMensajeTraducido: SErrorMysql | null = new SErrorMysql();
 
+    errorMensajeTraducido = await SErrorMysql.findBy("error_mysql", error.code);
+
     if (error.sqlMessage) {
       errorKey = error.sqlMessage
         ?.split("key")
@@ -43,23 +45,30 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     }
 
     if (error.code === "E_VALIDATION_FAILURE") {
-      const message = "La Validacion ha fallado";
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "La Validacion ha fallado";
       return ctx.response.status(409).send({
         error: { message },
         sql: ctx.$_sql,
       });
     }
     if (error.code === "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD") {
-      const message = "El tipo de valor no corresponde al dato solicitado";
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "El tipo de valor no corresponde al dato solicitado";
       return ctx.response.status(409).send({
         error: { message },
         sql: ctx.$_sql,
       });
     }
     if (error.code === "ER_BAD_FIELD_ERROR") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : error.code;
       return ctx.response
         .status(422)
-        .send({ error: { message: error.code }, sql: ctx.$_sql });
+        .send({ error: { message }, sql: ctx.$_sql });
     }
     if (error.code === "ER_DUP_ENTRY") {
       const message = errorMensajeTraducido
@@ -72,7 +81,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       });
     }
     if (error.code === "extname") {
-      const message = error.message;
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : error.message;
 
       return ctx.response.status(409).send({
         error: { message },
@@ -80,7 +91,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       });
     }
     if (error.code === "E_REQUEST_ENTITY_TOO_LARGE") {
-      const message = "El archivo es demasiado grande";
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "El archivo es demasiado grande";
 
       return ctx.response.status(409).send({
         error: { message },
@@ -88,6 +101,16 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       });
     }
 
+    if (error.code === "recupero_sin_diagnostico") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "El recupero debe tener al menos un diagnostico asociado para poder habilitar";
+
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
     // return ctx.response
     //   .status(411)
     //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
