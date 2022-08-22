@@ -40,6 +40,7 @@ export default class RecuperoLineaTratamiento extends BaseModel {
       if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
+    extras["id"] = this.$primaryKeyValue;
     return extras;
   }
 }

@@ -39,6 +39,7 @@ export default class RecuperoEstadio extends BaseModel {
       if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
+    extras["id"] = this.$primaryKeyValue;
     return extras;
   }
 }
