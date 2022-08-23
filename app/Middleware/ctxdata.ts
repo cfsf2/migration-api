@@ -93,7 +93,8 @@ export default class UsuarioPermiso {
     ctx.$_errores = [];
     ctx.$_conf = {
       estructura: {},
-      buscarPadre: buscarPadre,
+      buscarPadre: (id: number) =>
+        buscarPadre({ id, conf: ctx.$_conf.estructura }),
       getIDA: id_a,
       buscarPadreData: (id_a: string) => {
         return buscarPadreData({

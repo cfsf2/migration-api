@@ -1215,7 +1215,8 @@ export class ConfBuilder {
       })
     );
 
-    p.opciones["orden"] = contenedor?.orden.find(
+    const father = ctx.$_conf.buscarPadre(contenedor.id);
+    p.opciones["orden"] = father.orden.find(
       (o) => o.id_conf_h === contenedor?.id
     )?.orden;
 
