@@ -13,7 +13,7 @@ export default class RecuperoDiagnostico extends BaseModel {
   public static table = "tbl_recupero_diagnosticos";
 
   @column({ isPrimary: true })
-  public id_recupero_diagnostico: number;
+  public id_recupero_diagnosticos: number;
 
   @column()
   public id_recupero: number;
