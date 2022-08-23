@@ -21,5 +21,5 @@ import "../routes/transfers";
 import "../routes/pantalla";
 
 Route.get("/", async () => {
-  return { farmageo: "22-08-22" };
+  return { farmageo: "23-08-22" };
 });

@@ -1168,11 +1168,13 @@ export class ConfBuilder {
     idListado: number;
     idVista: number;
   }) => {
+    const father = ctx.$_conf.buscarPadre(contenedor.id);
+
     const p: {
       opciones: {};
       configuraciones: any[];
     } = {
-      opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
+      opciones: this.setOpciones(ctx, contenedor, father),
       configuraciones: [],
     };
 
@@ -1214,11 +1216,6 @@ export class ConfBuilder {
         );
       })
     );
-
-    const father = ctx.$_conf.buscarPadre(contenedor.id);
-    p.opciones["orden"] = father.orden.find(
-      (o) => o.id_conf_h === contenedor?.id
-    )?.orden;
 
     p.configuraciones = [];
     p.configuraciones = p.configuraciones.concat(_listadosArmados);
