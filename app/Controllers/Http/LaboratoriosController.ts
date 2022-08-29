@@ -16,6 +16,7 @@ export default class LaboratoriosController {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
       return await Laboratorio.traerLaboratorios({});
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
