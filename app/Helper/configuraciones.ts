@@ -616,7 +616,15 @@ const aplicaWhere = async (
 
   const tipo = getAtributo({ atributo: "componente", conf });
 
-  if (operador === "like") valor = valor?.concat("%");
+  if (operador === "like" && valor) {
+    const valores = valor.split(" ");
+
+    valores.forEach((v, i) => {
+      const $like = "%".concat(v + "%");
+      query.where(campo, "like", $like);
+    });
+    return query;
+  }
 
   if (operador === "fecha" || operador === "fecha_hora") {
     const fechas = JSON.parse(valor);
