@@ -1,18 +1,32 @@
 version: "3.8"
 services:
-  apiSQL:
+  apifsql:
     build:
       context: ./
     image: apif
-    container_name: apifarmageosql
+    container_name: apifsql
     ports:
       - "3001:3111"
+    env_file:
+      - .env
     volumes:
       - type: bind
         source: ./
         target: /home/node/app
         read_only: true
     command: node ace serve --watch
+    depends_on:
+      - mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    expose:
+      - 80
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
     depends_on:
       - mysql
 
@@ -30,15 +44,3 @@ services:
       MYSQL_ROOT_PASSWORD: "dockerpass"
       MYSQL_USER: "dan"
       MYSQL_PASSWORD: "secret"
-
-  phpmyadmin:
-    image: phpmyadmin
-    restart: always
-    expose:
-      - 80
-    ports:
-      - 8080:80
-    environment:
-      - PMA_HOST=mysql
-    depends_on:
-      - mysql
