@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  app:
+  apiSQL:
     build:
       context: ./
     image: apif
