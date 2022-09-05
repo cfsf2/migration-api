@@ -4,7 +4,7 @@ services:
     build:
       context: ./
     image: apif
-    container_name: API
+    container_name: apifarmageosql
     ports:
       - "3001:3111"
     volumes:
