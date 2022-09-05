@@ -1,13 +1,12 @@
-version: "3.2"
+version: "3.8"
 services:
   app:
-    restart: always
     build:
       context: ./
     image: apif
     container_name: API
     ports:
-      - "3111:3111"
+      - "3001:3111"
     volumes:
       - type: bind
         source: ./
@@ -15,5 +14,35 @@ services:
         read_only: true
       - node_modules:/home/node/app/node_modules
     command: node ace serve --watch
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    volumes:
+      - ../sql-data/db:/var/lib/mysql
+    ports:
+      - "3312:3306"
+    hostname: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "farmageo"
+      MYSQL_ROOT_PASSWORD: "dockerpass"
+      MYSQL_USER: "dan"
+      MYSQL_PASSWORD: "secret"
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    expose:
+      - 80
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+    depends_on:
+      - mysql
+
 volumes:
   node_modules: {}
