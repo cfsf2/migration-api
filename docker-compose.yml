@@ -12,7 +12,6 @@ services:
         source: ./
         target: /home/node/app
         read_only: true
-      - node_modules:/home/node/app/node_modules
     command: node ace serve --watch
     depends_on:
       - mysql
@@ -43,6 +42,3 @@ services:
       - PMA_HOST=mysql
     depends_on:
       - mysql
-
-volumes:
-  node_modules: {}
