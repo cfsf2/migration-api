@@ -14,7 +14,7 @@ services:
         source: ./
         target: /home/node/app
         read_only: true
-        - node_modules:/home/node/app/node_modules
+      - node_modules:/home/node/app/node_modules
     command: node ace serve --watch
     depends_on:
       - mysql
