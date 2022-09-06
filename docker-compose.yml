@@ -28,6 +28,8 @@ services:
       - 8080:80
     environment:
       - PMA_HOST=mysql
+      - MAX_EXECUTION_TIME=1200
+      - MEMORY_LIMIT=4G
     depends_on:
       - mysql
 
