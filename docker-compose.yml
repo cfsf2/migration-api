@@ -30,7 +30,7 @@ services:
       - PMA_HOST=mysql
       - MAX_EXECUTION_TIME=12000
       - MEMORY_LIMIT=4G
-      - UPLOAD_LIMIT=10M
+      - UPLOAD_LIMIT=200M
     depends_on:
       - mysql
 
