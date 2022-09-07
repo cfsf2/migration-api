@@ -43,11 +43,8 @@ services:
       - "3312:3306"
     hostname: mysql
     command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_DATABASE: "farmageo"
-      MYSQL_ROOT_PASSWORD: "dockerpass"
-      MYSQL_USER: "dan"
-      MYSQL_PASSWORD: "secret"
+    env_file:
+      - .env.mysql
 volumes:
   node_modules: {}
 
