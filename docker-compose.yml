@@ -50,3 +50,8 @@ services:
       MYSQL_PASSWORD: "secret"
 volumes:
   node_modules: {}
+
+networks:
+  default:
+    name: fsqlnet
+    external: true
