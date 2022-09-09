@@ -1,5 +1,16 @@
 version: "3.8"
 services:
+ webadminsql:
+    container_name: farmageosql-webadmin
+    restart: always
+    build:
+      context: ../admin/
+      dockerfile: ../admin/Dockerfile.prod
+    image: farmageoadminsql:latest
+    ports:
+      - "3150:80"
+    depends_on:
+      -apifsql
   apifsql:
     build:
       context: ./
