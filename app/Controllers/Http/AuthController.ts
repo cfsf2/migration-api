@@ -4,7 +4,6 @@ import { enumaBool } from "App/Helper/funciones";
 import Perfil from "App/Models/Perfil";
 import { DateTime } from "luxon";
 import { Permiso } from "App/Helper/permisos";
-import Farmacia from "App/Models/Farmacia";
 import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class AuthController {

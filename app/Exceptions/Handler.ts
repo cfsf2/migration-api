@@ -44,6 +44,16 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       errorMensajeTraducido = await SErrorMysql.findBy("error_mysql", errorKey);
     }
 
+    if (error.code === "E_INVALID_AUTH_PASSWORD") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "El Password es incorrecto";
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+
     if (error.code === "E_VALIDATION_FAILURE") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle

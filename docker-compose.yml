@@ -1,16 +1,15 @@
 version: "3.8"
 services:
- webadminsql:
+  webadminsql:
     container_name: farmageosql-webadmin
     restart: always
     build:
-      context: ../admin/
-      dockerfile: ../admin/Dockerfile.prod
+      context: ../migration-admin-fgeo/
+      dockerfile: ../migration-admin-fgeo/Dockerfile.prod
     image: farmageoadminsql:latest
     ports:
       - "3150:80"
-    depends_on:
-      -apifsql
+    depends_on: -apifsql
   apifsql:
     build:
       context: ./
@@ -54,8 +53,10 @@ services:
       - "3312:3306"
     hostname: mysql
     command: --default-authentication-plugin=mysql_native_password
-    env_file:
-      - .env.mysql
+    environment:
+      MYSQL_DATABASE: "farmageo"
+      MYSQL_ROOT_PASSWORD: "54h_f2FA"
+      MYSQL_USER: "dan"
 volumes:
   node_modules: {}
 
