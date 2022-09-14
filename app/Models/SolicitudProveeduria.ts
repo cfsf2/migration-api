@@ -13,11 +13,10 @@ import Entidad from "./Entidad";
 import Database from "@ioc:Adonis/Lucid/Database";
 import ProductoPack from "./ProductoPack";
 import SolicitudProveeduriaProductoPack from "./SolicitudProveeduriaProductoPack";
-import { JsonWebTokenError } from "jsonwebtoken";
+
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "App/Helper/email";
-import EstadoPedido from "./EstadoPedido";
 
 export default class SolicitudProveeduria extends BaseModel {
   static async traerSolicitudesProveeduria({

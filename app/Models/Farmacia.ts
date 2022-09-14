@@ -553,6 +553,7 @@ export default class Farmacia extends BaseModel {
     data: { usuario: any; farmacia: any; instituciones: any; perfil: any };
     usuarioAuth: Usuario;
   }) {
+    id;
     const usuario = await Usuario.findOrFail(data.farmacia.id_usuario);
     const instituciones = await FarmaciaInstitucion.query().where(
       "id_farmacia",

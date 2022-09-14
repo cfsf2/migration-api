@@ -58,7 +58,7 @@ export const getCoordenadas = ({
   provincia?: string;
   pais?: string;
 }): Promise<{ lat: string; lng: string }> => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     const direccioncompleta = `${calle} ${numero}, ${localidad}, ${provincia}, ${pais}`;
     const geocoding = await axios.get(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`

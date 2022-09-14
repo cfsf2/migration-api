@@ -97,7 +97,7 @@ export default class FarmaciasController {
       const usuario = await auth.authenticate();
       await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
 
-      const { username, id } = request.qs();
+      const { username } = request.qs();
       return response.created(
         await Farmacia.actualizarFarmacia({
           usuario: username,

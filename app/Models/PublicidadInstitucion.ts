@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
-import Publicidad from "./Publicidad";
+
 import Institucion from "./Institucion";
 
 export default class PublicidadInstitucion extends BaseModel {

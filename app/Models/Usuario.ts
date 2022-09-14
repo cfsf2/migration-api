@@ -63,7 +63,7 @@ export default class Usuario extends BaseModel {
         `tbl_usuario.id`,
         `tbl_usuario_perfil.id_usuario`
       )
-      .if(usuarioNombre, (query) => {
+      .if(usuarioNombre && usuarioNombre !== "", (query) => {
         return query.where("usuario", usuarioNombre);
       });
 

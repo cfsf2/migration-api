@@ -9,7 +9,7 @@ import { Permiso } from "App/Helper/permisos";
 import Entidad from "../../Models/Entidad";
 
 export default class EntidadController {
-  public async index({ request }: HttpContextContract) {
+  public async index() {
     try {
       return await Entidad.traerEntidades({ habilitado: "s" });
     } catch (err) {
@@ -17,7 +17,7 @@ export default class EntidadController {
     }
   }
 
-  public async index_Admin({ request, bouncer }: HttpContextContract) {
+  public async index_Admin({ bouncer }: HttpContextContract) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PDP_GET_ENTIDADES);
       return await Entidad.traerEntidades({});

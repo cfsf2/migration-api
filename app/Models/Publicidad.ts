@@ -14,7 +14,6 @@ import Institucion from "./Institucion";
 import PublicidadInstitucion from "./PublicidadInstitucion";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
-import { Request } from "@adonisjs/core/build/standalone";
 
 export default class Publicidad extends BaseModel {
   static async traerPublicidades({

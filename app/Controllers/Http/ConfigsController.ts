@@ -2,7 +2,6 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 
 import {
   listado,
-  vista,
   modificar,
   insertar,
   eliminar,
@@ -10,7 +9,7 @@ import {
   insertarABM,
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
-import { acciones } from "App/Helper/permisos";
+import { acciones, Permiso } from "App/Helper/permisos";
 
 const preloadRecursivo = (query) => {
   return query
@@ -23,7 +22,7 @@ const preloadRecursivo = (query) => {
 
 export default class ConfigsController {
   public async Config(ctx: HttpContextContract) {
-    const { request, response, bouncer, auth } = ctx;
+    const { request, bouncer, auth } = ctx;
 
     const config = request.qs().pantalla;
     const usuario = await auth.authenticate();
@@ -134,7 +133,7 @@ export default class ConfigsController {
   }
 
   public async ConfigPantalla(ctx: HttpContextContract) {
-    const { request, response, bouncer, auth } = ctx;
+    const { request, bouncer, auth } = ctx;
     const config = request.params().pantalla;
     const usuario = await auth.authenticate();
 
@@ -224,7 +223,10 @@ export default class ConfigsController {
 
       ctx.$_respuesta.configuraciones = configuraciones;
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;
-      ctx.$_respuesta.sql = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+      ctx.$_respuesta.sql = (await ctx.bouncer.allows(
+        "AccesoRuta",
+        Permiso.GET_SQL
+      ))
         ? ctx.$_sql
         : undefined;
       return ctx.$_respuesta;
@@ -234,10 +236,9 @@ export default class ConfigsController {
   }
 
   public async ABM_put(ctx: HttpContextContract) {
-    const { request, response, bouncer, auth } = ctx;
+    const { request, response, bouncer } = ctx;
     const config = request.params().config;
 
-    const usuario = await auth.authenticate();
     const id = request.body().id;
     const formData = request.body();
 

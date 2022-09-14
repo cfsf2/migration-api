@@ -66,6 +66,7 @@ export class Update {
     conf: SConf;
     formData?: {};
   }) {
+    formData;
     if (conf.tipo.id === 9)
       return this.updateABM({ ctx, formData: ctx.request.body(), conf });
 

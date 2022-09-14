@@ -14,7 +14,9 @@ export default class UsuariosController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.USER_GET_ALL);
 
-      const usuarios = await Usuario.traerPerfilDeUsuario({});
+      const usuarios = await Usuario.traerPerfilDeUsuario({
+        usuarioNombre: "",
+      });
 
       return usuarios;
     } catch (err) {
@@ -22,7 +24,7 @@ export default class UsuariosController {
     }
   }
 
-  public async mig_perfilUsuario({ request, bouncer }: HttpContextContract) {
+  public async mig_perfilUsuario({ request }: HttpContextContract) {
     try {
       // await bouncer.authorize("AccesoRuta", Permiso.USER_GET);
 
@@ -160,7 +162,7 @@ export default class UsuariosController {
   }: HttpContextContract) {
     try {
       const usuarioData = request.body().data;
-      const token = request.header("authorization")?.split(" ")[1];
+      // const token = request.header("authorization")?.split(" ")[1];
       const usuarioAuth = await auth.authenticate();
 
       bouncer

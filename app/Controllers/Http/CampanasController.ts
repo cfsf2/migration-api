@@ -1,6 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Database from "@ioc:Adonis/Lucid/Database";
-import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
+import { schema, rules } from "@ioc:Adonis/Core/Validator";
 import Campana from "App/Models/Campana";
 import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
@@ -31,7 +31,7 @@ export default class CampanasController {
     }
   }
 
-  public async todas({ request }: HttpContextContract) {
+  public async todas() {
     try {
       return await Campana.query()
         .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
@@ -75,7 +75,7 @@ export default class CampanasController {
 
   public async requerimientos({
     request,
-    response,
+
     bouncer,
   }: HttpContextContract) {
     try {
@@ -132,7 +132,7 @@ export default class CampanasController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.REQUERIMIENTOS_FINALIZADO);
       const usuario = await auth.authenticate();
-      const { id, finalizado } = request.body();
+      const { id } = request.body();
       const req = await CampanaRequerimiento.find(id);
 
       guardarDatosAuditoria({

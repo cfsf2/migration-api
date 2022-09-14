@@ -134,6 +134,7 @@ export class Insertar {
   }) {
     try {
       let tabla = conf.getAtributo({ atributo: "tabla" });
+      tabla;
       let Modelo = eval(
         getAtributo({ atributo: "modelo", conf })
       ) as typeof BaseModel;
@@ -182,6 +183,7 @@ export class Insertar {
     conf,
     usuario,
   }) {
+    usuario;
     try {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
@@ -312,6 +314,7 @@ export class Insertar {
     conf,
     usuario,
   }) {
+    usuario;
     try {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });

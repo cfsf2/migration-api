@@ -20,12 +20,7 @@ export default class RepoossController {
     }
   }
 
-  public async update({
-    request,
-    bouncer,
-    response,
-    auth,
-  }: HttpContextContract) {
+  public async update({ request, bouncer, auth }: HttpContextContract) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.REPORTEOOSS_CREATE);
       const usuario = await auth.authenticate();

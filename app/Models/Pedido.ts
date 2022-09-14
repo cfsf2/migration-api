@@ -151,8 +151,8 @@ export default class Pedido extends BaseModel {
       ? pedidoWeb.gruposproductos[0].productos.reduce(
           (
             subtotal: number,
-            p: { cantidad: number; precio: any },
-            i: number
+            p: { cantidad: number; precio: any }
+            //i: number
           ) => {
             subtotal = subtotal + Math.round(p.cantidad) * Number(p.precio);
             return subtotal;

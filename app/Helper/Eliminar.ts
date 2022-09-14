@@ -11,10 +11,6 @@ import SCCD from "App/Models/SConfConfDeta";
 
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
-import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
-import ExceptionHandler from "App/Exceptions/Handler";
-import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
@@ -55,7 +51,7 @@ export class Eliminar {
     const modelo = conf.getAtributo({ atributo: "delete_modelo" });
     const tabla = conf.getAtributo({ atributo: "delete_tabla" });
     const delete_id_nombre = conf.getAtributo({ atributo: "delete_id_nombre" });
-
+    ctx;
     const registrarCambios = getAtributo({
       atributo: "update_registro_cambios",
       conf: conf,

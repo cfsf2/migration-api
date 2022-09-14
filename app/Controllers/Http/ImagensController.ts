@@ -12,7 +12,7 @@ export default class ImagensController {
         const timestamp = Date.now().toString();
         const nombreArchivo = `A${timestamp}-${file.fileName}.${file.extname}`;
         const carpeta = "farmacias/";
-        const res = await file.moveToDisk(
+        await file.moveToDisk(
           carpeta,
           {
             contentType: file.type,
