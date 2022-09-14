@@ -7,7 +7,6 @@ import { DateTime } from "luxon";
 import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
-import ConfigsController from "./ConfigsController";
 
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";

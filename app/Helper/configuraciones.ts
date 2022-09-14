@@ -34,6 +34,7 @@ import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import ExceptionHandler from "App/Exceptions/Handler";
+import { Permiso } from "./permisos";
 
 const Database = Datab;
 let Recupero = R;
@@ -619,7 +620,7 @@ const aplicaWhere = async (
   if (operador === "like" && valor) {
     const valores = valor.split(" ");
 
-    valores.forEach((v, i) => {
+    valores.forEach((v) => {
       const $like = "%".concat(v + "%");
       query.where(campo, "like", $like);
     });
@@ -727,10 +728,10 @@ const aplicarFiltros = (
 
       if (!filtro) return;
 
-      const permiteNull = getAtributo({
-        atributo: "permite_null",
-        conf: filtro,
-      });
+      // const permiteNull = getAtributo({
+      //   atributo: "permite_null",
+      //   conf: filtro,
+      // });
 
       //  if (permiteNull === "n") throw new Error(`El ${id_a} es obligatorio`);
 
@@ -1259,11 +1260,11 @@ export class ConfBuilder {
       datos = await this.getDatos(ctx, abm, ctx.request.body().id);
     }
 
-    const sql = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+    const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
       ? ctx.$_sql
       : undefined;
 
-    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
       ? conf
       : undefined;
 
@@ -1285,8 +1286,16 @@ export class ConfBuilder {
       .preload("sub_conf", (query) => this.preloadRecursivo(query));
   };
 
-  public static setOpciones = (ctx, conf_h, conf, id?: number) => {
+  public static setOpciones = (
+    ctx: HttpContextContract,
+    conf_h: SConf,
+    conf: SConf,
+    id?: number
+  ) => {
     const opciones = {};
+
+    ctx;
+    id;
 
     conf?.valores.forEach((val) => {
       if (val.evaluar === "s") {
@@ -1319,6 +1328,7 @@ export class ConfBuilder {
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
+
     const campos = getSelect(ctx, [conf], 7);
     const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });
     const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
