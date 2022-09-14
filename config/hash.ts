@@ -70,10 +70,10 @@ const hashConfig: HashConfig = {
       rounds: 10,
     },
 
-    // custom: {
-    //   driver: "custom-bcrypt",
-    //   saltRounds: 10,
-    // },
+    custom: {
+      driver: "custom-bcrypt",
+      saltRounds: 10,
+    },
   },
 };
 
