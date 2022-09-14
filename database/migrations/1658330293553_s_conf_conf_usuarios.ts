@@ -28,7 +28,7 @@ export default class SConfConfUsuarios extends BaseSchema {
       table.timestamp("ts_modificacion", { useTz: true });
     });
 
-    await this.schema.alterTable("s_conf_conf_usuario", (table) => {
+    await this.schema.alterTable(this.tableName, (table) => {
       table.index(
         ["id_usuario", "id_conf"],
         "id_usuario_id_conf_UNIQUE",
