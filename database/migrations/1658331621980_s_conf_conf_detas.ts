@@ -4,7 +4,7 @@ export default class SConfConfDetas extends BaseSchema {
   protected tableName = "s_conf_conf_deta";
 
   public async up() {
-    await this.schema.createTable(this.tableName, (table) => {
+    this.schema.createTable(this.tableName, (table) => {
       table.increments("id");
       table
         .integer("id_conf_conf_usuario")
@@ -30,7 +30,7 @@ export default class SConfConfDetas extends BaseSchema {
       table.timestamp("ts_modificacion", { useTz: true });
     });
 
-    await this.schema.alterTable(this.tableName, (table) => {
+    this.schema.alterTable(this.tableName, (table) => {
       table.index(
         ["id_conf_conf_usuario", "id_conf"],
         "id_conf_conf_usuario_id_conf_UNIQUE",
