@@ -1,33 +1,24 @@
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
-export default class STipo extends BaseModel {
-  public static table = "s_tipo";
+export default class SComponente extends BaseModel {
+  public static table = "s_componente";
 
   @column({ isPrimary: true })
   public id: number;
-
-  @column()
-  public nombre: string;
-
-  @column()
-  public descripcion: string;
-
-  @column()
-  public tiene_componente: string;
-
-  @column()
-  public id_usuario_creacion: number;
-
-  @column()
-  public id_usuario_modificacion: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @column()
+  public id_usuario_modificacion: number;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",
@@ -45,7 +36,6 @@ export default class STipo extends BaseModel {
     const keys = Object.keys(this.$extras);
     const extras = {};
     keys.forEach((k) => {
-      if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
     return extras;
