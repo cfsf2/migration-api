@@ -76,11 +76,14 @@ export default class UsuarioPermiso {
       estructura.sub_conf?.forEach((sc) => id_a(id, sc));
       return IDA;
     };
-
     if (typeof ctx.auth.user !== "undefined") {
       ctx.auth.user.Permisos = await ctx.auth.user?._Permisos();
       ctx.usuario = ctx.auth.user;
       ctx.usuario.configuracionesDeUsuario = {};
+      ctx.usuario.configuracionesPermitidas = `"INICIO"`;
+    }
+    if (typeof ctx.auth.user === "undefined") {
+      ctx.usuario = {};
       ctx.usuario.configuracionesPermitidas = `"INICIO"`;
     }
     ctx.$_filtros = {

@@ -158,6 +158,8 @@ export default class ConfigsController {
       .preload("sub_conf", (query) => preloadRecursivo(query))
       .firstOrFail();
 
+    console.log(conf.toJSON());
+
     ctx.$_conf.estructura = conf;
     // para listado
     if (!(await bouncer.allows("AccesoConf", conf))) return respuestaVacia;

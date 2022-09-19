@@ -92,9 +92,10 @@ export const { actions } = Bouncer.define(
         case undefined:
           return false;
         case "t":
-          usuario.configuracionesPermitidas =
-            usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
-
+          if (usuario) {
+            usuario.configuracionesPermitidas =
+              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+          }
           return true;
         case "u":
           if (usuario) {
