@@ -80,6 +80,7 @@ export enum Permiso {
   INSTITUCIONES_GET_PARA_FARMACIA = "INSTITUCIONES_GET_PARA_FARMACIA",
 
   INICIO = "INICIO",
+  GET_SQL = "GET_SQL",
 }
 
 export enum acciones {

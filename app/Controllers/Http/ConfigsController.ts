@@ -158,11 +158,14 @@ export default class ConfigsController {
       .preload("sub_conf", (query) => preloadRecursivo(query))
       .firstOrFail();
 
-    console.log(conf.toJSON());
+    // console.log(conf.toJSON());
 
     ctx.$_conf.estructura = conf;
     // para listado
-    if (!(await bouncer.allows("AccesoConf", conf))) return respuestaVacia;
+    if (!(await bouncer.allows("AccesoConf", conf))) {
+      console.log("No hay acceso a ", conf);
+      return respuestaVacia;
+    }
 
     const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
     const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
@@ -231,6 +234,7 @@ export default class ConfigsController {
         : undefined;
       return ctx.$_respuesta;
     } catch (err) {
+      console.log(err);
       return err;
     }
   }

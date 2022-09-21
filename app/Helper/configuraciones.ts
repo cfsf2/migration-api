@@ -513,6 +513,10 @@ export const getAtributo = ({
   }
 
   return conf.valores.find((v) => {
+    if (!v.atributo[0]) {
+      console.log(conf.id_a);
+      console.log("ACA DEBE HABER UN ERROR", v, v.atributo, atributo, atributo);
+    }
     return v.atributo[0].nombre === atributo;
   })?.valor as string;
 };
