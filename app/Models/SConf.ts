@@ -12,6 +12,7 @@ import {
 } from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
 import Permiso from "./Permiso";
+import SComponente from "./SComponente";
 import SConfCpsc from "./SConfCpsc";
 import SConfPermiso from "./SConfPermiso";
 import SConfTipoAtributoValor from "./SConfTipoAtributoValor";
@@ -35,6 +36,9 @@ export default class SConf extends BaseModel {
 
   @column({ serializeAs: null })
   public id_tipo: number;
+
+  @column()
+  public id_componente: number | null;
 
   @column()
   public id_usuario_creacion: number;
@@ -72,6 +76,12 @@ export default class SConf extends BaseModel {
   })
   public tipo: HasOne<typeof STipo>;
 
+  @belongsTo(() => SComponente, {
+    localKey: "id",
+    foreignKey: "id_componente",
+  })
+  public componente: BelongsTo<typeof SComponente>;
+
   @hasManyThrough([() => Permiso, () => SConfPermiso], {
     localKey: "id",
     foreignKey: "id_conf",
@@ -103,7 +113,7 @@ export default class SConf extends BaseModel {
   public getAtributo({ atributo }: { atributo: string }): string {
     if (!this.valores) {
       console.log(
-        "Configuracion no tiene valores?? No, te olvidaste los preload papu"
+        "Configuracion no tiene valores?? No, te olvidaste los preload"
       );
       return "";
     }
@@ -129,6 +139,7 @@ export default class SConf extends BaseModel {
           .where("id_a", id_a)
           .preload("conf_permiso", (query) => query.preload("permiso"))
           .preload("tipo")
+          // .preload("componente")
           .preload("orden")
           .preload("valores", (query) => query.preload("atributo"))
           .preload("sub_conf", (query) => this.preloadRecursivo(query))

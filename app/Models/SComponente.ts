@@ -1,12 +1,32 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  hasManyThrough,
+  HasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
+import SAtributo from "./SAtributo";
+import STipoAtributo from "./STipoAtributo";
 
 export default class SComponente extends BaseModel {
   public static table = "s_componente";
 
   @column({ isPrimary: true })
   public id: number;
+
+  @column()
+  public nombre: string;
+
+  @hasManyThrough([() => SAtributo, () => STipoAtributo], {
+    localKey: "id",
+    foreignKey: "id_componente",
+    throughLocalKey: "id_atributo",
+    throughForeignKey: "id",
+  })
+  public atributos: HasManyThrough<typeof SAtributo>;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;

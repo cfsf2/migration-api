@@ -1,5 +1,14 @@
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  hasManyThrough,
+  HasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import { DateTime } from "luxon";
+import SAtributo from "./SAtributo";
+import STipoAtributo from "./STipoAtributo";
 import Usuario from "./Usuario";
 
 export default class STipo extends BaseModel {
@@ -16,6 +25,14 @@ export default class STipo extends BaseModel {
 
   @column()
   public tiene_componente: string;
+
+  @hasManyThrough([() => SAtributo, () => STipoAtributo], {
+    localKey: "id",
+    foreignKey: "id_tipo",
+    throughLocalKey: "id_atributo",
+    throughForeignKey: "id",
+  })
+  public atributos: HasManyThrough<typeof SAtributo>;
 
   @column()
   public id_usuario_creacion: number;

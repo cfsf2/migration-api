@@ -4,7 +4,7 @@ import Datab, {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
 
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
@@ -34,6 +34,7 @@ import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import ExceptionHandler from "App/Exceptions/Handler";
+import { Permiso } from "./permisos";
 
 const Database = Datab;
 let Recupero = R;
@@ -764,13 +765,15 @@ export class ConfBuilder {
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
       let configuracionDeUsuario = [] as any;
-      if (usuario) {
+
+      if (usuario && usuario.id) {
         configuracionDeUsuario = await SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
           .preload("detalles", (query) =>
             query.preload("conf", (query) => query.preload("tipo"))
           );
+
         ctx.usuario.configuracionesDeUsuario[listado.id_a] =
           configuracionDeUsuario[0];
         opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
@@ -1263,11 +1266,11 @@ export class ConfBuilder {
       datos = await this.getDatos(ctx, abm, ctx.request.body().id);
     }
 
-    const sql = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+    const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
       ? ctx.$_sql
       : undefined;
 
-    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", "GET_SQL"))
+    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
       ? conf
       : undefined;
 
@@ -1284,6 +1287,7 @@ export class ConfBuilder {
     return query
       .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("tipo")
+      .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => this.preloadRecursivo(query));
