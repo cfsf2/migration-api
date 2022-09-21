@@ -52,7 +52,11 @@ export default class CampanasController {
       });
 
       let random = () => {
-        return Math.random().toString(36).slice(2, 10).toUpperCase();
+        //alfanúmerico
+        //return Math.random().toString(36).slice(2, 10).toUpperCase();
+
+        //númerico
+        return Math.random().toString().slice(2, 10);
       };
 
       const requerimiento = new CampanaRequerimiento();
