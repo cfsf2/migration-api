@@ -1133,7 +1133,12 @@ export class ConfBuilder {
         // aplicar order del listado
         if (order.length > 0) {
           order.forEach((order) => {
-            query.orderBy(order, "desc");
+            const orderValores = order.split(",");
+
+            query.orderBy(
+              orderValores[0],
+              orderValores[1] ? orderValores[1].trim() : "desc"
+            );
           });
         }
 

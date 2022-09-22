@@ -525,9 +525,10 @@ export class Update {
       const Sconf = await SConf.query()
         .where("id", id)
         .preload("tipo")
-        .preload("componente");
+        .preload("componente")
+        .firstOrFail();
 
-      if (Sconf[0].tipo.tiene_componente === "n")
+      if (Sconf.tipo.tiene_componente === "n")
         throw new Error("SCONF_NO_COMPONENT");
 
       const Registro = await SConfTipoAtributoValor.query()
@@ -539,7 +540,7 @@ export class Update {
         const newRegistro = new SConfTipoAtributoValor();
 
         const id_tipo_atributo = await STipoAtributo.query()
-          .where("id_tipo", Sconf[0].tipo.id)
+          .where("id_tipo", Sconf.tipo.id)
           .andWhere("id_atributo", 5);
 
         newRegistro.merge({
@@ -569,6 +570,19 @@ export class Update {
         });
       }
 
+      //Elimina configuracion de componente anterior
+
+      await Database.query()
+        .from("s_conf_tipo_atributo_valor")
+        .leftJoin(
+          "s_tipo_atributo",
+          "s_conf_tipo_atributo_valor.id_tipo_atributo",
+          "s_tipo_atributo.id"
+        )
+        .where("s_conf_tipo_atributo_valor.id_conf", id)
+        .andWhere("s_tipo_atributo.id_componente", Sconf.componente.id)
+        .delete();
+
       // actualiza s_conf_tipo_atributo_valor con nombre de componente nuevo
       const valorAnterior = Registro[0].valor;
       Registro[0].merge({
@@ -596,12 +610,7 @@ export class Update {
       });
     } catch (err) {
       console.log(err);
-      throw await new ExceptionHandler().handle(
-        {
-          code: "SCONF_NO_COMPONENT",
-        },
-        ctx
-      );
+      throw await new ExceptionHandler().handle(err, ctx);
     }
   }
 }

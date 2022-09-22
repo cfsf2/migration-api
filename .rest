@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
-GET http://localhost:3111/laboratorios HTTP/1.1
-=======
-GET http://localhost:3111/pantalla/?pantalla=PANTALLA_SERVICIOS_ADMIN HTTP/1.1
->>>>>>> recupero
+POST http://localhost:3111/pantalla/PANTALLA_SERVICIOS_ADMIN HTTP/1.1
 
 ####
 
