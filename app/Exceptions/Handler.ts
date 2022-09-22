@@ -121,7 +121,17 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         sql: ctx.$_sql,
       });
     }
-    // return ctx.response
+    if (error.code === "SCONF_NO_COMPONENT") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "Este tipo no lleva componente";
+
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+    return ctx.response;
     //   .status(411)
     //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
 

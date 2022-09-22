@@ -26,6 +26,8 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
+import STipoAtributo from "App/Models/STipoAtributo";
+import SComponente from "App/Models/SComponente";
 
 let Recupero = R;
 let RecuperoDiagnostico = RD;
@@ -495,6 +497,121 @@ export class Update {
       } catch (err) {
         throw await new ExceptionHandler().handle(err, ctx);
       }
+    }
+  }
+
+  public static async sconf_cambio_componente({
+    ctx,
+    conf,
+    id,
+    usuario,
+  }: {
+    ctx: HttpContextContract;
+    conf: SConf;
+    usuario: U;
+    id: number;
+  }) {
+    try {
+      const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
+
+      const campo = getAtributo({ atributo: "update_campo", conf: conf });
+
+      const registrarCambios = getAtributo({
+        atributo: "update_registro_cambios",
+        conf: conf,
+      });
+      const body = ctx.request.body();
+      const Componente = await SComponente.findOrFail(body.valor);
+
+      const Sconf = await SConf.query()
+        .where("id", id)
+        .preload("tipo")
+        .preload("componente")
+        .firstOrFail();
+
+      if (Sconf.tipo.tiene_componente === "n")
+        throw new Error("SCONF_NO_COMPONENT");
+
+      const Registro = await SConfTipoAtributoValor.query()
+        .whereIn("id_tipo_atributo", [11, 21, 145, 176, 191])
+        .andWhere("id_conf", id);
+
+      // Crea s_conf_tipo_atributo_valor de atributo->"componente"
+      if (Registro.length === 0 && Componente) {
+        const newRegistro = new SConfTipoAtributoValor();
+
+        const id_tipo_atributo = await STipoAtributo.query()
+          .where("id_tipo", Sconf.tipo.id)
+          .andWhere("id_atributo", 5);
+
+        newRegistro.merge({
+          valor: Componente.nombre,
+          id_tipo_atributo: id_tipo_atributo[0].id,
+          id_conf: Sconf[0].id,
+        });
+        guardarDatosAuditoria({
+          usuario,
+          objeto: newRegistro,
+          accion: AccionCRUD.crear,
+          registroCambios: {
+            registrarCambios,
+            tabla,
+            campo,
+            valorAnterior: null,
+          },
+        });
+        await newRegistro.save();
+
+        return await Update.update({
+          ctx,
+          conf,
+          id,
+          usuario,
+          valor: ctx.request.body().valor,
+        });
+      }
+
+      //Elimina configuracion de componente anterior
+
+      await Database.query()
+        .from("s_conf_tipo_atributo_valor")
+        .leftJoin(
+          "s_tipo_atributo",
+          "s_conf_tipo_atributo_valor.id_tipo_atributo",
+          "s_tipo_atributo.id"
+        )
+        .where("s_conf_tipo_atributo_valor.id_conf", id)
+        .andWhere("s_tipo_atributo.id_componente", Sconf.componente.id)
+        .delete();
+
+      // actualiza s_conf_tipo_atributo_valor con nombre de componente nuevo
+      const valorAnterior = Registro[0].valor;
+      Registro[0].merge({
+        valor: Componente.nombre,
+      });
+      guardarDatosAuditoria({
+        usuario,
+        objeto: Registro[0],
+        accion: AccionCRUD.editar,
+        registroCambios: {
+          registrarCambios,
+          tabla,
+          campo,
+          valorAnterior,
+        },
+      });
+      Registro[0].save();
+
+      return await Update.update({
+        ctx,
+        conf,
+        id,
+        usuario,
+        valor: ctx.request.body().valor,
+      });
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
     }
   }
 }

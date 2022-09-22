@@ -1,24 +1,18 @@
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
-import STipo from "./STipo";
-import SAtributo from "./SAtributo";
-import Usuario from "./Usuario";
 import { DateTime } from "luxon";
+import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import Usuario from "./Usuario";
+import STipo from "./STipo";
 import SComponente from "./SComponente";
 
-export default class STipoAtributo extends BaseModel {
-  public static table = "s_tipo_atributo";
-
+export default class STipoComponente extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
   @column()
-  public id_tipo: number;
-
-  @column()
-  public id_atributo: number;
-
-  @column()
   public id_componente: number;
+
+  @column()
+  public id_tipo: number;
 
   @column()
   public id_usuario_creacion: number;
@@ -33,20 +27,14 @@ export default class STipoAtributo extends BaseModel {
   public ts_modificacion: DateTime;
 
   @hasOne(() => STipo, {
+    foreignKey: "id",
     localKey: "id_tipo",
-    foreignKey: "id",
   })
-  public tipos: HasOne<typeof STipo>;
-
-  @hasOne(() => SAtributo, {
-    localKey: "id_atributo",
-    foreignKey: "id",
-  })
-  public atributos: HasOne<typeof SAtributo>;
+  public tipo: HasOne<typeof STipo>;
 
   @hasOne(() => SComponente, {
-    localKey: "id_componente",
     foreignKey: "id",
+    localKey: "id_componente",
   })
   public componente: HasOne<typeof SComponente>;
 
@@ -66,7 +54,6 @@ export default class STipoAtributo extends BaseModel {
     const keys = Object.keys(this.$extras);
     const extras = {};
     keys.forEach((k) => {
-      if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
     return extras;

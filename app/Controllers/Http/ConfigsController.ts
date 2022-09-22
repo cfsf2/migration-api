@@ -14,7 +14,8 @@ import { acciones, Permiso } from "App/Helper/permisos";
 const preloadRecursivo = (query) => {
   return query
     .preload("conf_permiso", (query) => query.preload("permiso"))
-    .preload("tipo")
+    .preload("tipo", (query) => query.preload("atributos"))
+    .preload("componente", (query) => query.preload("atributos"))
     .preload("orden")
     .preload("valores", (query) => query.preload("atributo"))
     .preload("sub_conf", (query) => preloadRecursivo(query));
@@ -34,7 +35,8 @@ export default class ConfigsController {
     const conf = await SConf.query()
       .where("id_a", config)
       .preload("conf_permiso")
-      .preload("tipo")
+      .preload("tipo", (query) => query.preload("atributos"))
+      .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => preloadRecursivo(query))
@@ -151,15 +153,21 @@ export default class ConfigsController {
       .where("id_a", config)
       .andWhere("id_tipo", 1)
       .preload("conf_permiso")
-      .preload("tipo")
+      .preload("tipo", (query) => query.preload("atributos"))
+      .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => preloadRecursivo(query))
       .firstOrFail();
 
+    // console.log(conf.toJSON());
+
     ctx.$_conf.estructura = conf;
     // para listado
-    if (!(await bouncer.allows("AccesoConf", conf))) return respuestaVacia;
+    if (!(await bouncer.allows("AccesoConf", conf))) {
+      console.log("No hay acceso a ", conf);
+      return respuestaVacia;
+    }
 
     const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
     const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
@@ -231,6 +239,7 @@ export default class ConfigsController {
         : undefined;
       return ctx.$_respuesta;
     } catch (err) {
+      console.log(err);
       return err;
     }
   }
@@ -252,7 +261,8 @@ export default class ConfigsController {
       .where("id_a", config)
       .andWhere("id_tipo", 1)
       .preload("conf_permiso")
-      .preload("tipo")
+      .preload("componente", (query) => query.preload("atributos"))
+      .preload("tipo", (query) => query.preload("atributos"))
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => preloadRecursivo(query))
@@ -281,7 +291,8 @@ export default class ConfigsController {
       const config = await SConf.query()
         .where("id_a", id_a)
         .preload("conf_permiso")
-        .preload("tipo")
+        .preload("componente", (query) => query.preload("atributos"))
+        .preload("tipo", (query) => query.preload("atributos"))
         .preload("orden")
         .preload("valores", (query) => query.preload("atributo"))
         .preload("sub_conf", (query) => preloadRecursivo(query))
@@ -313,7 +324,8 @@ export default class ConfigsController {
       const config = await SConf.query()
         .where("id_a", id_a)
         .preload("conf_permiso")
-        .preload("tipo")
+        .preload("componente", (query) => query.preload("atributos"))
+        .preload("tipo", (query) => query.preload("atributos"))
         .preload("orden")
         .preload("valores", (query) => query.preload("atributo"))
         .preload("sub_conf", (query) => preloadRecursivo(query))
@@ -347,7 +359,8 @@ export default class ConfigsController {
       const config = await SConf.query()
         .where("id_a", id_a)
         .preload("conf_permiso")
-        .preload("tipo")
+        .preload("componente", (query) => query.preload("atributos"))
+        .preload("tipo", (query) => query.preload("atributos"))
         .preload("orden")
         .preload("valores", (query) => query.preload("atributo"))
         .preload("sub_conf", (query) => preloadRecursivo(query))

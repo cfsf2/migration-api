@@ -4,7 +4,7 @@ import Datab, {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
 
 import SConf from "App/Models/SConf";
 import S from "App/Models/Servicio";
@@ -514,6 +514,10 @@ export const getAtributo = ({
   }
 
   return conf.valores.find((v) => {
+    if (!v.atributo[0]) {
+      console.log(conf.id_a);
+      console.log("ACA DEBE HABER UN ERROR", v, v.atributo, atributo, atributo);
+    }
     return v.atributo[0].nombre === atributo;
   })?.valor as string;
 };
@@ -761,13 +765,15 @@ export class ConfBuilder {
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
       let configuracionDeUsuario = [] as any;
-      if (usuario) {
+
+      if (usuario && usuario.id) {
         configuracionDeUsuario = await SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
           .preload("detalles", (query) =>
             query.preload("conf", (query) => query.preload("tipo"))
           );
+
         ctx.usuario.configuracionesDeUsuario[listado.id_a] =
           configuracionDeUsuario[0];
         opciones["configuracionDeUsuario"] = configuracionDeUsuario[0];
@@ -1127,7 +1133,12 @@ export class ConfBuilder {
         // aplicar order del listado
         if (order.length > 0) {
           order.forEach((order) => {
-            query.orderBy(order, "desc");
+            const orderValores = order.split(",");
+
+            query.orderBy(
+              orderValores[0],
+              orderValores[1] ? orderValores[1].trim() : "desc"
+            );
           });
         }
 
@@ -1281,6 +1292,7 @@ export class ConfBuilder {
     return query
       .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("tipo")
+      .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
       .preload("valores", (query) => query.preload("atributo"))
       .preload("sub_conf", (query) => this.preloadRecursivo(query));

@@ -82,6 +82,7 @@ export enum Permiso {
   GET_SQL = "GET_SQL",
 
   INICIO = "INICIO",
+  GET_SQL = "GET_SQL",
 }
 
 export enum acciones {

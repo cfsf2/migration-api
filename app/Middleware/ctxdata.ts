@@ -77,12 +77,17 @@ export default class UsuarioPermiso {
       return IDA;
     };
 
+    ctx.usuario = {};
+    ctx.usuario.configuracionesDeUsuario = {};
+    ctx.usuario.configuracionesPermitidas = `"INICIO"`;
+
     if (typeof ctx.auth.user !== "undefined") {
       ctx.auth.user.Permisos = await ctx.auth.user?._Permisos();
       ctx.usuario = ctx.auth.user;
       ctx.usuario.configuracionesDeUsuario = {};
       ctx.usuario.configuracionesPermitidas = `"INICIO"`;
     }
+
     ctx.$_filtros = {
       solicitados: {},
       filtrosObligatorios: [],
