@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
 
 export default class UsuarioPermiso {
@@ -86,6 +87,11 @@ export default class UsuarioPermiso {
       ctx.usuario = ctx.auth.user;
       ctx.usuario.configuracionesDeUsuario = {};
       ctx.usuario.configuracionesPermitidas = `"INICIO"`;
+
+      ctx.usuario.farmacia = await Farmacia.findBy(
+        "id_usuario",
+        ctx.usuario.id
+      );
     }
 
     ctx.$_filtros = {
