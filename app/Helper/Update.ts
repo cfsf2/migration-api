@@ -512,6 +512,7 @@ export class Update {
     id: number;
   }) {
     try {
+      console.log(id);
       const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
 
       const campo = getAtributo({ atributo: "update_campo", conf: conf });
@@ -547,7 +548,7 @@ export class Update {
         newRegistro.merge({
           valor: Componente.nombre,
           id_tipo_atributo: id_tipo_atributo[0].id,
-          id_conf: Sconf[0].id,
+          id_conf: Sconf.id,
         });
         guardarDatosAuditoria({
           usuario,
