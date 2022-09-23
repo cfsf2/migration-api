@@ -37,6 +37,37 @@ export default class ProductosTransfersController {
     }
   }
 
+  //*****  CONTROLLERS ESTABLES */
+
+  public async bylab({ request, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABID);
+
+      const { instituciones } = request.qs();
+      const labid = request.params().id;
+
+      return await TransferProducto.query()
+        .preload("instituciones")
+        .select("tbl_transfer_producto.*")
+        .where("en_papelera", "n")
+        .andWhere("habilitado", "s")
+        .andWhere("id_laboratorio", labid)
+        .leftJoin(
+          "tbl_transfer_producto_institucion",
+          "tbl_transfer_producto.id",
+          "id_transfer_producto"
+        )
+        .whereIn(
+          "tbl_transfer_producto_institucion.id_institucion",
+          instituciones
+        )
+        .groupBy("tbl_transfer_producto.id");
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler();
+    }
+  }
+
   public async mig_instituciones({ request, bouncer }: HttpContextContract) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_PROD);
