@@ -8,7 +8,6 @@ import {
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Laboratorio from "App/Models/Laboratorio";
-import auth from "Config/auth";
 
 export default class LaboratoriosController {
   public async mig_index({ bouncer }) {
@@ -65,6 +64,29 @@ export default class LaboratoriosController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
       return await Laboratorio.traerLaboratorios({ id: request.params().id });
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
+  }
+
+  //*****  CONTROLLERS ESTABLES */
+
+  public async index({ bouncer }) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
+      return await Laboratorio.query().where("habilitado", "s");
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler();
+    }
+  }
+  public async transfers({ request, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
+      return await Laboratorio.query()
+        .where("habilitado", "s")
+        .andWhere("id", request.params().id)
+        .firstOrFail();
     } catch (err) {
       throw new ExceptionHandler();
     }
