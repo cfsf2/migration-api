@@ -32,7 +32,8 @@ export default class FarmaciasController {
     }
   }
 
-  public async mig_perfil({ request }: HttpContextContract) {
+  public async mig_perfil(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
       const farmacia = await Farmacia.traerFarmacias({
         usuario: request.params().usuario,
@@ -41,16 +42,25 @@ export default class FarmaciasController {
       if (request.url().includes("login") && farmacia.length !== 0) {
         console.log("actualizar ultimo acceso a ", farmacia.nombre);
 
-        const farmaciaLogueada = await Farmacia.findOrFail(farmacia.id);
+        const farmaciaLogueada = await Farmacia.query()
+          .where("id", farmacia.id)
+          .preload("nro_cuenta_drogueria", (query) =>
+            query.preload("drogueria")
+          )
+          .firstOrFail();
 
         farmaciaLogueada.f_ultimo_acceso = DateTime.now()
           .setLocale("es-Ar")
           .toFormat("yyyy-MM-dd hh:mm:ss");
 
         await farmaciaLogueada.save();
+
+        farmacia.nro_cuenta_drogueria =
+          farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
       }
       return farmacia;
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
