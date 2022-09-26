@@ -47,6 +47,9 @@ export default class FarmaciasController {
           .preload("nro_cuenta_drogueria", (query) =>
             query.preload("drogueria")
           )
+          .preload("nro_cuenta_laboratorio", (query) =>
+            query.preload("laboratorio")
+          )
           .firstOrFail();
 
         farmaciaLogueada.f_ultimo_acceso = DateTime.now()
@@ -57,6 +60,8 @@ export default class FarmaciasController {
 
         farmacia.nro_cuenta_drogueria =
           farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
+        farmacia.nro_cuenta_laboratorio =
+          farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
       }
       return farmacia;
     } catch (err) {

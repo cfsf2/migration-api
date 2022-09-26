@@ -47,6 +47,15 @@ export default class Laboratorio extends BaseModel {
   @column()
   public url: string;
 
+  @column()
+  public usa_sistema: string;
+
+  @column()
+  public tiene_apms: string;
+
+  @column()
+  public permite_nro_cuenta: string;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 

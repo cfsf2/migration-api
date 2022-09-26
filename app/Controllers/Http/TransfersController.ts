@@ -35,4 +35,18 @@ export default class TransfersController {
       throw new ExceptionHandler();
     }
   }
+
+  public async add({ request, auth, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+      const usuario = await auth.authenticate();
+
+      return await Transfer.guardar_sql({
+        data: request.body(),
+        usuario: usuario,
+      });
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
+  }
 }
