@@ -19,6 +19,7 @@ import TransferTransferProducto from "./TransferTransferProducto";
 import { transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
+import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 
 export default class Transfer extends BaseModel {
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -146,15 +147,49 @@ export default class Transfer extends BaseModel {
         .html(transferHtml({ transfer: data, farmacia: farmacia }));
     });
   }
+
   static async guardar_sql({ data, usuario }: { data: any; usuario: Usuario }) {
     try {
-      console.log(data);
       const nuevoTransfer = new Transfer();
       const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
       let drogueria = null as unknown as Drogueria;
 
       if (laboratorio.permite_nro_cuenta === "n") {
         drogueria = await Drogueria.findOrFail(data.id_drogueria);
+      }
+      if (laboratorio.permite_nro_cuenta === "s") {
+        const FL = await FarmaciaLaboratorio.query()
+          .where("id_farmacia", usuario.farmacia.id)
+          .where("id_laboratorio", data.id_laboratorio)
+          .first();
+
+        if (!FL) {
+          const newFL = new FarmaciaLaboratorio();
+          newFL.merge({
+            id_farmacia: usuario.farmacia.id,
+            id_laboratorio: data.id_laboratorio,
+            nro_cuenta: data.nro_cuenta_drogueria,
+          });
+          guardarDatosAuditoria({
+            objeto: newFL,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          await newFL.save();
+        }
+        if (FL) {
+          FL.merge({
+            id_farmacia: usuario.farmacia.id,
+            id_laboratorio: data.id_laboratorio,
+            nro_cuenta: data.nro_cuenta_drogueria,
+          });
+          guardarDatosAuditoria({
+            objeto: FL,
+            usuario: usuario,
+            accion: AccionCRUD.editar,
+          });
+          await FL.save();
+        }
       }
 
       const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
@@ -199,12 +234,17 @@ export default class Transfer extends BaseModel {
         transferProducto.save();
       });
       /*********************** MAIL INHABILITADO ******************************************/
+      /*********************** MAIL INHABILITADO ******************************************/
+      /*********************** MAIL INHABILITADO ******************************************/
       console.log(
         process.env.SMTP_USERNAME,
         farmacia.email,
         process.env.TRANSFER_EMAIL
       );
       return;
+      /*********************** MAIL INHABILITADO ******************************************/
+      /*********************** MAIL INHABILITADO ******************************************/
+      /*********************** MAIL INHABILITADO ******************************************/
       Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME)

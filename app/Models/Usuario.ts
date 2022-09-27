@@ -33,6 +33,8 @@ export default class Usuario extends BaseModel {
 
   public static table = "tbl_usuario";
 
+  farmacia: any;
+
   static async traerPerfilDeUsuario({
     usuarioNombre,
   }: {
