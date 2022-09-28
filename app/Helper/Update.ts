@@ -1,20 +1,20 @@
 import Database from "@ioc:Adonis/Lucid/Database";
+
 import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
-import U from "App/Models/Usuario";
 import SCC from "App/Models/SConfCpsc";
+import SRC from "App/Models/SRc";
+import SRD from "App/Models/SRcDeta";
+import SP from "App/Models/SPista";
 import SCCU from "App/Models/SConfConfUsuario";
 import SCCD from "App/Models/SConfConfDeta";
 
-import { getAtributo } from "./configuraciones";
-import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
-import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
-import ExceptionHandler from "App/Exceptions/Handler";
-import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import S from "App/Models/Servicio";
+import F from "App/Models/Farmacia";
+import FS from "App/Models/FarmaciaServicio";
+import FD from "App/Models/FarmaciaDrogueria";
+import FL from "App/Models/FarmaciaLaboratorio";
+import Usuario from "App/Models/Usuario";
 
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
@@ -26,8 +26,16 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
+
 import STipoAtributo from "App/Models/STipoAtributo";
 import SComponente from "App/Models/SComponente";
+
+import { getAtributo } from "./configuraciones";
+import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
+import ExceptionHandler from "App/Exceptions/Handler";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
 let Recupero = R;
 let RecuperoDiagnostico = RD;
@@ -43,10 +51,14 @@ let Monodro = M;
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
+let FarmaciaDrogueria = FD;
+let FarmaciaLaboratorio = FL;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
-let Usuario = U;
+let SRc = SRC;
+let SRcDeta = SRD;
+let SPista = SP;
 let SConfConfUsuario = SCCU;
 let SConfConfDeta = SCCD;
 
