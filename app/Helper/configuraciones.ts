@@ -7,17 +7,20 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
 
 import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import SCC from "App/Models/SConfCpsc";
-import Usuario from "App/Models/Usuario";
 import SRC from "App/Models/SRc";
 import SRD from "App/Models/SRcDeta";
 import SP from "App/Models/SPista";
 import SCCU from "App/Models/SConfConfUsuario";
 import SCCD from "App/Models/SConfConfDeta";
+
+import S from "App/Models/Servicio";
+import F from "App/Models/Farmacia";
+import FS from "App/Models/FarmaciaServicio";
+import FD from "App/Models/FarmaciaDrogueria";
+import FL from "App/Models/FarmaciaLaboratorio";
+import Usuario from "App/Models/Usuario";
 
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
@@ -51,6 +54,8 @@ let Monodro = M;
 let Servicio = S;
 let Farmacia = F;
 let FarmaciaServicio = FS;
+let FarmaciaDrogueria = FD;
+let FarmaciaLaboratorio = FL;
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
