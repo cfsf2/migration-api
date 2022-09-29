@@ -6,6 +6,7 @@ coverage
 .env
 .rest
 .env.mysql
+.env.local
 .htaccess
 *.sh
 

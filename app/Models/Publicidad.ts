@@ -63,7 +63,7 @@ export default class Publicidad extends BaseModel {
       )
       .leftJoin("tbl_institucion as i", "ip.id_institucion", "=", "i.id")
       .groupBy("p.id")
-      .orderBy("fecha_alta", "desc")
+      .orderBy("id", "desc")
 
       //novedades admin
       .if(tipo, (query) => {
@@ -134,6 +134,7 @@ export default class Publicidad extends BaseModel {
       .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
       .where("f.id", id_farmacia)
       .where("p.id_publicidad_tipo", 1)
+      .groupBy("p.id")
       .orderBy("fecha_alta", "desc");
 
     return publicidades;
