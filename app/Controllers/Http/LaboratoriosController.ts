@@ -57,6 +57,7 @@ export default class LaboratoriosController {
       lab.save();
       return;
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
