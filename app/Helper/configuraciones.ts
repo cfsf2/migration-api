@@ -1102,11 +1102,13 @@ export class ConfBuilder {
     const order = getOrder({ ctx, conf: vista });
 
     try {
-      if (campos.length !== 0 && id) {
+      if (campos.length !== 0) {
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
         // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        let query = eval(modelo).query().where(`${parametro}`, id);
+        let query = eval(modelo)
+          .query()
+          .if(id, (query) => query.where(`${parametro}`, id));
 
         //aplicaSelects
         campos.forEach((campo) => {
@@ -1174,7 +1176,7 @@ export class ConfBuilder {
           id,
         })
       ).filter((c) => c);
-
+      console.log(ctx.$_sql);
       return vistaFinal;
     } catch (err) {
       console.log(err);
