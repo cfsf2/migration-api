@@ -37,6 +37,15 @@ export default class Recupero extends BaseModel {
 
   @column()
   public habilitado: string;
+  
+  @column()
+  public estadio_definido: string;
+  
+  @column()
+  public performance_status_definido: string;
+  
+  @column()
+  public linea_tratamiento_definido: string;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
