@@ -122,22 +122,34 @@ export default class Publicidad extends BaseModel {
   }: {
     id_farmacia: string;
   }) {
-    const publicidades = await Database.from("tbl_publicidad as p")
-      .select("p.*", "p.ts_creacion as fecha_alta", "pc.nombre as color")
-      .leftJoin("tbl_publicidad_institucion as pi", "p.id", "pi.id_publicidad")
-      .leftJoin(
-        "tbl_farmacia_institucion as fi",
-        "pi.id_institucion",
-        "fi.id_institucion"
-      )
-      .leftJoin("tbl_farmacia as f", "fi.id_farmacia", "f.id")
-      .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
-      .where("f.id", id_farmacia)
-      .where("p.id_publicidad_tipo", 1)
-      .groupBy("p.id")
-      .orderBy("fecha_alta", "desc");
+    try {
+      const publicidades = await Database.from("tbl_publicidad as p")
+        .select("p.*", "p.ts_creacion as fecha_alta", "pc.nombre as color")
+        .leftJoin(
+          "tbl_publicidad_institucion as pi",
+          "p.id",
+          "pi.id_publicidad"
+        )
+        .leftJoin(
+          "tbl_farmacia_institucion as fi",
+          "pi.id_institucion",
+          "fi.id_institucion"
+        )
+        .leftJoin("tbl_farmacia as f", "fi.id_farmacia", "f.id")
+        .leftJoin("tbl_publicidad_color as pc", "p.id_color", "pc.id")
+        .where("f.id", id_farmacia)
+        .where("p.id_publicidad_tipo", 1)
+        .where("p.habilitado", "s")
+        .where("p.fecha_inicio", "<", DateTime.now().toSQL())
+        .where("p.fecha_fin", ">", DateTime.now().toSQL())
+        .groupBy("p.id")
+        .orderBy("fecha_alta", "desc");
 
-    return publicidades;
+      return publicidades;
+    } catch (err) {
+      console.log(err);
+      return err;
+    }
   }
 
   public static table = "tbl_publicidad";
