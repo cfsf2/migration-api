@@ -27,9 +27,11 @@ export default class Transfer extends BaseModel {
       .select(
         "t.*",
         "t.id as _id",
+        "t.id as codigo_transfer",
         "t.ts_modificacion as fecha_modificacion",
         "t.fecha as fecha_alta",
         "d.nombre as drogueria_id",
+        "l.nombre as laboratorio_id",
         "f.matricula as farmacia_id",
         "f.nombre as farmacia_nombre",
         "f.id as id_farmacia",
@@ -39,6 +41,7 @@ export default class Transfer extends BaseModel {
       )
       .leftJoin("tbl_drogueria as d", "t.id_drogueria", "d.id")
       .leftJoin("tbl_farmacia as f", "t.id_farmacia", "f.id")
+      .leftJoin("tbl_laboratorio as l", "l.id", "t.id_laboratorio")
       .leftJoin("tbl_estado_transfer as et", "t.id_transfer_estado", "et.id")
       .leftJoin("tbl_usuario as u", "t.id", "u.id")
       .if(id_farmacia, (query) => {
