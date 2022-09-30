@@ -149,7 +149,7 @@ export default class PublicidadsController {
           .toFormat("yyyy-MM-dd hh:mm:ss"),
         titulo: request.body().titulo,
         descripcion: request.body().descripcion,
-        habilitado: request.body().habilitado === true ? "s" : "n",
+        habilitado: request.body().habilitado == "true" ? "s" : "n",
         link: request.body().link,
         imagen: request.body().imagen,
         id_publicidad_tipo: tipo?.id,
