@@ -97,7 +97,6 @@ export default class EntidadController {
               : "s"
             : null,
       };
-      console.log("habilitado? ; ", `${request.body().mostrar_en_proveeduria}`);
 
       mergeObject = eliminarKeysVacios(mergeObject);
 

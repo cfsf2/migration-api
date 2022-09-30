@@ -129,7 +129,7 @@ export class Insertar {
         return { registroCreado: registro, creado: true };
       }
     } catch (err) {
-      console.log(err);
+      console.log("this is err:", err);
       return { registroCreado: err, creado: false, error: err.message };
     }
   }

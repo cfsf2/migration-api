@@ -41,7 +41,11 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         .pop()
         .replaceAll("'", "")
         .trim();
-      errorMensajeTraducido = await SErrorMysql.findBy("error_mysql", errorKey);
+      errorMensajeTraducido = await SErrorMysql.query()
+        .where("error_mysql", errorKey as string)
+        .first();
+      console.log("errorKey: ", errorKey);
+      console.log("errorMensajeTraducido: ", errorMensajeTraducido);
     }
 
     if (error.code === "E_INVALID_AUTH_PASSWORD") {
@@ -131,7 +135,11 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         sql: ctx.$_sql,
       });
     }
-    return ctx.response;
+    return ctx.response.badRequest({
+      error: {
+        message: errorMensajeTraducido?.detalle ?? error.sqlMessage,
+      },
+    });
     //   .status(411)
     //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
 

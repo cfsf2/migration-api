@@ -1176,7 +1176,7 @@ export class ConfBuilder {
           id,
         })
       ).filter((c) => c);
-      console.log(ctx.$_sql);
+
       return vistaFinal;
     } catch (err) {
       console.log(err);
@@ -1204,6 +1204,8 @@ export class ConfBuilder {
       opciones: this.setOpciones(ctx, contenedor, father),
       configuraciones: [],
     };
+
+    if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
 
     const _listados = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 2

@@ -379,7 +379,7 @@ export default class ConfigsController {
       return response.badRequest(res);
     } catch (err) {
       console.log(err);
-      return err;
+      return response.badRequest({ error: err });
     }
   }
 }
