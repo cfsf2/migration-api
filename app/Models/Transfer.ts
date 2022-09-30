@@ -134,18 +134,14 @@ export default class Transfer extends BaseModel {
       });
       transferProducto.save();
     });
-    console.log(
-      process.env.SMTP_USERNAME,
-      farmacia.email,
-      process.env.TRANSFER_EMAIL
-    );
+
     return;
     Mail.send((message) => {
       message
-        .from(process.env.SMTP_USERNAME)
-        //.to(process.env.TRANSFER_EMAIL)
-        .to(farmacia.email)
-        .to(process.env.TRANSFER_EMAIL)
+        .from(process.env.SMTP_USERNAME as string)
+        .to(farmacia.email as string)
+        .to(process.env.TRANSFER_EMAIL as string)
+        .to(process.env.TRANSFER_EMAIL2 as string)
         .subject("Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id)
         .html(transferHtml({ transfer: data, farmacia: farmacia }));
     });
