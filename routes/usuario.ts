@@ -15,6 +15,7 @@ Route.post(
   "/users/alta-usuario-farmacia",
   "UsuariosController.mig_alta_usuarioFarmacia"
 );
+Route.post("/checkToken", "AuthController.checkToken");
 
 Route.put(
   "/users/updateWebUser",

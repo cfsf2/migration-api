@@ -59,7 +59,20 @@ export default class AuthController {
         .where("tipo", tipo)
         .preload("permisos");
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
+    }
+  }
+
+  public async checkToken(ctx: HttpContextContract) {
+    try {
+      console.log("checking token");
+      return (await ctx.auth.check())
+        ? ctx.response.accepted({ message: "El token es valido" })
+        : ctx.response.conflict({ message: "El token es invalido" });
+    } catch (err) {
+      console.log(err);
+      return ctx.response.conflict({ message: "El token es invalido" });
     }
   }
 
