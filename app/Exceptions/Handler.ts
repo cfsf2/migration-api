@@ -21,7 +21,7 @@ import SErrorMysql from "App/Models/SErrorMysql";
 export default class ExceptionHandler extends HttpExceptionHandler {
   protected statusPages = {
     "404": "errors/not-found",
-    //"500..599": "errors/server-error",
+    "500..599": "errors/server-error",
   };
   constructor() {
     super(Logger);
@@ -81,6 +81,16 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         ? errorMensajeTraducido.detalle
         : "El tipo de valor no corresponde al dato solicitado";
       return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+
+    if (error.code === "E_ROW_NOT_FOUND") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "Pagina no encontrada";
+      return ctx.response.status(404).send({
         error: { message },
         sql: ctx.$_sql,
       });

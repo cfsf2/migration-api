@@ -3,6 +3,7 @@ import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import SComponente from "App/Models/SComponente";
 
 import Datab from "@ioc:Adonis/Lucid/Database";
 

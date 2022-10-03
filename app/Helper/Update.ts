@@ -44,6 +44,8 @@ import M from "App/Models/Monodro";
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
+import SComponente from "App/Models/SComponente";
+import STipoAtributo from "App/Models/STipoAtributo";
 
 const Database = Datab;
 let Recupero = R;

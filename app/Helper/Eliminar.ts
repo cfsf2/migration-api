@@ -1,5 +1,6 @@
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import SComponente from "App/Models/SComponente";
 
 import SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";

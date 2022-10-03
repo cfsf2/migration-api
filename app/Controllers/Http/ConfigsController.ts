@@ -11,6 +11,8 @@ import {
 import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 
+import ExceptionHandler from "App/Exceptions/Handler";
+
 const preloadRecursivo = (query) => {
   return query
     .preload("conf_permiso", (query) => query.preload("permiso"))
@@ -148,35 +150,36 @@ export default class ConfigsController {
     if (!config) {
       return respuestaVacia;
     }
-
-    const conf = await SConf.query()
-      .where("id_a", config)
-      .andWhere("id_tipo", 1)
-      .preload("conf_permiso")
-      .preload("tipo", (query) => query.preload("atributos"))
-      .preload("componente", (query) => query.preload("atributos"))
-      .preload("orden")
-      .preload("valores", (query) => query.preload("atributo"))
-      .preload("sub_conf", (query) => preloadRecursivo(query))
-      .firstOrFail();
-
-    // console.log(conf.toJSON());
-
-    ctx.$_conf.estructura = conf;
-    // para listado
-    if (!(await bouncer.allows("AccesoConf", conf))) {
-      console.log("No hay acceso a ", conf);
-      return respuestaVacia;
-    }
-
-    const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
-    const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
-    const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
-    const contenedores = conf.sub_conf.filter(
-      (sc) => sc.tipo.id === 7
-    ) as SConf[];
-
     try {
+      const conf = await SConf.query()
+        .where("id_a", config)
+        .andWhere("id_tipo", 1)
+        .preload("conf_permiso")
+        .preload("tipo", (query) => query.preload("atributos"))
+        .preload("componente", (query) => query.preload("atributos"))
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => preloadRecursivo(query))
+        .firstOrFail();
+
+      // console.log(conf.toJSON());
+
+      ctx.$_conf.estructura = conf;
+      // para listado
+      if (!(await bouncer.allows("AccesoConf", conf))) {
+        //console.log("No hay acceso a ", conf);
+        return respuestaVacia;
+      }
+
+      const listados = conf.sub_conf.filter(
+        (sc) => sc.tipo.id === 2
+      ) as SConf[];
+      const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
+      const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
+      const contenedores = conf.sub_conf.filter(
+        (sc) => sc.tipo.id === 7
+      ) as SConf[];
+
       ctx.$_respuesta = respuestaVacia;
 
       const listadosArmados = await Promise.all(
@@ -240,7 +243,7 @@ export default class ConfigsController {
       return ctx.$_respuesta;
     } catch (err) {
       console.log(err);
-      return err;
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
@@ -250,8 +253,6 @@ export default class ConfigsController {
 
     const id = request.body().id;
     const formData = request.body();
-
-    console.log("ABM PUT", request.body(), config);
 
     if (!config) {
       return respuestaVacia;

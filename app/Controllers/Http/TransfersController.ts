@@ -10,7 +10,7 @@ export default class TransfersController {
 
       return await Transfer.traerTransfers({});
     } catch (err) {
-      throw new ExceptionHandler();
+      return new ExceptionHandler();
     }
   }
 
@@ -21,7 +21,7 @@ export default class TransfersController {
         id_farmacia: request.params().id,
       });
     } catch (err) {
-      throw new ExceptionHandler();
+      return new ExceptionHandler();
     }
   }
 
@@ -32,7 +32,7 @@ export default class TransfersController {
 
       return await Transfer.guardar({ data: request.body(), usuario: usuario });
     } catch (err) {
-      throw new ExceptionHandler();
+      return new ExceptionHandler();
     }
   }
 
@@ -49,7 +49,7 @@ export default class TransfersController {
       });
     } catch (err) {
       console.log("CONTROLLER", err);
-      throw new ExceptionHandler().handle(err, ctx);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }
