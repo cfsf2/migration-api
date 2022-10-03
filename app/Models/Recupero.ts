@@ -48,6 +48,9 @@ export default class Recupero extends BaseModel {
   @column()
   public linea_tratamiento_definido: string;
 
+  @column()
+  public en_combinacion_definido: string;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
