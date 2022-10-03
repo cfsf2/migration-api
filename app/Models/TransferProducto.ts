@@ -29,8 +29,9 @@ export default class TransferProducto extends BaseModel {
     en_papelera?: string;
     habilitado?: string;
     labid?: number;
-    instituciones?: string[];
+    instituciones?: number[];
   }) {
+    console.log(instituciones);
     const trasfersProducto = await Database.from("tbl_transfer_producto as tp")
       .select(
         "tp.*",

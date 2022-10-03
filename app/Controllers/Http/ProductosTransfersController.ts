@@ -15,6 +15,7 @@ export default class ProductosTransfersController {
         habilitado: "s",
       });
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -33,6 +34,7 @@ export default class ProductosTransfersController {
         instituciones: instituciones,
       });
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -48,14 +50,14 @@ export default class ProductosTransfersController {
 
       return await TransferProducto.query()
         .preload("instituciones")
-        .select("tbl_transfer_producto.*")
+        .select("*")
         .where("en_papelera", "n")
         .andWhere("habilitado", "s")
         .andWhere("id_laboratorio", labid)
         .leftJoin(
           "tbl_transfer_producto_institucion",
           "tbl_transfer_producto.id",
-          "id_transfer_producto"
+          "tbl_transfer_producto_institucion.id_transfer_producto"
         )
         .whereIn(
           "tbl_transfer_producto_institucion.id_institucion",
@@ -79,6 +81,7 @@ export default class ProductosTransfersController {
       const instituciones = res.map((r) => r.id_institucion.toString());
       return instituciones;
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -105,6 +108,7 @@ export default class ProductosTransfersController {
         usuario
       );
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -124,7 +128,8 @@ export default class ProductosTransfersController {
       });
       await prod.save();
       return prod;
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
