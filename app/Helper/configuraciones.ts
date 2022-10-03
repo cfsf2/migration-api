@@ -264,7 +264,7 @@ const extraerElementos = ({
             datos[0]?.$extras[
               getAtributo({ atributo: "condicionConf_alias", conf: c })
             ];
-
+          console.log("datos", datos);
           if (!resultadoCondicion) return;
 
           const sc = (await SConf.findByIda({

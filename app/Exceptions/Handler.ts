@@ -145,6 +145,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         sql: ctx.$_sql,
       });
     }
+
     if (error.code === "SCONF_NO_COMPONENT") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle

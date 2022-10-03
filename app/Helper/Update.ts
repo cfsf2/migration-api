@@ -41,7 +41,6 @@ import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
 
-import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import SComponente from "App/Models/SComponente";
@@ -542,7 +541,7 @@ export class Update {
   }: {
     ctx: HttpContextContract;
     conf: SConf;
-    usuario: U;
+    usuario: Usuario;
     id: number;
   }) {
     try {
@@ -565,7 +564,10 @@ export class Update {
         .firstOrFail();
 
       if (Sconf.tipo.tiene_componente === "n")
-        throw new Error("SCONF_NO_COMPONENT");
+        throw await new ExceptionHandler().handle(
+          { code: "SCONF_NO_COMPONENT" },
+          ctx
+        );
 
       const Registro = await SConfTipoAtributoValor.query()
         .whereIn("id_tipo_atributo", [11, 21, 145, 176, 191])
@@ -646,7 +648,7 @@ export class Update {
       });
     } catch (err) {
       console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }
