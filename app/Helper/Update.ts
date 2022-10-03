@@ -1,4 +1,11 @@
-import Database from "@ioc:Adonis/Lucid/Database";
+import { getAtributo } from "./configuraciones";
+import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
+import ExceptionHandler from "App/Exceptions/Handler";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+
+import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
@@ -16,6 +23,13 @@ import FD from "App/Models/FarmaciaDrogueria";
 import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
+import T from "App/Models/Transfer";
+import TP from "App/Models/TransferProducto";
+import TTP from "App/Models/TransferTransferProducto";
+
+import L from "App/Models/Laboratorio";
+import DR from "App/Models/Drogueria";
+
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
 import RE from "App/Models/RecuperoEstadio";
@@ -27,16 +41,11 @@ import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
 
-import STipoAtributo from "App/Models/STipoAtributo";
-import SComponente from "App/Models/SComponente";
+import U from "./Update";
+import I from "./Insertar";
+import D from "./Eliminar";
 
-import { getAtributo } from "./configuraciones";
-import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
-import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
-import ExceptionHandler from "App/Exceptions/Handler";
-import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
-
+const Database = Datab;
 let Recupero = R;
 let RecuperoDiagnostico = RD;
 let RecuperoEstadio = RE;
@@ -53,6 +62,14 @@ let Farmacia = F;
 let FarmaciaServicio = FS;
 let FarmaciaDrogueria = FD;
 let FarmaciaLaboratorio = FL;
+
+let Transfer = T;
+let TransferProducto = TP;
+let TransferTransferProducto = TTP;
+
+let Laboratorio = L;
+let Drogueria = DR;
+
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
@@ -61,6 +78,9 @@ let SRcDeta = SRD;
 let SPista = SP;
 let SConfConfUsuario = SCCU;
 let SConfConfDeta = SCCD;
+
+let Insertar = I;
+let Eliminar = D;
 
 export class Update {
   constructor() {}
@@ -74,7 +94,7 @@ export class Update {
     formData,
   }: {
     ctx: HttpContextContract;
-    usuario: U;
+    usuario: Usuario;
     id: any;
     valor: string | number;
     conf: SConf;

@@ -135,8 +135,7 @@ export default class Transfer extends BaseModel {
       transferProducto.save();
     });
 
-    return;
-    Mail.send((message) => {
+    return Mail.send((message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
         .to(farmacia.email as string)
@@ -245,8 +244,8 @@ export default class Transfer extends BaseModel {
           .html(transferHtml({ transfer: data, farmacia: farmacia }));
       });
     } catch (err) {
-      console.log(err);
-      return;
+      console.log("MODELO", err);
+      throw err;
     }
   }
   public static table = "tbl_transfer";

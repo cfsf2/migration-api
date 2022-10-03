@@ -1,10 +1,14 @@
-import Datab, {
+import {
   DatabaseQueryBuilderContract,
   RawQuery,
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
+import ExceptionHandler from "App/Exceptions/Handler";
+import { Permiso } from "./permisos";
+
+import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
@@ -22,6 +26,13 @@ import FD from "App/Models/FarmaciaDrogueria";
 import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
+import T from "App/Models/Transfer";
+import TP from "App/Models/TransferProducto";
+import TTP from "App/Models/TransferTransferProducto";
+
+import L from "App/Models/Laboratorio";
+import DR from "App/Models/Drogueria";
+
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
 import RE from "App/Models/RecuperoEstadio";
@@ -36,8 +47,6 @@ import M from "App/Models/Monodro";
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
-import ExceptionHandler from "App/Exceptions/Handler";
-import { Permiso } from "./permisos";
 
 const Database = Datab;
 let Recupero = R;
@@ -56,6 +65,14 @@ let Farmacia = F;
 let FarmaciaServicio = FS;
 let FarmaciaDrogueria = FD;
 let FarmaciaLaboratorio = FL;
+
+let Transfer = T;
+let TransferProducto = TP;
+let TransferTransferProducto = TTP;
+
+let Laboratorio = L;
+let Drogueria = DR;
+
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;

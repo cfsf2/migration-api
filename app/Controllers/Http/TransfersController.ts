@@ -36,7 +36,9 @@ export default class TransfersController {
     }
   }
 
-  public async add({ request, auth, bouncer }: HttpContextContract) {
+  public async add(ctx: HttpContextContract) {
+    const { request, auth, bouncer } = ctx;
+
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
       const usuario = await auth.authenticate();
@@ -46,7 +48,8 @@ export default class TransfersController {
         usuario: usuario,
       });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log("CONTROLLER", err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 }

@@ -1,5 +1,10 @@
 import { getAtributo } from "./configuraciones";
-import Database from "@ioc:Adonis/Lucid/Database";
+import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import ExceptionHandler from "App/Exceptions/Handler";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+
+import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
@@ -17,6 +22,13 @@ import FD from "App/Models/FarmaciaDrogueria";
 import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
+import T from "App/Models/Transfer";
+import TP from "App/Models/TransferProducto";
+import TTP from "App/Models/TransferTransferProducto";
+
+import L from "App/Models/Laboratorio";
+import DR from "App/Models/Drogueria";
+
 import R from "App/Models/Recupero";
 import RD from "App/Models/RecuperoDiagnostico";
 import RE from "App/Models/RecuperoEstadio";
@@ -28,12 +40,10 @@ import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
 
-import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
-import ExceptionHandler from "App/Exceptions/Handler";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
-import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Update from "./Update";
+import U from "./Update";
+import D from "./Eliminar";
 
+const Database = Datab;
 let Recupero = R;
 let RecuperoDiagnostico = RD;
 let RecuperoEstadio = RE;
@@ -50,6 +60,14 @@ let Farmacia = F;
 let FarmaciaServicio = FS;
 let FarmaciaDrogueria = FD;
 let FarmaciaLaboratorio = FL;
+
+let Transfer = T;
+let TransferProducto = TP;
+let TransferTransferProducto = TTP;
+
+let Laboratorio = L;
+let Drogueria = DR;
+
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
@@ -58,6 +76,9 @@ let SRcDeta = SRD;
 let SPista = SP;
 let SConfConfUsuario = SCCU;
 let SConfConfDeta = SCCD;
+
+let Update = U;
+let Eliminar = D;
 
 export class Insertar {
   constructor() {}

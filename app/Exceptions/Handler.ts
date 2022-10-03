@@ -21,7 +21,7 @@ import SErrorMysql from "App/Models/SErrorMysql";
 export default class ExceptionHandler extends HttpExceptionHandler {
   protected statusPages = {
     "404": "errors/not-found",
-    "500..599": "errors/server-error",
+    //"500..599": "errors/server-error",
   };
   constructor() {
     super(Logger);
@@ -44,8 +44,6 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       errorMensajeTraducido = await SErrorMysql.query()
         .where("error_mysql", errorKey as string)
         .first();
-      console.log("errorKey: ", errorKey);
-      console.log("errorMensajeTraducido: ", errorMensajeTraducido);
     }
 
     if (error.code === "E_INVALID_AUTH_PASSWORD") {
@@ -67,6 +65,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         sql: ctx.$_sql,
       });
     }
+
     if (error.code === "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle
@@ -76,6 +75,17 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         sql: ctx.$_sql,
       });
     }
+
+    if (error.code === "WARN_DATA_TRUNCATED") {
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "El tipo de valor no corresponde al dato solicitado";
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+
     if (error.code === "ER_BAD_FIELD_ERROR") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle
