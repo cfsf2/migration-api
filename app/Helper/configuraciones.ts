@@ -964,78 +964,7 @@ export class ConfBuilder {
         }
       }
 
-      if (campos.length !== 0) {
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        let query = eval(modelo).query();
-
-        //aplicaSelects
-        campos.forEach(async (campo) => {
-          console.log(campo);
-          if (campo.evaluar === "s") {
-            campo.campo = eval(campo.campo);
-          }
-
-          if (campo.subquery === "s") {
-            const subquery = await Database.rawQuery(campo.campo);
-            return query.select(`"${subquery[0]}"`);
-          }
-
-          query.select(
-            Database.raw(
-              `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-            )
-          );
-          //console.log(query.toSQL().sql);
-        });
-
-        // aplicarPreloads - left join
-        if (leftJoins.length > 0) {
-          leftJoins.forEach((leftJoin) => {
-            if (leftJoin.evaluar === "s") {
-              return query.joinRaw(eval(leftJoin.valor));
-            }
-            query.joinRaw(leftJoin.valor);
-          });
-        }
-        // aplicar groupsBy
-        if (groupsBy.length > 0) {
-          groupsBy.forEach(({ groupBy, having }) => {
-            query.groupBy(groupBy);
-            if (having) query.having(having);
-          });
-        }
-        // aplicar order del listado
-        if (order.length > 0) {
-          order.forEach((order) => {
-            const orderValores = order.split(",");
-
-            query.orderBy(
-              orderValores[0],
-              orderValores[1] ? orderValores[1].trim() : "desc"
-            );
-          });
-        }
-
-        //aplicarFiltros
-
-        query = aplicarFiltros(
-          ctx,
-          query,
-          listado,
-          id,
-          queryFiltros,
-          filtros_aplicables
-        );
-
-        ctx.$_sql.push({ sql: query.toQuery(), conf: listado.id_a });
-        // console.log("listado sql: ", sql);
-        //await query.paginate(1, 15);
-        if (solo_conf === "n") {
-          datos = await query;
-        }
-      }
+      datos = await this.getDatos(ctx, listado, id);
 
       const cabeceras = await extraerElementos({
         ctx,
@@ -1393,7 +1322,7 @@ export class ConfBuilder {
         filtros_aplicables
       );
 
-      if (id) {
+      if (id && parametro) {
         query.where(`${parametro}`, id);
       }
 
