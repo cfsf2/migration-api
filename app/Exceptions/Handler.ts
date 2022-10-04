@@ -33,7 +33,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     let errorKey = {};
     let errorMensajeTraducido: SErrorMysql | null = new SErrorMysql();
 
-    errorMensajeTraducido = await SErrorMysql.findBy("error_mysql", error.code);
+    errorMensajeTraducido = await SErrorMysql.findBy(
+      "error_mysql",
+      error?.code
+    );
 
     if (error.sqlMessage) {
       errorKey = error.sqlMessage

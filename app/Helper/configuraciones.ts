@@ -260,11 +260,12 @@ const extraerElementos = ({
           if (condicionConf.evaluar === "s") {
             condicionConf.valor = eval(condicionConf.valor);
           }
+          console.log(condicionConf);
           const resultadoCondicion =
             datos[0]?.$extras[
               getAtributo({ atributo: "condicionConf_alias", conf: c })
             ];
-          console.log("datos", datos);
+
           if (!resultadoCondicion) return;
 
           const sc = (await SConf.findByIda({
@@ -605,18 +606,13 @@ const getSelect = (
 
     valoresSQL.forEach((v) => {
       let vselect: select = {
-        campo: "",
-        sql: "",
+        campo: v.valor,
+        sql: v.sql,
         alias: "",
-        evaluar: "",
-        subquery: "",
+        evaluar: v.evaluar,
+        subquery: v.subquery,
       };
 
-      vselect.campo = v.valor;
-      if (v.evaluar === "s") {
-        vselect.campo = eval(v.valor);
-      }
-      vselect.sql = v.sql;
       vselect.alias = getAtributo({
         atributo: v.atributo[0].nombre.concat("_alias"),
         conf,
@@ -814,6 +810,7 @@ export class ConfBuilder {
         }
         opciones[val.atributo[0].nombre] = val.valor;
       });
+
       opciones["orden"] = conf?.orden.find(
         (o) => o.id_conf_h === listado?.id
       )?.orden;
@@ -875,7 +872,8 @@ export class ConfBuilder {
       });
 
       const modelo = listado.getAtributo({ atributo: "modelo" });
-      const campos = getSelect(ctx, [columnas], 7);
+      const campos = getSelect(ctx, [listado], 7);
+
       const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
       const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
       const order = getOrder({ ctx, conf: listado });
@@ -974,6 +972,7 @@ export class ConfBuilder {
 
         //aplicaSelects
         campos.forEach(async (campo) => {
+          console.log(campo);
           if (campo.evaluar === "s") {
             campo.campo = eval(campo.campo);
           }
@@ -1068,6 +1067,8 @@ export class ConfBuilder {
         id,
       });
 
+      ctx.$_datos = ctx.$_datos.concat(datos);
+
       return {
         cabeceras,
         filtros,
@@ -1110,68 +1111,10 @@ export class ConfBuilder {
     };
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
-
-    const parametro = vista.getAtributo({ atributo: "parametro" });
-    const modelo = vista.getAtributo({ atributo: "modelo" });
     const campos = getSelect(ctx, [columnas], 7, usuario);
-    const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
-    const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
-    const order = getOrder({ ctx, conf: vista });
 
     try {
       if (campos.length !== 0) {
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        let query = eval(modelo)
-          .query()
-          .if(id, (query) => query.where(`${parametro}`, id));
-
-        //aplicaSelects
-        campos.forEach((campo) => {
-          // console.log(campo);
-          query.select(
-            Database.raw(
-              `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-            )
-          );
-          //console.log(query.toSQL().sql);
-        });
-
-        // aplicarPreloads - left join
-        if (leftJoins.length > 0) {
-          leftJoins.forEach((leftJoin) => {
-            if (leftJoin.evaluar === "s") {
-              return query.joinRaw(eval(leftJoin.valor));
-            }
-            query.joinRaw(leftJoin.valor);
-          });
-        }
-        // aplicar groupsBy
-        if (groupsBy.length > 0) {
-          groupsBy.forEach(({ groupBy, having }) => {
-            query.groupBy(groupBy);
-            if (having) query.having(having);
-          });
-        }
-        // aplicar order del listado
-        if (order.length > 0) {
-          order.forEach((order) => {
-            const orderValores = order.split(",");
-
-            query.orderBy(
-              orderValores[0],
-              orderValores[1] ? orderValores[1].trim() : "desc"
-            );
-          });
-        }
-
-        //aplicarFiltros
-
-        query = aplicarFiltros(ctx, query, vista);
-
-        ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
-
         vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
           ? ctx.$_sql
           : undefined;
@@ -1180,7 +1123,9 @@ export class ConfBuilder {
           : undefined;
         // console.log("vista sql: ", vistaFinal.sql);
         // await query.paginate(1, 15);
-        vistaFinal.datos = await query;
+        vistaFinal.datos = await this.getDatos(ctx, vista, id);
+
+        ctx.$_datos = ctx.$_datos.concat(vistaFinal.datos);
       }
       vistaFinal.cabeceras = (
         await extraerElementos({
@@ -1334,20 +1279,32 @@ export class ConfBuilder {
 
     ctx;
     id;
+    if (!conf) return opciones;
+    if (conf.valores) {
+      conf?.valores.forEach(async (val) => {
+        if (val.evaluar === "s") {
+          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+        }
+        if (val.subquery === "s") {
+          const subquery = await Database.rawQuery(val.valor);
+          return (opciones[val.atributo[0].nombre] = subquery);
+        }
+        opciones[val.atributo[0].nombre] = val.valor;
+      });
+    } else {
+      console.log("conf sin valores", conf.id_a, conf.valores);
+    }
 
-    conf?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
-
-    conf_h?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
-      }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
+    if (conf_h.valores) {
+      conf_h?.valores.forEach((val) => {
+        if (val.evaluar === "s") {
+          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+        }
+        opciones[val.atributo[0].nombre] = val.valor;
+      });
+    } else {
+      console.log("conf_h sin valores", conf.id_a, conf.valores);
+    }
 
     opciones["orden"] = conf?.orden.find(
       (o) => o.id_conf_h === conf_h?.id
@@ -1361,7 +1318,7 @@ export class ConfBuilder {
     ctx: HttpContextContract,
     conf: SConf,
     id?: number
-  ) => {
+  ): Promise<any> => {
     const modelo = conf.getAtributo({ atributo: "modelo" });
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
@@ -1442,7 +1399,11 @@ export class ConfBuilder {
 
       ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
 
-      return await query;
+      const datos = await query;
+
+      ctx.$_datos = ctx.$_datos.concat(datos);
+
+      return datos;
     }
   };
 }

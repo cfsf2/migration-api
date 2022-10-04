@@ -240,6 +240,7 @@ export default class ConfigsController {
       ))
         ? ctx.$_sql
         : undefined;
+
       return ctx.$_respuesta;
     } catch (err) {
       console.log(err);
