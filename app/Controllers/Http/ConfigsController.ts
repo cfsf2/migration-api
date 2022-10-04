@@ -76,59 +76,12 @@ export default class ConfigsController {
     }
     if (conf.tipo.id === 7) {
       console.log("Pidio contenedor", config.id_a);
-      let contenedor = conf;
-      const p: {
-        opciones: {};
-        configuraciones: any[];
-      } = {
-        opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
-        configuraciones: [],
-      };
-
-      const _listados = contenedor.sub_conf.filter(
-        (sc) => sc.tipo.id === 2
-      ) as SConf[];
-      const _vistas = contenedor.sub_conf.filter(
-        (sc) => sc.tipo.id === 6
-      ) as SConf[];
-
-      const _listadosArmados = await Promise.all(
-        _listados.map(async (listado) => {
-          return await ConfBuilder.armarListado(
-            ctx,
-            listado,
-            contenedor,
-            bouncer,
-            queryFiltros,
-            id,
-            usuario,
-            "n"
-          );
-        })
-      );
-
-      const _vistasArmadas = await Promise.all(
-        _vistas.map(async (vista) => {
-          return ConfBuilder.armarVista(
-            ctx,
-            vista,
-            id,
-            contenedor,
-            bouncer,
-            usuario
-          );
-        })
-      );
-
-      p.opciones["orden"] = conf?.orden.find(
-        (o) => o.id_conf_h === contenedor?.id
-      )?.orden;
-
-      p.configuraciones = [];
-      p.configuraciones = p.configuraciones.concat(_listadosArmados);
-      p.configuraciones = p.configuraciones.concat(_vistasArmadas);
-
-      return p;
+      return await ConfBuilder.armarContenedor({
+        ctx,
+        contenedor: conf,
+        idListado: id,
+        idVista: id,
+      });
     }
     if (conf.tipo.id === 9) {
       console.log("pidioABM", conf.id_a);

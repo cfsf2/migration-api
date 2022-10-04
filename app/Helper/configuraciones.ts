@@ -775,7 +775,7 @@ export class ConfBuilder {
     solo_conf?: string
   ) => {
     try {
-      let opciones = { configuracion_usuario_activo: "n" };
+      let opciones = this.setOpciones(ctx, listado, conf, id);
       let opcionesPantalla = {};
       let datos = [];
       let res = listadoVacio;
@@ -799,24 +799,10 @@ export class ConfBuilder {
 
       conf?.valores.forEach((val) => {
         if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+          return (opcionesPantalla[val.atributo[0].nombre] = eval(val.valor));
         }
         opcionesPantalla[val.atributo[0].nombre] = val.valor;
       });
-
-      listado?.valores.forEach((val) => {
-        if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
-        }
-        opciones[val.atributo[0].nombre] = val.valor;
-      });
-
-      opciones["orden"] = conf?.orden.find(
-        (o) => o.id_conf_h === listado?.id
-      )?.orden;
-
-      opciones["id_a"] = listado.id_a;
-      opciones["tipo"] = listado.tipo;
 
       if (
         opciones.configuracion_usuario_activo === "s" &&
@@ -828,6 +814,26 @@ export class ConfBuilder {
               configuracionDeUsuario[0][val.atributo[0].nombre];
         });
       }
+
+      let columnas = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 4,
+      });
+      let filtros_aplicables = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 3,
+      });
+      let listado_boton_admitidos = await verificarPermisos({
+        ctx,
+        conf: listado,
+        bouncer,
+        tipoId: 8,
+      });
+
       if (
         getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
       ) {
@@ -851,32 +857,6 @@ export class ConfBuilder {
           MenuConfiguracionDeListadoArmado,
         ];
       }
-
-      let columnas = await verificarPermisos({
-        ctx,
-        conf: listado,
-        bouncer,
-        tipoId: 4,
-      });
-      let filtros_aplicables = await verificarPermisos({
-        ctx,
-        conf: listado,
-        bouncer,
-        tipoId: 3,
-      });
-      let listado_boton_admitidos = await verificarPermisos({
-        ctx,
-        conf: listado,
-        bouncer,
-        tipoId: 8,
-      });
-
-      const modelo = listado.getAtributo({ atributo: "modelo" });
-      const campos = getSelect(ctx, [listado], 7);
-
-      const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
-      const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
-      const order = getOrder({ ctx, conf: listado });
 
       //Chequear filtros obligatorios
       if (solo_conf === "n") {
@@ -1092,7 +1072,7 @@ export class ConfBuilder {
       opciones: {};
       configuraciones: any[];
     } = {
-      opciones: this.setOpciones(ctx, contenedor, father),
+      opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
     };
 
@@ -1148,15 +1128,17 @@ export class ConfBuilder {
     ctx,
     conf,
     abm,
+    id,
   }: {
     ctx: HttpContextContract;
     abm: SConf;
     conf: SConf;
+    id?: number;
   }) => {
     if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
     let datos: any[] | undefined = [];
 
-    const opciones = this.setOpciones(ctx, abm, conf);
+    const opciones = this.setOpciones(ctx, abm, conf, id);
 
     const cabeceras = await extraerElementos({
       ctx,
@@ -1203,44 +1185,57 @@ export class ConfBuilder {
     conf_h: SConf,
     conf: SConf,
     id?: number
-  ) => {
-    const opciones = {};
+  ): any => {
+    try {
+      ctx;
+      id;
+      const opciones = {};
 
-    ctx;
-    id;
-    if (!conf) return opciones;
-    if (conf.valores) {
-      conf?.valores.forEach(async (val) => {
-        if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
-        }
-        if (val.subquery === "s") {
-          const subquery = await Database.rawQuery(val.valor);
-          return (opciones[val.atributo[0].nombre] = subquery);
-        }
-        opciones[val.atributo[0].nombre] = val.valor;
-      });
-    } else {
-      console.log("conf sin valores", conf.id_a, conf.valores);
+      if (conf_h.tipo.id === 2) {
+        opciones["configuracion_usuario_activo"] = "n";
+        opciones["display_container"] = "s";
+      }
+      if (
+        conf_h.tipo.id === 1 ||
+        conf_h.tipo.id === 6 ||
+        conf_h.tipo.id === 7
+      ) {
+        opciones["display_container"] = "s";
+      }
+
+      opciones["tipo"] = conf_h.tipo;
+      opciones["id_a"] = conf_h.id_a;
+
+      if (conf_h.valores) {
+        conf_h?.valores.forEach(async (val) => {
+          let copyVal = val.valor;
+          if (val.evaluar === "s") {
+            copyVal = eval(val.valor);
+          }
+          if (val.subquery === "s") {
+            const subquery = (await Database.rawQuery(copyVal))[0];
+            copyVal = subquery[0];
+          }
+          if (val.atributo[0].nombre === "display_container") {
+            copyVal = Object.values(copyVal)[0];
+          }
+          opciones[val.atributo[0].nombre] = copyVal;
+        });
+      } else {
+        console.log("conf_h sin valores", conf.id_a, conf.valores);
+      }
+
+      if (!conf) return opciones;
+
+      opciones["orden"] = conf?.orden.find(
+        (o) => o.id_conf_h === conf_h?.id
+      )?.orden;
+
+      return opciones;
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
-
-    if (conf_h.valores) {
-      conf_h?.valores.forEach((val) => {
-        if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
-        }
-        opciones[val.atributo[0].nombre] = val.valor;
-      });
-    } else {
-      console.log("conf_h sin valores", conf.id_a, conf.valores);
-    }
-
-    opciones["orden"] = conf?.orden.find(
-      (o) => o.id_conf_h === conf_h?.id
-    )?.orden;
-    opciones["tipo"] = conf_h.tipo;
-    opciones["id_a"] = conf_h.id_a;
-    return opciones;
   };
 
   private static getDatos = async (
