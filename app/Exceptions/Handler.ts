@@ -44,6 +44,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         .pop()
         .replaceAll("'", "")
         .trim();
+
       errorMensajeTraducido = await SErrorMysql.query()
         .where("error_mysql", errorKey as string)
         .first();
@@ -89,6 +90,18 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       });
     }
 
+    if (error.code === "ER_NO_DEFAULT_FOR_FIELD") {
+      console.log("Error de no default for field");
+      const field = error.sqlMessage.split("'")[1];
+      const message = errorMensajeTraducido
+        ? errorMensajeTraducido.detalle
+        : "Un valor debe ser provisto para " + field;
+      return ctx.response.status(409).send({
+        error: { message },
+        sql: ctx.$_sql,
+      });
+    }
+
     if (error.code === "E_ROW_NOT_FOUND") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle
@@ -107,16 +120,19 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         .status(422)
         .send({ error: { message }, sql: ctx.$_sql });
     }
+
     if (error.code === "ER_DUP_ENTRY") {
+      const entry = error.sqlMessage.split("entry").pop().split("'")[1];
       const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : `${error.code}: Ya existe un registro con ese valor. No puede haber duplicados`;
+        ? errorMensajeTraducido.detalle + " '" + entry + "' ."
+        : `${error.code}: Ya existe un registro con el valor "${entry}". No puede haber duplicados`;
 
       return ctx.response.status(409).send({
         error: { message },
         sql: ctx.$_sql,
       });
     }
+
     if (error.code === "extname") {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle

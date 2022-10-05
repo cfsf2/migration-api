@@ -789,6 +789,7 @@ export class ConfBuilder {
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
+      console.log(opciones.display_container, opciones.id_a);
       if (opciones.display_container === "n") return { opciones, datos };
 
       let configuracionDeUsuario = [] as any;
@@ -1025,7 +1026,7 @@ export class ConfBuilder {
       cabeceras: [],
       error: { message: "" },
     };
-
+    console.log(opciones.display_container, opciones.id_a);
     if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
@@ -1084,7 +1085,7 @@ export class ConfBuilder {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
     };
-
+    console.log(p.opciones.display_container, p.opciones.id_a);
     if (p.opciones.display_container === "n") return p;
 
     if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
@@ -1150,7 +1151,7 @@ export class ConfBuilder {
     let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf, id);
-
+    console.log(opciones.display_container, opciones.id_a);
     if (opciones.display_container === "n") return { opciones, datos };
 
     const cabeceras = await extraerElementos({
@@ -1220,7 +1221,7 @@ export class ConfBuilder {
       opciones["id_a"] = conf_h.id_a;
 
       if (conf_h.valores) {
-        conf_h?.valores.forEach(async (val) => {
+        conf_h?.valores.map(async (val) => {
           let copyVal = val.valor;
           if (val.evaluar === "s") {
             copyVal = eval(val.valor);

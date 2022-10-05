@@ -20,7 +20,9 @@ export default class LaboratoriosController {
     }
   }
 
-  public async mig_add({ request, bouncer, auth }: HttpContextContract) {
+  public async mig_add(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
+    console.log("Aniadiendo un Lab");
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_LAB);
       const usuario = await auth.authenticate();
@@ -36,7 +38,7 @@ export default class LaboratoriosController {
       return await nuevoLab.save();
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 

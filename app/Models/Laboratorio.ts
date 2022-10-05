@@ -48,6 +48,9 @@ export default class Laboratorio extends BaseModel {
   public url: string;
 
   @column()
+  public email: string;
+
+  @column()
   public usa_sistema: string;
 
   @column()
@@ -55,6 +58,9 @@ export default class Laboratorio extends BaseModel {
 
   @column()
   public permite_nro_cuenta: string;
+
+  @column()
+  public id_usuario: number;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
@@ -79,6 +85,12 @@ export default class Laboratorio extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario",
+  })
+  public usuario: HasOne<typeof Usuario>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
