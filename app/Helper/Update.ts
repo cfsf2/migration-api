@@ -451,7 +451,7 @@ export class Update {
   }: {
     ctx: HttpContextContract;
     conf: SConf;
-    usuario: U;
+    usuario: Usuario;
     id: number;
   }) {
     const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
