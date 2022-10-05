@@ -33,152 +33,170 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     let errorKey = {};
     let errorMensajeTraducido: SErrorMysql | null = new SErrorMysql();
 
-    errorMensajeTraducido = await SErrorMysql.findBy(
-      "error_mysql",
-      error?.code
-    );
-
-    if (error.sqlMessage) {
-      errorKey = error.sqlMessage
-        ?.split("key")
-        .pop()
-        .replaceAll("'", "")
-        .trim();
-
-      errorMensajeTraducido = await SErrorMysql.query()
-        .where("error_mysql", errorKey as string)
-        .first();
-    }
-
-    if (error.code === "E_INVALID_AUTH_PASSWORD") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "El Password es incorrecto";
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-
-    if (error.code === "E_VALIDATION_FAILURE") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "La Validacion ha fallado";
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-
-    if (error.code === "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "El tipo de valor no corresponde al dato solicitado";
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-
-    if (error.code === "WARN_DATA_TRUNCATED") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "El tipo de valor no corresponde al dato solicitado";
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-
-    if (error.code === "ER_NO_DEFAULT_FOR_FIELD") {
-      console.log("Error de no default for field");
-      const field = error.sqlMessage.split("'")[1];
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "Un valor debe ser provisto para " + field;
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-
-    if (error.code === "E_ROW_NOT_FOUND") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "Pagina no encontrada";
+    if (error) {
+      if (error.code) {
+        errorMensajeTraducido = await SErrorMysql.findBy(
+          "error_mysql",
+          error?.code
+        );
+      }
       console.log(error);
-      return ctx.response.status(404).send({
-        error: { message, e: error },
-        sql: ctx.$_sql,
-      });
-    }
 
-    if (error.code === "ER_BAD_FIELD_ERROR") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : error.code;
-      return ctx.response
-        .status(422)
-        .send({ error: { message }, sql: ctx.$_sql });
-    }
+      if (error.sqlMessage) {
+        errorKey = error.sqlMessage
+          ?.split("key")
+          .pop()
+          .replaceAll("'", "")
+          .trim();
 
-    if (error.code === "ER_DUP_ENTRY") {
-      const entry = error.sqlMessage.split("entry").pop().split("'")[1];
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle + " '" + entry + "' ."
-        : `${error.code}: Ya existe un registro con el valor "${entry}". No puede haber duplicados`;
+        errorMensajeTraducido = await SErrorMysql.query()
+          .where("error_mysql", errorKey as string)
+          .first();
+      }
 
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
+      if (error.code === "E_INVALID_AUTH_PASSWORD") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El Password es incorrecto";
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
 
-    if (error.code === "extname") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : error.message;
+      if (error.code === "E_VALIDATION_FAILURE") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "La Validacion ha fallado";
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
 
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
-    if (error.code === "E_REQUEST_ENTITY_TOO_LARGE") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "El archivo es demasiado grande";
+      if (error.code === "ER_TRUNCATED_WRONG_VALUE_FOR_FIELD") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El tipo de valor no corresponde al dato solicitado";
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
 
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
+      if (error.code === "WARN_DATA_TRUNCATED") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El tipo de valor no corresponde al dato solicitado";
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
 
-    if (error.code === "recupero_sin_diagnostico") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "El recupero debe tener al menos un diagnostico asociado para poder habilitar";
+      if (error.code === "ER_NO_DEFAULT_FOR_FIELD") {
+        console.log("Error de no default for field");
+        const field = error.sqlMessage.split("'")[1];
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Un valor debe ser provisto para " + field;
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
 
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
-    }
+      if (error.code === "E_ROW_NOT_FOUND") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Pagina no encontrada";
+        console.log(error);
+        return ctx.response.status(404).send({
+          error: { message, e: error },
+          sql: ctx.$_sql,
+        });
+      }
 
-    if (error.code === "SCONF_NO_COMPONENT") {
-      const message = errorMensajeTraducido
-        ? errorMensajeTraducido.detalle
-        : "Este tipo no lleva componente";
+      if (error.code === "ER_PARSE_ERROR") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Error de SQL";
 
-      return ctx.response.status(409).send({
-        error: { message },
-        sql: ctx.$_sql,
-      });
+        return ctx.response.status(409).send({
+          error: { message, e: error },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "ER_BAD_FIELD_ERROR") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : error.code;
+        return ctx.response
+          .status(422)
+          .send({ error: { message }, sql: ctx.$_sql });
+      }
+
+      if (error.code === "ER_DUP_ENTRY") {
+        const entry = error.sqlMessage.split("entry").pop().split("'")[1];
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle + " '" + entry + "' ."
+          : `${error.code}: Ya existe un registro con el valor "${entry}". No puede haber duplicados`;
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "extname") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : error.message;
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+      if (error.code === "E_REQUEST_ENTITY_TOO_LARGE") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El archivo es demasiado grande";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "recupero_sin_diagnostico") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El recupero debe tener al menos un diagnostico asociado para poder habilitar";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "SCONF_NO_COMPONENT") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Este tipo no lleva componente";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
     }
     return ctx.response.badRequest({
       error: {
-        message: errorMensajeTraducido?.detalle ?? error.sqlMessage,
+        message: errorMensajeTraducido?.detalle ?? error?.sqlMessage,
+        sql: ctx.$_sql,
+        error: error,
       },
     });
     //   .status(411)

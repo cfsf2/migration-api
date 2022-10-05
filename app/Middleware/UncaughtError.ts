@@ -8,12 +8,12 @@ export default class UncaughtError {
       // .on("unhandledRejection", (reason, p) => {
       //   // console.error(reason, "Unhandled Rejection at Promise", p);
       // })
-      .on("uncaughtException", (err) => {
+      .on("uncaughtException", async (err) => {
         console.log("Error no Capturado a tiempo");
         try {
           console.log(err);
         } catch (err) {
-          throw new ExceptionHandler().handle(err, ctx);
+          throw await new ExceptionHandler().handle(err, ctx);
         }
         // process.exit(1);
       });

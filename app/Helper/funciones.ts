@@ -3,6 +3,7 @@ import SRc from "App/Models/SRc";
 import SRcDeta from "App/Models/SRcDeta";
 import axios from "axios";
 import { DateTime } from "luxon";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 export const cambiarKey = ({
   o,
@@ -105,45 +106,45 @@ export const guardarDatosAuditoria = async ({
 
     case AccionCRUD.editar:
       console.log(usuario.id, objeto.$primaryKeyValue, registroCambios);
-      try {
+      // try {
+      if (
+        typeof registroCambios?.registrarCambios === "string" &&
+        registroCambios?.registrarCambios.trim() === "s"
+      ) {
         if (
-          typeof registroCambios?.registrarCambios === "string" &&
-          registroCambios?.registrarCambios.trim() === "s"
-        ) {
-          if (
-            !registroCambios.campo ||
-            !registroCambios.tabla ||
-            !registroCambios.valorAnterior
-          )
-            return;
+          !registroCambios.campo ||
+          !registroCambios.tabla ||
+          !registroCambios.valorAnterior
+        )
+          return;
 
-          const rc = new SRc();
+        const rc = new SRc();
 
-          await rc
-            .merge({
-              id_registro: objeto.$primaryKeyValue,
-              tabla: registroCambios.tabla,
-              id_usuario: usuario.id,
-            })
-            .save();
+        await rc
+          .merge({
+            id_registro: objeto.$primaryKeyValue,
+            tabla: registroCambios.tabla,
+            id_usuario: usuario.id,
+          })
+          .save();
 
-          const rc_deta = new SRcDeta();
-          await rc_deta
-            .merge({
-              id_rc: rc.id,
-              campo: registroCambios.campo,
-              valor: registroCambios.valorAnterior,
-            })
-            .save();
-          //  console.log(rc.id, rc_deta.id);
-        }
-        objeto.merge({
-          id_usuario_modificacion: usuario.id,
-        });
-      } catch (err) {
-        console.log(err);
-        return err;
+        const rc_deta = new SRcDeta();
+        await rc_deta
+          .merge({
+            id_rc: rc.id,
+            campo: registroCambios.campo,
+            valor: registroCambios.valorAnterior,
+          })
+          .save();
+        //  console.log(rc.id, rc_deta.id);
       }
+      objeto.merge({
+        id_usuario_modificacion: usuario.id,
+      });
+      // } catch (err) {
+      //   console.log(err);
+      //   return err;
+      // }
       break;
 
     case AccionCRUD.baja:
