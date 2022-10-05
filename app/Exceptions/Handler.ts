@@ -106,8 +106,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       const message = errorMensajeTraducido
         ? errorMensajeTraducido.detalle
         : "Pagina no encontrada";
+      console.log(error);
       return ctx.response.status(404).send({
-        error: { message },
+        error: { message, e: error },
         sql: ctx.$_sql,
       });
     }

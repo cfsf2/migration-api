@@ -104,6 +104,7 @@ export const guardarDatosAuditoria = async ({
       break;
 
     case AccionCRUD.editar:
+      console.log(usuario.id, objeto.$primaryKeyValue, registroCambios);
       try {
         if (
           typeof registroCambios?.registrarCambios === "string" &&
@@ -127,14 +128,14 @@ export const guardarDatosAuditoria = async ({
             .save();
 
           const rc_deta = new SRcDeta();
-          rc_deta
+          await rc_deta
             .merge({
               id_rc: rc.id,
               campo: registroCambios.campo,
               valor: registroCambios.valorAnterior,
             })
             .save();
-          // console.log(rc, rc_deta);
+          //  console.log(rc.id, rc_deta.id);
         }
         objeto.merge({
           id_usuario_modificacion: usuario.id,

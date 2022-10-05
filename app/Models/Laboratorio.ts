@@ -62,6 +62,12 @@ export default class Laboratorio extends BaseModel {
   @column()
   public id_usuario: number;
 
+  @column()
+  public id_tipo_comunicacion: number;
+
+  @column()
+  public id_modalidad_entrega: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
