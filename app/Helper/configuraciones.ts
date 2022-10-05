@@ -164,10 +164,15 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
         if (sch.tipo.id === 5) {
           if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
             try {
-              const conf = await SConf.findByOrFail(
+              const conf = await SConf.findBy(
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+              if (!conf)
+                throw await new ExceptionHandler().handle(
+                  { code: "E_ROW_NOT_FOUND", message: "error" },
+                  ctx
+                );
               const tienePermisoDeDestino = await bouncer.allows(
                 "AccesoConf",
                 conf
@@ -175,9 +180,12 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
               if (!tienePermisoDeDestino) return false;
             } catch (err) {
               console.log(
+                "El error fue provocado por lo si guiente",
                 err,
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+
+              return await new ExceptionHandler().handle(err, ctx);
             }
           }
         }
@@ -251,29 +259,29 @@ const extraerElementos = ({
             : undefined;
         }
 
-        const condicionConf = getFullAtributo({
-          atributo: "condicionConf",
-          conf: c,
-        });
+        // const condicionConf = getFullAtributo({
+        //   atributo: "condicionConf",
+        //   conf: c,
+        // });
 
-        if (condicionConf) {
-          if (condicionConf.evaluar === "s") {
-            condicionConf.valor = eval(condicionConf.valor);
-          }
-          console.log(condicionConf);
-          const resultadoCondicion =
-            datos[0]?.$extras[
-              getAtributo({ atributo: "condicionConf_alias", conf: c })
-            ];
+        // if (condicionConf) {
+        //   if (condicionConf.evaluar === "s") {
+        //     condicionConf.valor = eval(condicionConf.valor);
+        //   }
 
-          if (!resultadoCondicion) return;
+        //   const resultadoCondicion =
+        //     datos[0]?.$extras[
+        //       getAtributo({ atributo: "condicionConf_alias", conf: c })
+        //     ];
 
-          const sc = (await SConf.findByIda({
-            id_a: resultadoCondicion,
-          })) as SConf;
+        //   if (!resultadoCondicion) return;
 
-          c = sc;
-        }
+        //   const sc = (await SConf.findByIda({
+        //     id_a: resultadoCondicion,
+        //   })) as SConf;
+
+        //   c = sc;
+        // }
 
         item["id_a"] = c.id_a;
 
@@ -781,6 +789,7 @@ export class ConfBuilder {
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
+      if (opciones.display_container === "n") return listadoVacio;
 
       let configuracionDeUsuario = [] as any;
 
@@ -976,8 +985,6 @@ export class ConfBuilder {
         id,
       });
 
-      ctx.$_datos = ctx.$_datos.concat(datos);
-
       return {
         cabeceras,
         filtros,
@@ -1010,6 +1017,8 @@ export class ConfBuilder {
     let opciones = this.setOpciones(ctx, vista, conf, id);
     let datos = [{}];
     let sql = "";
+
+    if (opciones.display_container === "n") return vistaVacia;
 
     let vistaFinal: vista = {
       opciones,
@@ -1069,12 +1078,14 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
-      opciones: {};
+      opciones: { display_container: string };
       configuraciones: any[];
     } = {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
     };
+
+    if (p.opciones.display_container === "n") return vistaVacia;
 
     if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
 
@@ -1139,6 +1150,8 @@ export class ConfBuilder {
     let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf, id);
+
+    if (opciones.display_container === "n") return vistaVacia;
 
     const cabeceras = await extraerElementos({
       ctx,

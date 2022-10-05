@@ -33,11 +33,11 @@ export default class LaboratoriosController {
         usuario: usuario,
         accion: AccionCRUD.crear,
       });
-      nuevoLab.save();
+      return await nuevoLab.save();
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
-    return;
   }
 
   public async mig_update({ request, bouncer, auth }: HttpContextContract) {
@@ -89,6 +89,7 @@ export default class LaboratoriosController {
         .andWhere("id", request.params().id)
         .firstOrFail();
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
