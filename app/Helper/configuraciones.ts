@@ -789,7 +789,7 @@ export class ConfBuilder {
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
-      if (opciones.display_container === "n") return listadoVacio;
+      if (opciones.display_container === "n") return { opciones, datos };
 
       let configuracionDeUsuario = [] as any;
 
@@ -1018,8 +1018,6 @@ export class ConfBuilder {
     let datos = [{}];
     let sql = "";
 
-    if (opciones.display_container === "n") return vistaVacia;
-
     let vistaFinal: vista = {
       opciones,
       datos,
@@ -1027,6 +1025,8 @@ export class ConfBuilder {
       cabeceras: [],
       error: { message: "" },
     };
+
+    if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
     const campos = getSelect(ctx, [columnas], 7, usuario);
@@ -1085,7 +1085,7 @@ export class ConfBuilder {
       configuraciones: [],
     };
 
-    if (p.opciones.display_container === "n") return vistaVacia;
+    if (p.opciones.display_container === "n") return p;
 
     if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
 
@@ -1151,7 +1151,7 @@ export class ConfBuilder {
 
     const opciones = this.setOpciones(ctx, abm, conf, id);
 
-    if (opciones.display_container === "n") return vistaVacia;
+    if (opciones.display_container === "n") return { opciones, datos };
 
     const cabeceras = await extraerElementos({
       ctx,
