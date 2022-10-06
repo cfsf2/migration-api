@@ -339,7 +339,7 @@ export class Update {
     conf,
   }: {
     ctx: HttpContextContract;
-    usuario: U;
+    usuario: Usuario;
     id: any;
     valor: string | number;
     conf: SConf;
@@ -471,7 +471,6 @@ export class Update {
     if (Modelo && campo) {
       try {
         const registro = await Modelo.findOrFail(id);
-
         const recuperoDiagnosticos = await RecuperoDiagnostico.findBy(
           "id_recupero",
           registro.$primaryKeyValue
@@ -485,6 +484,58 @@ export class Update {
           throw {
             code: "recupero_sin_diagnostico",
           };
+        }
+        // recupero.estadio_definido == s ? recupero_estadio.id_recupero ? ok
+
+        const recuperoEstadio = await RecuperoEstadio.findBy(
+          "id_recupero",
+          registro.$primaryKeyValue
+        );
+
+        if (registro.estadio_definido === "s") {
+          if (!recuperoEstadio) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_estadio",
+            };
+          }
+        }
+
+        const recuperoPerformanceStatus = await RecuperoPerformanceStatus.findBy(
+          "id_recupero",
+          registro.$primaryKeyValue
+        );
+
+        if (registro.performance_status_definido === "s") {
+          if (!recuperoPerformanceStatus) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_performance_status",
+            };
+          }
+        }
+
+        const recuperoLineaTratamiento = await RecuperoLineaTratamiento.findBy(
+          "id_recupero",
+          registro.$primaryKeyValue
+        );
+
+        if (registro.performance_status_definido === "s") {
+          if (!recuperoLineaTratamiento) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_linea_tratamiento",
+            };
+          }
         }
 
         const valorAnterior = registro[campo];
