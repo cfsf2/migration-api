@@ -181,6 +181,39 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         });
       }
 
+      if (error.code === "recupero_sin_estadio") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El recupero debe tener al menos un estadio definido asociado para poder habilitar";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "recupero_sin_performance_status") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El recupero debe tener al menos un performance status definido asociado para poder habilitar";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "recupero_sin_linea_tratamiento") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El recupero debe tener al menos una linea de tratamiento definida asociada para poder habilitar";
+
+        return ctx.response.status(409).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
       if (error.code === "SCONF_NO_COMPONENT") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
