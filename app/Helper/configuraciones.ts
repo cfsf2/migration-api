@@ -31,6 +31,8 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _Apm from "App/Models/Apm";
+import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
 
 import R from "App/Models/Recupero";
@@ -71,6 +73,8 @@ let TransferProducto = TP;
 let TransferTransferProducto = TTP;
 
 let Laboratorio = L;
+let Apm = _Apm;
+let ApmFarmacia = _ApmFarmacia;
 let Drogueria = DR;
 
 let _SConf = SConf;
@@ -783,7 +787,6 @@ export class ConfBuilder {
     solo_conf?: string
   ) => {
     try {
-      console.log(id, "Id pasado a Listado");
       let opciones = this.setOpciones(ctx, listado, conf, id);
       let opcionesPantalla = {};
       let datos = [];
@@ -1262,6 +1265,7 @@ export class ConfBuilder {
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
+    tabla;
 
     const campos = getSelect(ctx, [conf], 7);
     const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });

@@ -3,8 +3,6 @@ import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 
 export default class Base extends BaseModel {
-  public static table = "tbl_apm";
-
   @column({ isPrimary: true })
   public id: number;
 
