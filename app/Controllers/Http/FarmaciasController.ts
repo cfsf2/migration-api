@@ -66,7 +66,7 @@ export default class FarmaciasController {
       return farmacia;
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 

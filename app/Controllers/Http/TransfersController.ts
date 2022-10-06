@@ -4,13 +4,15 @@ import { Permiso } from "App/Helper/permisos";
 import Transfer from "App/Models/Transfer";
 
 export default class TransfersController {
-  public async mig_index({ bouncer }: HttpContextContract) {
+  public async mig_index(ctx: HttpContextContract) {
+    const { bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET);
 
       return await Transfer.traerTransfers({});
     } catch (err) {
-      return new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 

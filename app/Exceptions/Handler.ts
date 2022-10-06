@@ -58,7 +58,17 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : "El Password es incorrecto";
-        return ctx.response.status(409).send({
+        return ctx.response.status(401).send({
+          error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "E_INVALID_AUTH_UID") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El Usuario no existe";
+        return ctx.response.status(401).send({
           error: { message },
           sql: ctx.$_sql,
         });

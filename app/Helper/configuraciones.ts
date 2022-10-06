@@ -783,6 +783,7 @@ export class ConfBuilder {
     solo_conf?: string
   ) => {
     try {
+      console.log(id, "Id pasado a Listado");
       let opciones = this.setOpciones(ctx, listado, conf, id);
       let opcionesPantalla = {};
       let datos = [];
