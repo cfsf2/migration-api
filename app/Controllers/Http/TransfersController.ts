@@ -4,35 +4,41 @@ import { Permiso } from "App/Helper/permisos";
 import Transfer from "App/Models/Transfer";
 
 export default class TransfersController {
-  public async mig_index({ bouncer }: HttpContextContract) {
+  public async mig_index(ctx: HttpContextContract) {
+    const { bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET);
 
       return await Transfer.traerTransfers({});
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_byFarmacia({ request, bouncer }: HttpContextContract) {
+  public async mig_byFarmacia(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_FARMACIA);
       return await Transfer.traerTransfers({
         id_farmacia: request.params().id,
       });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_add({ request, auth, bouncer }: HttpContextContract) {
+  public async mig_add(ctx: HttpContextContract) {
+    const { request, auth, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
       const usuario = await auth.authenticate();
 
       return await Transfer.guardar({ data: request.body(), usuario: usuario });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }
