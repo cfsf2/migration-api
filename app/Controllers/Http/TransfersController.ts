@@ -16,18 +16,21 @@ export default class TransfersController {
     }
   }
 
-  public async mig_byFarmacia({ request, bouncer }: HttpContextContract) {
+  public async mig_byFarmacia(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_FARMACIA);
       return await Transfer.traerTransfers({
         id_farmacia: request.params().id,
       });
     } catch (err) {
-      return new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_add({ request, auth, bouncer }: HttpContextContract) {
+  public async mig_add(ctx: HttpContextContract) {
+    const { request, auth, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
       const usuario = await auth.authenticate();

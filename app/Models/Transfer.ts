@@ -48,7 +48,7 @@ export default class Transfer extends BaseModel {
         // console.log("Transfer de farmaca Id =", id_farmacia);
         query.where("t.id_farmacia", id_farmacia);
       })
-      .orderBy("fecha_alta", "desc");
+      .orderBy("id", "desc");
 
     const res = await Promise.all(
       transfers.map(async (t) => {
