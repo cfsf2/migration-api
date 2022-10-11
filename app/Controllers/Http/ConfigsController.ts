@@ -10,6 +10,7 @@ import {
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 import ExceptionHandler from "App/Exceptions/Handler";
 
@@ -117,12 +118,24 @@ export default class ConfigsController {
 
       // console.log(conf.toJSON());
 
+<<<<<<< Updated upstream
       ctx.$_conf.estructura = conf;
       // para listado
       if (!(await bouncer.allows("AccesoConf", conf))) {
         //console.log("No hay acceso a ", conf);
         return respuestaVacia;
       }
+=======
+    ctx.$_conf.estructura = conf;
+    // para listado
+    if (!(await bouncer.allows("AccesoConf", conf))) {
+      console.log("No hay acceso a ", conf.id_a, conf.permiso);
+      console.log(await auth.check());
+      return ctx.response.unauthorized({
+        error: { message: "Sin Autorizacion" },
+      });
+    }
+>>>>>>> Stashed changes
 
       const listados = conf.sub_conf.filter(
         (sc) => sc.tipo.id === 2
