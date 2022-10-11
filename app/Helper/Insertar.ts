@@ -28,6 +28,8 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _Apm from "App/Models/Apm";
+import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
 
 import R from "App/Models/Recupero";
@@ -42,6 +44,7 @@ import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
 
 import U from "./Update";
+
 import D from "./Eliminar";
 
 const Database = Datab;
@@ -67,6 +70,8 @@ let TransferProducto = TP;
 let TransferTransferProducto = TTP;
 
 let Laboratorio = L;
+let Apm = _Apm;
+let ApmFarmacia = _ApmFarmacia;
 let Drogueria = DR;
 
 let _SConf = SConf;
@@ -176,6 +181,8 @@ export class Insertar {
         return await Update.updateABM({ ctx, formData, conf });
       }
 
+      console.log(formData);
+
       const nuevoRegistro = new Modelo();
 
       await Promise.all(
@@ -188,6 +195,15 @@ export class Insertar {
           const campo = getAtributo({
             atributo: "update_campo",
             conf: confCampo,
+          });
+
+          const insert_campos = getAtributo({
+            atributo: "insert_campos",
+            conf: confCampo,
+          });
+
+          insert_campos?.split("|").forEach((i) => {
+            nuevoRegistro.merge({ [i]: formData[i] });
           });
 
           const componente = getAtributo({

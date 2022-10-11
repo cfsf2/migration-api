@@ -120,7 +120,7 @@ export default class ConfigsController {
       // para listado
       if (!(await bouncer.allows("AccesoConf", conf))) {
         console.log("No hay acceso a ", conf.id_a, conf.permiso);
-        console.log(await auth.check());
+
         return ctx.response.unauthorized({
           error: { message: "Sin Autorizacion" },
         });

@@ -4,6 +4,8 @@ import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import SComponente from "App/Models/SComponente";
+import STipoAtributo from "App/Models/STipoAtributo";
 
 import Datab from "@ioc:Adonis/Lucid/Database";
 
@@ -28,6 +30,8 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _Apm from "App/Models/Apm";
+import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
 
 import R from "App/Models/Recupero";
@@ -43,8 +47,6 @@ import M from "App/Models/Monodro";
 
 import I from "./Insertar";
 import D from "./Eliminar";
-import SComponente from "App/Models/SComponente";
-import STipoAtributo from "App/Models/STipoAtributo";
 
 const Database = Datab;
 let Recupero = R;
@@ -69,6 +71,8 @@ let TransferProducto = TP;
 let TransferTransferProducto = TTP;
 
 let Laboratorio = L;
+let Apm = _Apm;
+let ApmFarmacia = _ApmFarmacia;
 let Drogueria = DR;
 
 let _SConf = SConf;
@@ -504,10 +508,11 @@ export class Update {
           }
         }
 
-        const recuperoPerformanceStatus = await RecuperoPerformanceStatus.findBy(
-          "id_recupero",
-          registro.$primaryKeyValue
-        );
+        const recuperoPerformanceStatus =
+          await RecuperoPerformanceStatus.findBy(
+            "id_recupero",
+            registro.$primaryKeyValue
+          );
 
         if (registro.performance_status_definido === "s") {
           if (!recuperoPerformanceStatus) {

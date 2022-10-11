@@ -1,13 +1,9 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { column } from "@ioc:Adonis/Lucid/Orm";
+import Base from "./Base";
 
-export default class LaboratorioModalidadEntrega extends BaseModel {
-  @column({ isPrimary: true })
-  public id: number
+export default class LaboratorioModalidadEntrega extends Base {
+  public static table = "tbl_laboratorio_modalidad_entrega";
 
-  @column.dateTime({ autoCreate: true })
-  public createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  public updatedAt: DateTime
+  @column()
+  public nombre: string;
 }

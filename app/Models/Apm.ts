@@ -6,6 +6,9 @@ import Base from "./Base";
 export default class Apm extends Base {
   public static table = "tbl_apm";
 
+  @column({ isPrimary: true })
+  public id: number;
+
   @column()
   public nombre: string;
 
