@@ -1083,7 +1083,7 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
-      opciones: { display_container: string };
+      opciones: { display_container: string; id_a: string };
       configuraciones: any[];
     } = {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
