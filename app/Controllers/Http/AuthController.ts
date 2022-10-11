@@ -41,7 +41,7 @@ export default class AuthController {
 
       response.token = log.token;
 
-      await bouncer.authorize("esAdmin", usuario[0]);
+      // await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
       console.log(error);
