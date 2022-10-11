@@ -526,7 +526,7 @@ export class Update {
           registro.$primaryKeyValue
         );
 
-        if (registro.performance_status_definido === "s") {
+        if (registro.linea_tratamiento_definido === "s") {
           if (!recuperoLineaTratamiento) {
             registro.merge({
               habilitado: "n",
