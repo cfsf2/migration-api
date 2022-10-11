@@ -31,6 +31,8 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _Apm from "App/Models/Apm";
+import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
 
 import R from "App/Models/Recupero";
@@ -71,6 +73,8 @@ let TransferProducto = TP;
 let TransferTransferProducto = TTP;
 
 let Laboratorio = L;
+let Apm = _Apm;
+let ApmFarmacia = _ApmFarmacia;
 let Drogueria = DR;
 
 let _SConf = SConf;
@@ -1079,7 +1083,7 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
-      opciones: { display_container: string };
+      opciones: { display_container: string; id_a: string };
       configuraciones: any[];
     } = {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
@@ -1261,6 +1265,7 @@ export class ConfBuilder {
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
+    tabla;
 
     const campos = getSelect(ctx, [conf], 7);
     const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });
