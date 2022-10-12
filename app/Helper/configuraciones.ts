@@ -4,87 +4,88 @@ import {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
+import * as M from "./ModelIndex";
 import Datab from "@ioc:Adonis/Lucid/Database";
 
-import SConf from "App/Models/SConf";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import SCC from "App/Models/SConfCpsc";
-import SRC from "App/Models/SRc";
-import SRD from "App/Models/SRcDeta";
-import SP from "App/Models/SPista";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
+// import SConf from "App/Models/SConf";
+// import SCTPV from "App/Models/SConfTipoAtributoValor";
+// import SCC from "App/Models/SConfCpsc";
+// import SRC from "App/Models/SRc";
+// import SRD from "App/Models/SRcDeta";
+// import SP from "App/Models/SPista";
+// import SCCU from "App/Models/SConfConfUsuario";
+// import SCCD from "App/Models/SConfConfDeta";
 
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import FD from "App/Models/FarmaciaDrogueria";
-import FL from "App/Models/FarmaciaLaboratorio";
-import Usuario from "App/Models/Usuario";
+// import S from "App/Models/Servicio";
+// import F from "App/Models/Farmacia";
+// import FS from "App/Models/FarmaciaServicio";
+// import FD from "App/Models/FarmaciaDrogueria";
+// import FL from "App/Models/FarmaciaLaboratorio";
+// import Usuario from "App/Models/Usuario";
 
-import T from "App/Models/Transfer";
-import TP from "App/Models/TransferProducto";
-import TTP from "App/Models/TransferTransferProducto";
+// import T from "App/Models/Transfer";
+// import TP from "App/Models/TransferProducto";
+// import TTP from "App/Models/TransferTransferProducto";
 
-import L from "App/Models/Laboratorio";
-import _Apm from "App/Models/Apm";
-import _ApmFarmacia from "App/Models/ApmFarmacia";
-import DR from "App/Models/Drogueria";
+// import L from "App/Models/Laboratorio";
+// import _Apm from "App/Models/Apm";
+// import _ApmFarmacia from "App/Models/ApmFarmacia";
+// import DR from "App/Models/Drogueria";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+// import R from "App/Models/Recupero";
+// import RD from "App/Models/RecuperoDiagnostico";
+// import RE from "App/Models/RecuperoEstadio";
+// import RLT from "App/Models/RecuperoLineaTratamiento";
+// import RPS from "App/Models/RecuperoPerformanceStatus";
+// import DGN from "App/Models/Diagnostico";
+// import ESTD from "App/Models/Estadio";
+// import LT from "App/Models/LineaTratamiento";
+// import PS from "App/Models/PerformanceStatus";
+// import M from "App/Models/Monodro";
 
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 
 const Database = Datab;
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+// let Recupero = R;
+// let RecuperoDiagnostico = RD;
+// let RecuperoEstadio = RE;
+// let RecuperoLineaTratamiento = RLT;
+// let RecuperoPerformanceStatus = RPS;
+// let Diagnostico = DGN;
+// let Estadio = ESTD;
+// let LineaTratamiento = LT;
+// let PerformanceStatus = PS;
+// let Monodro = M;
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let FarmaciaDrogueria = FD;
-let FarmaciaLaboratorio = FL;
+// let Servicio = S;
+// let Farmacia = F;
+// let FarmaciaServicio = FS;
+// let FarmaciaDrogueria = FD;
+// let FarmaciaLaboratorio = FL;
 
-let Transfer = T;
-let TransferProducto = TP;
-let TransferTransferProducto = TTP;
+// let Transfer = T;
+// let TransferProducto = TP;
+// let TransferTransferProducto = TTP;
 
-let Laboratorio = L;
-let Apm = _Apm;
-let ApmFarmacia = _ApmFarmacia;
-let Drogueria = DR;
+// let Laboratorio = L;
+// let Apm = _Apm;
+// let ApmFarmacia = _ApmFarmacia;
+// let Drogueria = DR;
 
-let _SConf = SConf;
-let SConfTipoAtributoValor = SCTPV;
-let SConfCpsc = SCC;
-let SRc = SRC;
-let SRcDeta = SRD;
-let SPista = SP;
-let SConfConfUsuario = SCCU;
-let SConfConfDeta = SCCD;
+// let _SConf = SConf;
+// let SConfTipoAtributoValor = SCTPV;
+// let SConfCpsc = SCC;
+// let SRc = SRC;
+// let SRcDeta = SRD;
+// let SPista = SP;
+// let SConfConfUsuario = SCCU;
+// let SConfConfDeta = SCCD;
 
 let Update = U;
 let Insertar = I;
@@ -97,7 +98,7 @@ const verificarPermisos = async ({
   tipoId,
 }: {
   ctx: HttpContextContract;
-  conf: SConf;
+  conf: typeof M.SConf;
   bouncer: any;
   tipoId: number;
 }) => {
@@ -132,7 +133,7 @@ const verificarPermisosHijos = async ({
   bouncer,
 }: {
   ctx: HttpContextContract;
-  conf: SConf;
+  conf: typeof M.SConf;
   bouncer: any;
 }) => {
   const sconfs_pedidos = conf.toJSON().sub_conf;
@@ -168,7 +169,7 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
         if (sch.tipo.id === 5) {
           if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
             try {
-              const conf = await SConf.findBy(
+              const conf = await M.SConf.findBy(
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
@@ -218,16 +219,16 @@ const extraerElementos = ({
   id,
 }: {
   ctx: HttpContextContract;
-  sc_hijos: SConf[];
-  sc_padre: SConf;
+  sc_hijos: typeof M.SConf[];
+  sc_padre: typeof M.SConf;
   bouncer: any;
-  usuario?: Usuario;
+  usuario?: typeof M.Usuario;
   datos?: any[];
   id?: number;
 }) => {
   return Promise.all(
     sc_hijos
-      .map(async (sconf: SConf) => {
+      .map(async (sconf: typeof M.SConf) => {
         let c = sconf;
         let item = {};
         // Verificar Orden designado por usuario
@@ -380,7 +381,7 @@ const extraerElementos = ({
             }
 
             if (atributoNombre === "enlace_id_a_opcional") {
-              const conf = await SConf.findByOrFail("id_a", val.valor);
+              const conf = await M.SConf.findByOrFail("id_a", val.valor);
               const per = await bouncer.allows("AccesoConf", conf);
 
               if (!per) return (item[atributoNombre] = undefined);
@@ -418,9 +419,9 @@ const getLeftJoins = ({
   conf,
   usuario,
 }: {
-  columnas: SConf[];
-  conf: SConf;
-  usuario?: Usuario;
+  columnas: typeof M.SConf[];
+  conf: typeof M.SConf;
+  usuario?: typeof M.Usuario;
 }): at[] => {
   return getFullAtributosById([conf, columnas], 11);
 };
@@ -438,7 +439,7 @@ interface gp {
 }
 
 const getFullAtributosById = (
-  sconfs: (SConf | SConf[])[],
+  sconfs: (typeof M.SConf | typeof M.SConf[])[],
   id: number
 ): any[] => {
   const sc = sconfs.flat(20);
@@ -474,7 +475,10 @@ const getFullAtributosById = (
     .filter((c) => c.valor);
 };
 
-const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
+const getAtributosById = (
+  sconfs: (typeof M.SConf | typeof M.SConf[])[],
+  id: number
+): any[] => {
   const sc = sconfs.flat(10);
 
   let atributos = [];
@@ -502,7 +506,7 @@ const getOrder = ({
   conf,
 }: {
   ctx: HttpContextContract;
-  conf: SConf;
+  conf: typeof M.SConf;
 }): string[] | number[] => {
   const usuarioOrder = ctx.usuario.configuracionesDeUsuario[conf.id_a]?.order;
 
@@ -517,9 +521,9 @@ const getGroupBy = ({
   conf,
   usuario,
 }: {
-  columnas: SConf[];
-  conf: SConf;
-  usuario?: Usuario;
+  columnas: typeof M.SConf[];
+  conf: typeof M.SConf;
+  usuario?: typeof M.Usuario;
 }): gp[] => {
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
@@ -539,7 +543,7 @@ export const getAtributo = ({
   conf,
 }: {
   atributo: string;
-  conf: SConf;
+  conf: typeof M.SConf;
 }): string => {
   if (!conf.valores) {
     console.log(
@@ -557,7 +561,13 @@ export const getAtributo = ({
   })?.valor as string;
 };
 
-const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
+const getAtributoById = ({
+  id,
+  conf,
+}: {
+  id: number;
+  conf: typeof M.SConf;
+}): string => {
   return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
 };
 
@@ -566,16 +576,22 @@ const getFullAtributo = ({
   conf,
 }: {
   atributo: string;
-  conf: SConf;
+  conf: typeof M.SConf;
 }) => {
   return conf.valores.find((v) => v.atributo[0].nombre === atributo);
 };
 
-const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
+const getFullAtributoById = ({
+  id,
+  conf,
+}: {
+  id: number;
+  conf: typeof M.SConf;
+}) => {
   return conf.valores.find((v) => v.atributo[0].id === id);
 };
 
-const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
+const getFullAtributosBySQL = ({ conf }: { conf: typeof M.SConf }) => {
   return conf.valores.filter((v) => v.sql === "s");
 };
 
@@ -589,9 +605,9 @@ interface select {
 
 const getSelect = (
   ctx,
-  sc_confs: (SConf | SConf[])[],
+  sc_confs: (typeof M.SConf | typeof M.SConf[])[],
   id: number,
-  usuario?: Usuario
+  usuario?: typeof M.Usuario
 ) => {
   let selects: any[] = [];
   const confs = sc_confs.flat(20);
@@ -643,7 +659,7 @@ const getSelect = (
 const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
   valor: string,
-  conf: SConf
+  conf: typeof M.SConf
 ) => {
   const campo = getAtributoById({ id: 7, conf });
 
@@ -705,10 +721,10 @@ const aplicaWhere = async (
 const aplicarFiltros = (
   ctx: HttpContextContract,
   query: DatabaseQueryBuilderContract,
-  configuracion: SConf,
+  configuracion: typeof M.SConf,
   id?: number,
   queryFiltros?: {},
-  filtros_e?: SConf[] // filtros para los que tiene permiso
+  filtros_e?: typeof M.SConf[] // filtros para los que tiene permiso
 ) => {
   //aplica filtros obligatorios de configuracion
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
@@ -778,12 +794,12 @@ const aplicarFiltros = (
 export class ConfBuilder {
   public static armarListado = async (
     ctx: HttpContextContract,
-    listado: SConf,
-    conf: SConf,
+    listado: typeof M.SConf,
+    conf: typeof M.SConf,
     bouncer: any,
     queryFiltros: any,
     id: number,
-    usuario?: Usuario,
+    usuario?: typeof M.Usuario,
     solo_conf?: string
   ) => {
     try {
@@ -799,7 +815,7 @@ export class ConfBuilder {
       let configuracionDeUsuario = [] as any;
 
       if (usuario && usuario.id) {
-        configuracionDeUsuario = await SConfConfUsuario.query()
+        configuracionDeUsuario = await M.SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
           .preload("detalles", (query) =>
@@ -851,7 +867,7 @@ export class ConfBuilder {
       if (
         getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
       ) {
-        const MenuConfiguracionDeListado = await SConf.query()
+        const MenuConfiguracionDeListado = await M.SConf.query()
           .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
           .preload("conf_permiso")
           .preload("tipo")
@@ -1011,11 +1027,11 @@ export class ConfBuilder {
 
   public static armarVista = async (
     ctx: HttpContextContract,
-    vista: SConf,
+    vista: typeof M.SConf,
     id: number,
-    conf: SConf,
+    conf: typeof M.SConf,
     bouncer: any,
-    usuario?: Usuario
+    usuario?: typeof M.Usuario
   ): Promise<vista> => {
     if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
@@ -1076,7 +1092,7 @@ export class ConfBuilder {
     contenedor,
   }: {
     ctx: HttpContextContract;
-    contenedor: SConf;
+    contenedor: typeof M.SConf;
     idListado: number;
     idVista: number;
   }) => {
@@ -1096,10 +1112,10 @@ export class ConfBuilder {
 
     const _listados = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 2
-    ) as SConf[];
+    ) as typeof M.SConf[];
     const _vistas = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 6
-    ) as SConf[];
+    ) as typeof M.SConf[];
 
     const _listadosArmados = await Promise.all(
       _listados.map(async (listado) => {
@@ -1147,8 +1163,8 @@ export class ConfBuilder {
     id,
   }: {
     ctx: HttpContextContract;
-    abm: SConf;
-    conf: SConf;
+    abm: typeof M.SConf;
+    conf: typeof M.SConf;
     id?: number;
   }) => {
     if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
@@ -1200,8 +1216,8 @@ export class ConfBuilder {
 
   public static setOpciones = (
     ctx: HttpContextContract,
-    conf_h: SConf,
-    conf: SConf,
+    conf_h: typeof M.SConf,
+    conf: typeof M.SConf,
     id?: number
   ): any => {
     try {
@@ -1258,10 +1274,12 @@ export class ConfBuilder {
 
   private static getDatos = async (
     ctx: HttpContextContract,
-    conf: SConf,
+    conf: typeof M.SConf,
     id?: number
   ): Promise<any> => {
-    const modelo = conf.getAtributo({ atributo: "modelo" });
+    const modelo = conf.getAtributo({
+      atributo: "modelo",
+    }) as unknown as string;
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
@@ -1280,7 +1298,7 @@ export class ConfBuilder {
     });
 
     if (modelo) {
-      const Modelo = eval(modelo) as typeof BaseModel;
+      const Modelo = M[modelo];
       let query = Modelo.query() as DatabaseQueryBuilderContract;
 
       campos.forEach(async (campo) => {
@@ -1376,7 +1394,7 @@ export interface listado {
   filtros: any[];
   opciones: {};
   sql?: any;
-  conf?: SConf;
+  conf?: typeof M.SConf;
   error?: { message: string };
 }
 
@@ -1385,7 +1403,7 @@ export interface vista {
   cabeceras: any[];
   opciones: {};
   sql?: any;
-  conf?: SConf;
+  conf?: typeof M.SConf;
   error?: { message: string };
 }
 
@@ -1393,8 +1411,8 @@ export const modificar = async (
   ctx: HttpContextContract,
   id: number,
   valor: any,
-  conf: SConf,
-  usuario: Usuario
+  conf: typeof M.SConf,
+  usuario: typeof M.Usuario
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
 
@@ -1407,8 +1425,8 @@ export const insertar = (
   ctx: HttpContextContract,
   valor: any,
   insert_ids: any,
-  conf: SConf,
-  usuario: Usuario
+  conf: typeof M.SConf,
+  usuario: typeof M.Usuario
 ) => {
   try {
     const funcion = getAtributo({ atributo: "insert_funcion", conf });
@@ -1426,8 +1444,8 @@ export const insertar = (
 export const eliminar = (
   ctx: HttpContextContract,
   delete_id: number,
-  conf: SConf,
-  usuario: Usuario
+  conf: typeof M.SConf,
+  usuario: typeof M.Usuario
 ) => {
   const funcion = getAtributo({ atributo: "delete_funcion", conf });
 
