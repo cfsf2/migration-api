@@ -37,6 +37,7 @@ export default class TransfersController {
 
       return await Transfer.guardar({ data: request.body(), usuario: usuario });
     } catch (err) {
+      console.log(err);
       return new ExceptionHandler();
     }
   }
@@ -51,6 +52,7 @@ export default class TransfersController {
       return await Transfer.guardar_sql({
         data: request.body(),
         usuario: usuario,
+        ctx,
       });
     } catch (err) {
       console.log("CONTROLLER", err);
