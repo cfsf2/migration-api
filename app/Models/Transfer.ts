@@ -21,6 +21,10 @@ import TransferTransferProducto from "./TransferTransferProducto";
 import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
+<<<<<<< Updated upstream
+=======
+import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+>>>>>>> Stashed changes
 import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class Transfer extends BaseModel {
@@ -148,7 +152,15 @@ export default class Transfer extends BaseModel {
     });
   }
 
-  static async guardar_sql({ data, usuario }: { data: any; usuario: Usuario }) {
+  static async guardar_sql({
+    data,
+    usuario,
+    ctx,
+  }: {
+    data: any;
+    usuario: Usuario;
+    ctx: any;
+  }) {
     try {
       const nuevoTransfer = new Transfer();
       const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
@@ -247,7 +259,14 @@ export default class Transfer extends BaseModel {
       });
     } catch (err) {
       console.log("MODELO", err);
-      throw err;
+      Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(process.env.SISTEMAS_EMAIL as string)
+          .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
+          .html(html_transfer(this) + err.toString());
+      });
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
