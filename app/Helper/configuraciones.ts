@@ -1089,7 +1089,7 @@ export class ConfBuilder {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
     };
-    console.log(p.opciones.display_container, p.opciones.id_a);
+
     if (p.opciones.display_container === "n") return p;
 
     if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
