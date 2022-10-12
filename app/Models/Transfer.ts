@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   column,
+  HasMany,
+  hasMany,
   hasManyThrough,
   HasManyThrough,
   hasOne,
@@ -16,7 +18,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProducto from "./TransferProducto";
 import TransferTransferProducto from "./TransferTransferProducto";
 
-import { transferHtml } from "../Helper/email";
+import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
 
@@ -144,6 +146,138 @@ export default class Transfer extends BaseModel {
         .html(transferHtml({ transfer: data, farmacia: farmacia }));
     });
   }
+
+  static async guardar_sql({ data, usuario }: { data: any; usuario: Usuario }) {
+    try {
+      const nuevoTransfer = new Transfer();
+      const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
+      let drogueria = null as unknown as Drogueria;
+
+      if (laboratorio.permite_nro_cuenta === "n") {
+        drogueria = await Drogueria.findOrFail(data.id_drogueria);
+      }
+      if (laboratorio.permite_nro_cuenta === "s") {
+        const FL = await FarmaciaLaboratorio.query()
+          .where("id_farmacia", usuario.farmacia.id)
+          .where("id_laboratorio", data.id_laboratorio)
+          .first();
+
+        if (!FL) {
+          const newFL = new FarmaciaLaboratorio();
+          newFL.merge({
+            id_farmacia: usuario.farmacia.id,
+            id_laboratorio: data.id_laboratorio,
+            nro_cuenta: data.nro_cuenta_drogueria,
+          });
+          guardarDatosAuditoria({
+            objeto: newFL,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          await newFL.save();
+        }
+        if (FL) {
+          FL.merge({
+            id_farmacia: usuario.farmacia.id,
+            id_laboratorio: data.id_laboratorio,
+            nro_cuenta: data.nro_cuenta_drogueria,
+          });
+          guardarDatosAuditoria({
+            objeto: FL,
+            usuario: usuario,
+            accion: AccionCRUD.editar,
+          });
+          await FL.save();
+        }
+      }
+
+      const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
+
+      nuevoTransfer.merge({
+        nro_cuenta_drogueria: data.nro_cuenta_drogueria,
+        id_drogueria: drogueria?.id,
+        id_laboratorio: laboratorio.id,
+        id_transfer_estado: 1,
+        id_farmacia: farmacia.id,
+        fecha: DateTime.now(),
+        email_destinatario: farmacia.email ? farmacia.email : usuario.email,
+        productos_solicitados: JSON.stringify(data.productos_solicitados),
+
+        id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+      });
+
+      guardarDatosAuditoria({
+        objeto: nuevoTransfer,
+        usuario: usuario,
+        accion: AccionCRUD.crear,
+      });
+
+      await nuevoTransfer.save();
+
+      data.productos_solicitados.forEach((p) => {
+        const transferProducto = new TransferTransferProducto();
+        transferProducto.merge({
+          id_transfer_producto: p.id,
+          id_transfer: nuevoTransfer.id,
+          cantidad: p.cantidad,
+          precio: p.precio,
+          observaciones: p.observacion,
+
+          id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+        });
+        guardarDatosAuditoria({
+          objeto: transferProducto,
+          usuario: usuario,
+          accion: AccionCRUD.crear,
+        });
+        transferProducto.save();
+      });
+
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(farmacia.email as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject(
+            "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
+          )
+          .html(transferHtml({ transfer: data, farmacia: farmacia }));
+      });
+    } catch (err) {
+      console.log("MODELO", err);
+      throw err;
+    }
+  }
+
+  public async enviarMail() {
+    try {
+      await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+      await this.load("farmacia" as any);
+      await this.load("laboratorio" as any);
+      await this.load("drogueria" as any);
+
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(this.email_destinatario as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+          .html(html_transfer(this));
+      });
+    } catch (err) {
+      console.log(err);
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(process.env.SISTEMAS_EMAIL as string)
+          .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
+          .html(html_transfer(this) + err.toString());
+      });
+    }
+  }
+
   public static table = "tbl_transfer";
 
   @column({ isPrimary: true })
@@ -233,6 +367,12 @@ export default class Transfer extends BaseModel {
     throughForeignKey: "id",
   })
   public productos: HasManyThrough<typeof TransferProducto>;
+
+  @hasMany(() => TransferTransferProducto, {
+    localKey: "id",
+    foreignKey: "id_transfer",
+  })
+  public ttp: HasMany<typeof TransferTransferProducto>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
