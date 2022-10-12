@@ -21,6 +21,7 @@ import TransferTransferProducto from "./TransferTransferProducto";
 import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class Transfer extends BaseModel {
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -250,7 +251,7 @@ export default class Transfer extends BaseModel {
     }
   }
 
-  public async enviarMail() {
+  public async enviarMail(ctx) {
     try {
       await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
       await this.load("farmacia" as any);
@@ -268,13 +269,14 @@ export default class Transfer extends BaseModel {
       });
     } catch (err) {
       console.log(err);
-      return Mail.send((message) => {
+      Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(process.env.SISTEMAS_EMAIL as string)
           .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
           .html(html_transfer(this) + err.toString());
       });
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
