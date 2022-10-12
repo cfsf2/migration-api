@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   column,
+  HasMany,
+  hasMany,
   hasManyThrough,
   HasManyThrough,
   hasOne,
@@ -16,10 +18,14 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProducto from "./TransferProducto";
 import TransferTransferProducto from "./TransferTransferProducto";
 
-import { transferHtml } from "../Helper/email";
+import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
+<<<<<<< HEAD
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+=======
+import ExceptionHandler from "App/Exceptions/Handler";
+>>>>>>> otroTransfer
 
 export default class Transfer extends BaseModel {
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -248,6 +254,39 @@ export default class Transfer extends BaseModel {
       throw err;
     }
   }
+<<<<<<< HEAD
+=======
+
+  public async enviarMail(ctx) {
+    try {
+      await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+      await this.load("farmacia" as any);
+      await this.load("laboratorio" as any);
+      await this.load("drogueria" as any);
+
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(this.email_destinatario as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+          .html(html_transfer(this));
+      });
+    } catch (err) {
+      console.log(err);
+      Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(process.env.SISTEMAS_EMAIL as string)
+          .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
+          .html(html_transfer(this) + err.toString());
+      });
+      throw new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
+>>>>>>> otroTransfer
   public static table = "tbl_transfer";
 
   @column({ isPrimary: true })
@@ -337,6 +376,12 @@ export default class Transfer extends BaseModel {
     throughForeignKey: "id",
   })
   public productos: HasManyThrough<typeof TransferProducto>;
+
+  @hasMany(() => TransferTransferProducto, {
+    localKey: "id",
+    foreignKey: "id_transfer",
+  })
+  public ttp: HasMany<typeof TransferTransferProducto>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

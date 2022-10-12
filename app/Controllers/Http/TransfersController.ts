@@ -57,4 +57,20 @@ export default class TransfersController {
       return new ExceptionHandler().handle(err, ctx);
     }
   }
+
+  public async sendTransfer(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
+
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+
+      console.log(request.body().id);
+      const transfer = await Transfer.findOrFail(request.body().id);
+
+      return transfer.enviarMail(ctx);
+    } catch (err) {
+      console.log("CONTROLLER", err);
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
 }

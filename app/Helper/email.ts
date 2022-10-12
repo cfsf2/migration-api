@@ -382,3 +382,72 @@ export const transferHtml = ({ transfer, farmacia }) => {
     texto: emailBody,
   });
 };
+
+export const html_transfer = (transfer) => {
+  try {
+    let stringTable = transfer.ttp.map((p) => {
+      return `<tr>
+                              <td>${p.transfer_producto.codigo ?? ""}</td>
+                              <td>${p.transfer_producto.nombre}</td>
+                              <td>${p.transfer_producto.presentacion}</td>
+                              <td>${p.cantidad}</td>
+                              <td>${p.observaciones ?? ""}</td>
+                          </tr>`;
+    });
+    let emailBody = `<head>
+                          <style>
+                            table {
+                              font-family: arial, sans-serif;
+                              border-collapse: collapse;
+                              width: 100%;
+                            }
+                            
+                            td, th {
+                              border: 1px solid #dddddd;
+                              text-align: left;
+                              padding: 8px;
+                            }
+                            
+                            tr:nth-child(even) {
+                              background-color: #dddddd;
+                            }
+  
+                          </style>
+                        </head>
+                        <body>
+                          <div>
+                            <p><b>Codigo: </b>${transfer.id} </p>
+                            <p><b>Farmacia: </b>${transfer.farmacia.nombre} / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
+                            <p><b>Telefono: </b>${transfer.farmacia.telefono}</p>
+                            <p><b>Nro Cufe: </b>${transfer.farmacia.cufe}</p>
+                            <p><b>Nro Cuenta de Droguería: </b>${transfer.nro_cuenta_drogueria}</p> 
+                            <p><b>Droguería: </b>${transfer.drogueria.nombre}</p>
+                            <p><b>Laboratorio elegido: </b>${transfer.laboratorio.nombre}</p>
+                            <p><b>Dirección: </b>${transfer.farmacia.direccioncompleta}</p>
+                          </div>
+                        <table>
+                            <tr>
+                              <th>Código</th>
+                              <th>Producto</th>
+                              <th>Presentación</th>
+                              <th>Cantidad</th>
+                              <th>Observaciones</th>
+                            </tr>
+                          <tbody>
+                          ${stringTable}                    
+                          </tbody>
+                        </table>
+                      </body>`;
+
+    return generarHtml({
+      titulo: "Pedido de Transfer",
+      texto: emailBody,
+    });
+  } catch (err) {
+    console.log(err);
+    return generarHtml({
+      titulo: "ERROR de Transfer",
+      texto: err.toString(),
+    });
+  }
+};
