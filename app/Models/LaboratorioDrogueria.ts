@@ -4,7 +4,7 @@ import Base from "./Base";
 import Drogueria from "./Drogueria";
 import Laboratorio from "./Laboratorio";
 
-export default class ApmFarmacia extends Base {
+export default class LaboratorioDrogueria extends Base {
   public static table = "tbl_laboratorio_drogueria";
 
   @column()
