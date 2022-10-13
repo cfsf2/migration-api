@@ -21,7 +21,7 @@ import TransferTransferProducto from "./TransferTransferProducto";
 import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
-import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+// import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 
