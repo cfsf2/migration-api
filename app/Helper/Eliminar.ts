@@ -2,79 +2,81 @@ import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import SComponente from "App/Models/SComponente";
 
-import SConf from "App/Models/SConf";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import SCC from "App/Models/SConfCpsc";
-import SRC from "App/Models/SRc";
-import SRD from "App/Models/SRcDeta";
-import SP from "App/Models/SPista";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
-
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import FD from "App/Models/FarmaciaDrogueria";
-import FL from "App/Models/FarmaciaLaboratorio";
-
 import Datab from "@ioc:Adonis/Lucid/Database";
-import Usuario from "App/Models/Usuario";
+import SConf from "App/Models/SConf";
+// import SCTPV from "App/Models/SConfTipoAtributoValor";
+// import SCC from "App/Models/SConfCpsc";
+// import SRC from "App/Models/SRc";
+// import SRD from "App/Models/SRcDeta";
+// import SP from "App/Models/SPista";
+// import SCCU from "App/Models/SConfConfUsuario";
+// import SCCD from "App/Models/SConfConfDeta";
 
-import T from "App/Models/Transfer";
-import TP from "App/Models/TransferProducto";
-import TTP from "App/Models/TransferTransferProducto";
+// import S from "App/Models/Servicio";
+// import F from "App/Models/Farmacia";
+// import FS from "App/Models/FarmaciaServicio";
+// import FD from "App/Models/FarmaciaDrogueria";
+// import FL from "App/Models/FarmaciaLaboratorio";
 
-import L from "App/Models/Laboratorio";
-import DR from "App/Models/Drogueria";
+// import Usuario from "App/Models/Usuario";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+// import T from "App/Models/Transfer";
+// import TP from "App/Models/TransferProducto";
+// import TTP from "App/Models/TransferTransferProducto";
+
+// import L from "App/Models/Laboratorio";
+// import DR from "App/Models/Drogueria";
+
+// import R from "App/Models/Recupero";
+// import RD from "App/Models/RecuperoDiagnostico";
+// import RE from "App/Models/RecuperoEstadio";
+// import RLT from "App/Models/RecuperoLineaTratamiento";
+// import RPS from "App/Models/RecuperoPerformanceStatus";
+// import DGN from "App/Models/Diagnostico";
+// import ESTD from "App/Models/Estadio";
+// import LT from "App/Models/LineaTratamiento";
+// import PS from "App/Models/PerformanceStatus";
+// import M from "App/Models/Monodro";
+
+import * as M from "./ModelIndex";
 
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 
 const Database = Datab;
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+// let Recupero = R;
+// let RecuperoDiagnostico = RD;
+// let RecuperoEstadio = RE;
+// let RecuperoLineaTratamiento = RLT;
+// let RecuperoPerformanceStatus = RPS;
+// let Diagnostico = DGN;
+// let Estadio = ESTD;
+// let LineaTratamiento = LT;
+// let PerformanceStatus = PS;
+// let Monodro = M;
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let FarmaciaDrogueria = FD;
-let FarmaciaLaboratorio = FL;
+// let Servicio = S;
+// let Farmacia = F;
+// let FarmaciaServicio = FS;
+// let FarmaciaDrogueria = FD;
+// let FarmaciaLaboratorio = FL;
 
-let Transfer = T;
-let TransferProducto = TP;
-let TransferTransferProducto = TTP;
+// let Transfer = T;
+// let TransferProducto = TP;
+// let TransferTransferProducto = TTP;
 
-let Laboratorio = L;
-let Drogueria = DR;
+// let Laboratorio = L;
+// let Drogueria = DR;
 
-let _SConf = SConf;
-let SConfTipoAtributoValor = SCTPV;
-let SConfCpsc = SCC;
-let SRc = SRC;
-let SRcDeta = SRD;
-let SPista = SP;
-let SConfConfUsuario = SCCU;
-let SConfConfDeta = SCCD;
+// let _SConf = SConf;
+// let SConfTipoAtributoValor = SCTPV;
+// let SConfCpsc = SCC;
+// let SRc = SRC;
+// let SRcDeta = SRD;
+// let SPista = SP;
+// let SConfConfUsuario = SCCU;
+// let SConfConfDeta = SCCD;
 
 let Update = U;
 let Insertar = I;
@@ -96,7 +98,7 @@ export class Eliminar {
 
     try {
       if (modelo && delete_id) {
-        const registro = await eval(modelo).findOrFail(delete_id);
+        const registro = await M[modelo].findOrFail(delete_id);
 
         await guardarDatosAuditoria({
           usuario,

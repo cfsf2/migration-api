@@ -11,7 +11,7 @@ import { Permiso } from "./permisos";
 import * as M from "./ModelIndex";
 import Datab from "@ioc:Adonis/Lucid/Database";
 
-// import SConf from "App/Models/SConf";
+import SConf from "App/Models/SConf";
 // import SCTPV from "App/Models/SConfTipoAtributoValor";
 // import SCC from "App/Models/SConfCpsc";
 // import SRC from "App/Models/SRc";
@@ -25,7 +25,7 @@ import Datab from "@ioc:Adonis/Lucid/Database";
 // import FS from "App/Models/FarmaciaServicio";
 // import FD from "App/Models/FarmaciaDrogueria";
 // import FL from "App/Models/FarmaciaLaboratorio";
-// import Usuario from "App/Models/Usuario";
+import Usuario from "App/Models/Usuario";
 
 // import T from "App/Models/Transfer";
 // import TP from "App/Models/TransferProducto";
@@ -98,7 +98,7 @@ const verificarPermisos = async ({
   tipoId,
 }: {
   ctx: HttpContextContract;
-  conf: typeof M.SConf;
+  conf: SConf;
   bouncer: any;
   tipoId: number;
 }) => {
@@ -133,7 +133,7 @@ const verificarPermisosHijos = async ({
   bouncer,
 }: {
   ctx: HttpContextContract;
-  conf: typeof M.SConf;
+  conf: SConf;
   bouncer: any;
 }) => {
   const sconfs_pedidos = conf.toJSON().sub_conf;
@@ -219,16 +219,16 @@ const extraerElementos = ({
   id,
 }: {
   ctx: HttpContextContract;
-  sc_hijos: typeof M.SConf[];
-  sc_padre: typeof M.SConf;
+  sc_hijos: SConf[];
+  sc_padre: SConf;
   bouncer: any;
-  usuario?: typeof M.Usuario;
+  usuario?: Usuario;
   datos?: any[];
   id?: number;
 }) => {
   return Promise.all(
     sc_hijos
-      .map(async (sconf: typeof M.SConf) => {
+      .map(async (sconf: SConf) => {
         let c = sconf;
         let item = {};
         // Verificar Orden designado por usuario
@@ -419,9 +419,9 @@ const getLeftJoins = ({
   conf,
   usuario,
 }: {
-  columnas: typeof M.SConf[];
-  conf: typeof M.SConf;
-  usuario?: typeof M.Usuario;
+  columnas: SConf[];
+  conf: SConf;
+  usuario?: Usuario;
 }): at[] => {
   return getFullAtributosById([conf, columnas], 11);
 };
@@ -439,7 +439,7 @@ interface gp {
 }
 
 const getFullAtributosById = (
-  sconfs: (typeof M.SConf | typeof M.SConf[])[],
+  sconfs: (SConf | SConf[])[],
   id: number
 ): any[] => {
   const sc = sconfs.flat(20);
@@ -475,10 +475,7 @@ const getFullAtributosById = (
     .filter((c) => c.valor);
 };
 
-const getAtributosById = (
-  sconfs: (typeof M.SConf | typeof M.SConf[])[],
-  id: number
-): any[] => {
+const getAtributosById = (sconfs: (SConf | SConf[])[], id: number): any[] => {
   const sc = sconfs.flat(10);
 
   let atributos = [];
@@ -506,7 +503,7 @@ const getOrder = ({
   conf,
 }: {
   ctx: HttpContextContract;
-  conf: typeof M.SConf;
+  conf: SConf;
 }): string[] | number[] => {
   const usuarioOrder = ctx.usuario.configuracionesDeUsuario[conf.id_a]?.order;
 
@@ -521,9 +518,9 @@ const getGroupBy = ({
   conf,
   usuario,
 }: {
-  columnas: typeof M.SConf[];
-  conf: typeof M.SConf;
-  usuario?: typeof M.Usuario;
+  columnas: SConf[];
+  conf: SConf;
+  usuario?: Usuario;
 }): gp[] => {
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
@@ -543,7 +540,7 @@ export const getAtributo = ({
   conf,
 }: {
   atributo: string;
-  conf: typeof M.SConf;
+  conf: SConf;
 }): string => {
   if (!conf.valores) {
     console.log(
@@ -561,13 +558,7 @@ export const getAtributo = ({
   })?.valor as string;
 };
 
-const getAtributoById = ({
-  id,
-  conf,
-}: {
-  id: number;
-  conf: typeof M.SConf;
-}): string => {
+const getAtributoById = ({ id, conf }: { id: number; conf: SConf }): string => {
   return conf.valores.find((v) => v.atributo[0].id === id)?.valor as string;
 };
 
@@ -576,22 +567,16 @@ const getFullAtributo = ({
   conf,
 }: {
   atributo: string;
-  conf: typeof M.SConf;
+  conf: SConf;
 }) => {
   return conf.valores.find((v) => v.atributo[0].nombre === atributo);
 };
 
-const getFullAtributoById = ({
-  id,
-  conf,
-}: {
-  id: number;
-  conf: typeof M.SConf;
-}) => {
+const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
   return conf.valores.find((v) => v.atributo[0].id === id);
 };
 
-const getFullAtributosBySQL = ({ conf }: { conf: typeof M.SConf }) => {
+const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
   return conf.valores.filter((v) => v.sql === "s");
 };
 
@@ -605,9 +590,9 @@ interface select {
 
 const getSelect = (
   ctx,
-  sc_confs: (typeof M.SConf | typeof M.SConf[])[],
+  sc_confs: (SConf | SConf[])[],
   id: number,
-  usuario?: typeof M.Usuario
+  usuario?: Usuario
 ) => {
   let selects: any[] = [];
   const confs = sc_confs.flat(20);
@@ -659,7 +644,7 @@ const getSelect = (
 const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
   valor: string,
-  conf: typeof M.SConf
+  conf: SConf
 ) => {
   const campo = getAtributoById({ id: 7, conf });
 
@@ -721,10 +706,10 @@ const aplicaWhere = async (
 const aplicarFiltros = (
   ctx: HttpContextContract,
   query: DatabaseQueryBuilderContract,
-  configuracion: typeof M.SConf,
+  configuracion: SConf,
   id?: number,
   queryFiltros?: {},
-  filtros_e?: typeof M.SConf[] // filtros para los que tiene permiso
+  filtros_e?: SConf[] // filtros para los que tiene permiso
 ) => {
   //aplica filtros obligatorios de configuracion
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
@@ -794,12 +779,12 @@ const aplicarFiltros = (
 export class ConfBuilder {
   public static armarListado = async (
     ctx: HttpContextContract,
-    listado: typeof M.SConf,
-    conf: typeof M.SConf,
+    listado: SConf,
+    conf: SConf,
     bouncer: any,
     queryFiltros: any,
     id: number,
-    usuario?: typeof M.Usuario,
+    usuario?: Usuario,
     solo_conf?: string
   ) => {
     try {
@@ -1027,11 +1012,11 @@ export class ConfBuilder {
 
   public static armarVista = async (
     ctx: HttpContextContract,
-    vista: typeof M.SConf,
+    vista: SConf,
     id: number,
-    conf: typeof M.SConf,
+    conf: SConf,
     bouncer: any,
-    usuario?: typeof M.Usuario
+    usuario?: Usuario
   ): Promise<vista> => {
     if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
@@ -1092,7 +1077,7 @@ export class ConfBuilder {
     contenedor,
   }: {
     ctx: HttpContextContract;
-    contenedor: typeof M.SConf;
+    contenedor: SConf;
     idListado: number;
     idVista: number;
   }) => {
@@ -1112,10 +1097,10 @@ export class ConfBuilder {
 
     const _listados = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 2
-    ) as typeof M.SConf[];
+    ) as SConf[];
     const _vistas = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 6
-    ) as typeof M.SConf[];
+    ) as SConf[];
 
     const _listadosArmados = await Promise.all(
       _listados.map(async (listado) => {
@@ -1163,8 +1148,8 @@ export class ConfBuilder {
     id,
   }: {
     ctx: HttpContextContract;
-    abm: typeof M.SConf;
-    conf: typeof M.SConf;
+    abm: SConf;
+    conf: SConf;
     id?: number;
   }) => {
     if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
@@ -1216,8 +1201,8 @@ export class ConfBuilder {
 
   public static setOpciones = (
     ctx: HttpContextContract,
-    conf_h: typeof M.SConf,
-    conf: typeof M.SConf,
+    conf_h: SConf,
+    conf: SConf,
     id?: number
   ): any => {
     try {
@@ -1274,7 +1259,7 @@ export class ConfBuilder {
 
   private static getDatos = async (
     ctx: HttpContextContract,
-    conf: typeof M.SConf,
+    conf: SConf,
     id?: number
   ): Promise<any> => {
     const modelo = conf.getAtributo({
@@ -1394,7 +1379,7 @@ export interface listado {
   filtros: any[];
   opciones: {};
   sql?: any;
-  conf?: typeof M.SConf;
+  conf?: SConf;
   error?: { message: string };
 }
 
@@ -1403,7 +1388,7 @@ export interface vista {
   cabeceras: any[];
   opciones: {};
   sql?: any;
-  conf?: typeof M.SConf;
+  conf?: SConf;
   error?: { message: string };
 }
 
@@ -1411,8 +1396,8 @@ export const modificar = async (
   ctx: HttpContextContract,
   id: number,
   valor: any,
-  conf: typeof M.SConf,
-  usuario: typeof M.Usuario
+  conf: SConf,
+  usuario: Usuario
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
 
@@ -1425,8 +1410,8 @@ export const insertar = (
   ctx: HttpContextContract,
   valor: any,
   insert_ids: any,
-  conf: typeof M.SConf,
-  usuario: typeof M.Usuario
+  conf: SConf,
+  usuario: Usuario
 ) => {
   try {
     const funcion = getAtributo({ atributo: "insert_funcion", conf });
@@ -1444,8 +1429,8 @@ export const insertar = (
 export const eliminar = (
   ctx: HttpContextContract,
   delete_id: number,
-  conf: typeof M.SConf,
-  usuario: typeof M.Usuario
+  conf: SConf,
+  usuario: Usuario
 ) => {
   const funcion = getAtributo({ atributo: "delete_funcion", conf });
 
