@@ -1,6 +1,12 @@
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+
 import SComponente from "App/Models/SComponente";
+
+import U from "./Update";
+import I from "./Insertar";
+
+import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
@@ -16,8 +22,6 @@ import F from "App/Models/Farmacia";
 import FS from "App/Models/FarmaciaServicio";
 import FD from "App/Models/FarmaciaDrogueria";
 import FL from "App/Models/FarmaciaLaboratorio";
-
-import Datab from "@ioc:Adonis/Lucid/Database";
 import Usuario from "App/Models/Usuario";
 
 import T from "App/Models/Transfer";
@@ -25,6 +29,8 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _Apm from "App/Models/Apm";
+import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
 
 import R from "App/Models/Recupero";
@@ -37,10 +43,6 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
-
-import U from "./Update";
-import I from "./Insertar";
-import D from "./Eliminar";
 
 const Database = Datab;
 let Recupero = R;
@@ -65,6 +67,8 @@ let TransferProducto = TP;
 let TransferTransferProducto = TTP;
 
 let Laboratorio = L;
+let Apm = _Apm;
+let ApmFarmacia = _ApmFarmacia;
 let Drogueria = DR;
 
 let _SConf = SConf;

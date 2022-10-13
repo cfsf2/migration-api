@@ -8,6 +8,10 @@ import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
+import U from "./Update";
+import I from "./Insertar";
+import D from "./Eliminar";
+
 import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
@@ -45,10 +49,6 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
-
-import U from "./Update";
-import I from "./Insertar";
-import D from "./Eliminar";
 
 const Database = Datab;
 let Recupero = R;

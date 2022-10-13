@@ -5,6 +5,10 @@ import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import SComponente from "App/Models/SComponente";
 
+import U from "./Update";
+
+import D from "./Eliminar";
+
 import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
@@ -42,10 +46,6 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
-
-import U from "./Update";
-
-import D from "./Eliminar";
 
 const Database = Datab;
 let Recupero = R;

@@ -4,8 +4,12 @@ import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+
 import SComponente from "App/Models/SComponente";
 import STipoAtributo from "App/Models/STipoAtributo";
+
+import I from "./Insertar";
+import D from "./Eliminar";
 
 import Datab from "@ioc:Adonis/Lucid/Database";
 
@@ -44,9 +48,6 @@ import ESTD from "App/Models/Estadio";
 import LT from "App/Models/LineaTratamiento";
 import PS from "App/Models/PerformanceStatus";
 import M from "App/Models/Monodro";
-
-import I from "./Insertar";
-import D from "./Eliminar";
 
 const Database = Datab;
 let Recupero = R;
