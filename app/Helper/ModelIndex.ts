@@ -19,6 +19,7 @@ import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
 
 import L from "App/Models/Laboratorio";
+import _LaboratorioDrogueria from "App/Models/LaboratorioDrogueria";
 import _Apm from "App/Models/Apm";
 import _ApmFarmacia from "App/Models/ApmFarmacia";
 import DR from "App/Models/Drogueria";
@@ -56,6 +57,7 @@ export let TransferProducto = TP;
 export let TransferTransferProducto = TTP;
 
 export let Laboratorio = L;
+export let LaboratorioDrogueria = _LaboratorioDrogueria;
 export let Apm = _Apm;
 export let ApmFarmacia = _ApmFarmacia;
 export let Drogueria = DR;
