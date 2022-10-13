@@ -21,10 +21,8 @@ import TransferTransferProducto from "./TransferTransferProducto";
 import { html_transfer, transferHtml } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
-<<<<<<< Updated upstream
-=======
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
->>>>>>> Stashed changes
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class Transfer extends BaseModel {
@@ -52,7 +50,7 @@ export default class Transfer extends BaseModel {
       .leftJoin("tbl_usuario as u", "t.id", "u.id")
       .if(id_farmacia, (query) => {
         console.log(id_farmacia);
-        query.where("t.id_farmacia", id_farmacia);
+        query.where("t.id_farmacia", id_farmacia as number);
       })
       .orderBy("id", "desc");
 
@@ -92,64 +90,89 @@ export default class Transfer extends BaseModel {
     return res;
   }
 
-  static async guardar({ data, usuario }: { data: any; usuario: Usuario }) {
+  static async guardar({
+    data,
+    usuario,
+    ctx,
+  }: {
+    data: any;
+    usuario: Usuario;
+    ctx: HttpContextContract;
+  }) {
     const nuevoTransfer = new Transfer();
-    const drogueria = await Drogueria.findByOrFail("nombre", data.drogueria_id);
-    const laboratorio = await Laboratorio.findByOrFail(
-      "nombre",
-      data.laboratorio_id
-    );
-    const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
+    try {
+      const drogueria = await Drogueria.findByOrFail(
+        "nombre",
+        data.drogueria_id
+      );
+      const laboratorio = await Laboratorio.findByOrFail(
+        "nombre",
+        data.laboratorio_id
+      );
+      const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
 
-    nuevoTransfer.merge({
-      nro_cuenta_drogueria: data.nro_cuenta_drogueria,
-      id_drogueria: drogueria.id,
-      id_laboratorio: laboratorio.id,
-      id_transfer_estado: 1,
-      id_farmacia: farmacia.id,
-      fecha: DateTime.now(),
-      email_destinatario: farmacia.email ? farmacia.email : usuario.email,
-      productos_solicitados: JSON.stringify(data.productos_solicitados),
-
-      id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-    });
-
-    guardarDatosAuditoria({
-      objeto: nuevoTransfer,
-      usuario: usuario,
-      accion: AccionCRUD.crear,
-    });
-
-    await nuevoTransfer.save();
-
-    data.productos_solicitados.forEach((p) => {
-      const transferProducto = new TransferTransferProducto();
-      transferProducto.merge({
-        id_transfer_producto: p.id,
-        id_transfer: nuevoTransfer.id,
-        cantidad: p.cantidad,
-        precio: p.precio,
-        observaciones: p.observacion,
+      nuevoTransfer.merge({
+        nro_cuenta_drogueria: data.nro_cuenta_drogueria,
+        id_drogueria: drogueria.id,
+        id_laboratorio: laboratorio.id,
+        id_transfer_estado: 1,
+        id_farmacia: farmacia.id,
+        fecha: DateTime.now(),
+        email_destinatario: farmacia.email ? farmacia.email : usuario.email,
+        productos_solicitados: JSON.stringify(data.productos_solicitados),
 
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
       });
+
       guardarDatosAuditoria({
-        objeto: transferProducto,
+        objeto: nuevoTransfer,
         usuario: usuario,
         accion: AccionCRUD.crear,
       });
-      transferProducto.save();
-    });
 
-    Mail.send((message) => {
-      message
-        .from(process.env.SMTP_USERNAME as string)
-        .to(farmacia.email as string)
-        .to(process.env.TRANSFER_EMAIL as string)
-        .to(process.env.TRANSFER_EMAIL2 as string)
-        .subject("Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id)
-        .html(transferHtml({ transfer: data, farmacia: farmacia }));
-    });
+      await nuevoTransfer.save();
+
+      data.productos_solicitados.forEach((p) => {
+        const transferProducto = new TransferTransferProducto();
+        transferProducto.merge({
+          id_transfer_producto: p.id,
+          id_transfer: nuevoTransfer.id,
+          cantidad: p.cantidad,
+          precio: p.precio,
+          observaciones: p.observacion,
+
+          id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+        });
+        guardarDatosAuditoria({
+          objeto: transferProducto,
+          usuario: usuario,
+          accion: AccionCRUD.crear,
+        });
+        transferProducto.save();
+      });
+
+      Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(farmacia.email as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject(
+            "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
+          )
+          .html(transferHtml({ transfer: data, farmacia: farmacia }));
+      });
+    } catch (err) {
+      console.log(err);
+      Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(process.env.SISTEMAS_EMAIL as string)
+          .subject("ERROR AL ENVIAR Transfer" + " " + nuevoTransfer.id)
+          .html(html_transfer(this) + err.toString());
+      });
+      throw new ExceptionHandler().handle(err, ctx);
+    }
   }
 
   static async guardar_sql({
@@ -161,8 +184,8 @@ export default class Transfer extends BaseModel {
     usuario: Usuario;
     ctx: any;
   }) {
+    const nuevoTransfer = new Transfer();
     try {
-      const nuevoTransfer = new Transfer();
       const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
       let drogueria = null as unknown as Drogueria;
 
@@ -263,7 +286,7 @@ export default class Transfer extends BaseModel {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(process.env.SISTEMAS_EMAIL as string)
-          .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
+          .subject("ERROR AL ENVIAR Transfer" + " " + nuevoTransfer.id)
           .html(html_transfer(this) + err.toString());
       });
       throw new ExceptionHandler().handle(err, ctx);

@@ -35,7 +35,11 @@ export default class TransfersController {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
       const usuario = await auth.authenticate();
 
-      return await Transfer.guardar({ data: request.body(), usuario: usuario });
+      return await Transfer.guardar({
+        data: request.body(),
+        usuario: usuario,
+        ctx,
+      });
     } catch (err) {
       console.log(err);
       return new ExceptionHandler();
