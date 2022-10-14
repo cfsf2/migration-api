@@ -24,6 +24,7 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Apm from "./Apm";
 
 export default class Transfer extends BaseModel {
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -189,10 +190,13 @@ export default class Transfer extends BaseModel {
       const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
       let drogueria = null as unknown as Drogueria;
 
-      if (laboratorio.permite_nro_cuenta === "n") {
+      if (
+        laboratorio.modalidad_entrega.id_a === "ALGUNAS_DROGUERIAS" ||
+        laboratorio.modalidad_entrega.id_a === "TODAS_DROGUERIAS"
+      ) {
         drogueria = await Drogueria.findOrFail(data.id_drogueria);
       }
-      if (laboratorio.permite_nro_cuenta === "s") {
+      if (laboratorio.modalidad_entrega.id_a === "DIRECTO") {
         const FL = await FarmaciaLaboratorio.query()
           .where("id_farmacia", usuario.farmacia.id)
           .where("id_laboratorio", data.id_laboratorio)
@@ -238,7 +242,10 @@ export default class Transfer extends BaseModel {
         fecha: DateTime.now(),
         email_destinatario: farmacia.email ? farmacia.email : usuario.email,
         productos_solicitados: JSON.stringify(data.productos_solicitados),
-
+        nro_cuenta_tabla:
+          laboratorio.modalidad_entrega.id_a === "DIRECTO"
+            ? "tbl_laboratorio"
+            : "tbl_drogueria",
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
       });
 
@@ -349,6 +356,15 @@ export default class Transfer extends BaseModel {
   public nro_cuenta_drogueria: string;
 
   @column()
+  public nro_cuenta_tabla: string;
+
+  @column()
+  public id_apm: string;
+
+  @column()
+  public email_laboratorio_apm: string;
+
+  @column()
   public email_destinatario: string;
 
   @column()
@@ -367,6 +383,12 @@ export default class Transfer extends BaseModel {
   public ts_modificacion: DateTime;
 
   //foreing key
+
+  @hasOne(() => Apm, {
+    foreignKey: "id",
+    localKey: "id_apm",
+  })
+  public apm: HasOne<typeof Apm>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",

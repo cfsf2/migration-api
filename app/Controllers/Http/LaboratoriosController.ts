@@ -80,7 +80,9 @@ export default class LaboratoriosController {
       return await Laboratorio.query()
         .where("habilitado", "s")
         .preload("droguerias")
-        .preload("apms");
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion");
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler();
@@ -93,6 +95,8 @@ export default class LaboratoriosController {
         .where("habilitado", "s")
         .preload("droguerias")
         .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
         .andWhere("id", request.params().id)
         .firstOrFail();
     } catch (err) {

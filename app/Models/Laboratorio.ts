@@ -15,6 +15,8 @@ import { enumaBool } from "App/Helper/funciones";
 import LaboratorioDrogueria from "./LaboratorioDrogueria";
 import Drogueria from "./Drogueria";
 import Apm from "./Apm";
+import LaboratorioModalidadEntrega from "./LaboratorioModalidadEntrega";
+import LaboratorioTipoComunicacion from "./LaboratorioTipoComunicacion";
 
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
@@ -115,6 +117,18 @@ export default class Laboratorio extends BaseModel {
     localKey: "id_usuario",
   })
   public usuario: HasOne<typeof Usuario>;
+
+  @hasOne(() => LaboratorioModalidadEntrega, {
+    foreignKey: "id",
+    localKey: "id_modalidad_entrega",
+  })
+  public modalidad_entrega: HasOne<typeof LaboratorioModalidadEntrega>;
+
+  @hasOne(() => LaboratorioTipoComunicacion, {
+    foreignKey: "id",
+    localKey: "id_tipo_comunicacion",
+  })
+  public tipo_comunicacion: HasOne<typeof LaboratorioTipoComunicacion>;
 
   @hasManyThrough([() => Drogueria, () => LaboratorioDrogueria], {
     localKey: "id",
