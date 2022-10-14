@@ -57,7 +57,13 @@ export default class Laboratorio extends BaseModel {
   public tiene_apms: string;
 
   @column()
-  public permite_nro_cuenta: string;
+  public monto_minimo_transfer: number;
+
+  @column()
+  public unidades_minimas_transfer: number;
+
+  @column()
+  public enviar_email_transfer_auto: string;
 
   @column()
   public id_usuario: number;

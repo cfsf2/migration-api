@@ -22,59 +22,61 @@ import SP from "App/Models/SPista";
 import SCCU from "App/Models/SConfConfUsuario";
 import SCCD from "App/Models/SConfConfDeta";
 
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import FD from "App/Models/FarmaciaDrogueria";
-import FL from "App/Models/FarmaciaLaboratorio";
+import * as M from "./ModelIndex";
+
+// import S from "App/Models/Servicio";
+// import F from "App/Models/Farmacia";
+// import FS from "App/Models/FarmaciaServicio";
+// import FD from "App/Models/FarmaciaDrogueria";
+// import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
-import T from "App/Models/Transfer";
-import TP from "App/Models/TransferProducto";
-import TTP from "App/Models/TransferTransferProducto";
+// import T from "App/Models/Transfer";
+// import TP from "App/Models/TransferProducto";
+// import TTP from "App/Models/TransferTransferProducto";
 
-import L from "App/Models/Laboratorio";
-import _Apm from "App/Models/Apm";
-import _ApmFarmacia from "App/Models/ApmFarmacia";
-import DR from "App/Models/Drogueria";
+// import L from "App/Models/Laboratorio";
+// import _Apm from "App/Models/Apm";
+// import _ApmFarmacia from "App/Models/ApmFarmacia";
+// import DR from "App/Models/Drogueria";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+// import R from "App/Models/Recupero";
+// import RD from "App/Models/RecuperoDiagnostico";
+// import RE from "App/Models/RecuperoEstadio";
+// import RLT from "App/Models/RecuperoLineaTratamiento";
+// import RPS from "App/Models/RecuperoPerformanceStatus";
+// import DGN from "App/Models/Diagnostico";
+// import ESTD from "App/Models/Estadio";
+// import LT from "App/Models/LineaTratamiento";
+// import PS from "App/Models/PerformanceStatus";
+// import M from "App/Models/Monodro";
 
 const Database = Datab;
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+// let Recupero = R;
+// let RecuperoDiagnostico = RD;
+// let RecuperoEstadio = RE;
+// let RecuperoLineaTratamiento = RLT;
+// let RecuperoPerformanceStatus = RPS;
+// let Diagnostico = DGN;
+// let Estadio = ESTD;
+// let LineaTratamiento = LT;
+// let PerformanceStatus = PS;
+// let Monodro = M;
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let FarmaciaDrogueria = FD;
-let FarmaciaLaboratorio = FL;
+// let Servicio = S;
+// let Farmacia = F;
+// let FarmaciaServicio = FS;
+// let FarmaciaDrogueria = FD;
+// let FarmaciaLaboratorio = FL;
 
-let Transfer = T;
-let TransferProducto = TP;
-let TransferTransferProducto = TTP;
+// let Transfer = T;
+// let TransferProducto = TP;
+// let TransferTransferProducto = TTP;
 
-let Laboratorio = L;
-let Apm = _Apm;
-let ApmFarmacia = _ApmFarmacia;
-let Drogueria = DR;
+// let Laboratorio = L;
+// let Apm = _Apm;
+// let ApmFarmacia = _ApmFarmacia;
+// let Drogueria = DR;
 
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
@@ -124,7 +126,7 @@ export class Update {
 
     if (modelo && campo) {
       try {
-        const registro = await eval(modelo).findOrFail(id);
+        const registro = await M[modelo].findOrFail(id);
         const valorAnterior = registro[campo];
 
         registro.merge({
@@ -280,9 +282,9 @@ export class Update {
         });
 
       const tabla = getAtributo({ atributo: "tabla", conf: conf });
-      const Modelo = eval(
+      const Modelo = M[
         getAtributo({ atributo: "modelo", conf: conf })
-      ) as typeof BaseModel;
+      ] as typeof BaseModel;
 
       const registro = await Modelo.findOrFail(ctx.$_id_general);
 
@@ -377,7 +379,7 @@ export class Update {
 
     if (modelo && campo) {
       try {
-        const registro = await eval(modelo).findOrFail(id);
+        const registro = await M[modelo].findOrFail(id);
         const valorAnterior = registro[campo];
 
         await validator.validate({
@@ -460,9 +462,7 @@ export class Update {
     id: number;
   }) {
     const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
-    const Modelo = eval(
-      getAtributo({ atributo: "update_modelo", conf: conf })
-    ) as typeof BaseModel;
+    const Modelo = M[getAtributo({ atributo: "update_modelo", conf: conf })];
     const campo = getAtributo({ atributo: "update_campo", conf: conf });
     const columna = getAtributo({
       atributo: "update_id_nombre",
@@ -476,7 +476,7 @@ export class Update {
     if (Modelo && campo) {
       try {
         const registro = await Modelo.findOrFail(id);
-        const recuperoDiagnosticos = await RecuperoDiagnostico.findBy(
+        const recuperoDiagnosticos = await M.RecuperoDiagnostico.findBy(
           "id_recupero",
           registro.$primaryKeyValue
         );
@@ -492,7 +492,7 @@ export class Update {
         }
         // recupero.estadio_definido == s ? recupero_estadio.id_recupero ? ok
 
-        const recuperoEstadio = await RecuperoEstadio.findBy(
+        const recuperoEstadio = await M.RecuperoEstadio.findBy(
           "id_recupero",
           registro.$primaryKeyValue
         );
@@ -510,7 +510,7 @@ export class Update {
         }
 
         const recuperoPerformanceStatus =
-          await RecuperoPerformanceStatus.findBy(
+          await M.RecuperoPerformanceStatus.findBy(
             "id_recupero",
             registro.$primaryKeyValue
           );
@@ -527,10 +527,11 @@ export class Update {
           }
         }
 
-        const recuperoLineaTratamiento = await RecuperoLineaTratamiento.findBy(
-          "id_recupero",
-          registro.$primaryKeyValue
-        );
+        const recuperoLineaTratamiento =
+          await M.RecuperoLineaTratamiento.findBy(
+            "id_recupero",
+            registro.$primaryKeyValue
+          );
 
         if (registro.linea_tratamiento_definido === "s") {
           if (!recuperoLineaTratamiento) {

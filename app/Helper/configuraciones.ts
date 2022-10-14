@@ -4,7 +4,7 @@ import {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
@@ -12,79 +12,80 @@ import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 
+import * as M from "./ModelIndex";
 import Datab from "@ioc:Adonis/Lucid/Database";
 
 import SConf from "App/Models/SConf";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import SCC from "App/Models/SConfCpsc";
-import SRC from "App/Models/SRc";
-import SRD from "App/Models/SRcDeta";
-import SP from "App/Models/SPista";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
+// import SCTPV from "App/Models/SConfTipoAtributoValor";
+// import SCC from "App/Models/SConfCpsc";
+// import SRC from "App/Models/SRc";
+// import SRD from "App/Models/SRcDeta";
+// import SP from "App/Models/SPista";
+// import SCCU from "App/Models/SConfConfUsuario";
+// import SCCD from "App/Models/SConfConfDeta";
 
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import FD from "App/Models/FarmaciaDrogueria";
-import FL from "App/Models/FarmaciaLaboratorio";
+// import S from "App/Models/Servicio";
+// import F from "App/Models/Farmacia";
+// import FS from "App/Models/FarmaciaServicio";
+// import FD from "App/Models/FarmaciaDrogueria";
+// import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
-import T from "App/Models/Transfer";
-import TP from "App/Models/TransferProducto";
-import TTP from "App/Models/TransferTransferProducto";
+// import T from "App/Models/Transfer";
+// import TP from "App/Models/TransferProducto";
+// import TTP from "App/Models/TransferTransferProducto";
 
-import L from "App/Models/Laboratorio";
-import _Apm from "App/Models/Apm";
-import _ApmFarmacia from "App/Models/ApmFarmacia";
-import DR from "App/Models/Drogueria";
+// import L from "App/Models/Laboratorio";
+// import _Apm from "App/Models/Apm";
+// import _ApmFarmacia from "App/Models/ApmFarmacia";
+// import DR from "App/Models/Drogueria";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+// import R from "App/Models/Recupero";
+// import RD from "App/Models/RecuperoDiagnostico";
+// import RE from "App/Models/RecuperoEstadio";
+// import RLT from "App/Models/RecuperoLineaTratamiento";
+// import RPS from "App/Models/RecuperoPerformanceStatus";
+// import DGN from "App/Models/Diagnostico";
+// import ESTD from "App/Models/Estadio";
+// import LT from "App/Models/LineaTratamiento";
+// import PS from "App/Models/PerformanceStatus";
+// import M from "App/Models/Monodro";
 
 const Database = Datab;
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+// let Recupero = R;
+// let RecuperoDiagnostico = RD;
+// let RecuperoEstadio = RE;
+// let RecuperoLineaTratamiento = RLT;
+// let RecuperoPerformanceStatus = RPS;
+// let Diagnostico = DGN;
+// let Estadio = ESTD;
+// let LineaTratamiento = LT;
+// let PerformanceStatus = PS;
+// let Monodro = M;
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let FarmaciaDrogueria = FD;
-let FarmaciaLaboratorio = FL;
+// let Servicio = S;
+// let Farmacia = F;
+// let FarmaciaServicio = FS;
+// let FarmaciaDrogueria = FD;
+// let FarmaciaLaboratorio = FL;
 
-let Transfer = T;
-let TransferProducto = TP;
-let TransferTransferProducto = TTP;
+// let Transfer = T;
+// let TransferProducto = TP;
+// let TransferTransferProducto = TTP;
 
-let Laboratorio = L;
-let Apm = _Apm;
-let ApmFarmacia = _ApmFarmacia;
-let Drogueria = DR;
+// let Laboratorio = L;
+// let Apm = _Apm;
+// let ApmFarmacia = _ApmFarmacia;
+// let Drogueria = DR;
 
-let _SConf = SConf;
-let SConfTipoAtributoValor = SCTPV;
-let SConfCpsc = SCC;
-let SRc = SRC;
-let SRcDeta = SRD;
-let SPista = SP;
-let SConfConfUsuario = SCCU;
-let SConfConfDeta = SCCD;
+// let _SConf = SConf;
+// let SConfTipoAtributoValor = SCTPV;
+// let SConfCpsc = SCC;
+// let SRc = SRC;
+// let SRcDeta = SRD;
+// let SPista = SP;
+// let SConfConfUsuario = SCCU;
+// let SConfConfDeta = SCCD;
 
 let Update = U;
 let Insertar = I;
@@ -168,7 +169,7 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
         if (sch.tipo.id === 5) {
           if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
             try {
-              const conf = await SConf.findBy(
+              const conf = await M.SConf.findBy(
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
@@ -380,7 +381,7 @@ const extraerElementos = ({
             }
 
             if (atributoNombre === "enlace_id_a_opcional") {
-              const conf = await SConf.findByOrFail("id_a", val.valor);
+              const conf = await M.SConf.findByOrFail("id_a", val.valor);
               const per = await bouncer.allows("AccesoConf", conf);
 
               if (!per) return (item[atributoNombre] = undefined);
@@ -799,7 +800,7 @@ export class ConfBuilder {
       let configuracionDeUsuario = [] as any;
 
       if (usuario && usuario.id) {
-        configuracionDeUsuario = await SConfConfUsuario.query()
+        configuracionDeUsuario = await M.SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
           .preload("detalles", (query) =>
@@ -851,7 +852,7 @@ export class ConfBuilder {
       if (
         getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
       ) {
-        const MenuConfiguracionDeListado = await SConf.query()
+        const MenuConfiguracionDeListado = await M.SConf.query()
           .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
           .preload("conf_permiso")
           .preload("tipo")
@@ -1261,7 +1262,9 @@ export class ConfBuilder {
     conf: SConf,
     id?: number
   ): Promise<any> => {
-    const modelo = conf.getAtributo({ atributo: "modelo" });
+    const modelo = conf.getAtributo({
+      atributo: "modelo",
+    }) as unknown as string;
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
@@ -1280,7 +1283,7 @@ export class ConfBuilder {
     });
 
     if (modelo) {
-      const Modelo = eval(modelo) as typeof BaseModel;
+      const Modelo = M[modelo];
       let query = Modelo.query() as DatabaseQueryBuilderContract;
 
       campos.forEach(async (campo) => {
