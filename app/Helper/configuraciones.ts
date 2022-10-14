@@ -884,7 +884,7 @@ export class ConfBuilder {
               error: { message: error, continuar: true },
               conf: listado.id_a,
             });
-            res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+            res.sql = (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
               ? ctx.$_sql
               : undefined;
             ctx.response.status(410);
@@ -931,10 +931,10 @@ export class ConfBuilder {
         listadoBotones,
         opciones,
         datos: datos,
-        sql: (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        sql: (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
           ? ctx.$_sql
           : undefined,
-        conf: (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        conf: (await bouncer.allows("AccesoRuta", Permiso.GET_CONF))
           ? conf
           : undefined,
       };
@@ -973,10 +973,10 @@ export class ConfBuilder {
 
     try {
       if (campos.length !== 0) {
-        vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        vistaFinal.sql = (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
           ? ctx.$_sql
           : undefined;
-        vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        vistaFinal.conf = (await bouncer.allows("AccesoRuta", Permiso.GET_CONF))
           ? vista
           : undefined;
         // console.log("vista sql: ", vistaFinal.sql);
@@ -1110,7 +1110,7 @@ export class ConfBuilder {
       ? ctx.$_sql
       : undefined;
 
-    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_CONF))
       ? conf
       : undefined;
 
