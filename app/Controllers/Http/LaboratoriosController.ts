@@ -77,7 +77,10 @@ export default class LaboratoriosController {
   public async index({ bouncer }) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
-      return await Laboratorio.query().where("habilitado", "s");
+      return await Laboratorio.query()
+        .where("habilitado", "s")
+        .preload("droguerias")
+        .preload("apms");
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler();
@@ -88,6 +91,8 @@ export default class LaboratoriosController {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
       return await Laboratorio.query()
         .where("habilitado", "s")
+        .preload("droguerias")
+        .preload("apms")
         .andWhere("id", request.params().id)
         .firstOrFail();
     } catch (err) {
