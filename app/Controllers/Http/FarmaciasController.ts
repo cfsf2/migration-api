@@ -10,6 +10,11 @@ import { Permiso } from "App/Helper/permisos";
 
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
+import {
+  FarmaciaDrogueria,
+  FarmaciaLaboratorio,
+  Laboratorio,
+} from "App/Helper/ModelIndex";
 
 export default class FarmaciasController {
   public async index() {
@@ -192,6 +197,57 @@ export default class FarmaciasController {
       return false;
     } catch (err) {
       throw new ExceptionHandler();
+    }
+  }
+
+  public async nro_cuenta(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
+    const { id_farmacia, id_laboratorio } = request.body();
+    try {
+      const farmacia = await Farmacia.query()
+        .where("id", id_farmacia)
+        .firstOrFail();
+
+      await bouncer.authorize("adminOfarmacia", farmacia);
+
+      const laboratorio = await Laboratorio.query()
+        .where("id", id_laboratorio)
+        .preload("apms")
+        .preload("droguerias")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
+        .firstOrFail();
+
+      switch (laboratorio.modalidad_entrega.id_a) {
+        case "DIRECTO":
+          const cuenta = await FarmaciaLaboratorio.query()
+            .where("id_farmacia", id_farmacia)
+            .andWhere("id_laboratorio", id_laboratorio);
+
+          return cuenta;
+        case "ALGUNAS_DROGUERIAS":
+          const droguerias_habilitadas = laboratorio.droguerias;
+
+          const cuentas = await FarmaciaDrogueria.query()
+            .where("id_farmacia", id_farmacia)
+            .andWhereIn(
+              "id_drogueria",
+              droguerias_habilitadas.map((d) => d.id)
+            )
+            .preload("drogueria");
+
+          return cuentas;
+
+        case "TODAS_DROGUERIAS":
+          return await FarmaciaDrogueria.query()
+            .where("id_farmacia", id_farmacia)
+            .preload("drogueria");
+      }
+
+      return [{}];
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 

@@ -133,7 +133,7 @@ export default class Laboratorio extends BaseModel {
   @hasManyThrough([() => Drogueria, () => LaboratorioDrogueria], {
     localKey: "id",
     foreignKey: "id_laboratorio",
-    throughLocalKey: "id_laboratorio",
+    throughLocalKey: "id_drogueria",
     throughForeignKey: "id",
   })
   public droguerias: HasManyThrough<typeof Drogueria>;

@@ -41,6 +41,13 @@ export const { actions } = Bouncer.define(
     return idUsuarioActualizar === usuario.id;
   }
 )
+  .define("adminOfarmacia", async (usuario: Usuario, farmacia: Farmacia) => {
+    await usuario.load("perfil", (q) => q.preload("permisos"));
+
+    if (usuario.perfil.find((p) => p.id === 1)) return true;
+    if (farmacia.id_usuario === usuario.id) return true;
+    return false;
+  })
   .define(
     "AccesoRuta",
     async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
