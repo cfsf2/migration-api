@@ -1,4 +1,4 @@
-import _SConf from "App/Models/SConf";
+import __SConf from "App/Models/SConf";
 import SCTPV from "App/Models/SConfTipoAtributoValor";
 import SCC from "App/Models/SConfCpsc";
 import SRC from "App/Models/SRc";
@@ -62,7 +62,8 @@ export let Apm = _Apm;
 export let ApmFarmacia = _ApmFarmacia;
 export let Drogueria = DR;
 
-export let SConf = _SConf;
+export let SConf = __SConf;
+export let _SConf = __SConf;
 export let SConfTipoAtributoValor = SCTPV;
 export let SConfCpsc = SCC;
 export let SRc = SRC;
