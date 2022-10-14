@@ -11,7 +11,7 @@ export default class LaboratorioDrogueria extends Base {
   public id_laboratorio: number;
 
   @column()
-  public id_farmacia: number;
+  public id_drogueria: number;
 
   @column()
   public id_apm: number;
