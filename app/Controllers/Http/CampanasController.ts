@@ -79,12 +79,13 @@ export default class CampanasController {
   }
 
   public async negaroReq(ctx: HttpContextContract) {
-    const { response } = ctx;
+    const { response, request } = ctx;
     try {
       const requerimiento = new CampanaRequerimiento();
 
       requerimiento.merge({
         finalizado: "si",
+        id_usuario: request.body().id_usuario,
       });
       requerimiento.codigo_promo = "NO_PARTICIPA";
 
