@@ -84,7 +84,7 @@ export default class CampanasController {
       const requerimiento = new CampanaRequerimiento();
 
       requerimiento.merge({
-        finalizado: "si",
+        finalizado: "s",
         id_usuario: request.body().id_usuario,
       });
       requerimiento.codigo_promo = "NO_PARTICIPA";
