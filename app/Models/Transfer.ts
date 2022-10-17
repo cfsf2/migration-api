@@ -25,6 +25,7 @@ import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Apm from "./Apm";
+import ApmFarmacia from "./ApmFarmacia";
 
 export default class Transfer extends BaseModel {
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -283,6 +284,10 @@ export default class Transfer extends BaseModel {
         transferProducto.save();
       });
 
+      if (laboratorio.enviar_email_transfer_auto === "s") {
+        return nuevoTransfer.enviarMailConLogica(ctx);
+      }
+
       return Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
@@ -307,7 +312,53 @@ export default class Transfer extends BaseModel {
     }
   }
 
-  public async enviarMail(ctx) {
+  public async enviarMailConLogica(ctx: HttpContextContract) {
+    console.log(this);
+    const laboratorio = await Laboratorio.query()
+      .where("id", this.id_laboratorio)
+      .preload("apms")
+      .preload("tipo_comunicacion")
+      .firstOrFail();
+
+    let destinatarioProveedor = "";
+
+    switch (laboratorio.tipo_comunicacion.id_a) {
+      case "TC_LABORATORIO":
+        destinatarioProveedor = laboratorio.email;
+        break;
+      case "TC_APM":
+        let apm = await Apm.query()
+          .leftJoin("tbl_apm_farmacia as af", "af.id_apm", "tbl_apm.id")
+          .where("af.id_farmacia", this.id_farmacia)
+          .where("af.id_laboratorio", this.id_laboratorio)
+          .first();
+        if (!apm) {
+          apm = (await Apm.query()
+            .where("id_laboratorio", this.id_laboratorio)
+            .andWhere("administrador", "s")
+            .first()) as any;
+        }
+        if (!apm) {
+          return (destinatarioProveedor = laboratorio.email);
+        }
+        destinatarioProveedor = apm.email;
+        break;
+      case "TC_DROGUERIA":
+        const drogueria = await Drogueria.query()
+          .leftJoin(
+            "tbl_laboratorio_drogueria as ld",
+            "la.id_drogueria",
+            "tbl_drogueria.id"
+          )
+          .where("ld.id_laboratorio", this.id_laboratorio)
+          .andWhere("ld.id_drogueria", this.id_drogueria)
+          .firstOrFail();
+
+        break;
+    }
+  }
+
+  public async enviarMail(ctx: HttpContextContract) {
     try {
       await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
       await this.load("farmacia" as any);

@@ -224,7 +224,7 @@ export default class FarmaciasController {
             .where("id_farmacia", id_farmacia)
             .andWhere("id_laboratorio", id_laboratorio)
             .first();
-
+          if (!cuenta) return {};
           return cuenta;
         case "ALGUNAS_DROGUERIAS":
           const droguerias_habilitadas = laboratorio.droguerias;
