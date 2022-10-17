@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  belongsTo,
+  BelongsTo,
   column,
   HasMany,
   hasMany,
@@ -284,21 +286,21 @@ export default class Transfer extends BaseModel {
         transferProducto.save();
       });
 
-      if (laboratorio.enviar_email_transfer_auto === "s") {
+      if (laboratorio.envia_email_transfer_auto === "s") {
         return nuevoTransfer.enviarMailConLogica(ctx);
       }
 
-      return Mail.send((message) => {
-        message
-          .from(process.env.SMTP_USERNAME as string)
-          .to(farmacia.email as string)
-          .to(process.env.TRANSFER_EMAIL as string)
-          .to(process.env.TRANSFER_EMAIL2 as string)
-          .subject(
-            "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
-          )
-          .html(transferHtml({ transfer: data, farmacia: farmacia }));
-      });
+      // return Mail.send((message) => {
+      //   message
+      //     .from(process.env.SMTP_USERNAME as string)
+      //     .to(farmacia.email as string)
+      //     .to(process.env.TRANSFER_EMAIL as string)
+      //     .to(process.env.TRANSFER_EMAIL2 as string)
+      //     .subject(
+      //       "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
+      //     )
+      //     .html(transferHtml({ transfer: data, farmacia: farmacia }));
+      // });
     } catch (err) {
       console.log("MODELO", err);
       Mail.send((message) => {
@@ -313,7 +315,11 @@ export default class Transfer extends BaseModel {
   }
 
   public async enviarMailConLogica(ctx: HttpContextContract) {
-    console.log(this);
+    await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+    await this.load("farmacia" as any);
+    await this.load("laboratorio" as any);
+    await this.load("drogueria" as any);
+
     const laboratorio = await Laboratorio.query()
       .where("id", this.id_laboratorio)
       .preload("apms")
@@ -353,9 +359,22 @@ export default class Transfer extends BaseModel {
           .where("ld.id_laboratorio", this.id_laboratorio)
           .andWhere("ld.id_drogueria", this.id_drogueria)
           .firstOrFail();
-
+        destinatarioProveedor = drogueria.email;
         break;
     }
+    console.log("enviarMailConLogica", destinatarioProveedor);
+    const mail = await Mail.send((message) => {
+      message
+        .from(process.env.SMTP_USERNAME as string)
+        .to(this.email_destinatario as string)
+        .to(destinatarioProveedor)
+        .to(process.env.TRANSFER_EMAIL as string)
+        .to(process.env.TRANSFER_EMAIL2 as string)
+        .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+        .html(html_transfer(this));
+    });
+
+    console.log(mail);
   }
 
   public async enviarMail(ctx: HttpContextContract) {
@@ -466,11 +485,11 @@ export default class Transfer extends BaseModel {
   })
   public farmacia: HasOne<typeof Farmacia>;
 
-  @hasOne(() => Drogueria, {
-    foreignKey: "id",
-    localKey: "id_drogueria",
+  @belongsTo(() => Drogueria, {
+    foreignKey: "id_drogueria",
+    localKey: "id",
   })
-  public drogueria: HasOne<typeof Drogueria>;
+  public drogueria: BelongsTo<typeof Drogueria>;
 
   @hasOne(() => Laboratorio, {
     foreignKey: "id",

@@ -77,7 +77,7 @@ export default class Laboratorio extends BaseModel {
   public unidades_minimas_transfer: number;
 
   @column()
-  public enviar_email_transfer_auto: string;
+  public envia_email_transfer_auto: string;
 
   @column()
   public id_usuario: number;
