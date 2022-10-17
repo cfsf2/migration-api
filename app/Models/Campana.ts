@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   column,
+  HasMany,
+  hasMany,
   HasManyThrough,
   hasManyThrough,
   hasOne,
@@ -131,6 +133,12 @@ export default class Campana extends BaseModel {
     throughForeignKey: "id",
   })
   public atributos: HasManyThrough<typeof CampanaAtributo>;
+
+  @hasMany(() => CampanaCampanaAtributo, {
+    localKey: "id",
+    foreignKey: "id_campana",
+  })
+  public atributos_valores: HasMany<typeof CampanaCampanaAtributo>;
 
   @hasManyThrough([() => CampanaOrientado, () => CampanaCampanaOrientado], {
     localKey: "id",

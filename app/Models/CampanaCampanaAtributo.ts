@@ -47,7 +47,12 @@ export default class CampanaCampanaAtributo extends BaseModel {
   @hasOne(() => CampanaAtributo, {
     foreignKey: "id",
     localKey: "id_campana_atributo",
-    serializeAs: "atributos",
+  })
+  public atributos: HasOne<typeof CampanaAtributo>;
+
+  @hasOne(() => CampanaAtributo, {
+    foreignKey: "id",
+    localKey: "id_campana_atributo",
   })
   public atributo: HasOne<typeof CampanaAtributo>;
 

@@ -23,6 +23,7 @@ export default class CampanasController {
         .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
         .preload("orientados")
         .preload("atributos")
+        .preload("atributos_valores", (query) => query.preload("atributo"))
         .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
         .apply((scopes) => scopes.habilitado(habilitado))
         .apply((scopes) => scopes.vigente());
