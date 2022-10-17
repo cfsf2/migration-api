@@ -7,6 +7,8 @@ Route.get("/campana/requerimientos", "CampanasController.mig_requerimientos");
 
 Route.post("/campana/nuevoRequerimiento", "CampanasController.mig_nuevoReq");
 
+Route.post("/campana/negarRequerimiento", "CampanasController.negarReq");
+
 Route.put(
   "/campana/finalizarrequerimiento",
   "CampanasController.update_requerimiento"

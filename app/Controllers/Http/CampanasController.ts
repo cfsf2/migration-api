@@ -42,7 +42,8 @@ export default class CampanasController {
     }
   }
 
-  public async mig_nuevoReq({ request, response }: HttpContextContract) {
+  public async mig_nuevoReq(ctx: HttpContextContract) {
+    const { request, response } = ctx;
     try {
       const requerimientoSchema = schema.create({
         id_campana: schema.number(),
@@ -73,7 +74,29 @@ export default class CampanasController {
       });
     } catch (error) {
       console.log(error);
-      throw new ExceptionHandler();
+      throw new ExceptionHandler().handle(error, ctx);
+    }
+  }
+
+  public async negaroReq(ctx: HttpContextContract) {
+    const { response } = ctx;
+    try {
+      const requerimiento = new CampanaRequerimiento();
+
+      requerimiento.merge({
+        finalizado: "si",
+      });
+      requerimiento.codigo_promo = "NO_PARTICIPA";
+
+      await requerimiento.save();
+
+      return response.status(201).send({
+        msg: "El Requerimiento se genero con exito",
+        codigo: requerimiento.codigo_promo,
+      });
+    } catch (error) {
+      console.log(error);
+      throw new ExceptionHandler().handle(error, ctx);
     }
   }
 
