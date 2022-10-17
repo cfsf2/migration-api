@@ -50,7 +50,7 @@ export default class ProductosTransfersController {
 
       return await TransferProducto.query()
         .preload("instituciones")
-        .select("*")
+        .select("tbl_transfer_producto.*")
         .where("en_papelera", "n")
         .andWhere("habilitado", "s")
         .andWhere("id_laboratorio", labid)

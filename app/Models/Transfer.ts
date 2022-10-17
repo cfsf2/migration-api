@@ -187,7 +187,13 @@ export default class Transfer extends BaseModel {
   }) {
     const nuevoTransfer = new Transfer();
     try {
-      const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
+      const laboratorio = await Laboratorio.query()
+        .where("id", data.id_laboratorio)
+        .preload("modalidad_entrega")
+        .preload("apms")
+        .preload("tipo_comunicacion")
+        .preload("droguerias")
+        .firstOrFail();
       let drogueria = null as unknown as Drogueria;
 
       if (
@@ -259,6 +265,7 @@ export default class Transfer extends BaseModel {
 
       data.productos_solicitados.forEach((p) => {
         const transferProducto = new TransferTransferProducto();
+
         transferProducto.merge({
           id_transfer_producto: p.id,
           id_transfer: nuevoTransfer.id,

@@ -222,7 +222,8 @@ export default class FarmaciasController {
         case "DIRECTO":
           const cuenta = await FarmaciaLaboratorio.query()
             .where("id_farmacia", id_farmacia)
-            .andWhere("id_laboratorio", id_laboratorio);
+            .andWhere("id_laboratorio", id_laboratorio)
+            .first();
 
           return cuenta;
         case "ALGUNAS_DROGUERIAS":

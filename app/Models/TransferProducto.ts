@@ -57,7 +57,7 @@ export default class TransferProducto extends BaseModel {
             "tpi.id_transfer_producto",
             "tp.id"
           )
-          .whereIn("tpi.id_institucion", instituciones)
+          .whereIn("tpi.id_institucion", instituciones as unknown as string[])
           .groupBy("tpi.id_transfer_producto")
       )
       //en_papelera
@@ -67,7 +67,7 @@ export default class TransferProducto extends BaseModel {
       .if(habilitado, (query) => {
         query.where("tp.habilitado", "s");
       })
-      .if(labid, (query) => query.where("l.id", labid))
+      .if(labid, (query) => query.where("l.id", labid as number))
       .orderBy("codigo", "desc");
 
     return trasfersProducto.map((t) => {
