@@ -17,7 +17,8 @@ export default class CampanasController {
     }
   }
 
-  public async activas({ request }: HttpContextContract) {
+  public async activas(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
       const { idUsuario, habilitado } = request.qs();
       const campanas = await Campana.query()
@@ -43,7 +44,8 @@ export default class CampanasController {
 
       return campanaConValores;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
