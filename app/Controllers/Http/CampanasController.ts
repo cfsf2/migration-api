@@ -6,6 +6,7 @@ import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
+import CampanaCampanaAtributo from "App/Models/CampanaCampanaAtributo";
 
 export default class CampanasController {
   public async index() {
@@ -19,14 +20,18 @@ export default class CampanasController {
   public async activas({ request }: HttpContextContract) {
     try {
       const { idUsuario, habilitado } = request.qs();
-      return await Campana.query()
+      const campanas = await Campana.query()
         .select(Database.raw("tbl_campana.*, tbl_campana.id as _id"))
         .preload("orientados")
-        .preload("atributos")
-        .preload("atributos_valores", (query) => query.preload("atributo"))
+        .preload("atributos", (query) => query.preload("atributo"))
         .apply((scopes) => scopes.forUser({ idUsuario: idUsuario }))
         .apply((scopes) => scopes.habilitado(habilitado))
         .apply((scopes) => scopes.vigente());
+
+      const campanaConValores = campanas.map((c) => c.toObject());
+      console.log(campanaConValores);
+
+      return campanas;
     } catch (err) {
       throw new ExceptionHandler();
     }
@@ -87,6 +92,7 @@ export default class CampanasController {
       requerimiento.merge({
         finalizado: "s",
         id_usuario: request.body().id_usuario,
+        id_campana: request.body().id_usuario,
       });
       requerimiento.codigo_promo = "NO_PARTICIPA";
 

@@ -132,13 +132,13 @@ export default class Campana extends BaseModel {
     throughLocalKey: "id_campana_atributo",
     throughForeignKey: "id",
   })
-  public atributos: HasManyThrough<typeof CampanaAtributo>;
+  public atributos_only: HasManyThrough<typeof CampanaAtributo>;
 
   @hasMany(() => CampanaCampanaAtributo, {
     localKey: "id",
     foreignKey: "id_campana",
   })
-  public atributos_valores: HasMany<typeof CampanaCampanaAtributo>;
+  public atributos: HasMany<typeof CampanaCampanaAtributo>;
 
   @hasManyThrough([() => CampanaOrientado, () => CampanaCampanaOrientado], {
     localKey: "id",
