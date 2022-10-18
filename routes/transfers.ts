@@ -4,3 +4,5 @@ Route.get("/transfers", "TransfersController.mig_index");
 
 Route.get("/transfers/farmacia/:id", "TransfersController.mig_byFarmacia");
 Route.post("/transfers", "TransfersController.mig_add");
+
+Route.post("/transfers/enviarTransfer", "TransfersController.sendTransfer");

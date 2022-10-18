@@ -15,6 +15,9 @@ export default class CampanaAtributo extends BaseModel {
   @column()
   public descripcion: string;
 
+  @column()
+  public valor: string | undefined;
+
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
     const extras = {};

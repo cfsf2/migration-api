@@ -63,7 +63,8 @@ export default class PublicidadsController {
     }
   }
 
-  public async mig_agregar_novedad({ request, bouncer }: HttpContextContract) {
+  public async mig_agregar_novedad(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_CREATE);
 
@@ -93,6 +94,12 @@ export default class PublicidadsController {
         id_color: color.id,
       });
 
+      guardarDatosAuditoria({
+        usuario: await ctx.auth.authenticate(),
+        objeto: nuevaNovedad,
+        accion: AccionCRUD.crear,
+      });
+
       await nuevaNovedad.save();
 
       request.body().instituciones.forEach((id_institucion) => {
@@ -106,7 +113,8 @@ export default class PublicidadsController {
 
       return;
     } catch (error) {
-      throw new ExceptionHandler();
+      console.log(error);
+      throw new ExceptionHandler().handle(error, ctx);
     }
   }
 
@@ -141,7 +149,7 @@ export default class PublicidadsController {
           .toFormat("yyyy-MM-dd hh:mm:ss"),
         titulo: request.body().titulo,
         descripcion: request.body().descripcion,
-        habilitado: request.body().habilitado === true ? "s" : "n",
+        habilitado: request.body().habilitado == "true" ? "s" : "n",
         link: request.body().link,
         imagen: request.body().imagen,
         id_publicidad_tipo: tipo?.id,

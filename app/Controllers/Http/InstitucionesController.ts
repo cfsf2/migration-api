@@ -5,7 +5,8 @@ import { Permiso } from "App/Helper/permisos";
 import Institucion from "App/Models/Institucion";
 
 export default class InstitucionesController {
-  public async mig_instituciones({ request, bouncer }: HttpContextContract) {
+  public async mig_instituciones(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", [
         Permiso.INSTITUCIONES_GET,
@@ -41,7 +42,8 @@ export default class InstitucionesController {
         });
       return instituciones;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
