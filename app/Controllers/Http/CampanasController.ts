@@ -28,8 +28,11 @@ export default class CampanasController {
         .apply((scopes) => scopes.habilitado(habilitado))
         .apply((scopes) => scopes.vigente());
 
-      const campanaConValores = campanas.map((c) => c.toObject());
-      console.log(campanaConValores);
+      const campanaConValores = campanas.map((c) => {
+       let d = c.toObject()
+        d.atributos.codigo = c.
+      });
+      
 
       return campanas;
     } catch (err) {
@@ -92,7 +95,7 @@ export default class CampanasController {
       requerimiento.merge({
         finalizado: "s",
         id_usuario: request.body().id_usuario,
-        id_campana: request.body().id_usuario,
+        id_campana: request.body().id_campana,
       });
       requerimiento.codigo_promo = "NO_PARTICIPA";
 
