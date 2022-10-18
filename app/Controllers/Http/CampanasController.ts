@@ -30,10 +30,18 @@ export default class CampanasController {
 
       const campanaConValores = campanas.map((c) => {
         let d = c.toObject();
-        d.atributos.codigo = c.atributos;
+        d.atributos = d.atributos.map((at) => {
+          at.codigo = at.atributo.codigo;
+          at.nombre = at.atributo.nombre;
+          at.descripcion = at.atributo.descripcion;
+          delete at.atributo;
+          delete at.$extras;
+          return at;
+        });
+        return d;
       });
 
-      return campanas;
+      return campanaConValores;
     } catch (err) {
       throw new ExceptionHandler();
     }
