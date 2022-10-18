@@ -29,10 +29,9 @@ export default class CampanasController {
         .apply((scopes) => scopes.vigente());
 
       const campanaConValores = campanas.map((c) => {
-       let d = c.toObject()
-        d.atributos.codigo = c.
+        let d = c.toObject();
+        d.atributos.codigo = c.atributos;
       });
-      
 
       return campanas;
     } catch (err) {
