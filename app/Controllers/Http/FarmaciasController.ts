@@ -10,6 +10,11 @@ import { Permiso } from "App/Helper/permisos";
 
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
+import {
+  FarmaciaDrogueria,
+  FarmaciaLaboratorio,
+  Laboratorio,
+} from "App/Helper/ModelIndex";
 
 export default class FarmaciasController {
   public async index() {
@@ -32,7 +37,8 @@ export default class FarmaciasController {
     }
   }
 
-  public async mig_perfil({ request }: HttpContextContract) {
+  public async mig_perfil(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
       const farmacia = await Farmacia.traerFarmacias({
         usuario: request.params().usuario,
@@ -41,17 +47,31 @@ export default class FarmaciasController {
       if (request.url().includes("login") && farmacia.length !== 0) {
         console.log("actualizar ultimo acceso a ", farmacia.nombre);
 
-        const farmaciaLogueada = await Farmacia.findOrFail(farmacia.id);
+        const farmaciaLogueada = await Farmacia.query()
+          .where("id", farmacia.id)
+          .preload("nro_cuenta_drogueria", (query) =>
+            query.preload("drogueria")
+          )
+          .preload("nro_cuenta_laboratorio", (query) =>
+            query.preload("laboratorio")
+          )
+          .firstOrFail();
 
         farmaciaLogueada.f_ultimo_acceso = DateTime.now()
           .setLocale("es-Ar")
           .toFormat("yyyy-MM-dd hh:mm:ss");
 
         await farmaciaLogueada.save();
+
+        farmacia.nro_cuenta_drogueria =
+          farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
+        farmacia.nro_cuenta_laboratorio =
+          farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
       }
       return farmacia;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
@@ -177,6 +197,58 @@ export default class FarmaciasController {
       return false;
     } catch (err) {
       throw new ExceptionHandler();
+    }
+  }
+
+  public async nro_cuenta(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
+    const { id_farmacia, id_laboratorio } = request.body();
+    try {
+      const farmacia = await Farmacia.query()
+        .where("id", id_farmacia)
+        .firstOrFail();
+
+      await bouncer.authorize("adminOfarmacia", farmacia);
+
+      const laboratorio = await Laboratorio.query()
+        .where("id", id_laboratorio)
+        .preload("apms")
+        .preload("droguerias")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
+        .firstOrFail();
+
+      switch (laboratorio.modalidad_entrega.id_a) {
+        case "DIRECTO":
+          const cuenta = await FarmaciaLaboratorio.query()
+            .where("id_farmacia", id_farmacia)
+            .andWhere("id_laboratorio", id_laboratorio)
+            .first();
+          if (!cuenta) return {};
+          return cuenta;
+        case "ALGUNAS_DROGUERIAS":
+          const droguerias_habilitadas = laboratorio.droguerias;
+
+          const cuentas = await FarmaciaDrogueria.query()
+            .where("id_farmacia", id_farmacia)
+            .andWhereIn(
+              "id_drogueria",
+              droguerias_habilitadas.map((d) => d.id)
+            )
+            .preload("drogueria");
+
+          return cuentas;
+
+        case "TODAS_DROGUERIAS":
+          return await FarmaciaDrogueria.query()
+            .where("id_farmacia", id_farmacia)
+            .preload("drogueria");
+      }
+
+      return [{}];
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 

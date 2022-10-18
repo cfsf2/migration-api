@@ -417,13 +417,29 @@ export const html_transfer = (transfer) => {
                         <body>
                           <div>
                             <p><b>Codigo: </b>${transfer.id} </p>
-                            <p><b>Farmacia: </b>${transfer.farmacia.nombre} / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
-                            <p><b>Telefono: </b>${transfer.farmacia.telefono}</p>
+                            <p><b>Farmacia: </b>${
+                              transfer.farmacia.nombre
+                            } / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
+                            <p><b>Telefono: </b>${
+                              transfer.farmacia.telefono
+                            }</p>
                             <p><b>Nro Cufe: </b>${transfer.farmacia.cufe}</p>
-                            <p><b>Nro Cuenta de Droguería: </b>${transfer.nro_cuenta_drogueria}</p> 
-                            <p><b>Droguería: </b>${transfer.drogueria.nombre}</p>
-                            <p><b>Laboratorio elegido: </b>${transfer.laboratorio.nombre}</p>
-                            <p><b>Dirección: </b>${transfer.farmacia.direccioncompleta}</p>
+                            <p><b>Nro Cuenta: </b>${
+                              transfer.nro_cuenta_drogueria
+                            }</p> 
+                            ${
+                              transfer.drogueria
+                                ? "<p><b>Droguería: </b>" +
+                                  transfer.drogueria.nombre +
+                                  "</p>"
+                                : ""
+                            }
+                            <p><b>Laboratorio elegido: </b>${
+                              transfer.laboratorio.nombre
+                            }</p>
+                            <p><b>Dirección: </b>${
+                              transfer.farmacia.direccioncompleta
+                            }</p>
                           </div>
                         <table>
                             <tr>

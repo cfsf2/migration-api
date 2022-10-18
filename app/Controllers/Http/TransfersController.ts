@@ -46,6 +46,8 @@ export default class TransfersController {
     }
   }
 
+  //*** CONTROLLERS ESTABLES */
+
   public async add(ctx: HttpContextContract) {
     const { request, auth, bouncer } = ctx;
 

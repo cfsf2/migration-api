@@ -1,14 +1,3 @@
-import Database from "@ioc:Adonis/Lucid/Database";
-import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import U from "App/Models/Usuario";
-import SCC from "App/Models/SConfCpsc";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
-
 import { getAtributo } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
@@ -16,39 +5,90 @@ import ExceptionHandler from "App/Exceptions/Handler";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
-import STipoAtributo from "App/Models/STipoAtributo";
 import SComponente from "App/Models/SComponente";
+import STipoAtributo from "App/Models/STipoAtributo";
 
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+import I from "./Insertar";
+import D from "./Eliminar";
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
+import Datab from "@ioc:Adonis/Lucid/Database";
+
+import SConf from "App/Models/SConf";
+import SCTPV from "App/Models/SConfTipoAtributoValor";
+import SCC from "App/Models/SConfCpsc";
+import SRC from "App/Models/SRc";
+import SRD from "App/Models/SRcDeta";
+import SP from "App/Models/SPista";
+import SCCU from "App/Models/SConfConfUsuario";
+import SCCD from "App/Models/SConfConfDeta";
+
+import * as M from "./ModelIndex";
+
+// import S from "App/Models/Servicio";
+// import F from "App/Models/Farmacia";
+// import FS from "App/Models/FarmaciaServicio";
+// import FD from "App/Models/FarmaciaDrogueria";
+// import FL from "App/Models/FarmaciaLaboratorio";
+import Usuario from "App/Models/Usuario";
+
+// import T from "App/Models/Transfer";
+// import TP from "App/Models/TransferProducto";
+// import TTP from "App/Models/TransferTransferProducto";
+
+// import L from "App/Models/Laboratorio";
+// import _Apm from "App/Models/Apm";
+// import _ApmFarmacia from "App/Models/ApmFarmacia";
+// import DR from "App/Models/Drogueria";
+
+// import R from "App/Models/Recupero";
+// import RD from "App/Models/RecuperoDiagnostico";
+// import RE from "App/Models/RecuperoEstadio";
+// import RLT from "App/Models/RecuperoLineaTratamiento";
+// import RPS from "App/Models/RecuperoPerformanceStatus";
+// import DGN from "App/Models/Diagnostico";
+// import ESTD from "App/Models/Estadio";
+// import LT from "App/Models/LineaTratamiento";
+// import PS from "App/Models/PerformanceStatus";
+// import M from "App/Models/Monodro";
+
+const Database = Datab;
+// let Recupero = R;
+// let RecuperoDiagnostico = RD;
+// let RecuperoEstadio = RE;
+// let RecuperoLineaTratamiento = RLT;
+// let RecuperoPerformanceStatus = RPS;
+// let Diagnostico = DGN;
+// let Estadio = ESTD;
+// let LineaTratamiento = LT;
+// let PerformanceStatus = PS;
+// let Monodro = M;
+
+// let Servicio = S;
+// let Farmacia = F;
+// let FarmaciaServicio = FS;
+// let FarmaciaDrogueria = FD;
+// let FarmaciaLaboratorio = FL;
+
+// let Transfer = T;
+// let TransferProducto = TP;
+// let TransferTransferProducto = TTP;
+
+// let Laboratorio = L;
+// let Apm = _Apm;
+// let ApmFarmacia = _ApmFarmacia;
+// let Drogueria = DR;
+
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;
 let SConfCpsc = SCC;
-let Usuario = U;
+let SRc = SRC;
+let SRcDeta = SRD;
+let SPista = SP;
 let SConfConfUsuario = SCCU;
 let SConfConfDeta = SCCD;
+
+let Insertar = I;
+let Eliminar = D;
 
 export class Update {
   constructor() {}
@@ -62,7 +102,7 @@ export class Update {
     formData,
   }: {
     ctx: HttpContextContract;
-    usuario: U;
+    usuario: Usuario;
     id: any;
     valor: string | number;
     conf: SConf;
@@ -86,7 +126,7 @@ export class Update {
 
     if (modelo && campo) {
       try {
-        const registro = await eval(modelo).findOrFail(id);
+        const registro = await M[modelo].findOrFail(id);
         const valorAnterior = registro[campo];
 
         registro.merge({
@@ -242,9 +282,9 @@ export class Update {
         });
 
       const tabla = getAtributo({ atributo: "tabla", conf: conf });
-      const Modelo = eval(
+      const Modelo = M[
         getAtributo({ atributo: "modelo", conf: conf })
-      ) as typeof BaseModel;
+      ] as typeof BaseModel;
 
       const registro = await Modelo.findOrFail(ctx.$_id_general);
 
@@ -306,7 +346,7 @@ export class Update {
     conf,
   }: {
     ctx: HttpContextContract;
-    usuario: U;
+    usuario: Usuario;
     id: any;
     valor: string | number;
     conf: SConf;
@@ -339,7 +379,7 @@ export class Update {
 
     if (modelo && campo) {
       try {
-        const registro = await eval(modelo).findOrFail(id);
+        const registro = await M[modelo].findOrFail(id);
         const valorAnterior = registro[campo];
 
         await validator.validate({
@@ -418,13 +458,11 @@ export class Update {
   }: {
     ctx: HttpContextContract;
     conf: SConf;
-    usuario: U;
+    usuario: Usuario;
     id: number;
   }) {
     const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
-    const Modelo = eval(
-      getAtributo({ atributo: "update_modelo", conf: conf })
-    ) as typeof BaseModel;
+    const Modelo = M[getAtributo({ atributo: "update_modelo", conf: conf })];
     const campo = getAtributo({ atributo: "update_campo", conf: conf });
     const columna = getAtributo({
       atributo: "update_id_nombre",
@@ -438,8 +476,7 @@ export class Update {
     if (Modelo && campo) {
       try {
         const registro = await Modelo.findOrFail(id);
-
-        const recuperoDiagnosticos = await RecuperoDiagnostico.findBy(
+        const recuperoDiagnosticos = await M.RecuperoDiagnostico.findBy(
           "id_recupero",
           registro.$primaryKeyValue
         );
@@ -452,6 +489,60 @@ export class Update {
           throw {
             code: "recupero_sin_diagnostico",
           };
+        }
+        // recupero.estadio_definido == s ? recupero_estadio.id_recupero ? ok
+
+        const recuperoEstadio = await M.RecuperoEstadio.findBy(
+          "id_recupero",
+          registro.$primaryKeyValue
+        );
+
+        if (registro.estadio_definido === "s") {
+          if (!recuperoEstadio) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_estadio",
+            };
+          }
+        }
+
+        const recuperoPerformanceStatus =
+          await M.RecuperoPerformanceStatus.findBy(
+            "id_recupero",
+            registro.$primaryKeyValue
+          );
+
+        if (registro.performance_status_definido === "s") {
+          if (!recuperoPerformanceStatus) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_performance_status",
+            };
+          }
+        }
+
+        const recuperoLineaTratamiento =
+          await M.RecuperoLineaTratamiento.findBy(
+            "id_recupero",
+            registro.$primaryKeyValue
+          );
+
+        if (registro.linea_tratamiento_definido === "s") {
+          if (!recuperoLineaTratamiento) {
+            registro.merge({
+              habilitado: "n",
+            });
+            await registro.save();
+            throw {
+              code: "recupero_sin_linea_tratamiento",
+            };
+          }
         }
 
         const valorAnterior = registro[campo];
@@ -508,7 +599,7 @@ export class Update {
   }: {
     ctx: HttpContextContract;
     conf: SConf;
-    usuario: U;
+    usuario: Usuario;
     id: number;
   }) {
     try {
@@ -531,7 +622,10 @@ export class Update {
         .firstOrFail();
 
       if (Sconf.tipo.tiene_componente === "n")
-        throw new Error("SCONF_NO_COMPONENT");
+        throw await new ExceptionHandler().handle(
+          { code: "SCONF_NO_COMPONENT" },
+          ctx
+        );
 
       const Registro = await SConfTipoAtributoValor.query()
         .whereIn("id_tipo_atributo", [11, 21, 145, 176, 191])
@@ -612,7 +706,7 @@ export class Update {
       });
     } catch (err) {
       console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }

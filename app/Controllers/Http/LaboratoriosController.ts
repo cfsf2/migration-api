@@ -8,7 +8,6 @@ import {
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Laboratorio from "App/Models/Laboratorio";
-import auth from "Config/auth";
 
 export default class LaboratoriosController {
   public async mig_index({ bouncer }) {
@@ -21,7 +20,9 @@ export default class LaboratoriosController {
     }
   }
 
-  public async mig_add({ request, bouncer, auth }: HttpContextContract) {
+  public async mig_add(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
+    console.log("Aniadiendo un Lab");
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_LAB);
       const usuario = await auth.authenticate();
@@ -34,11 +35,11 @@ export default class LaboratoriosController {
         usuario: usuario,
         accion: AccionCRUD.crear,
       });
-      nuevoLab.save();
+      return await nuevoLab.save();
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
-    return;
   }
 
   public async mig_update({ request, bouncer, auth }: HttpContextContract) {
@@ -67,6 +68,39 @@ export default class LaboratoriosController {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
       return await Laboratorio.traerLaboratorios({ id: request.params().id });
     } catch (err) {
+      throw new ExceptionHandler();
+    }
+  }
+
+  //*****  CONTROLLERS ESTABLES */
+
+  public async index({ bouncer }) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
+      return await Laboratorio.query()
+        .where("habilitado", "s")
+        .preload("droguerias")
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion");
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler();
+    }
+  }
+  public async transfers({ request, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
+      return await Laboratorio.query()
+        .where("habilitado", "s")
+        .preload("droguerias")
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
+        .andWhere("id", request.params().id)
+        .firstOrFail();
+    } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }

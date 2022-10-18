@@ -1,14 +1,28 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  hasMany,
+  HasMany,
+  HasManyThrough,
+  hasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { enumaBool } from "App/Helper/funciones";
+import LaboratorioDrogueria from "./LaboratorioDrogueria";
+import Drogueria from "./Drogueria";
+import Apm from "./Apm";
+import LaboratorioModalidadEntrega from "./LaboratorioModalidadEntrega";
+import LaboratorioTipoComunicacion from "./LaboratorioTipoComunicacion";
 
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
     const laboratorios = await Database.from("tbl_laboratorio as l")
       .select("*", "l.id as _id", "l.id as id", "l.ts_creacion as fechaalta")
-      .if(id, (query) => query.where("id", id))
+      .if(id, (query) => query.where("id", id as number))
       .orderBy("fechaalta", "desc");
 
     let result = laboratorios.map((l) => {
@@ -47,6 +61,33 @@ export default class Laboratorio extends BaseModel {
   @column()
   public url: string;
 
+  @column()
+  public email: string;
+
+  @column()
+  public usa_sistema: string;
+
+  @column()
+  public tiene_apms: string;
+
+  @column()
+  public monto_minimo_transfer: number;
+
+  @column()
+  public unidades_minimas_transfer: number;
+
+  @column()
+  public envia_email_transfer_auto: string;
+
+  @column()
+  public id_usuario: number;
+
+  @column()
+  public id_tipo_comunicacion: number;
+
+  @column()
+  public id_modalidad_entrega: number;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
@@ -70,6 +111,38 @@ export default class Laboratorio extends BaseModel {
     localKey: "id_usuario_modificacion",
   })
   public usuario_modificacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario",
+  })
+  public usuario: HasOne<typeof Usuario>;
+
+  @hasOne(() => LaboratorioModalidadEntrega, {
+    foreignKey: "id",
+    localKey: "id_modalidad_entrega",
+  })
+  public modalidad_entrega: HasOne<typeof LaboratorioModalidadEntrega>;
+
+  @hasOne(() => LaboratorioTipoComunicacion, {
+    foreignKey: "id",
+    localKey: "id_tipo_comunicacion",
+  })
+  public tipo_comunicacion: HasOne<typeof LaboratorioTipoComunicacion>;
+
+  @hasManyThrough([() => Drogueria, () => LaboratorioDrogueria], {
+    localKey: "id",
+    foreignKey: "id_laboratorio",
+    throughLocalKey: "id_drogueria",
+    throughForeignKey: "id",
+  })
+  public droguerias: HasManyThrough<typeof Drogueria>;
+
+  @hasMany(() => Apm, {
+    localKey: "id",
+    foreignKey: "id_laboratorio",
+  })
+  public apms: HasMany<typeof Apm>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
