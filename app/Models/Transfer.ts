@@ -266,41 +266,43 @@ export default class Transfer extends BaseModel {
 
       await nuevoTransfer.save();
 
-      data.productos_solicitados.forEach((p) => {
-        const transferProducto = new TransferTransferProducto();
+      await Promise.all(
+        data.productos_solicitados.map(async (p) => {
+          const transferProducto = new TransferTransferProducto();
 
-        transferProducto.merge({
-          id_transfer_producto: p.id,
-          id_transfer: nuevoTransfer.id,
-          cantidad: p.cantidad,
-          precio: p.precio,
-          observaciones: p.observacion,
+          transferProducto.merge({
+            id_transfer_producto: p.id,
+            id_transfer: nuevoTransfer.id,
+            cantidad: p.cantidad,
+            precio: p.precio,
+            observaciones: p.observacion,
 
-          id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-        });
-        guardarDatosAuditoria({
-          objeto: transferProducto,
-          usuario: usuario,
-          accion: AccionCRUD.crear,
-        });
-        transferProducto.save();
-      });
+            id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+          });
+          guardarDatosAuditoria({
+            objeto: transferProducto,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          return transferProducto.save();
+        })
+      );
 
       if (laboratorio.envia_email_transfer_auto === "s") {
         return nuevoTransfer.enviarMailAutomatico(ctx);
       }
 
-      // return Mail.send((message) => {
-      //   message
-      //     .from(process.env.SMTP_USERNAME as string)
-      //     .to(farmacia.email as string)
-      //     .to(process.env.TRANSFER_EMAIL as string)
-      //     .to(process.env.TRANSFER_EMAIL2 as string)
-      //     .subject(
-      //       "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
-      //     )
-      //     .html(transferHtml({ transfer: data, farmacia: farmacia }));
-      // });
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(farmacia.email as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject(
+            "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
+          )
+          .html(transferHtml({ transfer: data, farmacia: farmacia }));
+      });
     } catch (err) {
       console.log("MODELO", err);
       Mail.send((message) => {
@@ -323,6 +325,7 @@ export default class Transfer extends BaseModel {
       .where("id", this.id_laboratorio)
       .preload("apms")
       .preload("tipo_comunicacion")
+      .preload("modalidad_entrega")
       .firstOrFail();
 
     let destinatarioProveedor = "";
@@ -332,37 +335,53 @@ export default class Transfer extends BaseModel {
         destinatarioProveedor = laboratorio.email;
         break;
       case "TC_APM":
-        let apm = await Apm.query()
-          .leftJoin("tbl_apm_farmacia as af", "af.id_apm", "tbl_apm.id")
-          .where("af.id_farmacia", this.id_farmacia)
-          .where("af.id_laboratorio", this.id_laboratorio)
-          .first();
-        if (!apm) {
-          apm = (await Apm.query()
-            .where("id_laboratorio", this.id_laboratorio)
-            .andWhere("administrador", "s")
-            .first()) as any;
+        if (laboratorio.tiene_apms === "s") {
+          let apm = await Apm.query()
+            .leftJoin("tbl_apm_farmacia as af", "af.id_apm", "tbl_apm.id")
+            .where("af.id_farmacia", this.id_farmacia)
+            .where("af.id_laboratorio", this.id_laboratorio)
+            .first();
+          if (!apm) {
+            apm = (await Apm.query()
+              .where("id_laboratorio", this.id_laboratorio)
+              .andWhere("administrador", "s")
+              .first()) as any;
+            if (!apm) {
+              console.log("no hay apms pero deberia");
+              destinatarioProveedor = laboratorio.email;
+              break;
+            }
+            destinatarioProveedor = apm.email;
+          }
+          break;
         }
-        if (!apm) {
-          return (destinatarioProveedor = laboratorio.email);
-        }
-        destinatarioProveedor = apm.email;
+        console.log("no hay apms");
+        destinatarioProveedor = laboratorio.email;
         break;
       case "TC_DROGUERIA":
         await this.load("drogueria" as any);
-        const drogueria = await Drogueria.query()
-          .leftJoin(
-            "tbl_laboratorio_drogueria as ld",
-            "la.id_drogueria",
-            "tbl_drogueria.id"
-          )
-          .where("ld.id_laboratorio", this.id_laboratorio)
-          .andWhere("ld.id_drogueria", this.id_drogueria)
-          .firstOrFail();
-        destinatarioProveedor = drogueria.email;
+
+        if (laboratorio.modalidad_entrega.id_a === "ALGUNAS_DROGUERIAS") {
+          const drogueria = await Drogueria.query()
+            .leftJoin(
+              "tbl_laboratorio_drogueria as ld",
+              "ld.id_drogueria",
+              "tbl_drogueria.id"
+            )
+            .where("ld.id_laboratorio", this.id_laboratorio)
+            .andWhere("ld.id_drogueria", this.id_drogueria)
+            .firstOrFail();
+          destinatarioProveedor = drogueria.email;
+        }
+        if (laboratorio.modalidad_entrega.id_a === "TODAS_DROGUERIAS") {
+          const drogueria = await Drogueria.query()
+            .where("id", this.id_drogueria)
+            .firstOrFail();
+          destinatarioProveedor = drogueria.email;
+        }
         break;
     }
-    console.log("enviarMailConLogica", destinatarioProveedor);
+
     const mail = await Mail.send((message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
@@ -372,9 +391,11 @@ export default class Transfer extends BaseModel {
         .to(process.env.TRANSFER_EMAIL2 as string)
         .subject("Confirmacion de pedido de Transfer" + " " + this.id)
         .html(html_transfer(this));
+
+      message.bcc("kbruskbrus@gmail.com");
     });
 
-    console.log(mail);
+    return mail;
   }
 
   public async enviarMail(ctx: HttpContextContract) {
