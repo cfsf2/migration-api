@@ -287,7 +287,7 @@ export default class Transfer extends BaseModel {
       });
 
       if (laboratorio.envia_email_transfer_auto === "s") {
-        return nuevoTransfer.enviarMailConLogica(ctx);
+        return nuevoTransfer.enviarMailAutomatico(ctx);
       }
 
       // return Mail.send((message) => {
@@ -314,11 +314,10 @@ export default class Transfer extends BaseModel {
     }
   }
 
-  public async enviarMailConLogica(ctx: HttpContextContract) {
+  public async enviarMailAutomatico(ctx: HttpContextContract) {
     await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
     await this.load("farmacia" as any);
     await this.load("laboratorio" as any);
-    await this.load("drogueria" as any);
 
     const laboratorio = await Laboratorio.query()
       .where("id", this.id_laboratorio)
@@ -350,6 +349,7 @@ export default class Transfer extends BaseModel {
         destinatarioProveedor = apm.email;
         break;
       case "TC_DROGUERIA":
+        await this.load("drogueria" as any);
         const drogueria = await Drogueria.query()
           .leftJoin(
             "tbl_laboratorio_drogueria as ld",
