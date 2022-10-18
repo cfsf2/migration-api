@@ -79,7 +79,7 @@ export default class CampanasController {
     }
   }
 
-  public async negaroReq(ctx: HttpContextContract) {
+  public async negarReq(ctx: HttpContextContract) {
     const { response, request } = ctx;
     try {
       const requerimiento = new CampanaRequerimiento();
