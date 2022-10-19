@@ -346,15 +346,27 @@ export default class Transfer extends BaseModel {
       .preload("modalidad_entrega")
       .firstOrFail();
 
+    if (laboratorio.envia_email_transfer_auto !== "s") {
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(this.farmacia.email as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+          .html(html_transfer(this));
+      });
+    }
+
     let destinatarioProveedor = "";
 
     switch (laboratorio.tipo_comunicacion.id_a) {
       case "TC_LABORATORIO":
-        if (!laboratorio.email)
-          throw await new ExceptionHandler().handle(
-            { code: "LAB_SIN_EMAIL" },
-            {} as HttpContextContract
-          );
+        // if (!laboratorio.email)
+        //   throw await new ExceptionHandler().handle(
+        //     { code: "LAB_SIN_EMAIL" },
+        //     {} as HttpContextContract
+        //   );
         destinatarioProveedor = laboratorio.email;
         break;
       case "TC_APM":
@@ -409,13 +421,11 @@ export default class Transfer extends BaseModel {
       message
         .from(process.env.SMTP_USERNAME as string)
         .to(this.email_destinatario as string)
-        .to(destinatarioProveedor)
+        .bcc(destinatarioProveedor)
         .to(process.env.TRANSFER_EMAIL as string)
         .to(process.env.TRANSFER_EMAIL2 as string)
         .subject("Confirmacion de pedido de Transfer" + " " + this.id)
         .html(html_transfer(this));
-
-      message.bcc("kbruskbrus@gmail.com");
     });
 
     return mail;
