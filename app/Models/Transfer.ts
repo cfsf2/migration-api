@@ -255,7 +255,10 @@ export default class Transfer extends BaseModel {
 
         if (laboratorio.monto_minimo_transfer > monto) {
           return new ExceptionHandler().handle(
-            { code: "TRANSFER_NO_SUPERA_MONTO_MINIMO" },
+            {
+              code: "TRANSFER_NO_SUPERA_MONTO_MINIMO",
+              valor: laboratorio.monto_minimo_transfer,
+            },
             ctx
           );
         }
@@ -270,7 +273,10 @@ export default class Transfer extends BaseModel {
 
         if (laboratorio.unidades_minimas_transfer > cantidad_unidades) {
           return new ExceptionHandler().handle(
-            { code: "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA" },
+            {
+              code: "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA",
+              valor: laboratorio.unidades_minimas_transfer,
+            },
             ctx
           );
         }

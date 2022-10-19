@@ -238,7 +238,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       if (error.code === "TRANSFER_NO_SUPERA_MONTO_MINIMO") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
-          : "El pedido no supera el monto minimo exigido por el laboratorio";
+          : `El pedido no supera el monto minimo exigido por el laboratorio. Minimo: ${error.valor} `;
 
         return ctx.response.status(409).send({
           error: { message, code: error.code },
@@ -248,7 +248,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       if (error.code === "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
-          : "El pedido no supera la cantidad minima de unidades exigido por el laboratorio";
+          : `El pedido no supera la cantidad minima de unidades exigido por el laboratorio. Minimo: ${error.valor}`;
 
         return ctx.response.status(409).send({
           error: { message, code: error.code },
