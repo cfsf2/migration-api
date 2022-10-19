@@ -1,5 +1,17 @@
 {
   "commands": {
+    "enviar:transfer_emails": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/EnviarTransferEmails",
+      "commandName": "enviar:transfer_emails",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",
@@ -13,17 +25,63 @@
       "settings": {
         "loadApp": true
       },
-      "commandPath": "@adonisjs/core/build/commands/ListRoutes",
+      "commandPath": "@adonisjs/core/build/commands/ListRoutes/index",
       "commandName": "list:routes",
       "description": "List application routes",
       "args": [],
       "aliases": [],
       "flags": [
         {
+          "name": "verbose",
+          "propertyName": "verbose",
+          "type": "boolean",
+          "description": "Display more information"
+        },
+        {
+          "name": "reverse",
+          "propertyName": "reverse",
+          "type": "boolean",
+          "alias": "r",
+          "description": "Reverse routes display"
+        },
+        {
+          "name": "methods",
+          "propertyName": "methodsFilter",
+          "type": "array",
+          "alias": "m",
+          "description": "Filter routes by method"
+        },
+        {
+          "name": "patterns",
+          "propertyName": "patternsFilter",
+          "type": "array",
+          "alias": "p",
+          "description": "Filter routes by the route pattern"
+        },
+        {
+          "name": "names",
+          "propertyName": "namesFilter",
+          "type": "array",
+          "alias": "n",
+          "description": "Filter routes by route name"
+        },
+        {
           "name": "json",
           "propertyName": "json",
           "type": "boolean",
           "description": "Output as JSON"
+        },
+        {
+          "name": "table",
+          "propertyName": "table",
+          "type": "boolean",
+          "description": "Output as Table"
+        },
+        {
+          "name": "max-width",
+          "propertyName": "maxWidth",
+          "type": "number",
+          "description": "Specify maximum rendering width. Ignored for JSON Output"
         }
       ]
     },

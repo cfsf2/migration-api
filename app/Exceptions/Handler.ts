@@ -234,6 +234,14 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: ctx.$_sql,
         });
       }
+
+      if (error.code === "LAB_SIN_EMAIL") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El Laboratorio no tiene un email asignado";
+
+        return { error: { message } };
+      }
     }
     return ctx.response.badRequest({
       error: {

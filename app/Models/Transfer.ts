@@ -28,8 +28,10 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Apm from "./Apm";
 import ApmFarmacia from "./ApmFarmacia";
+import TransferEmail from "./TransferEmail";
 
 export default class Transfer extends BaseModel {
+  public static table = "tbl_transfer";
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
     const transfers = await Database.from("tbl_transfer as t")
       .select(
@@ -287,7 +289,9 @@ export default class Transfer extends BaseModel {
           return transferProducto.save();
         })
       );
+      // *** en Lugar de enviar el mail, se suma un registro a la tabla transfer_email para que el cron ejecute la funcion
 
+      return await nuevoTransfer.generarColaEmail(ctx);
       if (laboratorio.envia_email_transfer_auto === "s") {
         return nuevoTransfer.enviarMailAutomatico(ctx);
       }
@@ -316,7 +320,21 @@ export default class Transfer extends BaseModel {
     }
   }
 
-  public async enviarMailAutomatico(ctx: HttpContextContract) {
+  public async generarColaEmail(ctx: HttpContextContract) {
+    const nuevoEmail = new TransferEmail();
+    guardarDatosAuditoria({
+      objeto: nuevoEmail,
+      usuario: ctx.auth.user as Usuario,
+      accion: AccionCRUD.crear,
+    });
+    nuevoEmail.merge({
+      id_transfer: this.id,
+      enviado: "n",
+    });
+    return await nuevoEmail.save();
+  }
+
+  public async enviarMailAutomatico() {
     await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
     await this.load("farmacia" as any);
     await this.load("laboratorio" as any);
@@ -332,6 +350,11 @@ export default class Transfer extends BaseModel {
 
     switch (laboratorio.tipo_comunicacion.id_a) {
       case "TC_LABORATORIO":
+        if (!laboratorio.email)
+          throw await new ExceptionHandler().handle(
+            { code: "LAB_SIN_EMAIL" },
+            {} as HttpContextContract
+          );
         destinatarioProveedor = laboratorio.email;
         break;
       case "TC_APM":
@@ -398,19 +421,17 @@ export default class Transfer extends BaseModel {
     return mail;
   }
 
-  public async enviarMail(ctx: HttpContextContract) {
+  public async enviarMail(email) {
     try {
       await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
       await this.load("farmacia" as any);
       await this.load("laboratorio" as any);
       await this.load("drogueria" as any);
 
-      return Mail.send((message) => {
+      return await Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
-          .to(this.email_destinatario as string)
-          .to(process.env.TRANSFER_EMAIL as string)
-          .to(process.env.TRANSFER_EMAIL2 as string)
+          .to(email as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
           .html(html_transfer(this));
       });
@@ -423,11 +444,9 @@ export default class Transfer extends BaseModel {
           .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
           .html(html_transfer(this) + err.toString());
       });
-      throw new ExceptionHandler().handle(err, ctx);
+      throw new ExceptionHandler(); //.handle(err, ctx);
     }
   }
-
-  public static table = "tbl_transfer";
 
   @column({ isPrimary: true })
   public id: number;
