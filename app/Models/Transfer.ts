@@ -306,6 +306,12 @@ export default class Transfer extends BaseModel {
 
       await nuevoTransfer.save();
 
+      nuevoTransfer
+        .merge({
+          email_laboratorio_apm: await nuevoTransfer.getDestinatario(),
+        })
+        .save();
+
       //***  Registra los productos transfer solicitados */
       await Promise.all(
         data.productos_solicitados.map(async (p) => {
@@ -397,6 +403,34 @@ export default class Transfer extends BaseModel {
       });
     }
 
+    let destinatarioProveedor = await this.getDestinatario();
+
+    const mail = await Mail.send((message) => {
+      message
+        .from(process.env.SMTP_USERNAME as string)
+        .to(this.email_destinatario as string)
+        .bcc(destinatarioProveedor)
+        .to(process.env.TRANSFER_EMAIL as string)
+        .to(process.env.TRANSFER_EMAIL2 as string)
+        .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+        .html(html_transfer(this));
+    });
+
+    return mail;
+  }
+
+  public async getDestinatario() {
+    await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+    await this.load("farmacia" as any);
+    await this.load("laboratorio" as any);
+
+    const laboratorio = await Laboratorio.query()
+      .where("id", this.id_laboratorio)
+      .preload("apms")
+      .preload("tipo_comunicacion")
+      .preload("modalidad_entrega")
+      .firstOrFail();
+
     let destinatarioProveedor = "";
 
     switch (laboratorio.tipo_comunicacion.id_a) {
@@ -456,18 +490,7 @@ export default class Transfer extends BaseModel {
         break;
     }
 
-    const mail = await Mail.send((message) => {
-      message
-        .from(process.env.SMTP_USERNAME as string)
-        .to(this.email_destinatario as string)
-        .bcc(destinatarioProveedor)
-        .to(process.env.TRANSFER_EMAIL as string)
-        .to(process.env.TRANSFER_EMAIL2 as string)
-        .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-        .html(html_transfer(this));
-    });
-
-    return mail;
+    return destinatarioProveedor;
   }
 
   public async enviarMail(email) {
