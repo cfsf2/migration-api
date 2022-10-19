@@ -40,7 +40,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           error?.code
         );
       }
-      console.log(error);
+      console.log("Error Handler:", error);
 
       if (error.sqlMessage) {
         errorKey = error.sqlMessage
@@ -231,6 +231,27 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message },
+          sql: ctx.$_sql,
+        });
+      }
+
+      if (error.code === "TRANSFER_NO_SUPERA_MONTO_MINIMO") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El pedido no supera el monto minimo exigido por el laboratorio";
+
+        return ctx.response.status(409).send({
+          error: { message, code: error.code },
+          sql: ctx.$_sql,
+        });
+      }
+      if (error.code === "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El pedido no supera la cantidad minima de unidades exigido por el laboratorio";
+
+        return ctx.response.status(409).send({
+          error: { message, code: error.code },
           sql: ctx.$_sql,
         });
       }

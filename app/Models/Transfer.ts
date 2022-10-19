@@ -201,6 +201,7 @@ export default class Transfer extends BaseModel {
         .firstOrFail();
       let drogueria = null as unknown as Drogueria;
 
+      // *********** Chequear modalidad_entrega
       if (
         laboratorio.modalidad_entrega.id_a === "ALGUNAS_DROGUERIAS" ||
         laboratorio.modalidad_entrega.id_a === "TODAS_DROGUERIAS"
@@ -244,6 +245,37 @@ export default class Transfer extends BaseModel {
 
       const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
 
+      //** Validar monto Minimo y cantidad Minima */
+      if (laboratorio.monto_minimo_transfer > 0) {
+        let monto = data.productos_solicitados.reduce((p, c) => {
+          const cantidad = c.cantidad;
+          const precio = c.precio;
+          return precio * cantidad + p;
+        }, 0);
+
+        if (laboratorio.monto_minimo_transfer > monto) {
+          return new ExceptionHandler().handle(
+            { code: "TRANSFER_NO_SUPERA_MONTO_MINIMO" },
+            ctx
+          );
+        }
+      }
+
+      if (laboratorio.unidades_minimas_transfer > 0) {
+        let cantidad_unidades = data.productos_solicitados.reduce((p, c) => {
+          const cantidad = c.cantidad;
+
+          return cantidad + p;
+        }, 0);
+
+        if (laboratorio.unidades_minimas_transfer > cantidad_unidades) {
+          return new ExceptionHandler().handle(
+            { code: "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA" },
+            ctx
+          );
+        }
+      }
+
       nuevoTransfer.merge({
         nro_cuenta_drogueria: data.nro_cuenta_drogueria,
         id_drogueria: drogueria?.id,
@@ -268,6 +300,7 @@ export default class Transfer extends BaseModel {
 
       await nuevoTransfer.save();
 
+      //***  Registra los productos transfer solicitados */
       await Promise.all(
         data.productos_solicitados.map(async (p) => {
           const transferProducto = new TransferTransferProducto();
