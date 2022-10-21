@@ -82,6 +82,6 @@ export default class EnviarTransferEmails extends BaseCommand {
     } catch (err) {
       console.log(err);
     }
-    this.logger.info("Hello world!");
+    this.logger.info("Enviar Transfer Emails");
   }
 }
