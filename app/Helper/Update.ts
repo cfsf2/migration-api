@@ -24,59 +24,9 @@ import SCCD from "App/Models/SConfConfDeta";
 
 import * as M from "./ModelIndex";
 
-// import S from "App/Models/Servicio";
-// import F from "App/Models/Farmacia";
-// import FS from "App/Models/FarmaciaServicio";
-// import FD from "App/Models/FarmaciaDrogueria";
-// import FL from "App/Models/FarmaciaLaboratorio";
 import Usuario from "App/Models/Usuario";
 
-// import T from "App/Models/Transfer";
-// import TP from "App/Models/TransferProducto";
-// import TTP from "App/Models/TransferTransferProducto";
-
-// import L from "App/Models/Laboratorio";
-// import _Apm from "App/Models/Apm";
-// import _ApmFarmacia from "App/Models/ApmFarmacia";
-// import DR from "App/Models/Drogueria";
-
-// import R from "App/Models/Recupero";
-// import RD from "App/Models/RecuperoDiagnostico";
-// import RE from "App/Models/RecuperoEstadio";
-// import RLT from "App/Models/RecuperoLineaTratamiento";
-// import RPS from "App/Models/RecuperoPerformanceStatus";
-// import DGN from "App/Models/Diagnostico";
-// import ESTD from "App/Models/Estadio";
-// import LT from "App/Models/LineaTratamiento";
-// import PS from "App/Models/PerformanceStatus";
-// import M from "App/Models/Monodro";
-
 const Database = Datab;
-// let Recupero = R;
-// let RecuperoDiagnostico = RD;
-// let RecuperoEstadio = RE;
-// let RecuperoLineaTratamiento = RLT;
-// let RecuperoPerformanceStatus = RPS;
-// let Diagnostico = DGN;
-// let Estadio = ESTD;
-// let LineaTratamiento = LT;
-// let PerformanceStatus = PS;
-// let Monodro = M;
-
-// let Servicio = S;
-// let Farmacia = F;
-// let FarmaciaServicio = FS;
-// let FarmaciaDrogueria = FD;
-// let FarmaciaLaboratorio = FL;
-
-// let Transfer = T;
-// let TransferProducto = TP;
-// let TransferTransferProducto = TTP;
-
-// let Laboratorio = L;
-// let Apm = _Apm;
-// let ApmFarmacia = _ApmFarmacia;
-// let Drogueria = DR;
 
 let _SConf = SConf;
 let SConfTipoAtributoValor = SCTPV;

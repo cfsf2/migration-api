@@ -40,7 +40,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           error?.code
         );
       }
-      console.log("Error Handler:", error);
+      console.log(Date(), "Error Handler:", error);
 
       if (error.sqlMessage) {
         errorKey = error.sqlMessage
@@ -260,6 +260,14 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : "El Laboratorio no tiene un email asignado";
+
+        return { error: { message } };
+      }
+
+      if (error.code === "NO_HAY_OTRO_APM_ADMINISTRADOR") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Debe haber al menos un APM administrador";
 
         return { error: { message } };
       }
