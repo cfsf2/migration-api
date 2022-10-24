@@ -132,24 +132,33 @@ export default class Transfer extends BaseModel {
 
       await nuevoTransfer.save();
 
-      data.productos_solicitados.forEach((p) => {
-        const transferProducto = new TransferTransferProducto();
-        transferProducto.merge({
-          id_transfer_producto: p.id,
-          id_transfer: nuevoTransfer.id,
-          cantidad: p.cantidad,
-          precio: p.precio,
-          observaciones: p.observacion,
+      await Promise.all(
+        data.productos_solicitados.map(async (p) => {
+          const transferProducto = new TransferTransferProducto();
+          transferProducto.merge({
+            id_transfer_producto: p.id,
+            id_transfer: nuevoTransfer.id,
+            cantidad: p.cantidad,
+            precio: p.precio,
+            observaciones: p.observacion,
 
-          id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-        });
-        guardarDatosAuditoria({
-          objeto: transferProducto,
-          usuario: usuario,
-          accion: AccionCRUD.crear,
-        });
-        transferProducto.save();
-      });
+            id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+          });
+          guardarDatosAuditoria({
+            objeto: transferProducto,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          await transferProducto.save();
+        })
+      );
+
+      await nuevoTransfer.load("ttp" as any, (ttp) =>
+        ttp.preload("transfer_producto")
+      );
+      await nuevoTransfer.load("farmacia" as any);
+      await nuevoTransfer.load("laboratorio" as any);
+      await nuevoTransfer.load("drogueria" as any);
 
       Mail.send((message) => {
         message
@@ -160,7 +169,7 @@ export default class Transfer extends BaseModel {
           .subject(
             "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
           )
-          .html(transferHtml({ transfer: data, farmacia: farmacia }));
+          .html(html_transfer(nuevoTransfer));
       });
     } catch (err) {
       console.log(err);

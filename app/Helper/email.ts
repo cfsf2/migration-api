@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 const imagen_path = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/imagenes/`;
 
 interface Email {
@@ -355,6 +357,7 @@ export const transferHtml = ({ transfer, farmacia }) => {
                       </head>
                       <body>
                         <div>
+                          <p><b>Codigo: </b>${transfer.id} </p>
                           <p><b>Farmacia: </b>${farmacia.nombre} / <b>Cuit: </b>${farmacia.cuit}</p>
                           <p><b>Telefono: </b>${farmacia.telefono}</p>
                           <p><b>Nro Cufe: </b>${farmacia.cufe}</p>
@@ -362,6 +365,7 @@ export const transferHtml = ({ transfer, farmacia }) => {
                           <p><b>Droguería: </b>${transfer.drogueria_id}</p>
                           <p><b>Laboratorio elegido: </b>${transfer.laboratorio_id}</p>
                           <p><b>Dirección: </b>${farmacia.direccioncompleta}</p>
+                          
                         </div>
                       <table>
                           <tr>
@@ -417,13 +421,28 @@ export const html_transfer = (transfer) => {
                         <body>
                           <div>
                             <p><b>Codigo: </b>${transfer.id} </p>
-                            <p><b>Farmacia: </b>${transfer.farmacia.nombre} / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
-                            <p><b>Telefono: </b>${transfer.farmacia.telefono}</p>
+                            <p><b>Farmacia: </b>${
+                              transfer.farmacia.nombre
+                            } / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
+                            <p><b>Telefono: </b>${
+                              transfer.farmacia.telefono
+                            }</p>
                             <p><b>Nro Cufe: </b>${transfer.farmacia.cufe}</p>
-                            <p><b>Nro Cuenta de Droguería: </b>${transfer.nro_cuenta_drogueria}</p> 
-                            <p><b>Droguería: </b>${transfer.drogueria.nombre}</p>
-                            <p><b>Laboratorio elegido: </b>${transfer.laboratorio.nombre}</p>
-                            <p><b>Dirección: </b>${transfer.farmacia.direccioncompleta}</p>
+                            <p><b>Nro Cuenta de Droguería: </b>${
+                              transfer.nro_cuenta_drogueria
+                            }</p> 
+                            <p><b>Droguería: </b>${
+                              transfer.drogueria.nombre
+                            }</p>
+                            <p><b>Laboratorio elegido: </b>${
+                              transfer.laboratorio.nombre
+                            }</p>
+                            <p><b>Dirección: </b>${
+                              transfer.farmacia.direccioncompleta
+                            }</p>
+                            <p><b>Fecha: </b> ${DateTime.fromISO(
+                              transfer.ts_creacion
+                            ).toFormat("dd/MM/yyyy  hh:mm:ss")}</p>
                           </div>
                         <table>
                             <tr>
