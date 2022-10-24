@@ -122,10 +122,9 @@ export const { actions } = Bouncer.define(
           const permisosUsuario = await arrayPermisos(usuario);
 
           if (
-            permisosUsuario.findIndex(
-              (p: { nombre: string }) =>
-                p.nombre === conf.conf_permiso.permiso.nombre
-            ) !== -1
+            permisosUsuario.findIndex((p: { nombre: string }) => {
+              return p.nombre === conf.conf_permiso?.permiso.nombre;
+            }) !== -1
           ) {
             usuario.configuracionesPermitidas =
               usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
