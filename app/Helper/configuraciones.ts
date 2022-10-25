@@ -274,6 +274,7 @@ const extraerElementos = ({
               ctx.$_sql.push({
                 sql: Database.rawQuery(val.valor).toQuery(),
                 conf: c.id_a,
+                confId: c.id,
               });
               val.valor = lista[0];
             }
@@ -1405,7 +1406,11 @@ export class ConfBuilder {
         query.where(`${parametro}`, id);
       }
 
-      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
+      ctx.$_sql.push({
+        sql: query.toQuery(),
+        conf: conf.id_a,
+        confId: conf.id,
+      });
 
       return await query;
     }

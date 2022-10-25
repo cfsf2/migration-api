@@ -6,7 +6,7 @@ declare module "@ioc:Adonis/Core/HttpContext" {
       solicitados: {};
       filtrosObligatorios: string[];
     };
-    $_sql: { sql: string; conf: string }[];
+    $_sql: { sql: string; conf: string; confId: number }[];
     $_datos: any[];
     $_errores: {
       error: { message: string; continuar?: boolean };
