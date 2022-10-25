@@ -649,10 +649,11 @@ const aplicarFiltros = (
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where && where.valor.trim() !== "") {
+    let thisWhere = where.valor;
     if (where.evaluar === "s") {
-      return query.whereRaw(eval(where.valor));
+      thisWhere = eval(where.valor);
     }
-    query.whereRaw(where.valor);
+    query.whereRaw(thisWhere);
   }
 
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
@@ -728,7 +729,7 @@ export class ConfBuilder {
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
-      console.log(opciones.display_container, opciones.id_a);
+
       if (opciones.display_container === "n") return { opciones, datos };
 
       let configuracionDeUsuario = [] as any;
@@ -965,7 +966,7 @@ export class ConfBuilder {
       cabeceras: [],
       error: { message: "" },
     };
-    console.log(opciones.display_container, opciones.id_a);
+
     if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
@@ -1018,11 +1019,13 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
+      sql: { sql: string; conf: string }[] | undefined;
       opciones: { display_container: string; id_a: string };
       configuraciones: any[];
     } = {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
+      sql: [],
     };
 
     if (p.opciones.display_container === "n") return p;
@@ -1068,6 +1071,10 @@ export class ConfBuilder {
       })
     );
 
+    const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+      ? ctx.$_sql
+      : undefined;
+    p.sql = sql;
     p.configuraciones = [];
     p.configuraciones = p.configuraciones.concat(_listadosArmados);
     p.configuraciones = p.configuraciones.concat(_vistasArmadas);
@@ -1280,7 +1287,6 @@ export class ConfBuilder {
       ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
 
       const datos = await query;
-
       ctx.$_datos = ctx.$_datos.concat(datos);
 
       return datos;
