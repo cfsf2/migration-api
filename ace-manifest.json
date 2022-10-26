@@ -7,7 +7,7 @@
       },
       "commandPath": "./commands/EnviarTransferEmails",
       "commandName": "enviar:transfer_emails",
-      "description": "",
+      "description": "Envia Emails de Transfer que se encuentren pendientes",
       "args": [],
       "aliases": [],
       "flags": []

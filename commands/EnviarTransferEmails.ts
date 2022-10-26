@@ -9,7 +9,8 @@ export default class EnviarTransferEmails extends BaseCommand {
   /**
    * Command description is displayed in the "help" output
    */
-  public static description = "";
+  public static description =
+    "Envia Emails de Transfer que se encuentren pendientes";
 
   public static settings = {
     /**

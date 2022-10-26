@@ -223,6 +223,7 @@ const extraerElementos = ({
         // }
 
         item["id_a"] = c.id_a;
+        item["id"] = c.id;
 
         await Promise.all(
           c.valores.map(async (val) => {
@@ -240,13 +241,28 @@ const extraerElementos = ({
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-              let lista = await Database.rawQuery(val.valor);
-              ctx.$_sql.push({
-                sql: Database.rawQuery(val.valor).toQuery(),
-                conf: c.id_a,
-                confId: c.id,
-              });
-              val.valor = lista[0];
+              try {
+                let lista = await Database.rawQuery(val.valor);
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                });
+
+                val.valor = lista[0];
+              } catch (err) {
+                err.id_a = c.id_a;
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                  error: true,
+                });
+
+                return new ExceptionHandler().handle(err, ctx);
+              }
             }
 
             if (atributoNombre === "opciones") {
@@ -521,6 +537,8 @@ interface select {
   alias: string;
   evaluar: string;
   subquery: string;
+  id_a: string;
+  confId: number;
 }
 
 const getSelect = (
@@ -539,6 +557,8 @@ const getSelect = (
       alias: "",
       evaluar: "",
       subquery: "",
+      id_a: conf.id_a,
+      confId: conf.id,
     };
 
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
@@ -559,6 +579,8 @@ const getSelect = (
         alias: "",
         evaluar: v.evaluar,
         subquery: v.subquery,
+        id_a: conf.id_a,
+        confId: conf.id,
       };
 
       vselect.alias = getAtributo({
@@ -941,7 +963,7 @@ export class ConfBuilder {
           : undefined,
       };
     } catch (err) {
-      console.log(err);
+      console.log("ArmarListado", err);
       throw await new ExceptionHandler().handle(err, ctx);
     }
   };
@@ -1001,8 +1023,8 @@ export class ConfBuilder {
 
       return vistaFinal;
     } catch (err) {
-      console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      // console.log("ArmarVista", err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   };
 
@@ -1166,6 +1188,7 @@ export class ConfBuilder {
 
       opciones["tipo"] = conf_h.tipo;
       opciones["id_a"] = conf_h.id_a;
+      opciones["id"] = conf_h.id;
 
       if (conf_h.valores) {
         conf_h?.valores.map(async (val) => {
@@ -1174,8 +1197,25 @@ export class ConfBuilder {
             copyVal = eval(val.valor);
           }
           if (val.subquery === "s") {
-            const subquery = (await Database.rawQuery(copyVal))[0];
-            copyVal = subquery[0];
+            try {
+              const subquery = (await Database.rawQuery(copyVal))[0];
+
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+              });
+
+              copyVal = subquery[0];
+            } catch (err) {
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+                error: true,
+              });
+              return new ExceptionHandler().handle(err, ctx);
+            }
           }
           if (val.atributo[0].nombre === "display_container") {
             copyVal = Object.values(copyVal)[0];
@@ -1234,8 +1274,24 @@ export class ConfBuilder {
         }
 
         if (campo.subquery === "s") {
-          const subquery = await Database.rawQuery(campo.campo);
-          return query.select(`"${subquery[0]}"`);
+          try {
+            const subquery = await Database.rawQuery(campo.campo);
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+            });
+            return query.select(`"${subquery[0]}"`);
+          } catch (err) {
+            err.id = campo.id_a;
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+              error: true,
+            });
+            return await new ExceptionHandler().handle(err, ctx);
+          }
         }
         query.select(
           Database.raw(
@@ -1285,16 +1341,26 @@ export class ConfBuilder {
         query.where(`${parametro}`, id);
       }
 
-      ctx.$_sql.push({
-        sql: query.toQuery(),
-        conf: conf.id_a,
-        confId: conf.id,
-      });
+      try {
+        const datos = await query;
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+        });
+        ctx.$_datos = ctx.$_datos.concat(datos);
 
-      const datos = await query;
-      ctx.$_datos = ctx.$_datos.concat(datos);
+        return datos;
+      } catch (err) {
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+          error: true,
+        });
 
-      return datos;
+        return new ExceptionHandler().handle(err, ctx);
+      }
     }
   };
 }

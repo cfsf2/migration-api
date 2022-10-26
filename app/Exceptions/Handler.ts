@@ -59,7 +59,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle
           : "El Password es incorrecto";
         return ctx.response.status(401).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -69,7 +69,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle
           : "El Usuario no existe";
         return ctx.response.status(401).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -79,7 +79,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle
           : "La Validacion ha fallado";
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -88,7 +88,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : "El tipo de valor no corresponde al dato solicitado";
-        return ctx.response.status(409).send({
+        return ctx.response.status(422).send({
           error: { message },
           sql: ctx.$_sql,
         });
@@ -98,8 +98,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : "El tipo de valor no corresponde al dato solicitado";
-        return ctx.response.status(409).send({
-          error: { message },
+        return ctx.response.status(422).send({
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -110,8 +110,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : "Un valor debe ser provisto para " + field;
-        return ctx.response.status(409).send({
-          error: { message },
+        return ctx.response.status(422).send({
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -122,7 +122,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "Pagina no encontrada";
         console.log(error);
         return ctx.response.status(404).send({
-          error: { message, e: error },
+          error: { message, e: error, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -130,10 +130,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       if (error.code === "ER_PARSE_ERROR") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
-          : "Error de SQL";
+          : error.code + " : " + error.sql;
 
-        return ctx.response.status(409).send({
-          error: { message, e: error },
+        return ctx.response.status(422).send({
+          error: { message, e: error, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -141,10 +141,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       if (error.code === "ER_BAD_FIELD_ERROR") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
-          : error.code;
+          : error.code + " " + error.sqlMessage;
         return ctx.response
           .status(422)
-          .send({ error: { message }, sql: ctx.$_sql });
+          .send({ error: { message, errorSql: error.sql }, sql: ctx.$_sql });
       }
 
       if (error.code === "ER_DUP_ENTRY") {
@@ -153,8 +153,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle + " '" + entry + "' ."
           : `${error.code}: Ya existe un registro con el valor "${entry}". No puede haber duplicados`;
 
-        return ctx.response.status(409).send({
-          error: { message },
+        return ctx.response.status(422).send({
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -165,7 +165,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : error.message;
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -174,8 +174,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle
           : "El archivo es demasiado grande";
 
-        return ctx.response.status(409).send({
-          error: { message },
+        return ctx.response.status(422).send({
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -186,7 +186,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El recupero debe tener al menos un diagnostico asociado para poder habilitar";
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -197,7 +197,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El recupero debe tener al menos un estadio definido asociado para poder habilitar";
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -208,7 +208,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El recupero debe tener al menos un performance status definido asociado para poder habilitar";
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -219,7 +219,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El recupero debe tener al menos una linea de tratamiento definida asociada para poder habilitar";
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -230,7 +230,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "Este tipo no lleva componente";
 
         return ctx.response.status(409).send({
-          error: { message },
+          error: { message, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -241,7 +241,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : `El pedido no supera el monto minimo exigido por el laboratorio. Minimo: ${error.valor} `;
 
         return ctx.response.status(409).send({
-          error: { message, code: error.code },
+          error: { message, code: error.code, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -251,7 +251,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : `El pedido no supera la cantidad minima de unidades exigido por el laboratorio. Minimo: ${error.valor}`;
 
         return ctx.response.status(409).send({
-          error: { message, code: error.code },
+          error: { message, code: error.code, errorSql: error.sql },
           sql: ctx.$_sql,
         });
       }
@@ -261,7 +261,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           ? errorMensajeTraducido.detalle
           : "El Laboratorio no tiene un email asignado";
 
-        return { error: { message } };
+        return { error: { message }, errorSql: error.sql };
       }
 
       if (error.code === "NO_HAY_OTRO_APM_ADMINISTRADOR") {
@@ -275,9 +275,10 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     return ctx.response.badRequest({
       error: {
         message: errorMensajeTraducido?.detalle ?? error?.sqlMessage,
-        sql: ctx.$_sql,
         error: error,
+        errorSql: error?.sql,
       },
+      sql: ctx.$_sql,
     });
     //   .status(411)
     //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
