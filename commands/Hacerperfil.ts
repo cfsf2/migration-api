@@ -33,18 +33,13 @@ export default class Hacerperfil extends BaseCommand {
   @args.string()
   public nuevoPerfil: string;
 
-  @args.string()
-  public descripcion: string;
-
-  @args.string()
-  public tipo: string;
-
   @args.spread()
   public permisos: string[];
 
   public async run() {
     const { default: Perfil } = await import("App/Models/Perfil");
     const { default: PerfilPermiso } = await import("App/Models/PerfilPermiso");
+    const { default: Permiso } = await import("App/Models/Permiso");
 
     const perfil = await Perfil.query()
       .where("nombre", this.perfilBase)
@@ -55,24 +50,45 @@ export default class Hacerperfil extends BaseCommand {
 
     const nuevoPerfil = await Perfil.create({
       nombre: this.nuevoPerfil,
-      descripcion: this.descripcion,
-      tipo: this.tipo,
+      descripcion: await this.prompt.ask("Descripcion de perfil: "),
+      tipo: await this.prompt.ask("Tipo de perfil: "),
     });
 
-    perfil.permisos.map(async (permiso) => {
-      return await PerfilPermiso.create({
-        id_perfil: nuevoPerfil.id,
-        id_permiso: permiso.id
+    await Promise.all(
+      perfil.permisos.map(async (permiso) => {
+        return await PerfilPermiso.create({
+          id_perfil: nuevoPerfil.id,
+          id_permiso: permiso.id,
+        });
       })
-    });
+    );
 
-    this.permisos.forEach(async(permiso) => //modelo de permiso )
-    
+    await Promise.all(
+      this.permisos.map(async (permiso) => {
+        const existeP = await Permiso.query().where("nombre", permiso).first();
+
+        if (!existeP) {
+          const nuevoPermiso = await Permiso.create({
+            nombre: permiso,
+            descripcion: await this.prompt.ask("Descripcion del permiso: "),
+            tipo: await this.prompt.ask("Tipo/permiso: "),
+          });
+          console.log("nuevoPermiso", nuevoPermiso);
+          return await PerfilPermiso.create({
+            id_perfil: nuevoPerfil.id,
+            id_permiso: nuevoPermiso.id,
+          });
+        }
+
+        return await PerfilPermiso.create({
+          id_perfil: nuevoPerfil.id,
+          id_permiso: existeP.id,
+        });
+      })
+    );
 
     if (perfil) {
       this.logger.success("Perfil Existente");
-
-      console.log(this.nuevoPerfil);
     }
   }
 }
