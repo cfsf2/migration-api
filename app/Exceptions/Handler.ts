@@ -17,6 +17,7 @@ import Logger from "@ioc:Adonis/Core/Logger";
 import HttpExceptionHandler from "@ioc:Adonis/Core/HttpExceptionHandler";
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import SErrorMysql from "App/Models/SErrorMysql";
+import { Permiso } from "App/Helper/permisos";
 
 export default class ExceptionHandler extends HttpExceptionHandler {
   protected statusPages = {
@@ -60,7 +61,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El Password es incorrecto";
         return ctx.response.status(401).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -70,7 +73,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El Usuario no existe";
         return ctx.response.status(401).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -80,7 +85,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "La Validacion ha fallado";
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -90,7 +97,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El tipo de valor no corresponde al dato solicitado";
         return ctx.response.status(422).send({
           error: { message },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -100,7 +109,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El tipo de valor no corresponde al dato solicitado";
         return ctx.response.status(422).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -112,7 +123,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "Un valor debe ser provisto para " + field;
         return ctx.response.status(422).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -123,7 +136,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         console.log(error);
         return ctx.response.status(404).send({
           error: { message, e: error, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -134,7 +149,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(422).send({
           error: { message, e: error, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -144,7 +161,12 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : error.code + " " + error.sqlMessage;
         return ctx.response
           .status(422)
-          .send({ error: { message, errorSql: error.sql }, sql: ctx.$_sql });
+          .send({
+            error: { message, errorSql: error.sql },
+            sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+              ? ctx.$_sql
+              : undefined,
+          });
       }
 
       if (error.code === "ER_DUP_ENTRY") {
@@ -155,7 +177,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(422).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -166,7 +190,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
       if (error.code === "E_REQUEST_ENTITY_TOO_LARGE") {
@@ -176,7 +202,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(422).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -187,7 +215,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -198,7 +228,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -209,7 +241,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -220,7 +254,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -231,7 +267,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -242,7 +280,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, code: error.code, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
       if (error.code === "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA") {
@@ -252,7 +292,9 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return ctx.response.status(409).send({
           error: { message, code: error.code, errorSql: error.sql },
-          sql: ctx.$_sql,
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
         });
       }
 
@@ -262,6 +304,19 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           : "El Laboratorio no tiene un email asignado";
 
         return { error: { message }, errorSql: error.sql };
+      }
+
+      if (error.code === "SIN_EMAIL_VALIDO") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Debe ingresar un email valido.";
+
+        return ctx.response.status(409).send({
+          error: { message, code: error.code, errorSql: error.sql },
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
+        });
       }
 
       if (error.code === "NO_HAY_OTRO_APM_ADMINISTRADOR") {
@@ -278,10 +333,14 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         error: error,
         errorSql: error?.sql,
       },
-      sql: ctx.$_sql,
+      sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+        ? ctx.$_sql
+        : undefined,
     });
     //   .status(411)
-    //   .send({ error: { message: error.code, sql: error.sql }, sql: ctx.$_sql });
+    //   .send({ errorctx.: { message: error.code, sql: error.sql }, sql: (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+    //      ? ctx.$_sql
+    //      : undefined });
 
     /**
      * Forward rest of the exceptions to the parent class

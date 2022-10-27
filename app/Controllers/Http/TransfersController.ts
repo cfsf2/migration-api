@@ -88,13 +88,17 @@ export default class TransfersController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
 
-      console.log(request.body().id);
       const transfer = await Transfer.findOrFail(request.body().id);
 
       const emails = Object.values(request.body()).find((r) =>
         r.toString().includes("@")
       );
-      console.log(emails);
+      if (!emails) {
+        return await new ExceptionHandler().handle(
+          { code: "SIN_EMAIL_VALIDO" },
+          ctx
+        );
+      }
 
       return transfer.generarColaEmailUnico(ctx, emails);
     } catch (err) {

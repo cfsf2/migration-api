@@ -35,7 +35,7 @@ export default class ConfigsController {
     }
     const conf = await SConf.query()
       .where("id_a", config)
-      .preload("conf_permiso")
+      .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("tipo", (query) => query.preload("atributos"))
       .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
@@ -106,7 +106,7 @@ export default class ConfigsController {
       const conf = await SConf.query()
         .where("id_a", config)
         .andWhere("id_tipo", 1)
-        .preload("conf_permiso")
+        .preload("conf_permiso", (query) => query.preload("permiso"))
         .preload("tipo", (query) => query.preload("atributos"))
         .preload("componente", (query) => query.preload("atributos"))
         .preload("orden")
