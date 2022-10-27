@@ -82,6 +82,7 @@ export enum Permiso {
   INICIO = "INICIO",
   GET_SQL = "GET_SQL",
   GET_CONF = "GET_CONF",
+  TRANSFER_ADMIN = "TRANSFER_ADMIN",
 }
 
 export enum acciones {

@@ -70,7 +70,7 @@ export default class TransfersController {
     const { request, bouncer } = ctx;
 
     try {
-      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
 
       console.log(request.body().id);
       const transfer = await Transfer.findOrFail(request.body().id);
@@ -86,7 +86,7 @@ export default class TransfersController {
     const { request, bouncer } = ctx;
 
     try {
-      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
 
       console.log(request.body().id);
       const transfer = await Transfer.findOrFail(request.body().id);
