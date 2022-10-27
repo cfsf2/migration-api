@@ -1275,12 +1275,12 @@ export class ConfBuilder {
 
         if (campo.subquery === "s") {
           try {
-            const subquery = await Database.rawQuery(campo.campo);
             ctx.$_sql.push({
               sql: Database.rawQuery(campo.campo).toQuery(),
               conf: campo.id_a,
               confId: campo.confId,
             });
+            const subquery = await Database.rawQuery(campo.campo);
             return query.select(`"${subquery[0]}"`);
           } catch (err) {
             err.id = campo.id_a;
@@ -1342,12 +1342,12 @@ export class ConfBuilder {
       }
 
       try {
-        const datos = await query;
         ctx.$_sql.push({
           sql: query.toQuery(),
           conf: conf.id_a,
           confId: conf.id,
         });
+        const datos = await query;
         ctx.$_datos = ctx.$_datos.concat(datos);
 
         return datos;

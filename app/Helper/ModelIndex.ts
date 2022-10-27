@@ -17,6 +17,7 @@ import U from "App/Models/Usuario";
 import T from "App/Models/Transfer";
 import TP from "App/Models/TransferProducto";
 import TTP from "App/Models/TransferTransferProducto";
+import _TransferEmail from "App/Models/TransferEmail";
 
 import L from "App/Models/Laboratorio";
 import _LaboratorioDrogueria from "App/Models/LaboratorioDrogueria";
@@ -55,6 +56,7 @@ export let FarmaciaLaboratorio = FL;
 export let Transfer = T;
 export let TransferProducto = TP;
 export let TransferTransferProducto = TTP;
+export let TransferEmail = _TransferEmail;
 
 export let Laboratorio = L;
 export let LaboratorioDrogueria = _LaboratorioDrogueria;
