@@ -1132,7 +1132,7 @@ export class ConfBuilder {
       id: ctx.request.body().id,
     });
 
-    if (ctx.request.body().id) {
+    if (ctx.request.body().id && abm.getAtributo({ atributo: "parametro" })) {
       datos = await this.getDatos(ctx, abm, ctx.request.body().id);
     }
 
