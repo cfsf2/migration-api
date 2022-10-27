@@ -44,51 +44,67 @@ export default class Hacerperfil extends BaseCommand {
     const perfil = await Perfil.query()
       .where("nombre", this.perfilBase)
       .preload("permisos")
-      .firstOrFail();
+      .first();
 
     if (!perfil) return this.logger.warning("Ese perfil no existe");
 
-    const nuevoPerfil = await Perfil.create({
-      nombre: this.nuevoPerfil,
-      descripcion: await this.prompt.ask("Descripcion de perfil: "),
-      tipo: await this.prompt.ask("Tipo de perfil: "),
-    });
+    if (perfil) {
+      this.logger.info("Ingresa los datos del perfil");
 
-    await Promise.all(
-      perfil.permisos.map(async (permiso) => {
-        return await PerfilPermiso.create({
-          id_perfil: nuevoPerfil.id,
-          id_permiso: permiso.id,
-        });
-      })
-    );
+      const nuevoPerfil = await Perfil.create({
+        nombre: this.nuevoPerfil,
+        descripcion: await this.prompt.ask("Descripcion de perfil: "),
+        tipo: await this.prompt.choice("Select account type", [
+          {
+            name: "admin",
+            message: "Admin (Complete access)",
+          },
+          {
+            name: "farmacia",
+            message: "Farmacia (Can access specific resources)",
+          },
+        ]),
+      });
 
-    await Promise.all(
-      this.permisos.map(async (permiso) => {
-        const existeP = await Permiso.query().where("nombre", permiso).first();
-
-        if (!existeP) {
-          const nuevoPermiso = await Permiso.create({
-            nombre: permiso,
-            descripcion: await this.prompt.ask("Descripcion del permiso: "),
-            tipo: await this.prompt.ask("Tipo/permiso: "),
-          });
-          console.log("nuevoPermiso", nuevoPermiso);
+      await Promise.all(
+        perfil.permisos.map(async (permiso) => {
           return await PerfilPermiso.create({
             id_perfil: nuevoPerfil.id,
-            id_permiso: nuevoPermiso.id,
+            id_permiso: permiso.id,
           });
-        }
+        })
+      );
 
-        return await PerfilPermiso.create({
-          id_perfil: nuevoPerfil.id,
-          id_permiso: existeP.id,
-        });
-      })
-    );
+      await Promise.all(
+        this.permisos.map(async (permiso) => {
+          const existeP = await Permiso.query()
+            .where("nombre", permiso)
+            .first();
 
-    if (perfil) {
-      this.logger.success("Perfil Existente");
+          if (!existeP) {
+            this.logger.warning("El permiso no existe");
+            this.logger.info("Ingresa los datos del nuevo permiso");
+
+            const nuevoPermiso = await Permiso.create({
+              nombre: permiso,
+              descripcion: await this.prompt.ask("Descripcion del permiso: "),
+              tipo: await this.prompt.ask("Tipo/permiso: "),
+            });
+
+            await PerfilPermiso.create({
+              id_perfil: nuevoPerfil.id,
+              id_permiso: nuevoPermiso.id,
+            });
+            return this.logger.success("Permiso creado!");
+          }
+
+          return await PerfilPermiso.create({
+            id_perfil: nuevoPerfil.id,
+            id_permiso: existeP.id,
+          });
+        })
+      );
+      return this.logger.success("Perfil creado!");
     }
   }
 }
