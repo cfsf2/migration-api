@@ -73,7 +73,7 @@ export const { actions } = Bouncer.define(
     }
   )
   .define("esAdmin", async (_usuario: Usuario, us: Usuario) => {
-    if (!!(us.$preloaded.perfil as any).find((p) => p.id === 1)) {
+    if (!!(us.$preloaded.perfil as any).find((p) => p.tipo === "admin")) {
       return us.habilitado === "s";
     }
     const tienePerfilFarmacia = await Farmacia.findBy("id_usuario", us.id);

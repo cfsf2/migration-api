@@ -12,6 +12,37 @@
       "aliases": [],
       "flags": []
     },
+    "hacerperfil": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/Hacerperfil",
+      "commandName": "hacerperfil",
+      "description": "",
+      "args": [
+        {
+          "type": "string",
+          "propertyName": "perfilBase",
+          "name": "perfilBase",
+          "required": true
+        },
+        {
+          "type": "string",
+          "propertyName": "nuevoPerfil",
+          "name": "nuevoPerfil",
+          "required": true
+        },
+        {
+          "type": "spread",
+          "propertyName": "permisos",
+          "name": "permisos",
+          "required": true
+        }
+      ],
+      "aliases": [],
+      "flags": []
+    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",
