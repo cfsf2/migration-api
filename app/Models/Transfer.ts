@@ -29,6 +29,7 @@ import ExceptionHandler from "App/Exceptions/Handler";
 import Apm from "./Apm";
 import ApmFarmacia from "./ApmFarmacia";
 import TransferEmail from "./TransferEmail";
+import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 
 export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";
