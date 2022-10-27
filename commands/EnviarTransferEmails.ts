@@ -1,4 +1,6 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
+import Mail from "@ioc:Adonis/Addons/Mail";
+import { generarHtml, html_transfer } from "App/Helper/email";
 
 export default class EnviarTransferEmails extends BaseCommand {
   /**
@@ -33,56 +35,61 @@ export default class EnviarTransferEmails extends BaseCommand {
 
     const transferEmailPendiente = await TransferEmail.query()
       .where("enviado", "n")
-      .preload("transfer");
+      .preload("transfer", (query) =>
+        query
+          .preload("ttp", (query) => query.preload("transfer_producto"))
+          .preload("productos")
+          .preload("laboratorio")
+          .preload("farmacia")
+          .preload("drogueria")
+      );
     try {
       await Promise.all(
         transferEmailPendiente.map(async (tep) => {
-          const emailRes = await tep.transfer.enviarMailAutomatico();
+          const emailRes = await tep.Enviar();
 
           tep.merge({
             enviado: "s",
-            emails: JSON.stringify(emailRes.envelope.to),
+            emails: emailRes.envelope.to.toString(),
             emails_rechazados:
               emailRes.rejected.length > 0
-                ? JSON.stringify(emailRes.rejected)
+                ? emailRes.rejected.split(",")
                 : null,
           });
 
+          if (emailRes.rejected.length > 0) {
+            Mail.send((message) => {
+              message
+                .from(process.env.SMTP_USERNAME as string)
+                .to(process.env.TRANSFER_EMAIL as string)
+                .subject(
+                  "El transfer con Id" +
+                    " " +
+                    tep.transfer.id +
+                    " no pudo ser enviado correctamente"
+                )
+                .html(
+                  generarHtml({
+                    titulo:
+                      "Transfer " +
+                      tep.transfer.id +
+                      " no pudo ser enviado correctamente",
+                    texto:
+                      "Los destinatarios " +
+                      emailRes.rejected.toString() +
+                      " rechazaron la recepcion del email de transfer.",
+                  })
+                );
+            });
+          }
           await tep.save();
 
           return emailRes;
         })
       );
-
-      const transferEmailFallidos = await TransferEmail.query()
-        .whereNotNull("emails_rechazados")
-        .preload("transfer");
-
-      await Promise.all(
-        transferEmailFallidos.map(async (tep) => {
-          const emails_rechazados = JSON.parse(tep.emails_rechazados as string);
-
-          let rechazados: string[] = [];
-
-          await Promise.all(
-            emails_rechazados.map(async (e) => {
-              const resEmail = await tep.transfer.enviarMail(e);
-              rechazados = rechazados.concat(resEmail.rejected);
-            })
-          );
-
-          await tep
-            .merge({
-              emails_rechazados:
-                rechazados.length > 0 ? JSON.stringify(rechazados) : null,
-            })
-            .save();
-          return;
-        })
-      );
     } catch (err) {
       console.log(err);
     }
-    this.logger.info("Enviar Transfer Emails");
+    this.logger.info("Transfers Enviados");
   }
 }

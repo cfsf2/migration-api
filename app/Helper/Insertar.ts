@@ -115,7 +115,7 @@ export class Insertar {
       ] as typeof BaseModel;
 
       if (formData.id) {
-        return await Update.updateABM({ ctx, formData, conf });
+        return await U.updateABM({ ctx, formData, conf });
       }
 
       console.log(formData);

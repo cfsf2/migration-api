@@ -81,4 +81,25 @@ export default class TransfersController {
       return new ExceptionHandler().handle(err, ctx);
     }
   }
+
+  public async sendTransfer_a_este_email(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
+
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+
+      console.log(request.body().id);
+      const transfer = await Transfer.findOrFail(request.body().id);
+
+      const emails = Object.values(request.body()).find((r) =>
+        r.toString().includes("@")
+      );
+      console.log(emails);
+
+      return transfer.generarColaEmailUnico(ctx, emails);
+    } catch (err) {
+      console.log("CONTROLLER", err);
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
 }

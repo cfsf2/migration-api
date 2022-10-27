@@ -338,7 +338,7 @@ export default class Transfer extends BaseModel {
 
       return await nuevoTransfer.generarColaEmail(ctx);
       if (laboratorio.envia_email_transfer_auto === "s") {
-        return nuevoTransfer.enviarMailAutomatico(ctx);
+        return nuevoTransfer.enviarMailAutomatico();
       }
 
       return Mail.send((message) => {
@@ -372,8 +372,36 @@ export default class Transfer extends BaseModel {
       usuario: ctx.auth.user as Usuario,
       accion: AccionCRUD.crear,
     });
+
+    const destinatarios = [
+      process.env.TRANSFER_EMAIL,
+      process.env.TRANSFER_EMAIL2,
+      this.farmacia.email,
+    ];
+
+    if (this.laboratorio.envia_email_transfer_auto === "s") {
+      destinatarios.push(await this.getDestinatario());
+    }
+
     nuevoEmail.merge({
       id_transfer: this.id,
+      emails: destinatarios.filter((c) => c).toString(),
+      enviado: "n",
+    });
+    return await nuevoEmail.save();
+  }
+
+  public async generarColaEmailUnico(ctx: HttpContextContract, email) {
+    const nuevoEmail = new TransferEmail();
+
+    guardarDatosAuditoria({
+      objeto: nuevoEmail,
+      usuario: ctx.auth.user as Usuario,
+      accion: AccionCRUD.crear,
+    });
+    nuevoEmail.merge({
+      id_transfer: this.id,
+      emails: email,
       enviado: "n",
     });
     return await nuevoEmail.save();

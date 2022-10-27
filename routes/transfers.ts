@@ -9,3 +9,8 @@ Route.get("/transfers/farmacia/:id", "TransfersController.mig_byFarmacia");
 Route.post("/transfers", "TransfersController.add");
 
 Route.post("/transfers/enviarTransfer", "TransfersController.sendTransfer");
+
+Route.post(
+  "/transfers/enviarTransferUnico",
+  "TransfersController.sendTransfer_a_este_email"
+);
