@@ -53,12 +53,43 @@ export default class EnviarTransferEmails extends BaseCommand {
             emails: emailRes.envelope.to.toString(),
             emails_rechazados:
               emailRes.rejected.length > 0
-                ? emailRes.rejected.split(",")
+                ? emailRes.rejected.toString()
                 : null,
           });
 
-          await tep.save();
+          if (emailRes.rejected.length > 0) {
+            await Mail.send((message) => {
+              message
+                .from(process.env.SMTP_USERNAME as string)
+                .to(process.env.TRANSFER_EMAIL as string)
+                .subject(
+                  "El transfer con Id" +
+                    " " +
+                    tep.transfer.id +
+                    " no pudo ser enviado correctamente"
+                )
+                .html(
+                  generarHtml({
+                    titulo:
+                      "Transfer " +
+                      tep.transfer.id +
+                      " no pudo ser enviado correctamente",
+                    texto:
+                      "Los destinatarios " +
+                      emailRes.rejected?.toString() +
+                      " rechazaron la recepcion del email de transfer." +
+                      "<br/>" +
+                      "El sistema no intentara enviar el email nuevamente." +
+                      "<hr/>" +
+                      "<code>" +
+                      emailRes.rejectedErrors.toString() +
+                      "</code>",
+                  })
+                );
+            });
+          }
 
+          await tep.save();
           return emailRes;
         } catch (err) {
           await Mail.send((message) => {
@@ -79,7 +110,7 @@ export default class EnviarTransferEmails extends BaseCommand {
                     " no pudo ser enviado correctamente",
                   texto:
                     "Los destinatarios " +
-                    err.rejected.toString() +
+                    err.rejected?.toString() +
                     " rechazaron la recepcion del email de transfer." +
                     "<br/>" +
                     "El sistema no intentara enviar el email nuevamente." +
@@ -94,8 +125,7 @@ export default class EnviarTransferEmails extends BaseCommand {
           await tep
             .merge({
               enviado: "s",
-
-              emails_rechazados: err.rejected.toString(","),
+              emails_rechazados: err.rejected?.toString(),
             })
             .save();
 
@@ -103,6 +133,6 @@ export default class EnviarTransferEmails extends BaseCommand {
         }
       })
     );
-    this.logger.info("Transfers Enviados");
+    this.logger.success("Transfers Enviados");
   }
 }
