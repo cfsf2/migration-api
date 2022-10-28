@@ -306,6 +306,10 @@ export default class Transfer extends BaseModel {
             ? "tbl_laboratorio"
             : "tbl_drogueria",
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+
+        envia_email_transfer_auto: laboratorio.envia_email_transfer_auto,
+        monto_minimo_transfer: laboratorio.monto_minimo_transfer,
+        unidades_minimas_transfer: laboratorio.unidades_minimas_transfer,
       });
 
       guardarDatosAuditoria({
@@ -333,7 +337,6 @@ export default class Transfer extends BaseModel {
             cantidad: p.cantidad,
             precio: p.precio,
             observaciones: p.observacion,
-
             id_usuario_creacion: usuario.id, // cambiar por dato de sesion
           });
           guardarDatosAuditoria({
@@ -587,6 +590,18 @@ export default class Transfer extends BaseModel {
 
   @column()
   public id_apm: string;
+
+  @column()
+  public envio_email_verificado: string;
+
+  @column()
+  public monto_minimo_transfer: number;
+
+  @column()
+  public unidades_minimas_transfer: number;
+
+  @column()
+  public envia_email_transfer_auto: string;
 
   @column()
   public email_laboratorio_apm: string;

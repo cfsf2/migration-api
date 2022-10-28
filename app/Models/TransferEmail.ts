@@ -27,6 +27,8 @@ export default class TransferEmail extends Base {
         .html(html_transfer(this.transfer));
 
       this.emails
+        .replace(/;/g, ",")
+        .replace(/:/g, ",")
         .split(",")
         .forEach((destinatario) => message.to(destinatario));
     });
