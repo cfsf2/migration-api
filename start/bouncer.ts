@@ -114,16 +114,11 @@ export const { actions } = Bouncer.define(
         case "n":
           return false;
         case "p":
-          if (Array.isArray(conf.permiso)) {
-            return true;
-            return false;
-          }
-
           const permisosUsuario = await arrayPermisos(usuario);
 
           if (
             permisosUsuario.findIndex((p: { nombre: string }) => {
-              return p.nombre === conf.conf_permiso?.permiso.nombre;
+              return p.nombre === conf.conf_permiso.permiso.nombre;
             }) !== -1
           ) {
             usuario.configuracionesPermitidas =
@@ -131,7 +126,7 @@ export const { actions } = Bouncer.define(
             return true;
           }
 
-          return Bouncer.deny("Acceso no autorizado", 401);
+          return false;
         default:
           return false;
       }

@@ -1116,11 +1116,11 @@ export class ConfBuilder {
     conf: SConf;
     id?: number;
   }) => {
-    if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
+    if (!(await ctx.bouncer.allows("AccesoConf", abm))) return vistaVacia;
     let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf, id);
-    console.log(opciones.display_container, opciones.id_a);
+    // console.log("ABM", opciones.display_container, opciones.id_a);
     if (opciones.display_container === "n") return { opciones, datos };
 
     const cabeceras = await extraerElementos({
