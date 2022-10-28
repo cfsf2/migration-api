@@ -1266,7 +1266,7 @@ export class ConfBuilder {
 
     if (modelo) {
       const Modelo = M[modelo];
-      console.log(modelo);
+
       let query = Modelo.query() as DatabaseQueryBuilderContract;
 
       campos.forEach(async (campo) => {

@@ -187,7 +187,9 @@ export default class ConfigsController {
       configuraciones = configuraciones.concat(contenedoresArmadas);
       configuraciones = configuraciones.concat(abmsArmados);
 
-      ctx.$_respuesta.configuraciones = configuraciones;
+      ctx.$_respuesta.configuraciones = configuraciones.filter(
+        (c) => c.opciones.tipo
+      );
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;
       ctx.$_respuesta.sql = (await ctx.bouncer.allows(
         "AccesoRuta",
