@@ -414,7 +414,7 @@ export default class Transfer extends BaseModel {
     });
     nuevoEmail.merge({
       id_transfer: this.id,
-      emails: email,
+      emails: email.replace(/;/g, ",").replace(/:/g, ","),
       enviado: "n",
     });
     return await nuevoEmail.save();
