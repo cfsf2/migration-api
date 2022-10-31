@@ -48,10 +48,8 @@ export default class PublicidadsController {
     }
   }
 
-  public async mig_novedadesFarmacia({
-    request,
-    bouncer,
-  }: HttpContextContract) {
+  public async mig_novedadesFarmacia(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_FARMACIA);
       const novedades = await Publicidad.traerNovedadesFarmacias({
@@ -59,7 +57,8 @@ export default class PublicidadsController {
       });
       return novedades;
     } catch (error) {
-      throw new ExceptionHandler();
+      console.log(error);
+      return new ExceptionHandler().handle(error, ctx);
     }
   }
 

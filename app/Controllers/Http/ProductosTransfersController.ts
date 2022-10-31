@@ -15,6 +15,7 @@ export default class ProductosTransfersController {
         habilitado: "s",
       });
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -33,6 +34,38 @@ export default class ProductosTransfersController {
         instituciones: instituciones,
       });
     } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler();
+    }
+  }
+
+  //*****  CONTROLLERS ESTABLES */
+
+  public async bylab({ request, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABID);
+
+      const { instituciones } = request.qs();
+      const labid = request.params().id;
+
+      return await TransferProducto.query()
+        .preload("instituciones")
+        .select("tbl_transfer_producto.*")
+        .where("en_papelera", "n")
+        .andWhere("habilitado", "s")
+        .andWhere("id_laboratorio", labid)
+        .leftJoin(
+          "tbl_transfer_producto_institucion",
+          "tbl_transfer_producto.id",
+          "tbl_transfer_producto_institucion.id_transfer_producto"
+        )
+        .whereIn(
+          "tbl_transfer_producto_institucion.id_institucion",
+          instituciones
+        )
+        .groupBy("tbl_transfer_producto.id");
+    } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -48,6 +81,7 @@ export default class ProductosTransfersController {
       const instituciones = res.map((r) => r.id_institucion.toString());
       return instituciones;
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -74,6 +108,7 @@ export default class ProductosTransfersController {
         usuario
       );
     } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }
@@ -93,7 +128,8 @@ export default class ProductosTransfersController {
       });
       await prod.save();
       return prod;
-    } catch (error) {
+    } catch (err) {
+      console.log(err);
       throw new ExceptionHandler();
     }
   }

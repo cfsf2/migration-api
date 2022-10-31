@@ -1,52 +1,28 @@
 import { getAtributo } from "./configuraciones";
-import Database from "@ioc:Adonis/Lucid/Database";
-import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import U from "App/Models/Usuario";
-import SCC from "App/Models/SConfCpsc";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
-
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import Update from "./Update";
+import SComponente from "App/Models/SComponente";
 
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+import * as M from "./ModelIndex";
 
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
+import Datab from "@ioc:Adonis/Lucid/Database";
+import U from "./Update";
 
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let _SConf = SConf;
-let SConfTipoAtributoValor = SCTPV;
-let SConfCpsc = SCC;
-let Usuario = U;
+import D from "./Eliminar";
+
+import SConf from "App/Models/SConf";
+
+import SCCU from "App/Models/SConfConfUsuario";
+import SCCD from "App/Models/SConfConfDeta";
+
 let SConfConfUsuario = SCCU;
 let SConfConfDeta = SCCD;
+
+const Database = Datab;
+let Update = U;
+let Eliminar = D;
 
 export class Insertar {
   constructor() {}
@@ -59,9 +35,8 @@ export class Insertar {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-      let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
-      if (!modelo)
-        modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
+      let modelo = M[getAtributo({ atributo: "insert_modelo", conf })];
+      if (!modelo) modelo = M[getAtributo({ atributo: "update_modelo", conf })];
 
       let campos = getAtributo({ atributo: "insert_campos", conf });
       let campo = getAtributo({ atributo: "insert_campo", conf });
@@ -118,7 +93,7 @@ export class Insertar {
         return { registroCreado: registro, creado: true };
       }
     } catch (err) {
-      console.log(err);
+      console.log("this is err:", err);
       return { registroCreado: err, creado: false, error: err.message };
     }
   }
@@ -135,13 +110,15 @@ export class Insertar {
     try {
       let tabla = conf.getAtributo({ atributo: "tabla" });
       tabla;
-      let Modelo = eval(
+      let Modelo = M[
         getAtributo({ atributo: "modelo", conf })
-      ) as typeof BaseModel;
+      ] as typeof BaseModel;
 
       if (formData.id) {
-        return await Update.updateABM({ ctx, formData, conf });
+        return await U.updateABM({ ctx, formData, conf });
       }
+
+      console.log(formData);
 
       const nuevoRegistro = new Modelo();
 
@@ -155,6 +132,15 @@ export class Insertar {
           const campo = getAtributo({
             atributo: "update_campo",
             conf: confCampo,
+          });
+
+          const insert_campos = getAtributo({
+            atributo: "insert_campos",
+            conf: confCampo,
+          });
+
+          insert_campos?.split("|").forEach((i) => {
+            nuevoRegistro.merge({ [i]: formData[i] });
           });
 
           const componente = getAtributo({
@@ -188,9 +174,8 @@ export class Insertar {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-      let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
-      if (!modelo)
-        modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
+      let modelo = M[getAtributo({ atributo: "insert_modelo", conf })];
+      if (!modelo) modelo = M[getAtributo({ atributo: "update_modelo", conf })];
 
       let campos = getAtributo({ atributo: "insert_campos", conf });
       let campo = getAtributo({ atributo: "insert_campo", conf });
@@ -252,9 +237,9 @@ export class Insertar {
         let tabla = conf.getAtributo({ atributo: "insert_tabla" });
         if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-        let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
+        let modelo = M[getAtributo({ atributo: "insert_modelo", conf })];
         if (!modelo)
-          modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
+          modelo = M[getAtributo({ atributo: "update_modelo", conf })];
 
         let campos = getAtributo({ atributo: "insert_campos", conf });
         let campo = getAtributo({ atributo: "insert_campo", conf });
@@ -319,9 +304,8 @@ export class Insertar {
       let tabla = conf.getAtributo({ atributo: "insert_tabla" });
       if (!tabla) tabla = getAtributo({ atributo: "update_tabla", conf });
 
-      let modelo = eval(getAtributo({ atributo: "insert_modelo", conf }));
-      if (!modelo)
-        modelo = eval(getAtributo({ atributo: "update_modelo", conf }));
+      let modelo = M[getAtributo({ atributo: "insert_modelo", conf })];
+      if (!modelo) modelo = M[getAtributo({ atributo: "update_modelo", conf })];
 
       let campos = getAtributo({ atributo: "insert_campos", conf });
       let campo = getAtributo({ atributo: "insert_campo", conf });
@@ -373,8 +357,7 @@ export class Insertar {
       await Promise.all(
         Object.keys(valor).map(async (filtro) => {
           const filtroConf = (
-            await _SConf
-              .query()
+            await SConf.query()
               .where("id_a", filtro)
               .preload("valores", (query) => query.preload("atributo"))
           )[0];

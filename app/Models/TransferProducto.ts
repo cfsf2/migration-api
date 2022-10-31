@@ -1,5 +1,12 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  hasManyThrough,
+  HasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Laboratorio from "./Laboratorio";
 import Database from "@ioc:Adonis/Lucid/Database";
@@ -10,6 +17,7 @@ import {
   enumaBool,
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
+import Institucion from "./Institucion";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -21,8 +29,9 @@ export default class TransferProducto extends BaseModel {
     en_papelera?: string;
     habilitado?: string;
     labid?: number;
-    instituciones?: string[];
+    instituciones?: number[];
   }) {
+    console.log(instituciones);
     const trasfersProducto = await Database.from("tbl_transfer_producto as tp")
       .select(
         "tp.*",
@@ -48,7 +57,7 @@ export default class TransferProducto extends BaseModel {
             "tpi.id_transfer_producto",
             "tp.id"
           )
-          .whereIn("tpi.id_institucion", instituciones)
+          .whereIn("tpi.id_institucion", instituciones as unknown as string[])
           .groupBy("tpi.id_transfer_producto")
       )
       //en_papelera
@@ -58,7 +67,7 @@ export default class TransferProducto extends BaseModel {
       .if(habilitado, (query) => {
         query.where("tp.habilitado", "s");
       })
-      .if(labid, (query) => query.where("l.id", labid))
+      .if(labid, (query) => query.where("l.id", labid as number))
       .orderBy("codigo", "desc");
 
     return trasfersProducto.map((t) => {
@@ -239,6 +248,14 @@ export default class TransferProducto extends BaseModel {
     localKey: "id_laboratorio",
   })
   public laboratorio: HasOne<typeof Laboratorio>;
+
+  @hasManyThrough([() => Institucion, () => TransferProductoInstitucion], {
+    localKey: "id",
+    foreignKey: "id_transfer_producto",
+    throughLocalKey: "id_institucion",
+    throughForeignKey: "id",
+  })
+  public instituciones: HasManyThrough<typeof Institucion>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

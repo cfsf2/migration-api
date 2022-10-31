@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  belongsTo,
+  BelongsTo,
   column,
   HasMany,
   hasMany,
@@ -24,8 +26,13 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 // import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Apm from "./Apm";
+import ApmFarmacia from "./ApmFarmacia";
+import TransferEmail from "./TransferEmail";
+import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 
 export default class Transfer extends BaseModel {
+  public static table = "tbl_transfer";
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
     const transfers = await Database.from("tbl_transfer as t")
       .select(
@@ -195,13 +202,23 @@ export default class Transfer extends BaseModel {
   }) {
     const nuevoTransfer = new Transfer();
     try {
-      const laboratorio = await Laboratorio.findOrFail(data.id_laboratorio);
+      const laboratorio = await Laboratorio.query()
+        .where("id", data.id_laboratorio)
+        .preload("modalidad_entrega")
+        .preload("apms")
+        .preload("tipo_comunicacion")
+        .preload("droguerias")
+        .firstOrFail();
       let drogueria = null as unknown as Drogueria;
 
-      if (laboratorio.permite_nro_cuenta === "n") {
+      // *********** Chequear modalidad_entrega
+      if (
+        laboratorio.modalidad_entrega.id_a === "ALGUNAS_DROGUERIAS" ||
+        laboratorio.modalidad_entrega.id_a === "TODAS_DROGUERIAS"
+      ) {
         drogueria = await Drogueria.findOrFail(data.id_drogueria);
       }
-      if (laboratorio.permite_nro_cuenta === "s") {
+      if (laboratorio.modalidad_entrega.id_a === "DIRECTO") {
         const FL = await FarmaciaLaboratorio.query()
           .where("id_farmacia", usuario.farmacia.id)
           .where("id_laboratorio", data.id_laboratorio)
@@ -238,6 +255,43 @@ export default class Transfer extends BaseModel {
 
       const farmacia = await Farmacia.findByOrFail("id_usuario", usuario.id);
 
+      //** Validar monto Minimo y cantidad Minima */
+      if (laboratorio.monto_minimo_transfer > 0) {
+        let monto = data.productos_solicitados.reduce((p, c) => {
+          const cantidad = c.cantidad;
+          const precio = c.precio;
+          return precio * cantidad + p;
+        }, 0);
+
+        if (laboratorio.monto_minimo_transfer > monto) {
+          return new ExceptionHandler().handle(
+            {
+              code: "TRANSFER_NO_SUPERA_MONTO_MINIMO",
+              valor: laboratorio.monto_minimo_transfer,
+            },
+            ctx
+          );
+        }
+      }
+
+      if (laboratorio.unidades_minimas_transfer > 0) {
+        let cantidad_unidades = data.productos_solicitados.reduce((p, c) => {
+          const cantidad = c.cantidad;
+
+          return cantidad + p;
+        }, 0);
+
+        if (laboratorio.unidades_minimas_transfer > cantidad_unidades) {
+          return new ExceptionHandler().handle(
+            {
+              code: "TRANSFER_NO_SUPERA_CANTIDAD_MINIMA",
+              valor: laboratorio.unidades_minimas_transfer,
+            },
+            ctx
+          );
+        }
+      }
+
       nuevoTransfer.merge({
         nro_cuenta_drogueria: data.nro_cuenta_drogueria,
         id_drogueria: drogueria?.id,
@@ -247,8 +301,15 @@ export default class Transfer extends BaseModel {
         fecha: DateTime.now(),
         email_destinatario: farmacia.email ? farmacia.email : usuario.email,
         productos_solicitados: JSON.stringify(data.productos_solicitados),
-
+        nro_cuenta_tabla:
+          laboratorio.modalidad_entrega.id_a === "DIRECTO"
+            ? "tbl_laboratorio"
+            : "tbl_drogueria",
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+
+        envia_email_transfer_auto: laboratorio.envia_email_transfer_auto,
+        monto_minimo_transfer: laboratorio.monto_minimo_transfer,
+        unidades_minimas_transfer: laboratorio.unidades_minimas_transfer,
       });
 
       guardarDatosAuditoria({
@@ -259,24 +320,39 @@ export default class Transfer extends BaseModel {
 
       await nuevoTransfer.save();
 
-      data.productos_solicitados.forEach((p) => {
-        const transferProducto = new TransferTransferProducto();
-        transferProducto.merge({
-          id_transfer_producto: p.id,
-          id_transfer: nuevoTransfer.id,
-          cantidad: p.cantidad,
-          precio: p.precio,
-          observaciones: p.observacion,
+      nuevoTransfer
+        .merge({
+          email_laboratorio_apm: await nuevoTransfer.getDestinatario(),
+        })
+        .save();
 
-          id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-        });
-        guardarDatosAuditoria({
-          objeto: transferProducto,
-          usuario: usuario,
-          accion: AccionCRUD.crear,
-        });
-        transferProducto.save();
-      });
+      //***  Registra los productos transfer solicitados */
+      await Promise.all(
+        data.productos_solicitados.map(async (p) => {
+          const transferProducto = new TransferTransferProducto();
+
+          transferProducto.merge({
+            id_transfer_producto: p.id,
+            id_transfer: nuevoTransfer.id,
+            cantidad: p.cantidad,
+            precio: p.precio,
+            observaciones: p.observacion,
+            id_usuario_creacion: usuario.id, // cambiar por dato de sesion
+          });
+          guardarDatosAuditoria({
+            objeto: transferProducto,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          return transferProducto.save();
+        })
+      );
+      // *** en Lugar de enviar el mail, se suma un registro a la tabla transfer_email para que el cron ejecute la funcion
+
+      return await nuevoTransfer.generarColaEmail(ctx);
+      if (laboratorio.envia_email_transfer_auto === "s") {
+        return nuevoTransfer.enviarMailAutomatico();
+      }
 
       return Mail.send((message) => {
         message
@@ -302,19 +378,173 @@ export default class Transfer extends BaseModel {
     }
   }
 
-  public async enviarMail(ctx) {
+  public async generarColaEmail(ctx: HttpContextContract) {
+    const nuevoEmail = new TransferEmail();
+    guardarDatosAuditoria({
+      objeto: nuevoEmail,
+      usuario: ctx.auth.user as Usuario,
+      accion: AccionCRUD.crear,
+    });
+
+    const destinatarios = [
+      process.env.TRANSFER_EMAIL,
+      process.env.TRANSFER_EMAIL2,
+      this.farmacia.email,
+    ];
+
+    if (this.laboratorio.envia_email_transfer_auto === "s") {
+      destinatarios.push(await this.getDestinatario());
+    }
+
+    nuevoEmail.merge({
+      id_transfer: this.id,
+      emails: destinatarios.filter((c) => c).toString(),
+      enviado: "n",
+    });
+    return await nuevoEmail.save();
+  }
+
+  public async generarColaEmailUnico(ctx: HttpContextContract, email) {
+    const nuevoEmail = new TransferEmail();
+
+    guardarDatosAuditoria({
+      objeto: nuevoEmail,
+      usuario: ctx.auth.user as Usuario,
+      accion: AccionCRUD.crear,
+    });
+    nuevoEmail.merge({
+      id_transfer: this.id,
+      emails: email.replace(/;/g, ",").replace(/:/g, ","),
+      enviado: "n",
+    });
+    return await nuevoEmail.save();
+  }
+
+  public async enviarMailAutomatico() {
+    await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+    await this.load("farmacia" as any);
+    await this.load("laboratorio" as any);
+
+    const laboratorio = await Laboratorio.query()
+      .where("id", this.id_laboratorio)
+      .preload("apms")
+      .preload("tipo_comunicacion")
+      .preload("modalidad_entrega")
+      .firstOrFail();
+
+    if (laboratorio.envia_email_transfer_auto !== "s") {
+      return Mail.send((message) => {
+        message
+          .from(process.env.SMTP_USERNAME as string)
+          .to(this.farmacia.email as string)
+          .to(process.env.TRANSFER_EMAIL as string)
+          .to(process.env.TRANSFER_EMAIL2 as string)
+          .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+          .html(html_transfer(this));
+      });
+    }
+
+    let destinatarioProveedor = await this.getDestinatario();
+
+    const mail = await Mail.send((message) => {
+      message
+        .from(process.env.SMTP_USERNAME as string)
+        .to(this.email_destinatario as string)
+        .bcc(destinatarioProveedor)
+        .to(process.env.TRANSFER_EMAIL as string)
+        .to(process.env.TRANSFER_EMAIL2 as string)
+        .subject("Confirmacion de pedido de Transfer" + " " + this.id)
+        .html(html_transfer(this));
+    });
+
+    return mail;
+  }
+
+  public async getDestinatario() {
+    await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
+    await this.load("farmacia" as any);
+    await this.load("laboratorio" as any);
+
+    const laboratorio = await Laboratorio.query()
+      .where("id", this.id_laboratorio)
+      .preload("apms")
+      .preload("tipo_comunicacion")
+      .preload("modalidad_entrega")
+      .firstOrFail();
+
+    let destinatarioProveedor = "";
+
+    switch (laboratorio.tipo_comunicacion.id_a) {
+      case "TC_LABORATORIO":
+        // if (!laboratorio.email)
+        //   throw await new ExceptionHandler().handle(
+        //     { code: "LAB_SIN_EMAIL" },
+        //     {} as HttpContextContract
+        //   );
+        destinatarioProveedor = laboratorio.email;
+        break;
+      case "TC_APM":
+        if (laboratorio.tiene_apms === "s") {
+          let apm = await Apm.query()
+            .leftJoin("tbl_apm_farmacia as af", "af.id_apm", "tbl_apm.id")
+            .where("af.id_farmacia", this.id_farmacia)
+            .where("af.id_laboratorio", this.id_laboratorio)
+            .first();
+          if (!apm) {
+            apm = (await Apm.query()
+              .where("id_laboratorio", this.id_laboratorio)
+              .andWhere("administrador", "s")
+              .first()) as any;
+            if (!apm) {
+              console.log("no hay apms pero deberia");
+              destinatarioProveedor = laboratorio.email;
+              break;
+            }
+            destinatarioProveedor = apm.email;
+          }
+          break;
+        }
+        console.log("no hay apms");
+        destinatarioProveedor = laboratorio.email;
+        break;
+      case "TC_DROGUERIA":
+        await this.load("drogueria" as any);
+
+        if (laboratorio.modalidad_entrega.id_a === "ALGUNAS_DROGUERIAS") {
+          const drogueria = await Drogueria.query()
+            .leftJoin(
+              "tbl_laboratorio_drogueria as ld",
+              "ld.id_drogueria",
+              "tbl_drogueria.id"
+            )
+            .where("ld.id_laboratorio", this.id_laboratorio)
+            .andWhere("ld.id_drogueria", this.id_drogueria)
+            .firstOrFail();
+          destinatarioProveedor = drogueria.email;
+        }
+        if (laboratorio.modalidad_entrega.id_a === "TODAS_DROGUERIAS") {
+          const drogueria = await Drogueria.query()
+            .where("id", this.id_drogueria)
+            .firstOrFail();
+          destinatarioProveedor = drogueria.email;
+        }
+        break;
+    }
+
+    return destinatarioProveedor;
+  }
+
+  public async enviarMail(email) {
     try {
       await this.load("ttp" as any, (ttp) => ttp.preload("transfer_producto"));
       await this.load("farmacia" as any);
       await this.load("laboratorio" as any);
       await this.load("drogueria" as any);
 
-      return Mail.send((message) => {
+      return await Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
-          .to(this.email_destinatario as string)
-          .to(process.env.TRANSFER_EMAIL as string)
-          .to(process.env.TRANSFER_EMAIL2 as string)
+          .to(email as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
           .html(html_transfer(this));
       });
@@ -327,11 +557,9 @@ export default class Transfer extends BaseModel {
           .subject("ERROR AL ENVIAR Transfer" + " " + this.id)
           .html(html_transfer(this) + err.toString());
       });
-      throw new ExceptionHandler().handle(err, ctx);
+      throw new ExceptionHandler(); //.handle(err, ctx);
     }
   }
-
-  public static table = "tbl_transfer";
 
   @column({ isPrimary: true })
   public id: number;
@@ -358,6 +586,27 @@ export default class Transfer extends BaseModel {
   public nro_cuenta_drogueria: string;
 
   @column()
+  public nro_cuenta_tabla: string;
+
+  @column()
+  public id_apm: string;
+
+  @column()
+  public envio_email_verificado: string;
+
+  @column()
+  public monto_minimo_transfer: number;
+
+  @column()
+  public unidades_minimas_transfer: number;
+
+  @column()
+  public envia_email_transfer_auto: string;
+
+  @column()
+  public email_laboratorio_apm: string;
+
+  @column()
   public email_destinatario: string;
 
   @column()
@@ -377,6 +626,12 @@ export default class Transfer extends BaseModel {
 
   //foreing key
 
+  @hasOne(() => Apm, {
+    foreignKey: "id",
+    localKey: "id_apm",
+  })
+  public apm: HasOne<typeof Apm>;
+
   @hasOne(() => Usuario, {
     foreignKey: "id",
     localKey: "id_usuario_creacion",
@@ -395,11 +650,11 @@ export default class Transfer extends BaseModel {
   })
   public farmacia: HasOne<typeof Farmacia>;
 
-  @hasOne(() => Drogueria, {
-    foreignKey: "id",
-    localKey: "id_drogueria",
+  @belongsTo(() => Drogueria, {
+    foreignKey: "id_drogueria",
+    localKey: "id",
   })
-  public drogueria: HasOne<typeof Drogueria>;
+  public drogueria: BelongsTo<typeof Drogueria>;
 
   @hasOne(() => Laboratorio, {
     foreignKey: "id",

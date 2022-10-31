@@ -45,11 +45,12 @@ export default class AuthController {
       return response;
     } catch (error) {
       console.log(error);
-      throw new ExceptionHandler().handle(error, ctx);
+      return new ExceptionHandler().handle(error, ctx);
     }
   }
 
-  public async mig_perfiles({ request, bouncer }: HttpContextContract) {
+  public async mig_perfiles(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PERFILES_GET);
 
@@ -60,7 +61,7 @@ export default class AuthController {
         .preload("permisos");
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 

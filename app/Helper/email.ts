@@ -428,12 +428,16 @@ export const html_transfer = (transfer) => {
                               transfer.farmacia.telefono
                             }</p>
                             <p><b>Nro Cufe: </b>${transfer.farmacia.cufe}</p>
-                            <p><b>Nro Cuenta de Droguería: </b>${
+                            <p><b>Nro Cuenta: </b>${
                               transfer.nro_cuenta_drogueria
                             }</p> 
-                            <p><b>Droguería: </b>${
-                              transfer.drogueria.nombre
-                            }</p>
+                            ${
+                              transfer.drogueria
+                                ? "<p><b>Droguería: </b>" +
+                                  transfer.drogueria.nombre +
+                                  "</p>"
+                                : ""
+                            }
                             <p><b>Laboratorio elegido: </b>${
                               transfer.laboratorio.nombre
                             }</p>

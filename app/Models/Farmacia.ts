@@ -1,7 +1,10 @@
 import { DateTime } from "luxon";
+
 import {
   BaseModel,
   column,
+  HasMany,
+  hasMany,
   HasManyThrough,
   hasManyThrough,
   HasOne,
@@ -31,6 +34,8 @@ import FarmaciaProductoCustom from "./FarmaciaProductoCustom";
 import Inventario from "./Inventario";
 import FarmaciaInstitucion from "./FarmaciaInstitucion";
 import UsuarioPerfil from "./UsuarioPerfil";
+import FarmaciaDrogueria from "./FarmaciaDrogueria";
+import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -855,6 +860,16 @@ export default class Farmacia extends BaseModel {
     throughForeignKey: "id",
   })
   public servicios: HasManyThrough<typeof Servicio>;
+
+  @hasMany(() => FarmaciaDrogueria, {
+    foreignKey: "id_farmacia",
+  })
+  public nro_cuenta_drogueria: HasMany<typeof FarmaciaDrogueria>;
+
+  @hasMany(() => FarmaciaLaboratorio, {
+    foreignKey: "id_farmacia",
+  })
+  public nro_cuenta_laboratorio: HasMany<typeof FarmaciaLaboratorio>;
 
   // public serializeExtras = true;
 

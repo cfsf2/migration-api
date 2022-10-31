@@ -10,6 +10,7 @@ import {
 } from "App/Helper/configuraciones";
 import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 const preloadRecursivo = (query) => {
   return query
@@ -34,7 +35,7 @@ export default class ConfigsController {
     }
     const conf = await SConf.query()
       .where("id_a", config)
-      .preload("conf_permiso")
+      .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("tipo", (query) => query.preload("atributos"))
       .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
@@ -74,59 +75,12 @@ export default class ConfigsController {
     }
     if (conf.tipo.id === 7) {
       console.log("Pidio contenedor", config.id_a);
-      let contenedor = conf;
-      const p: {
-        opciones: {};
-        configuraciones: any[];
-      } = {
-        opciones: { id_a: contenedor.id_a, tipo: contenedor.tipo },
-        configuraciones: [],
-      };
-
-      const _listados = contenedor.sub_conf.filter(
-        (sc) => sc.tipo.id === 2
-      ) as SConf[];
-      const _vistas = contenedor.sub_conf.filter(
-        (sc) => sc.tipo.id === 6
-      ) as SConf[];
-
-      const _listadosArmados = await Promise.all(
-        _listados.map(async (listado) => {
-          return await ConfBuilder.armarListado(
-            ctx,
-            listado,
-            contenedor,
-            bouncer,
-            queryFiltros,
-            id,
-            usuario,
-            "n"
-          );
-        })
-      );
-
-      const _vistasArmadas = await Promise.all(
-        _vistas.map(async (vista) => {
-          return ConfBuilder.armarVista(
-            ctx,
-            vista,
-            id,
-            contenedor,
-            bouncer,
-            usuario
-          );
-        })
-      );
-
-      p.opciones["orden"] = conf?.orden.find(
-        (o) => o.id_conf_h === contenedor?.id
-      )?.orden;
-
-      p.configuraciones = [];
-      p.configuraciones = p.configuraciones.concat(_listadosArmados);
-      p.configuraciones = p.configuraciones.concat(_vistasArmadas);
-
-      return p;
+      return await ConfBuilder.armarContenedor({
+        ctx,
+        contenedor: conf,
+        idListado: id,
+        idVista: id,
+      });
     }
     if (conf.tipo.id === 9) {
       console.log("pidioABM", conf.id_a);
@@ -148,35 +102,39 @@ export default class ConfigsController {
     if (!config) {
       return respuestaVacia;
     }
-
-    const conf = await SConf.query()
-      .where("id_a", config)
-      .andWhere("id_tipo", 1)
-      .preload("conf_permiso")
-      .preload("tipo", (query) => query.preload("atributos"))
-      .preload("componente", (query) => query.preload("atributos"))
-      .preload("orden")
-      .preload("valores", (query) => query.preload("atributo"))
-      .preload("sub_conf", (query) => preloadRecursivo(query))
-      .firstOrFail();
-
-    // console.log(conf.toJSON());
-
-    ctx.$_conf.estructura = conf;
-    // para listado
-    if (!(await bouncer.allows("AccesoConf", conf))) {
-      console.log("No hay acceso a ", conf);
-      return respuestaVacia;
-    }
-
-    const listados = conf.sub_conf.filter((sc) => sc.tipo.id === 2) as SConf[];
-    const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
-    const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
-    const contenedores = conf.sub_conf.filter(
-      (sc) => sc.tipo.id === 7
-    ) as SConf[];
-
     try {
+      const conf = await SConf.query()
+        .where("id_a", config)
+        .andWhere("id_tipo", 1)
+        .preload("conf_permiso", (query) => query.preload("permiso"))
+        .preload("tipo", (query) => query.preload("atributos"))
+        .preload("componente", (query) => query.preload("atributos"))
+        .preload("orden")
+        .preload("valores", (query) => query.preload("atributo"))
+        .preload("sub_conf", (query) => preloadRecursivo(query))
+        .firstOrFail();
+
+      // console.log(conf.toJSON());
+
+      ctx.$_conf.estructura = conf;
+      // para listado
+      if (!(await bouncer.allows("AccesoConf", conf))) {
+        console.log("No hay acceso a ", conf.id_a, conf.permiso);
+
+        return ctx.response.unauthorized({
+          error: { message: "Sin Autorizacion" },
+        });
+      }
+
+      const listados = conf.sub_conf.filter(
+        (sc) => sc.tipo.id === 2
+      ) as SConf[];
+      const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
+      const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
+      const contenedores = conf.sub_conf.filter(
+        (sc) => sc.tipo.id === 7
+      ) as SConf[];
+
       ctx.$_respuesta = respuestaVacia;
 
       const listadosArmados = await Promise.all(
@@ -229,7 +187,9 @@ export default class ConfigsController {
       configuraciones = configuraciones.concat(contenedoresArmadas);
       configuraciones = configuraciones.concat(abmsArmados);
 
-      ctx.$_respuesta.configuraciones = configuraciones;
+      ctx.$_respuesta.configuraciones = configuraciones.filter(
+        (c) => c.opciones.tipo
+      );
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;
       ctx.$_respuesta.sql = (await ctx.bouncer.allows(
         "AccesoRuta",
@@ -237,10 +197,11 @@ export default class ConfigsController {
       ))
         ? ctx.$_sql
         : undefined;
+
       return ctx.$_respuesta;
     } catch (err) {
       console.log(err);
-      return err;
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
@@ -250,8 +211,6 @@ export default class ConfigsController {
 
     const id = request.body().id;
     const formData = request.body();
-
-    console.log("ABM PUT", request.body(), config);
 
     if (!config) {
       return respuestaVacia;
@@ -310,8 +269,8 @@ export default class ConfigsController {
       }
       return response.badRequest(res);
     } catch (err) {
-      console.log(err);
-      return;
+      console.log("CONTROLLER", err);
+      return err;
     }
   }
 
@@ -379,7 +338,7 @@ export default class ConfigsController {
       return response.badRequest(res);
     } catch (err) {
       console.log(err);
-      return err;
+      return response.badRequest({ error: err });
     }
   }
 }

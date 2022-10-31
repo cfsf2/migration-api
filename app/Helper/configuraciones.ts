@@ -1,64 +1,25 @@
-import Datab, {
+import {
   DatabaseQueryBuilderContract,
   RawQuery,
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel, ModelQueryBuilderContract } from "@ioc:Adonis/Lucid/Orm";
-
-import SConf from "App/Models/SConf";
-import S from "App/Models/Servicio";
-import F from "App/Models/Farmacia";
-import FS from "App/Models/FarmaciaServicio";
-import SCTPV from "App/Models/SConfTipoAtributoValor";
-import SCC from "App/Models/SConfCpsc";
-import Usuario from "App/Models/Usuario";
-import SRC from "App/Models/SRc";
-import SRD from "App/Models/SRcDeta";
-import SP from "App/Models/SPista";
-import SCCU from "App/Models/SConfConfUsuario";
-import SCCD from "App/Models/SConfConfDeta";
-
-import R from "App/Models/Recupero";
-import RD from "App/Models/RecuperoDiagnostico";
-import RE from "App/Models/RecuperoEstadio";
-import RLT from "App/Models/RecuperoLineaTratamiento";
-import RPS from "App/Models/RecuperoPerformanceStatus";
-import DGN from "App/Models/Diagnostico";
-import ESTD from "App/Models/Estadio";
-import LT from "App/Models/LineaTratamiento";
-import PS from "App/Models/PerformanceStatus";
-import M from "App/Models/Monodro";
+import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
+import ExceptionHandler from "App/Exceptions/Handler";
+import { Permiso } from "./permisos";
 
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
-import ExceptionHandler from "App/Exceptions/Handler";
-import { Permiso } from "./permisos";
+
+import * as M from "./ModelIndex";
+import Datab from "@ioc:Adonis/Lucid/Database";
+
+import SConf from "App/Models/SConf";
+
+import Usuario from "App/Models/Usuario";
 
 const Database = Datab;
-let Recupero = R;
-let RecuperoDiagnostico = RD;
-let RecuperoEstadio = RE;
-let RecuperoLineaTratamiento = RLT;
-let RecuperoPerformanceStatus = RPS;
-let Diagnostico = DGN;
-let Estadio = ESTD;
-let LineaTratamiento = LT;
-let PerformanceStatus = PS;
-let Monodro = M;
-
-let Servicio = S;
-let Farmacia = F;
-let FarmaciaServicio = FS;
-let _SConf = SConf;
-let SConfTipoAtributoValor = SCTPV;
-let SConfCpsc = SCC;
-let SRc = SRC;
-let SRcDeta = SRD;
-let SPista = SP;
-let SConfConfUsuario = SCCU;
-let SConfConfDeta = SCCD;
 
 let Update = U;
 let Insertar = I;
@@ -142,10 +103,15 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
         if (sch.tipo.id === 5) {
           if (getAtributo({ atributo: "enlace_id_a", conf: sch })) {
             try {
-              const conf = await SConf.findByOrFail(
+              const conf = await M.SConf.findBy(
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+              if (!conf)
+                throw await new ExceptionHandler().handle(
+                  { code: "E_ROW_NOT_FOUND", message: "error" },
+                  ctx
+                );
               const tienePermisoDeDestino = await bouncer.allows(
                 "AccesoConf",
                 conf
@@ -153,9 +119,12 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
               if (!tienePermisoDeDestino) return false;
             } catch (err) {
               console.log(
+                "El error fue provocado por lo si guiente",
                 err,
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+
+              return await new ExceptionHandler().handle(err, ctx);
             }
           }
         }
@@ -229,30 +198,32 @@ const extraerElementos = ({
             : undefined;
         }
 
-        const condicionConf = getFullAtributo({
-          atributo: "condicionConf",
-          conf: c,
-        });
+        // const condicionConf = getFullAtributo({
+        //   atributo: "condicionConf",
+        //   conf: c,
+        // });
 
-        if (condicionConf) {
-          if (condicionConf.evaluar === "s") {
-            condicionConf.valor = eval(condicionConf.valor);
-          }
-          const resultadoCondicion =
-            datos[0]?.$extras[
-              getAtributo({ atributo: "condicionConf_alias", conf: c })
-            ];
+        // if (condicionConf) {
+        //   if (condicionConf.evaluar === "s") {
+        //     condicionConf.valor = eval(condicionConf.valor);
+        //   }
 
-          if (!resultadoCondicion) return;
+        //   const resultadoCondicion =
+        //     datos[0]?.$extras[
+        //       getAtributo({ atributo: "condicionConf_alias", conf: c })
+        //     ];
 
-          const sc = (await SConf.findByIda({
-            id_a: resultadoCondicion,
-          })) as SConf;
+        //   if (!resultadoCondicion) return;
 
-          c = sc;
-        }
+        //   const sc = (await SConf.findByIda({
+        //     id_a: resultadoCondicion,
+        //   })) as SConf;
+
+        //   c = sc;
+        // }
 
         item["id_a"] = c.id_a;
+        item["id"] = c.id;
 
         await Promise.all(
           c.valores.map(async (val) => {
@@ -270,12 +241,28 @@ const extraerElementos = ({
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-              let lista = await Database.rawQuery(val.valor);
-              ctx.$_sql.push({
-                sql: Database.rawQuery(val.valor).toQuery(),
-                conf: c.id_a,
-              });
-              val.valor = lista[0];
+              try {
+                let lista = await Database.rawQuery(val.valor);
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                });
+
+                val.valor = lista[0];
+              } catch (err) {
+                err.id_a = c.id_a;
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                  error: true,
+                });
+
+                return new ExceptionHandler().handle(err, ctx);
+              }
             }
 
             if (atributoNombre === "opciones") {
@@ -345,7 +332,7 @@ const extraerElementos = ({
             }
 
             if (atributoNombre === "enlace_id_a_opcional") {
-              const conf = await SConf.findByOrFail("id_a", val.valor);
+              const conf = await M.SConf.findByOrFail("id_a", val.valor);
               const per = await bouncer.allows("AccesoConf", conf);
 
               if (!per) return (item[atributoNombre] = undefined);
@@ -550,6 +537,8 @@ interface select {
   alias: string;
   evaluar: string;
   subquery: string;
+  id_a: string;
+  confId: number;
 }
 
 const getSelect = (
@@ -568,6 +557,8 @@ const getSelect = (
       alias: "",
       evaluar: "",
       subquery: "",
+      id_a: conf.id_a,
+      confId: conf.id,
     };
 
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
@@ -583,18 +574,15 @@ const getSelect = (
 
     valoresSQL.forEach((v) => {
       let vselect: select = {
-        campo: "",
-        sql: "",
+        campo: v.valor,
+        sql: v.sql,
         alias: "",
-        evaluar: "",
-        subquery: "",
+        evaluar: v.evaluar,
+        subquery: v.subquery,
+        id_a: conf.id_a,
+        confId: conf.id,
       };
 
-      vselect.campo = v.valor;
-      if (v.evaluar === "s") {
-        vselect.campo = eval(v.valor);
-      }
-      vselect.sql = v.sql;
       vselect.alias = getAtributo({
         atributo: v.atributo[0].nombre.concat("_alias"),
         conf,
@@ -684,10 +672,11 @@ const aplicarFiltros = (
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where && where.valor.trim() !== "") {
+    let thisWhere = where.valor;
     if (where.evaluar === "s") {
-      return query.whereRaw(eval(where.valor));
+      thisWhere = eval(where.valor);
     }
-    query.whereRaw(where.valor);
+    query.whereRaw(thisWhere);
   }
 
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
@@ -757,17 +746,19 @@ export class ConfBuilder {
     solo_conf?: string
   ) => {
     try {
-      let opciones = { configuracion_usuario_activo: "n" };
+      let opciones = this.setOpciones(ctx, listado, conf, id);
       let opcionesPantalla = {};
       let datos = [];
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
+      if (opciones.display_container === "n") return { opciones, datos };
+
       let configuracionDeUsuario = [] as any;
 
       if (usuario && usuario.id) {
-        configuracionDeUsuario = await SConfConfUsuario.query()
+        configuracionDeUsuario = await M.SConfConfUsuario.query()
           .where("id_conf", listado.id)
           .andWhere("id_usuario", usuario.id)
           .preload("detalles", (query) =>
@@ -781,23 +772,10 @@ export class ConfBuilder {
 
       conf?.valores.forEach((val) => {
         if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
+          return (opcionesPantalla[val.atributo[0].nombre] = eval(val.valor));
         }
         opcionesPantalla[val.atributo[0].nombre] = val.valor;
       });
-
-      listado?.valores.forEach((val) => {
-        if (val.evaluar === "s") {
-          return (opciones[val.atributo[0].nombre] = eval(val.valor));
-        }
-        opciones[val.atributo[0].nombre] = val.valor;
-      });
-      opciones["orden"] = conf?.orden.find(
-        (o) => o.id_conf_h === listado?.id
-      )?.orden;
-
-      opciones["id_a"] = listado.id_a;
-      opciones["tipo"] = listado.tipo;
 
       if (
         opciones.configuracion_usuario_activo === "s" &&
@@ -808,29 +786,6 @@ export class ConfBuilder {
             opciones[val.atributo[0].nombre] =
               configuracionDeUsuario[0][val.atributo[0].nombre];
         });
-      }
-      if (
-        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
-      ) {
-        const MenuConfiguracionDeListado = await SConf.query()
-          .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
-          .preload("conf_permiso")
-          .preload("tipo")
-          .preload("orden")
-          .preload("valores", (query) => query.preload("atributo"))
-          .preload("sub_conf", (query) => this.preloadRecursivo(query))
-          .firstOrFail();
-
-        const MenuConfiguracionDeListadoArmado = await this.armarContenedor({
-          ctx,
-          contenedor: MenuConfiguracionDeListado,
-          idListado: listado.id,
-          idVista: listado.id,
-        });
-
-        opciones["configuracionesDeListado"] = [
-          MenuConfiguracionDeListadoArmado,
-        ];
       }
 
       let columnas = await verificarPermisos({
@@ -852,11 +807,29 @@ export class ConfBuilder {
         tipoId: 8,
       });
 
-      const modelo = listado.getAtributo({ atributo: "modelo" });
-      const campos = getSelect(ctx, [columnas], 7);
-      const leftJoins = getLeftJoins({ columnas: columnas, conf: listado });
-      const groupsBy: gp[] = getGroupBy({ columnas, conf: listado });
-      const order = getOrder({ ctx, conf: listado });
+      if (
+        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
+      ) {
+        const MenuConfiguracionDeListado = await M.SConf.query()
+          .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
+          .preload("conf_permiso")
+          .preload("tipo")
+          .preload("orden")
+          .preload("valores", (query) => query.preload("atributo"))
+          .preload("sub_conf", (query) => this.preloadRecursivo(query))
+          .firstOrFail();
+
+        const MenuConfiguracionDeListadoArmado = await this.armarContenedor({
+          ctx,
+          contenedor: MenuConfiguracionDeListado,
+          idListado: listado.id,
+          idVista: listado.id,
+        });
+
+        opciones["configuracionesDeListado"] = [
+          MenuConfiguracionDeListadoArmado,
+        ];
+      }
 
       //Chequear filtros obligatorios
       if (solo_conf === "n") {
@@ -935,7 +908,7 @@ export class ConfBuilder {
               error: { message: error, continuar: true },
               conf: listado.id_a,
             });
-            res.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+            res.sql = (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
               ? ctx.$_sql
               : undefined;
             ctx.response.status(410);
@@ -944,77 +917,7 @@ export class ConfBuilder {
         }
       }
 
-      if (campos.length !== 0) {
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        let query = eval(modelo).query();
-
-        //aplicaSelects
-        campos.forEach(async (campo) => {
-          if (campo.evaluar === "s") {
-            campo.campo = eval(campo.campo);
-          }
-
-          if (campo.subquery === "s") {
-            const subquery = await Database.rawQuery(campo.campo);
-            return query.select(`"${subquery[0]}"`);
-          }
-
-          query.select(
-            Database.raw(
-              `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-            )
-          );
-          //console.log(query.toSQL().sql);
-        });
-
-        // aplicarPreloads - left join
-        if (leftJoins.length > 0) {
-          leftJoins.forEach((leftJoin) => {
-            if (leftJoin.evaluar === "s") {
-              return query.joinRaw(eval(leftJoin.valor));
-            }
-            query.joinRaw(leftJoin.valor);
-          });
-        }
-        // aplicar groupsBy
-        if (groupsBy.length > 0) {
-          groupsBy.forEach(({ groupBy, having }) => {
-            query.groupBy(groupBy);
-            if (having) query.having(having);
-          });
-        }
-        // aplicar order del listado
-        if (order.length > 0) {
-          order.forEach((order) => {
-            const orderValores = order.split(",");
-
-            query.orderBy(
-              orderValores[0],
-              orderValores[1] ? orderValores[1].trim() : "desc"
-            );
-          });
-        }
-
-        //aplicarFiltros
-
-        query = aplicarFiltros(
-          ctx,
-          query,
-          listado,
-          id,
-          queryFiltros,
-          filtros_aplicables
-        );
-
-        ctx.$_sql.push({ sql: query.toQuery(), conf: listado.id_a });
-        // console.log("listado sql: ", sql);
-        //await query.paginate(1, 15);
-        if (solo_conf === "n") {
-          datos = await query;
-        }
-      }
+      datos = await this.getDatos(ctx, listado, id);
 
       const cabeceras = await extraerElementos({
         ctx,
@@ -1052,15 +955,15 @@ export class ConfBuilder {
         listadoBotones,
         opciones,
         datos: datos,
-        sql: (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        sql: (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
           ? ctx.$_sql
           : undefined,
-        conf: (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        conf: (await bouncer.allows("AccesoRuta", Permiso.GET_CONF))
           ? conf
           : undefined,
       };
     } catch (err) {
-      console.log(err);
+      console.log("ArmarListado", err);
       throw await new ExceptionHandler().handle(err, ctx);
     }
   };
@@ -1087,76 +990,24 @@ export class ConfBuilder {
       error: { message: "" },
     };
 
-    let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
+    if (opciones.display_container === "n") return vistaFinal;
 
-    const parametro = vista.getAtributo({ atributo: "parametro" });
-    const modelo = vista.getAtributo({ atributo: "modelo" });
+    let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
     const campos = getSelect(ctx, [columnas], 7, usuario);
-    const leftJoins = getLeftJoins({ columnas, conf: vista, usuario });
-    const groupsBy: gp[] = getGroupBy({ columnas, conf: vista, usuario });
-    const order = getOrder({ ctx, conf: vista });
 
     try {
-      if (campos.length !== 0 && id) {
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        // ARRANCA LA QUERY -----------=======================-------------QUERY-----------------========================---------------------------------
-        let query = eval(modelo).query().where(`${parametro}`, id);
-
-        //aplicaSelects
-        campos.forEach((campo) => {
-          // console.log(campo);
-          query.select(
-            Database.raw(
-              `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-            )
-          );
-          //console.log(query.toSQL().sql);
-        });
-
-        // aplicarPreloads - left join
-        if (leftJoins.length > 0) {
-          leftJoins.forEach((leftJoin) => {
-            if (leftJoin.evaluar === "s") {
-              return query.joinRaw(eval(leftJoin.valor));
-            }
-            query.joinRaw(leftJoin.valor);
-          });
-        }
-        // aplicar groupsBy
-        if (groupsBy.length > 0) {
-          groupsBy.forEach(({ groupBy, having }) => {
-            query.groupBy(groupBy);
-            if (having) query.having(having);
-          });
-        }
-        // aplicar order del listado
-        if (order.length > 0) {
-          order.forEach((order) => {
-            const orderValores = order.split(",");
-
-            query.orderBy(
-              orderValores[0],
-              orderValores[1] ? orderValores[1].trim() : "desc"
-            );
-          });
-        }
-
-        //aplicarFiltros
-
-        query = aplicarFiltros(ctx, query, vista);
-
-        ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
-
-        vistaFinal.sql = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+      if (campos.length !== 0) {
+        vistaFinal.sql = (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
           ? ctx.$_sql
           : undefined;
-        vistaFinal.conf = (await bouncer.allows("AccesoRuta", "GET_SQL"))
+        vistaFinal.conf = (await bouncer.allows("AccesoRuta", Permiso.GET_CONF))
           ? vista
           : undefined;
         // console.log("vista sql: ", vistaFinal.sql);
         // await query.paginate(1, 15);
-        vistaFinal.datos = await query;
+        vistaFinal.datos = await this.getDatos(ctx, vista, id);
+
+        ctx.$_datos = ctx.$_datos.concat(vistaFinal.datos);
       }
       vistaFinal.cabeceras = (
         await extraerElementos({
@@ -1172,8 +1023,8 @@ export class ConfBuilder {
 
       return vistaFinal;
     } catch (err) {
-      console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      // console.log("ArmarVista", err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   };
 
@@ -1191,12 +1042,18 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
-      opciones: {};
+      sql: { sql: string; conf: string }[] | undefined;
+      opciones: { display_container: string; id_a: string };
       configuraciones: any[];
     } = {
-      opciones: this.setOpciones(ctx, contenedor, father),
+      opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
+      sql: [],
     };
+
+    if (p.opciones.display_container === "n") return p;
+
+    if (!(await ctx.bouncer.allows("AccesoConf", contenedor))) return p;
 
     const _listados = contenedor.sub_conf.filter(
       (sc) => sc.tipo.id === 2
@@ -1237,6 +1094,10 @@ export class ConfBuilder {
       })
     );
 
+    const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+      ? ctx.$_sql
+      : undefined;
+    p.sql = sql;
     p.configuraciones = [];
     p.configuraciones = p.configuraciones.concat(_listadosArmados);
     p.configuraciones = p.configuraciones.concat(_vistasArmadas);
@@ -1248,15 +1109,19 @@ export class ConfBuilder {
     ctx,
     conf,
     abm,
+    id,
   }: {
     ctx: HttpContextContract;
     abm: SConf;
     conf: SConf;
+    id?: number;
   }) => {
-    if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
+    if (!(await ctx.bouncer.allows("AccesoConf", abm))) return vistaVacia;
     let datos: any[] | undefined = [];
 
-    const opciones = this.setOpciones(ctx, abm, conf);
+    const opciones = this.setOpciones(ctx, abm, conf, id);
+    // console.log("ABM", opciones.display_container, opciones.id_a);
+    if (opciones.display_container === "n") return { opciones, datos };
 
     const cabeceras = await extraerElementos({
       ctx,
@@ -1267,7 +1132,7 @@ export class ConfBuilder {
       id: ctx.request.body().id,
     });
 
-    if (ctx.request.body().id) {
+    if (ctx.request.body().id && abm.getAtributo({ atributo: "parametro" })) {
       datos = await this.getDatos(ctx, abm, ctx.request.body().id);
     }
 
@@ -1275,7 +1140,7 @@ export class ConfBuilder {
       ? ctx.$_sql
       : undefined;
 
-    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+    const arbolConf = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_CONF))
       ? conf
       : undefined;
 
@@ -1303,43 +1168,89 @@ export class ConfBuilder {
     conf_h: SConf,
     conf: SConf,
     id?: number
-  ) => {
-    const opciones = {};
+  ): any => {
+    try {
+      ctx;
+      id;
+      const opciones = {};
 
-    ctx;
-    id;
-
-    conf?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
+      if (conf_h.tipo.id === 2) {
+        opciones["configuracion_usuario_activo"] = "n";
+        opciones["display_container"] = "s";
       }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
-
-    conf_h?.valores.forEach((val) => {
-      if (val.evaluar === "s") {
-        return (opciones[val.atributo[0].nombre] = eval(val.valor));
+      if (
+        conf_h.tipo.id === 1 ||
+        conf_h.tipo.id === 6 ||
+        conf_h.tipo.id === 7
+      ) {
+        opciones["display_container"] = "s";
       }
-      opciones[val.atributo[0].nombre] = val.valor;
-    });
 
-    opciones["orden"] = conf?.orden.find(
-      (o) => o.id_conf_h === conf_h?.id
-    )?.orden;
-    opciones["tipo"] = conf_h.tipo;
-    opciones["id_a"] = conf_h.id_a;
-    return opciones;
+      opciones["tipo"] = conf_h.tipo;
+      opciones["id_a"] = conf_h.id_a;
+      opciones["id"] = conf_h.id;
+
+      if (conf_h.valores) {
+        conf_h?.valores.map(async (val) => {
+          let copyVal = val.valor;
+          if (val.evaluar === "s") {
+            copyVal = eval(val.valor);
+          }
+          if (val.subquery === "s") {
+            try {
+              const subquery = (await Database.rawQuery(copyVal))[0];
+
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+              });
+
+              copyVal = subquery[0];
+            } catch (err) {
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+                error: true,
+              });
+              return new ExceptionHandler().handle(err, ctx);
+            }
+          }
+          if (val.atributo[0].nombre === "display_container") {
+            copyVal = Object.values(copyVal)[0];
+          }
+          opciones[val.atributo[0].nombre] = copyVal;
+        });
+      } else {
+        console.log("conf_h sin valores", conf.id_a, conf.valores);
+      }
+
+      if (!conf) return opciones;
+
+      opciones["orden"] = conf?.orden.find(
+        (o) => o.id_conf_h === conf_h?.id
+      )?.orden;
+
+      return opciones;
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
+    }
   };
 
   private static getDatos = async (
     ctx: HttpContextContract,
     conf: SConf,
     id?: number
-  ) => {
-    const modelo = conf.getAtributo({ atributo: "modelo" });
+  ): Promise<any> => {
+    const modelo = conf.getAtributo({
+      atributo: "modelo",
+    }) as unknown as string;
     const parametro = conf.getAtributo({ atributo: "parametro" });
 
     const tabla = conf.getAtributo({ atributo: "tabla" });
+    tabla;
 
     const campos = getSelect(ctx, [conf], 7);
     const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });
@@ -1354,7 +1265,8 @@ export class ConfBuilder {
     });
 
     if (modelo) {
-      const Modelo = eval(modelo) as typeof BaseModel;
+      const Modelo = M[modelo];
+
       let query = Modelo.query() as DatabaseQueryBuilderContract;
 
       campos.forEach(async (campo) => {
@@ -1363,8 +1275,24 @@ export class ConfBuilder {
         }
 
         if (campo.subquery === "s") {
-          const subquery = await Database.rawQuery(campo.campo);
-          return query.select(`"${subquery[0]}"`);
+          try {
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+            });
+            const subquery = await Database.rawQuery(campo.campo);
+            return query.select(`"${subquery[0]}"`);
+          } catch (err) {
+            err.id = campo.id_a;
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+              error: true,
+            });
+            return await new ExceptionHandler().handle(err, ctx);
+          }
         }
         query.select(
           Database.raw(
@@ -1410,13 +1338,30 @@ export class ConfBuilder {
         filtros_aplicables
       );
 
-      if (id) {
+      if (id && parametro) {
         query.where(`${parametro}`, id);
       }
 
-      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
+      try {
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+        });
+        const datos = await query;
+        ctx.$_datos = ctx.$_datos.concat(datos);
 
-      return await query;
+        return datos;
+      } catch (err) {
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+          error: true,
+        });
+
+        return new ExceptionHandler().handle(err, ctx);
+      }
     }
   };
 }

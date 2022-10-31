@@ -46,6 +46,8 @@ export default class TransfersController {
     }
   }
 
+  //*** CONTROLLERS ESTABLES */
+
   public async add(ctx: HttpContextContract) {
     const { request, auth, bouncer } = ctx;
 
@@ -68,12 +70,37 @@ export default class TransfersController {
     const { request, bouncer } = ctx;
 
     try {
-      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE);
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
 
       console.log(request.body().id);
       const transfer = await Transfer.findOrFail(request.body().id);
 
       return transfer.enviarMail(ctx);
+    } catch (err) {
+      console.log("CONTROLLER", err);
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
+  public async sendTransfer_a_este_email(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
+
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
+
+      const transfer = await Transfer.findOrFail(request.body().id);
+
+      const emails = Object.values(request.body()).find((r) =>
+        r.toString().includes("@")
+      );
+      if (!emails) {
+        return await new ExceptionHandler().handle(
+          { code: "SIN_EMAIL_VALIDO" },
+          ctx
+        );
+      }
+
+      return transfer.generarColaEmailUnico(ctx, emails);
     } catch (err) {
       console.log("CONTROLLER", err);
       return new ExceptionHandler().handle(err, ctx);

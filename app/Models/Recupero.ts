@@ -16,6 +16,7 @@ import PerformanceStatus from "./PerformanceStatus";
 import RecuperoPerformanceStatus from "./RecuperoPerformanceStatus";
 import Diagnostico from "./Diagnostico";
 import RecuperoDiagnostico from "./RecuperoDiagnostico";
+import Usuario from "./Usuario";
 
 export default class Recupero extends BaseModel {
   public static table = "tbl_recupero";
@@ -38,11 +39,41 @@ export default class Recupero extends BaseModel {
   @column()
   public habilitado: string;
 
+  @column()
+  public estadio_definido: string;
+
+  @column()
+  public performance_status_definido: string;
+
+  @column()
+  public linea_tratamiento_definido: string;
+
+  @column()
+  public en_combinacion_definido: string;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   public ts_modificacion: DateTime;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column()
+  public id_usuario_creacion: number;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_creacion",
+  })
+  public usuario_creacion: HasOne<typeof Usuario>;
+
+  @hasOne(() => Usuario, {
+    foreignKey: "id",
+    localKey: "id_usuario_modificacion",
+  })
+  public usuario_modificacion: HasOne<typeof Usuario>;
 
   @hasOne(() => Monodro, {
     foreignKey: "id",

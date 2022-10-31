@@ -53,6 +53,9 @@ export default class Drogueria extends BaseModel {
   public nombre: string;
 
   @column()
+  public email: string;
+
+  @column()
   public habilitado: string;
 
   @column.dateTime({ autoCreate: true })

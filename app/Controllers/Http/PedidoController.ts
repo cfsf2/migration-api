@@ -13,30 +13,37 @@ export default class PedidoController {
     }
   }
 
-  public async mig_confirmarPedido({ request }: HttpContextContract) {
+  public async mig_confirmarPedido(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
-      return await Pedido.guardarPedido({ pedidoWeb: request.body() });
+      const pedido = await Pedido.guardarPedido({ pedidoWeb: request.body() });
+      return pedido;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_admin_pedidos({ bouncer }: HttpContextContract) {
+  public async mig_admin_pedidos(ctx: HttpContextContract) {
+    const { bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PEDIDOS_GET);
       return await Pedido.traerPedidos({});
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_farmacia_pedidos({ request, bouncer }: HttpContextContract) {
+  public async mig_farmacia_pedidos(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PEDIDOS_GET_FARMACIA);
       const { idFarmacia } = request.params();
       return await Pedido.traerPedidos({ idFarmacia: idFarmacia });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 

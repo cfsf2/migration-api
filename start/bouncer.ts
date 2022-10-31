@@ -41,6 +41,13 @@ export const { actions } = Bouncer.define(
     return idUsuarioActualizar === usuario.id;
   }
 )
+  .define("adminOfarmacia", async (usuario: Usuario, farmacia: Farmacia) => {
+    await usuario.load("perfil", (q) => q.preload("permisos"));
+
+    if (usuario.perfil.find((p) => p.id === 1)) return true;
+    if (farmacia.id_usuario === usuario.id) return true;
+    return false;
+  })
   .define(
     "AccesoRuta",
     async (usuario: Usuario, permiso: Permiso | Permiso[]) => {
@@ -107,25 +114,19 @@ export const { actions } = Bouncer.define(
         case "n":
           return false;
         case "p":
-          if (Array.isArray(conf.permiso)) {
-            return true;
-            return false;
-          }
-
           const permisosUsuario = await arrayPermisos(usuario);
 
           if (
-            permisosUsuario.findIndex(
-              (p: { nombre: string }) =>
-                p.nombre === conf.conf_permiso.permiso.nombre
-            ) !== -1
+            permisosUsuario.findIndex((p: { nombre: string }) => {
+              return p.nombre === conf.conf_permiso.permiso.nombre;
+            }) !== -1
           ) {
             usuario.configuracionesPermitidas =
               usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
             return true;
           }
 
-          return Bouncer.deny("Acceso no autorizado", 401);
+          return false;
         default:
           return false;
       }
