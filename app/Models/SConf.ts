@@ -20,12 +20,6 @@ import STipo from "./STipo";
 import Usuario from "./Usuario";
 
 export default class SConf extends BaseModel {
-  static toJSON() {
-    throw new Error("Method not implemented.");
-  }
-  static getAtributo(arg0: { atributo: string }) {
-    throw new Error("Method not implemented.");
-  }
   public static table = "s_conf";
 
   @column({ isPrimary: true })
@@ -115,6 +109,7 @@ export default class SConf extends BaseModel {
     throughForeignKey: "id",
   })
   public sub_conf: HasManyThrough<typeof SConf>;
+
   static id_a: any;
   static id: any;
   static orden: any;

@@ -812,7 +812,7 @@ export class ConfBuilder {
       ) {
         const MenuConfiguracionDeListado = await M.SConf.query()
           .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
-          .preload("conf_permiso")
+          .preload("conf_permiso", (query) => query.preload("permiso"))
           .preload("tipo")
           .preload("orden")
           .preload("valores", (query) => query.preload("atributo"))
