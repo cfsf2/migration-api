@@ -8,4 +8,5 @@ export default class LaboratorioTipoComunicacion extends Base {
 
   @column()
   public nombre: string;
+  /**/
 }
