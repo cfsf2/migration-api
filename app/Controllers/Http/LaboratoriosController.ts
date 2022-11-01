@@ -88,6 +88,21 @@ export default class LaboratoriosController {
       throw new ExceptionHandler();
     }
   }
+
+  public async index_admin({ bouncer }) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
+      return await Laboratorio.query()
+        .preload("droguerias")
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion");
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler();
+    }
+  }
+
   public async transfers({ request, bouncer }: HttpContextContract) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
