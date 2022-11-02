@@ -92,7 +92,7 @@ export const { actions } = Bouncer.define(
     async (usuario: Usuario, conf: SConf, accion?: acciones) => {
       const clearanceLevel = conf.permiso;
       if (!clearanceLevel) {
-        console.log("sin clearance");
+        console.log(usuario.id, " sin clearance para ", conf.id_a);
         return false;
       }
       switch (clearanceLevel) {

@@ -107,6 +107,11 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+
+              await conf?.load("conf_permiso", (query) =>
+                query.preload("permiso")
+              );
+
               if (!conf)
                 throw await new ExceptionHandler().handle(
                   { code: "E_ROW_NOT_FOUND", message: "error" },
