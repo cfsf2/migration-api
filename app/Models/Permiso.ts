@@ -8,7 +8,7 @@ export default class Permiso extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
-  @column({ serializeAs: "slug" })
+  @column()
   public nombre: string;
 
   @column()

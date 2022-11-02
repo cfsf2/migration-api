@@ -35,7 +35,7 @@ export default class ConfigsController {
     }
     const conf = await SConf.query()
       .where("id_a", config)
-      .preload("conf_permiso")
+      .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("tipo", (query) => query.preload("atributos"))
       .preload("componente", (query) => query.preload("atributos"))
       .preload("orden")
@@ -106,7 +106,7 @@ export default class ConfigsController {
       const conf = await SConf.query()
         .where("id_a", config)
         .andWhere("id_tipo", 1)
-        .preload("conf_permiso")
+        .preload("conf_permiso", (query) => query.preload("permiso"))
         .preload("tipo", (query) => query.preload("atributos"))
         .preload("componente", (query) => query.preload("atributos"))
         .preload("orden")
@@ -187,7 +187,9 @@ export default class ConfigsController {
       configuraciones = configuraciones.concat(contenedoresArmadas);
       configuraciones = configuraciones.concat(abmsArmados);
 
-      ctx.$_respuesta.configuraciones = configuraciones;
+      ctx.$_respuesta.configuraciones = configuraciones.filter(
+        (c) => c.opciones.tipo
+      );
       ctx.$_respuesta.error = ctx.$_errores[0]?.error;
       ctx.$_respuesta.sql = (await ctx.bouncer.allows(
         "AccesoRuta",
@@ -217,7 +219,7 @@ export default class ConfigsController {
     const conf = await SConf.query()
       .where("id_a", config)
       .andWhere("id_tipo", 1)
-      .preload("conf_permiso")
+      .preload("conf_permiso", (query) => query.preload("permiso"))
       .preload("componente", (query) => query.preload("atributos"))
       .preload("tipo", (query) => query.preload("atributos"))
       .preload("orden")
@@ -247,7 +249,7 @@ export default class ConfigsController {
 
       const config = await SConf.query()
         .where("id_a", id_a)
-        .preload("conf_permiso")
+        .preload("conf_permiso", (query) => query.preload("permiso"))
         .preload("componente", (query) => query.preload("atributos"))
         .preload("tipo", (query) => query.preload("atributos"))
         .preload("orden")
@@ -280,7 +282,7 @@ export default class ConfigsController {
       const usuario = await auth.authenticate();
       const config = await SConf.query()
         .where("id_a", id_a)
-        .preload("conf_permiso")
+        .preload("conf_permiso", (query) => query.preload("permiso"))
         .preload("componente", (query) => query.preload("atributos"))
         .preload("tipo", (query) => query.preload("atributos"))
         .preload("orden")

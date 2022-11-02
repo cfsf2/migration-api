@@ -92,7 +92,7 @@ export const { actions } = Bouncer.define(
     async (usuario: Usuario, conf: SConf, accion?: acciones) => {
       const clearanceLevel = conf.permiso;
       if (!clearanceLevel) {
-        console.log("sin clearance");
+        console.log(usuario.id, " sin clearance para ", conf.id_a);
         return false;
       }
       switch (clearanceLevel) {
@@ -114,25 +114,19 @@ export const { actions } = Bouncer.define(
         case "n":
           return false;
         case "p":
-          if (Array.isArray(conf.permiso)) {
-            return true;
-            return false;
-          }
-
           const permisosUsuario = await arrayPermisos(usuario);
 
           if (
-            permisosUsuario.findIndex(
-              (p: { nombre: string }) =>
-                p.nombre === conf.conf_permiso.permiso.nombre
-            ) !== -1
+            permisosUsuario.findIndex((p: { nombre: string }) => {
+              return p.nombre === conf.conf_permiso.permiso.nombre;
+            }) !== -1
           ) {
             usuario.configuracionesPermitidas =
               usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
             return true;
           }
 
-          return Bouncer.deny("Acceso no autorizado", 401);
+          return false;
         default:
           return false;
       }

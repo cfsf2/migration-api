@@ -107,6 +107,11 @@ const verificarPermisoConf = async ({ ctx, sub_confs, bouncer }) => {
                 "id_a",
                 getAtributo({ atributo: "enlace_id_a", conf: sch })
               );
+
+              await conf?.load("conf_permiso", (query) =>
+                query.preload("permiso")
+              );
+
               if (!conf)
                 throw await new ExceptionHandler().handle(
                   { code: "E_ROW_NOT_FOUND", message: "error" },
@@ -223,6 +228,7 @@ const extraerElementos = ({
         // }
 
         item["id_a"] = c.id_a;
+        item["id"] = c.id;
 
         await Promise.all(
           c.valores.map(async (val) => {
@@ -240,12 +246,28 @@ const extraerElementos = ({
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-              let lista = await Database.rawQuery(val.valor);
-              ctx.$_sql.push({
-                sql: Database.rawQuery(val.valor).toQuery(),
-                conf: c.id_a,
-              });
-              val.valor = lista[0];
+              try {
+                let lista = await Database.rawQuery(val.valor);
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                });
+
+                val.valor = lista[0];
+              } catch (err) {
+                err.id_a = c.id_a;
+
+                ctx.$_sql.push({
+                  sql: Database.rawQuery(val.valor).toQuery(),
+                  conf: c.id_a,
+                  confId: c.id,
+                  error: true,
+                });
+
+                return new ExceptionHandler().handle(err, ctx);
+              }
             }
 
             if (atributoNombre === "opciones") {
@@ -520,6 +542,8 @@ interface select {
   alias: string;
   evaluar: string;
   subquery: string;
+  id_a: string;
+  confId: number;
 }
 
 const getSelect = (
@@ -538,6 +562,8 @@ const getSelect = (
       alias: "",
       evaluar: "",
       subquery: "",
+      id_a: conf.id_a,
+      confId: conf.id,
     };
 
     select.campo = getFullAtributoById({ id: id, conf })?.valor as string;
@@ -558,6 +584,8 @@ const getSelect = (
         alias: "",
         evaluar: v.evaluar,
         subquery: v.subquery,
+        id_a: conf.id_a,
+        confId: conf.id,
       };
 
       vselect.alias = getAtributo({
@@ -649,10 +677,11 @@ const aplicarFiltros = (
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where && where.valor.trim() !== "") {
+    let thisWhere = where.valor;
     if (where.evaluar === "s") {
-      return query.whereRaw(eval(where.valor));
+      thisWhere = eval(where.valor);
     }
-    query.whereRaw(where.valor);
+    query.whereRaw(thisWhere);
   }
 
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
@@ -728,7 +757,7 @@ export class ConfBuilder {
       let res = listadoVacio;
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
-      console.log(opciones.display_container, opciones.id_a);
+
       if (opciones.display_container === "n") return { opciones, datos };
 
       let configuracionDeUsuario = [] as any;
@@ -788,7 +817,7 @@ export class ConfBuilder {
       ) {
         const MenuConfiguracionDeListado = await M.SConf.query()
           .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
-          .preload("conf_permiso")
+          .preload("conf_permiso", (query) => query.preload("permiso"))
           .preload("tipo")
           .preload("orden")
           .preload("valores", (query) => query.preload("atributo"))
@@ -939,7 +968,7 @@ export class ConfBuilder {
           : undefined,
       };
     } catch (err) {
-      console.log(err);
+      console.log("ArmarListado", err);
       throw await new ExceptionHandler().handle(err, ctx);
     }
   };
@@ -965,7 +994,7 @@ export class ConfBuilder {
       cabeceras: [],
       error: { message: "" },
     };
-    console.log(opciones.display_container, opciones.id_a);
+
     if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
@@ -999,8 +1028,8 @@ export class ConfBuilder {
 
       return vistaFinal;
     } catch (err) {
-      console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      // console.log("ArmarVista", err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   };
 
@@ -1018,11 +1047,13 @@ export class ConfBuilder {
     const father = ctx.$_conf.buscarPadre(contenedor.id);
 
     const p: {
+      sql: { sql: string; conf: string }[] | undefined;
       opciones: { display_container: string; id_a: string };
       configuraciones: any[];
     } = {
       opciones: this.setOpciones(ctx, contenedor, father, idVista),
       configuraciones: [],
+      sql: [],
     };
 
     if (p.opciones.display_container === "n") return p;
@@ -1068,6 +1099,10 @@ export class ConfBuilder {
       })
     );
 
+    const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+      ? ctx.$_sql
+      : undefined;
+    p.sql = sql;
     p.configuraciones = [];
     p.configuraciones = p.configuraciones.concat(_listadosArmados);
     p.configuraciones = p.configuraciones.concat(_vistasArmadas);
@@ -1086,11 +1121,11 @@ export class ConfBuilder {
     conf: SConf;
     id?: number;
   }) => {
-    if (!(await ctx.bouncer.allows("AccesoConf", conf))) return vistaVacia;
+    if (!(await ctx.bouncer.allows("AccesoConf", abm))) return vistaVacia;
     let datos: any[] | undefined = [];
 
     const opciones = this.setOpciones(ctx, abm, conf, id);
-    console.log(opciones.display_container, opciones.id_a);
+    // console.log("ABM", opciones.display_container, opciones.id_a);
     if (opciones.display_container === "n") return { opciones, datos };
 
     const cabeceras = await extraerElementos({
@@ -1102,7 +1137,7 @@ export class ConfBuilder {
       id: ctx.request.body().id,
     });
 
-    if (ctx.request.body().id) {
+    if (ctx.request.body().id && abm.getAtributo({ atributo: "parametro" })) {
       datos = await this.getDatos(ctx, abm, ctx.request.body().id);
     }
 
@@ -1158,6 +1193,7 @@ export class ConfBuilder {
 
       opciones["tipo"] = conf_h.tipo;
       opciones["id_a"] = conf_h.id_a;
+      opciones["id"] = conf_h.id;
 
       if (conf_h.valores) {
         conf_h?.valores.map(async (val) => {
@@ -1166,8 +1202,25 @@ export class ConfBuilder {
             copyVal = eval(val.valor);
           }
           if (val.subquery === "s") {
-            const subquery = (await Database.rawQuery(copyVal))[0];
-            copyVal = subquery[0];
+            try {
+              const subquery = (await Database.rawQuery(copyVal))[0];
+
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+              });
+
+              copyVal = subquery[0];
+            } catch (err) {
+              ctx.$_sql.push({
+                sql: Database.rawQuery(copyVal).toQuery(),
+                conf: conf_h.id_a,
+                confId: conf_h.id,
+                error: true,
+              });
+              return new ExceptionHandler().handle(err, ctx);
+            }
           }
           if (val.atributo[0].nombre === "display_container") {
             copyVal = Object.values(copyVal)[0];
@@ -1218,6 +1271,7 @@ export class ConfBuilder {
 
     if (modelo) {
       const Modelo = M[modelo];
+
       let query = Modelo.query() as DatabaseQueryBuilderContract;
 
       campos.forEach(async (campo) => {
@@ -1226,8 +1280,24 @@ export class ConfBuilder {
         }
 
         if (campo.subquery === "s") {
-          const subquery = await Database.rawQuery(campo.campo);
-          return query.select(`"${subquery[0]}"`);
+          try {
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+            });
+            const subquery = await Database.rawQuery(campo.campo);
+            return query.select(`"${subquery[0]}"`);
+          } catch (err) {
+            err.id = campo.id_a;
+            ctx.$_sql.push({
+              sql: Database.rawQuery(campo.campo).toQuery(),
+              conf: campo.id_a,
+              confId: campo.confId,
+              error: true,
+            });
+            return await new ExceptionHandler().handle(err, ctx);
+          }
         }
         query.select(
           Database.raw(
@@ -1277,13 +1347,26 @@ export class ConfBuilder {
         query.where(`${parametro}`, id);
       }
 
-      ctx.$_sql.push({ sql: query.toQuery(), conf: conf.id_a });
+      try {
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+        });
+        const datos = await query;
+        ctx.$_datos = ctx.$_datos.concat(datos);
 
-      const datos = await query;
+        return datos;
+      } catch (err) {
+        ctx.$_sql.push({
+          sql: query.toQuery(),
+          conf: conf.id_a,
+          confId: conf.id,
+          error: true,
+        });
 
-      ctx.$_datos = ctx.$_datos.concat(datos);
-
-      return datos;
+        return new ExceptionHandler().handle(err, ctx);
+      }
     }
   };
 }

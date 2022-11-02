@@ -1,6 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
+import { DateTime } from "luxon";
 
 export default class UsuarioPermiso {
   public async handle(ctx: HttpContextContract, next: () => Promise<void>) {
@@ -99,7 +100,13 @@ export default class UsuarioPermiso {
       filtrosObligatorios: [],
     };
     ctx.$_filtros.solicitados = ctx.request.qs();
-    ctx.$_sql = [];
+    ctx.$_sql = [
+      {
+        conf: "Separador",
+        confId: 0,
+        sql: DateTime.now().toFormat("hh:mm:ss"),
+      },
+    ];
     ctx.$_datos = [];
     ctx.$_errores = [];
     ctx.$_conf = {
