@@ -1,7 +1,15 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import {
+  BaseModel,
+  column,
+  HasManyThrough,
+  hasManyThrough,
+  hasOne,
+  HasOne,
+} from "@ioc:Adonis/Lucid/Orm";
 import Base from "./Base";
 import Menu from "./Menu";
+import MenuItemCpsc from "./MenuItemCpsc";
 
 export default class MenuItem extends Base {
   public static table = "tbl_menu_item";
@@ -29,4 +37,12 @@ export default class MenuItem extends Base {
     foreignKey: "id",
   })
   public menu: HasOne<typeof Menu>;
+
+  @hasManyThrough([() => MenuItem, () => MenuItemCpsc], {
+    localKey: "id",
+    foreignKey: "id_menu_item",
+    throughLocalKey: "id_menu_item_hijo",
+    throughForeignKey: "id",
+  })
+  public menuItems: HasManyThrough<typeof MenuItem>;
 }

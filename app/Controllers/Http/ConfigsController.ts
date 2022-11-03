@@ -12,6 +12,7 @@ import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Menu from "App/Models/Menu";
+import MenuItem from "App/Models/MenuItem";
 
 const preloadRecursivo = (query) => {
   return query
@@ -22,6 +23,11 @@ const preloadRecursivo = (query) => {
     .preload("valores", (query) => query.preload("atributo"))
     .preload("sub_conf", (query) => preloadRecursivo(query));
 };
+
+const preloadRecursivoMenu = (query) => {
+  return query.preload("menuItems", (query) => preloadRecursivoMenu(query));
+};
+
 const respuestaVacia: respuesta = {
   configuraciones: [],
   opciones: {},
@@ -366,11 +372,9 @@ export default class ConfigsController {
   public async Test(ctx: HttpContextContract) {
     const menu = ctx.request.body().menu;
 
-    console.log(ctx.request.body());
-
     const _Menu = await Menu.query()
-      .where("id_a", menu)
-      .preload("menuItems")
+      .where("id_a", menu.trim())
+      .preload("menuItems", (query) => preloadRecursivoMenu(query))
       .first();
 
     return _Menu;
