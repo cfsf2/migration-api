@@ -12,4 +12,4 @@ Route.post("insertar", "ConfigsController.Insert");
 
 Route.post("eliminar", "ConfigsController.Delete");
 
-Route.get("test", "ConfigsController.Test");
+Route.post("test", "ConfigsController.Test");

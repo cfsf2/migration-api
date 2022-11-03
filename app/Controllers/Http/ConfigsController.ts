@@ -11,6 +11,7 @@ import {
 import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Menu from "App/Models/Menu";
 
 const preloadRecursivo = (query) => {
   return query
@@ -21,6 +22,26 @@ const preloadRecursivo = (query) => {
     .preload("valores", (query) => query.preload("atributo"))
     .preload("sub_conf", (query) => preloadRecursivo(query));
 };
+const respuestaVacia: respuesta = {
+  configuraciones: [],
+  opciones: {},
+  error: {},
+};
+
+const listadoVacio: listado = {
+  datos: [{}],
+  cabeceras: [{}],
+  filtros: [{}],
+  listadoBotones: [{}],
+  opciones: {},
+  error: { message: "" },
+};
+
+export interface respuesta {
+  configuraciones: any[];
+  opciones: {};
+  error: {};
+}
 
 export default class ConfigsController {
   public async Config(ctx: HttpContextContract) {
@@ -341,25 +362,17 @@ export default class ConfigsController {
       return response.badRequest({ error: err });
     }
   }
-}
 
-const respuestaVacia: respuesta = {
-  configuraciones: [],
-  opciones: {},
-  error: {},
-};
+  public async Test(ctx: HttpContextContract) {
+    const menu = ctx.request.body().menu;
 
-const listadoVacio: listado = {
-  datos: [{}],
-  cabeceras: [{}],
-  filtros: [{}],
-  listadoBotones: [{}],
-  opciones: {},
-  error: { message: "" },
-};
+    console.log(ctx.request.body());
 
-export interface respuesta {
-  configuraciones: any[];
-  opciones: {};
-  error: {};
+    const _Menu = await Menu.query()
+      .where("id_a", menu)
+      .preload("menuItems")
+      .first();
+
+    return _Menu;
+  }
 }
