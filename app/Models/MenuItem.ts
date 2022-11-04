@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  BelongsTo,
+  belongsTo,
   column,
   HasManyThrough,
   hasManyThrough,
@@ -10,6 +12,7 @@ import {
 import Base from "./Base";
 import Menu from "./Menu";
 import MenuItemCpsc from "./MenuItemCpsc";
+import MenuItemTipo from "./MenuItemTipo";
 
 export default class MenuItem extends Base {
   public static table = "tbl_menu_item";
@@ -20,7 +23,7 @@ export default class MenuItem extends Base {
   @column()
   public url: string;
 
-  @column()
+  @column({ serializeAs: null })
   public id_menu: number;
 
   @column()
@@ -32,11 +35,20 @@ export default class MenuItem extends Base {
   @column()
   public orden: number;
 
+  @column({ serializeAs: null })
+  public id_menu_item_tipo: number;
+
   @hasOne(() => Menu, {
     localKey: "id_menu",
     foreignKey: "id",
   })
   public menu: HasOne<typeof Menu>;
+
+  @belongsTo(() => MenuItemTipo, {
+    foreignKey: "id_menu_item_tipo",
+    localKey: "id",
+  })
+  public tipo: BelongsTo<typeof MenuItemTipo>;
 
   @hasManyThrough([() => MenuItem, () => MenuItemCpsc], {
     localKey: "id",
@@ -44,5 +56,5 @@ export default class MenuItem extends Base {
     throughLocalKey: "id_menu_item_hijo",
     throughForeignKey: "id",
   })
-  public menuItems: HasManyThrough<typeof MenuItem>;
+  public hijos: HasManyThrough<typeof MenuItem>;
 }

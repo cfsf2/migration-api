@@ -25,7 +25,9 @@ const preloadRecursivo = (query) => {
 };
 
 const preloadRecursivoMenu = (query) => {
-  return query.preload("menuItems", (query) => preloadRecursivoMenu(query));
+  return query
+    .preload("tipo")
+    .preload("hijos", (query) => preloadRecursivoMenu(query));
 };
 
 const respuestaVacia: respuesta = {
@@ -118,8 +120,7 @@ export default class ConfigsController {
   public async ConfigPantalla(ctx: HttpContextContract) {
     const { request, bouncer, auth } = ctx;
     const config = request.params().pantalla;
-    const usuario = await auth.authenticate();
-
+    const usuario = await auth.use("api").authenticate();
     const id_a_solicitados = request.body();
 
     const id = id_a_solicitados.id;
@@ -227,7 +228,7 @@ export default class ConfigsController {
 
       return ctx.$_respuesta;
     } catch (err) {
-      console.log(err);
+      console.log("ConfigController.ConfigPantalla", err);
       return new ExceptionHandler().handle(err, ctx);
     }
   }
@@ -369,12 +370,12 @@ export default class ConfigsController {
     }
   }
 
-  public async Test(ctx: HttpContextContract) {
+  public async Menu(ctx: HttpContextContract) {
     const menu = ctx.request.body().menu;
-
+    console.log("CALL MENU");
     const _Menu = await Menu.query()
-      .where("id_a", menu.trim())
-      .preload("menuItems", (query) => preloadRecursivoMenu(query))
+      .where("id_a", menu?.trim())
+      .preload("hijos", (query) => preloadRecursivoMenu(query))
       .first();
 
     return _Menu;

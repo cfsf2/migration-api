@@ -27,6 +27,8 @@ import {
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
 import Database from "@ioc:Adonis/Lucid/Database";
+import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class Usuario extends BaseModel {
   public Permisos: {};
@@ -576,17 +578,25 @@ export default class Usuario extends BaseModel {
     return this.nombre + " " + ap;
   }
 
-  public async _Permisos() {
-    const perfiles = await this.related("perfil").query().preload("permisos");
+  public async _Permisos(ctx: HttpContextContract) {
+    try {
+      if (!ctx.auth.isAuthenticated) return ctx.response.status(440);
 
-    let permisosUsuario: any = {};
+      const perfiles = await this.related("perfil").query().preload("permisos");
 
-    perfiles.forEach((perfil) => {
-      perfil.permisos.forEach(
-        (permiso) => (permisosUsuario[permiso.nombre] = 1)
-      );
-    });
-    return permisosUsuario;
+      let permisosUsuario: any = {};
+
+      perfiles.forEach((perfil) => {
+        perfil.permisos.forEach(
+          (permiso) => (permisosUsuario[permiso.nombre] = 1)
+        );
+      });
+      return permisosUsuario;
+    } catch (err) {
+      console.log("Permisos", err);
+
+      return new ExceptionHandler().handle(err, ctx);
+    }
   }
 
   @column()

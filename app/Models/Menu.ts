@@ -16,5 +16,5 @@ export default class Menu extends Base {
     localKey: "id",
     foreignKey: "id_menu",
   })
-  public menuItems: HasMany<typeof MenuItem>;
+  public hijos: HasMany<typeof MenuItem>;
 }
