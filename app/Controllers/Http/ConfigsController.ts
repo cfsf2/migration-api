@@ -372,78 +372,83 @@ export default class ConfigsController {
 
   public async Menu(ctx: HttpContextContract) {
     const menu = ctx.request.body().menu;
+    try {
+      const _Menu = await Menu.query()
+        .where("id_a", menu?.trim())
+        .preload("hijos", (query) =>
+          preloadRecursivoMenu(query.orderBy("orden", "asc"))
+        )
+        .firstOrFail();
 
-    const _Menu = await Menu.query()
-      .where("id_a", menu?.trim())
-      .preload("hijos", (query) =>
-        preloadRecursivoMenu(query.orderBy("orden", "asc"))
-      )
-      .firstOrFail();
-
-    _Menu.serialize({
-      relations: {
-        hijos: {
-          relations: {
-            rel: {
-              fields: ["orden", "id_menu_item_hijo"],
+      _Menu.serialize({
+        relations: {
+          hijos: {
+            relations: {
+              rel: {
+                fields: ["orden", "id_menu_item_hijo"],
+              },
             },
           },
         },
-      },
-    });
-
-    let __Menu = _Menu.hijos.map((h) => h.toJSON());
-
-    const ordenarHijos = async (m) => {
-      //verificamos permisos aca?
-
-      if (m.permiso === "n") {
-        return undefined;
-      }
-
-      if (m.permiso === "u") {
-        if (!ctx.auth.isLoggedIn) {
-          return undefined;
-        }
-      }
-
-      if (m.permiso === "p" && !(await ctx.bouncer.allows("AccesoMenu", m))) {
-        return undefined;
-      }
-
-      if (m.hijos.length === 0) {
-        delete m.rel;
-        delete m.hijos;
-        return m;
-      }
-
-      m.hijos = await Promise.all(
-        m.hijos.map(async (h) => {
-          h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
-
-          return await ordenarHijos(h);
-        })
-      );
-
-      m.hijos = m.hijos.sort((a, b) => {
-        if (a.orden > b.orden) {
-          return 1;
-        }
-        if (a.orden < b.orden) {
-          return -1;
-        }
-        // a must be equal to b
-        return 0;
       });
 
-      delete m.rel;
-      return m;
-    };
+      let __Menu = _Menu.hijos.map((h) => h.toJSON());
 
-    const MenuDefinitivo = (
-      await Promise.all(__Menu.map(async (m) => await ordenarHijos(m)))
-    ).filter((m) => m);
-    console.log(MenuDefinitivo.length);
-    return MenuDefinitivo;
+      const ordenarHijos = async (m) => {
+        //verificamos permisos aca?
+
+        if (m.permiso === "n") {
+          return undefined;
+        }
+
+        if (m.permiso === "u") {
+          if (!ctx.auth.isLoggedIn) {
+            return undefined;
+          }
+        }
+
+        if (m.permiso === "p" && !(await ctx.bouncer.allows("AccesoMenu", m))) {
+          return undefined;
+        }
+
+        if (m.hijos.length === 0) {
+          delete m.rel;
+          delete m.hijos;
+          return m;
+        }
+
+        m.hijos = await Promise.all(
+          m.hijos.map(async (h) => {
+            h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
+
+            return await ordenarHijos(h);
+          })
+        );
+
+        m.hijos = m.hijos.sort((a, b) => {
+          if (a.orden > b.orden) {
+            return 1;
+          }
+          if (a.orden < b.orden) {
+            return -1;
+          }
+          // a must be equal to b
+          return 0;
+        });
+
+        delete m.rel;
+        return m;
+      };
+
+      const MenuDefinitivo = (
+        await Promise.all(__Menu.map(async (m) => await ordenarHijos(m)))
+      ).filter((m) => m);
+
+      return MenuDefinitivo;
+    } catch (err) {
+      console.log(Date.now(), err);
+
+      return new ExceptionHandler().handle(err, ctx);
+    }
   }
 }
