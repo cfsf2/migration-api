@@ -15,7 +15,7 @@ export default class AuthController {
       console.log(username, password);
       const log = await auth
         .use("api")
-        .attempt(username, password, { expiresIn: "24h" });
+        .attempt(username, password, { expiresIn: process.env.JWTEXPIRESIN });
 
       let response = log.user.toObject();
       response = enumaBool(response);
@@ -68,12 +68,23 @@ export default class AuthController {
   public async checkToken(ctx: HttpContextContract) {
     try {
       console.log("checking token");
-      return (await ctx.auth.check())
-        ? ctx.response.accepted({ message: "El token es valido" })
-        : ctx.response.conflict({ message: "El token es invalido" });
+      if (await ctx.auth.check()) {
+        return ctx.response.accepted({
+          authenticated: ctx.auth.isAuthenticated,
+          message: "El token es valido",
+        });
+      }
+      await ctx.auth.use("api").revoke();
+      return ctx.response.status(440).send({
+        authenticated: ctx.auth.isAuthenticated,
+        message: "El token es invalido",
+      });
     } catch (err) {
       console.log(err);
-      return ctx.response.conflict({ message: "El token es invalido" });
+      return ctx.response.status(440).send({
+        authenticated: ctx.auth.isAuthenticated,
+        message: "El token es invalido ERR",
+      });
     }
   }
 
