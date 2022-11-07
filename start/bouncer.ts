@@ -11,6 +11,7 @@ import Farmacia from "App/Models/Farmacia";
 import SConf from "App/Models/SConf";
 import Usuario from "App/Models/Usuario";
 import { arrayPermisos } from "App/Helper/funciones";
+import MenuItem from "App/Models/MenuItem";
 
 /*
 |--------------------------------------------------------------------------
@@ -132,7 +133,24 @@ export const { actions } = Bouncer.define(
       }
     },
     { allowGuest: true }
-  );
+  )
+  .define("AccesoMenu", async (usuario: Usuario, menu: MenuItem) => {
+    const permisosUsuario = await arrayPermisos(usuario);
+    const M = await MenuItem.query()
+      .where("id", menu.id)
+      .preload("Permiso", (query) => query.preload("permiso"))
+      .firstOrFail();
+
+    if (
+      permisosUsuario.findIndex((p) => {
+        return p.nombre === M.Permiso.permiso.nombre;
+      }) !== -1
+    ) {
+      return true;
+    }
+
+    return false;
+  });
 
 /*
 |--------------------------------------------------------------------------
