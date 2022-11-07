@@ -395,6 +395,10 @@ export default class ConfigsController {
       let __Menu = _Menu.hijos.map((h) => h.toJSON());
 
       const ordenarHijos = async (m) => {
+        //varifico la institucion
+        if (m.institucion === "s") {
+          m.laod("institucion");
+        }
         //verificamos permisos aca?
 
         if (m.permiso === "n") {
