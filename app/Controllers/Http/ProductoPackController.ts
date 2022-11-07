@@ -11,7 +11,10 @@ import ProductoPack from "App/Models/ProductoPack";
 export default class ProductoPackController {
   public async mig_index() {
     try {
-      return await ProductoPack.traerProductosPacks({});
+      return await ProductoPack.traerProductosPacks({
+        en_papelera: "n",
+        habilitado: "s",
+      });
     } catch (err) {
       throw new ExceptionHandler();
     }
@@ -37,7 +40,6 @@ export default class ProductoPackController {
   public async mig_producto({}: HttpContextContract) {
     try {
       return await ProductoPack.traerProductosPacks({
-        habilitado: "s",
         en_papelera: "n",
       });
     } catch (err) {
@@ -45,11 +47,8 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_agregar_producto({
-    request,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async mig_agregar_producto(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PDP_CREATE);
       const usuario = await auth.authenticate();
@@ -78,7 +77,7 @@ export default class ProductoPackController {
       nuevoProducto.save();
       return nuevoProducto;
     } catch (error) {
-      throw new ExceptionHandler();
+      return await new ExceptionHandler().handle(error, ctx);
     }
   }
 
