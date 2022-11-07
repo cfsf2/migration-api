@@ -16,6 +16,7 @@ import Base from "./Base";
 import Menu from "./Menu";
 import MenuItemCpsc from "./MenuItemCpsc";
 import MenuItemTipo from "./MenuItemTipo";
+import MenuItemPermiso from "./MenuItemPermiso";
 
 export default class MenuItem extends Base {
   public static table = "tbl_menu_item";
@@ -38,7 +39,7 @@ export default class MenuItem extends Base {
   @column()
   public orden: number;
 
-  @column({ serializeAs: null })
+  @column()
   public permiso: string;
 
   @column({ serializeAs: null })
@@ -55,6 +56,12 @@ export default class MenuItem extends Base {
     localKey: "id",
   })
   public tipo: BelongsTo<typeof MenuItemTipo>;
+
+  @belongsTo(() => MenuItemPermiso, {
+    localKey: "id_menu_item",
+    foreignKey: "id",
+  })
+  public Permiso: BelongsTo<typeof MenuItemPermiso>;
 
   @hasManyThrough([() => MenuItem, () => MenuItemCpsc], {
     localKey: "id",
