@@ -12,7 +12,6 @@ import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Menu from "App/Models/Menu";
-import MenuItem from "App/Models/MenuItem";
 
 const preloadRecursivo = (query) => {
   return query
@@ -27,7 +26,8 @@ const preloadRecursivo = (query) => {
 const preloadRecursivoMenu = (query) => {
   return query
     .preload("tipo")
-    .preload("hijos", (query) => preloadRecursivoMenu(query));
+    .preload("hijos", (query) => preloadRecursivoMenu(query))
+    .preload("rel");
 };
 
 const respuestaVacia: respuesta = {
@@ -372,12 +372,55 @@ export default class ConfigsController {
 
   public async Menu(ctx: HttpContextContract) {
     const menu = ctx.request.body().menu;
-    console.log("CALL MENU");
+
     const _Menu = await Menu.query()
       .where("id_a", menu?.trim())
-      .preload("hijos", (query) => preloadRecursivoMenu(query))
-      .first();
+      .preload("hijos", (query) =>
+        preloadRecursivoMenu(query.orderBy("orden", "asc"))
+      )
+      .firstOrFail();
 
-    return _Menu;
+    _Menu.serialize({
+      relations: {
+        hijos: {
+          relations: {
+            rel: {
+              fields: ["orden", "id_menu_item_hijo"],
+            },
+          },
+        },
+      },
+    });
+
+    let __Menu = _Menu.hijos.map((h) => h.toJSON());
+
+    const ordenarHijos = (m) => {
+      if (m.hijos.length === 0) {
+        delete m.rel;
+        delete m.hijos;
+        return m;
+      }
+      m.hijos = m.hijos.map((h) => {
+        h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
+
+        return ordenarHijos(h);
+      });
+      m.hijos = m.hijos.sort((a, b) => {
+        if (a.orden > b.orden) {
+          return 1;
+        }
+        if (a.orden < b.orden) {
+          return -1;
+        }
+        // a must be equal to b
+        return 0;
+      });
+
+      delete m.rel;
+
+      return m;
+    };
+
+    return __Menu.map((m) => ordenarHijos(m));
   }
 }

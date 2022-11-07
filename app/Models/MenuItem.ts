@@ -4,6 +4,9 @@ import {
   BelongsTo,
   belongsTo,
   column,
+  computed,
+  hasMany,
+  HasMany,
   HasManyThrough,
   hasManyThrough,
   hasOne,
@@ -36,6 +39,9 @@ export default class MenuItem extends Base {
   public orden: number;
 
   @column({ serializeAs: null })
+  public permiso: string;
+
+  @column({ serializeAs: null })
   public id_menu_item_tipo: number;
 
   @hasOne(() => Menu, {
@@ -57,4 +63,10 @@ export default class MenuItem extends Base {
     throughForeignKey: "id",
   })
   public hijos: HasManyThrough<typeof MenuItem>;
+
+  @hasMany(() => MenuItemCpsc, {
+    localKey: "id",
+    foreignKey: "id_menu_item",
+  })
+  public rel: HasMany<typeof MenuItemCpsc>;
 }
