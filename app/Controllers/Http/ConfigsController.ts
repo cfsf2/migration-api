@@ -397,14 +397,16 @@ export default class ConfigsController {
     const ordenarHijos = async (m) => {
       //verificamos permisos aca?
 
-      if (m.premiso === "t") {
+      if (m.permiso === "n") {
+        return undefined;
       }
-      if (m.permiso === "n") return undefined;
+
       if (m.permiso === "u") {
         if (!ctx.auth.isLoggedIn) {
           return undefined;
         }
       }
+
       if (m.permiso === "p" && !(await ctx.bouncer.allows("AccesoMenu", m))) {
         return undefined;
       }
@@ -414,15 +416,14 @@ export default class ConfigsController {
         delete m.hijos;
         return m;
       }
-      m.hijos = (
-        await Promise.all(
-          m.hijos.map(async (h) => {
-            h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
 
-            return await ordenarHijos(h);
-          })
-        )
-      ).filter((m) => m);
+      m.hijos = await Promise.all(
+        m.hijos.map(async (h) => {
+          h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
+
+          return await ordenarHijos(h);
+        })
+      );
 
       m.hijos = m.hijos.sort((a, b) => {
         if (a.orden > b.orden) {
@@ -436,10 +437,13 @@ export default class ConfigsController {
       });
 
       delete m.rel;
+      return m;
     };
 
-    return (
+    const MenuDefinitivo = (
       await Promise.all(__Menu.map(async (m) => await ordenarHijos(m)))
     ).filter((m) => m);
+    console.log(MenuDefinitivo.length);
+    return MenuDefinitivo;
   }
 }
