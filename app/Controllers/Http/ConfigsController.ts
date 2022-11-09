@@ -429,18 +429,21 @@ export default class ConfigsController {
           })
         );
 
-        m.hijos = m.hijos.sort((a, b) => {
-          if (a.orden > b.orden) {
-            return 1;
-          }
-          if (a.orden < b.orden) {
-            return -1;
-          }
-          // a must be equal to b
-          return 0;
-        });
+        m.hijos = m.hijos
+          .sort((a, b) => {
+            if (a.orden > b.orden) {
+              return 1;
+            }
+            if (a.orden < b.orden) {
+              return -1;
+            }
+            // a must be equal to b
+            return 0;
+          })
+          .filter((m) => m);
 
         delete m.rel;
+
         return m;
       };
 
