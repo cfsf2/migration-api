@@ -425,7 +425,7 @@ export default class ConfigsController {
           m.hijos.map(async (h) => {
             h.orden = m.rel.find((r) => r.id_menu_item_hijo === h.id).orden;
 
-            return await ordenarHijos(h);
+            return (await ordenarHijos(h)).filter((m) => m);
           })
         );
 
