@@ -13,9 +13,10 @@ export default class UncaughtError {
         try {
           console.log(err);
         } catch (err) {
+          console.log(Date.now(), ctx.auth.user?.id, ctx.$_errores, err);
           throw await new ExceptionHandler().handle(err, ctx);
         }
-        // process.exit(1);
+        process.exit(1);
       });
     await next();
   }
