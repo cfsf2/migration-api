@@ -41,7 +41,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           error?.code
         );
       }
-      console.log(Date(), "Error Handler:", error);
+      console.log(Date(), "Error Handler:", await error);
 
       if (error.sqlMessage) {
         errorKey = error.sqlMessage
@@ -159,14 +159,12 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle
           : error.code + " " + error.sqlMessage;
-        return ctx.response
-          .status(422)
-          .send({
-            error: { message, errorSql: error.sql },
-            sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
-              ? ctx.$_sql
-              : undefined,
-          });
+        return ctx.response.status(422).send({
+          error: { message, errorSql: error.sql },
+          sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
+            ? ctx.$_sql
+            : undefined,
+        });
       }
 
       if (error.code === "ER_DUP_ENTRY") {
