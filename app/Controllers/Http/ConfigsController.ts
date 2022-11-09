@@ -89,20 +89,20 @@ export default class ConfigsController {
   }
 
   public async ConfigPantalla(ctx: HttpContextContract) {
-    const { request, bouncer, auth } = ctx;
-    const config = request.params().pantalla;
-    const usuario = await auth.authenticate();
-
-    const id_a_solicitados = request.body();
-
-    const id = id_a_solicitados.id;
-
-    const queryFiltros = request.qs(); // siempre undefined porque pasamos todo por post
-
-    if (!config) {
-      return respuestaVacia;
-    }
     try {
+      const { request, bouncer, auth } = ctx;
+      const config = request.params().pantalla;
+      const usuario = await auth.authenticate();
+
+      const id_a_solicitados = request.body();
+
+      const id = id_a_solicitados.id;
+
+      const queryFiltros = request.qs(); // siempre undefined porque pasamos todo por post
+
+      if (!config) {
+        return respuestaVacia;
+      }
       const conf = await SConf.query()
         .where("id_a", config)
         .andWhere("id_tipo", 1)
