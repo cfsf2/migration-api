@@ -201,7 +201,7 @@ export default class FarmaciasController {
   }
 
   public async nro_cuenta(ctx: HttpContextContract) {
-    const { request, bouncer, auth } = ctx;
+    const { request, bouncer } = ctx;
     const { id_farmacia, id_laboratorio } = request.body();
     try {
       const farmacia = await Farmacia.query()
