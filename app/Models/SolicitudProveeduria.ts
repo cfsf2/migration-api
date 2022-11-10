@@ -88,7 +88,7 @@ export default class SolicitudProveeduria extends BaseModel {
       //const arrayDestinatarios = data.destinatario.split(";");
 
       const arr = "rodriad90@gmail.com;rodrigoa.acevedo@mgmail.com".split(";");
-      console.log(arr);
+      // console.log(arr);
       arr.forEach((destinatario) => {
         Mail.send((messege) => {
           messege

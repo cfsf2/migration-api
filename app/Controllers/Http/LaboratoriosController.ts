@@ -22,7 +22,7 @@ export default class LaboratoriosController {
 
   public async mig_add(ctx: HttpContextContract) {
     const { request, bouncer, auth } = ctx;
-    console.log("Aniadiendo un Lab");
+    // console.log("Aniadiendo un Lab");
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_LAB);
       const usuario = await auth.authenticate();

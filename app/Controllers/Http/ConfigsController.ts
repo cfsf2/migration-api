@@ -47,7 +47,7 @@ export default class ConfigsController {
     if (!(await bouncer.allows("AccesoConf", conf))) return listadoVacio;
 
     if (conf.tipo.id === 2) {
-      console.log("pidio Listado");
+      //  console.log("pidio Listado");
       try {
         return ConfBuilder.armarListado(
           ctx,
@@ -65,7 +65,7 @@ export default class ConfigsController {
       }
     }
     if (conf.tipo.id === 6) {
-      console.log("pidio Vista");
+      // console.log("pidio Vista");
       try {
         return ConfBuilder.armarVista(ctx, conf, id, conf, bouncer, usuario);
       } catch (err) {
@@ -74,7 +74,7 @@ export default class ConfigsController {
       }
     }
     if (conf.tipo.id === 7) {
-      console.log("Pidio contenedor", config.id_a);
+      // console.log("Pidio contenedor", config.id_a);
       return await ConfBuilder.armarContenedor({
         ctx,
         contenedor: conf,
@@ -83,7 +83,7 @@ export default class ConfigsController {
       });
     }
     if (conf.tipo.id === 9) {
-      console.log("pidioABM", conf.id_a);
+      //  console.log("pidioABM", conf.id_a);
       return ConfBuilder.armarABM({ ctx, conf, abm: conf });
     }
   }
@@ -119,7 +119,7 @@ export default class ConfigsController {
       ctx.$_conf.estructura = conf;
       // para listado
       if (!(await bouncer.allows("AccesoConf", conf))) {
-        console.log("No hay acceso a ", conf.id_a, conf.permiso);
+        //  console.log("No hay acceso a ", conf.id_a, conf.permiso);
 
         return ctx.response.unauthorized({
           error: { message: "Sin Autorizacion" },

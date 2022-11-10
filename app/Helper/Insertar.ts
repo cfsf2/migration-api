@@ -118,7 +118,7 @@ export class Insertar {
         return await U.updateABM({ ctx, formData, conf });
       }
 
-      console.log(formData);
+      // console.log(formData);
 
       const nuevoRegistro = new Modelo();
 
@@ -148,9 +148,10 @@ export class Insertar {
             conf: confCampo,
           });
 
-          if (componente === "radio") console.log("radio");
+          if (componente === "radio")
+            // console.log("radio");
 
-          nuevoRegistro.merge({ [campo]: formData[id_a] });
+            nuevoRegistro.merge({ [campo]: formData[id_a] });
         })
       );
 

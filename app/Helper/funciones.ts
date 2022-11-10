@@ -106,7 +106,7 @@ export const guardarDatosAuditoria = async ({
       break;
 
     case AccionCRUD.editar:
-      console.log(usuario.id, objeto.$primaryKeyValue, registroCambios);
+      // console.log(usuario.id, objeto.$primaryKeyValue, registroCambios);
       // try {
       if (
         typeof registroCambios?.registrarCambios === "string" &&

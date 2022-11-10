@@ -12,7 +12,7 @@ export default class AuthController {
       const { request, auth, bouncer } = ctx;
       const { username, password } = request.only(["username", "password"]);
 
-      console.log(username, password);
+      //  console.log(username, password);
       const log = await auth
         .use("api")
         .attempt(username, password, { expiresIn: "24h" });
@@ -67,7 +67,7 @@ export default class AuthController {
 
   public async checkToken(ctx: HttpContextContract) {
     try {
-      console.log("checking token");
+      //   console.log("checking token");
       return (await ctx.auth.check())
         ? ctx.response.accepted({ message: "El token es valido" })
         : ctx.response.conflict({ message: "El token es invalido" });

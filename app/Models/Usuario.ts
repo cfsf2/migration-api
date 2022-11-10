@@ -425,21 +425,21 @@ export default class Usuario extends BaseModel {
     try {
       let usuario: Usuario = new Usuario();
 
-      console.log(
-        "Usuario MOdelo id:",
-        id,
-        "username",
-        username,
-        "password",
-        password
-      );
+      // console.log(
+      //   "Usuario MOdelo id:",
+      //   id,
+      //   "username",
+      //   username,
+      //   "password",
+      //   password
+      // );
       if (id) {
         usuario = await Usuario.findOrFail(id);
       }
       if (username) {
         usuario = await Usuario.findByOrFail("usuario", username);
       }
-      console.log(password);
+      // console.log(password);
       usuario.merge({ password: password });
 
       guardarDatosAuditoria({

@@ -506,7 +506,7 @@ export default class Farmacia extends BaseModel {
         });
       }
       if (productoAgregar && productoAgregar.nombre.trim() !== "") {
-        console.log("productosAgregar");
+        // console.log("productosAgregar");
         const productoN = new ProductoCustom();
         productoN.fill({
           nombre: productoAgregar.nombre,
@@ -530,7 +530,7 @@ export default class Farmacia extends BaseModel {
         farmaciaProdCustomN.save();
       }
       if (d.papeleraProductos.length > 0) {
-        console.log("d.papeleraProductos");
+        // console.log("d.papeleraProductos");
         d.papeleraProductos.forEach(async (p) => {
           const FPC = await FarmaciaProductoCustom.query()
             .where("id_producto_custom", p.id)
@@ -633,12 +633,12 @@ export default class Farmacia extends BaseModel {
     }
 
     if (Number(data.perfil) !== data.farmacia.id_perfil) {
-      console.log(
-        "cambio de perfil ",
-        data.farmacia.id_perfil,
-        " a ",
-        data.perfil
-      );
+      // console.log(
+      //   "cambio de perfil ",
+      //   data.farmacia.id_perfil,
+      //   " a ",
+      //   data.perfil
+      // );
       const perfilDB = await UsuarioPerfil.findBy(
         "id_usuario",
         data.farmacia.id_usuario
@@ -670,7 +670,7 @@ export default class Farmacia extends BaseModel {
         localidad: nuevaFarmacia.localidad,
       });
 
-      console.log("he sido  invocado ", lat, log);
+      // console.log("he sido  invocado ", lat, log);
 
       farmaciaN.merge({
         id_usuario: usuario.id,
