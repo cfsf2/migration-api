@@ -1,4 +1,4 @@
-import { BaseModel, BelongsTo, belongsTo, column } from "@ioc:Adonis/Lucid/Orm";
+import { BelongsTo, belongsTo, column } from "@ioc:Adonis/Lucid/Orm";
 import { Transfer } from "App/Helper/ModelIndex";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import Base from "./Base";

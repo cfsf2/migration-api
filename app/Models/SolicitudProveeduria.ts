@@ -37,7 +37,9 @@ export default class SolicitudProveeduria extends BaseModel {
       .leftJoin("tbl_farmacia as f", "sp.id_farmacia", "f.id")
       .leftJoin("tbl_estado_pedido as ep", "sp.id_estado_pedido", "ep.id")
       .leftJoin("tbl_entidad as e", "sp.id_entidad", "e.id")
-      .if(farmaciaid, (query) => query.where("sp.id_farmacia", farmaciaid))
+      .if(farmaciaid, (query) =>
+        query.where("sp.id_farmacia", farmaciaid as number)
+      )
       .orderBy("fecha", "desc");
 
     const arraySolicitudes = await Promise.all(
@@ -92,7 +94,7 @@ export default class SolicitudProveeduria extends BaseModel {
       arr.forEach((destinatario) => {
         Mail.send((messege) => {
           messege
-            .from(process.env.SMTP_USERNAME)
+            .from(process.env.SMTP_USERNAME as string)
             // .to(data.email_destinatario)
             .to(destinatario)
             .subject(data.asunto)

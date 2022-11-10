@@ -40,6 +40,16 @@ let SConfConfDeta = SCCD;
 let Insertar = I;
 let Eliminar = D;
 
+_SConf;
+SConfCpsc;
+SRc;
+SRcDeta;
+SPista;
+SConfConfUsuario;
+SConfConfDeta;
+Eliminar;
+Insertar;
+
 export class Update {
   constructor() {}
 

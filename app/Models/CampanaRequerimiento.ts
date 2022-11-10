@@ -55,13 +55,13 @@ export default class CampanaRequerimiento extends BaseModel {
       .leftJoin("tbl_usuario as u", "cr.id_usuario", "u.id")
       .leftJoin("tbl_campana as c", "cr.id_campana", "c.id")
       .if(id_usuario, (query) => {
-        return query.where("u.id", id_usuario);
+        return query.where("u.id", id_usuario as number);
       })
       .if(id_campana && id_campana !== "todas", (query) => {
-        return query.where("c.id", id_campana);
+        return query.where("c.id", id_campana as number);
       })
       .if(finalizado && finalizado !== "todas", (query) => {
-        return query.where("cr.finalizado", finalizado);
+        return query.where("cr.finalizado", finalizado as string);
       });
 
     let req = requerimientos.map(async (r) => {

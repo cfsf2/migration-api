@@ -77,7 +77,7 @@ export default class Publicidad extends BaseModel {
       })
 
       .if(institucion && institucion !== "todas", (query) => {
-        query.andWhere("i.id", institucion);
+        query.andWhere("i.id", institucion as any);
       })
 
       .if(titulo && titulo.trim() !== "", (query) => {

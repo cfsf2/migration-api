@@ -9,7 +9,7 @@ import ExceptionHandler from "App/Exceptions/Handler";
 export default class AuthController {
   public async mig_loginwp(ctx: HttpContextContract) {
     try {
-      const { request, auth, bouncer } = ctx;
+      const { request, auth } = ctx;
       const { username, password } = request.only(["username", "password"]);
 
       //  console.log(username, password);

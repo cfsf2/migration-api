@@ -24,4 +24,4 @@ Route.put(
 Route.put("/users/", "UsuariosController.mig_actualizar");
 Route.put("/users/newpassword", "UsuariosController.mig_newpassword");
 
-Route.delete("/users", "UsuariosController.ts.delete");
+Route.delete("/users", "UsuariosController.delete");

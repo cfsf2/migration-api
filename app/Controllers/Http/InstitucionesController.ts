@@ -73,12 +73,7 @@ export default class InstitucionesController {
     }
   }
 
-  public async actualizar({
-    request,
-    response,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async actualizar({ request, bouncer, auth }: HttpContextContract) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.INSTITUCIONES_UPDATE);
       const usuario = await auth.authenticate();

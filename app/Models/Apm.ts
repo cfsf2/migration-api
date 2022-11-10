@@ -29,6 +29,9 @@ export default class Apm extends Base {
   public id_laboratorio: number;
 
   public static async hacerAdministrador({ ctx, usuario, id, valor, conf }) {
+    usuario;
+    conf;
+
     try {
       const Apm_ = await Apm.findOrFail(id);
 
