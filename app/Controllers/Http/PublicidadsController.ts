@@ -15,24 +15,28 @@ import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 
 export default class PublicidadsController {
-  public async mig_publicidades({}: HttpContextContract) {
+  public async mig_publicidades(ctx: HttpContextContract) {
     try {
       return Publicidad.traerPublicidades({});
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_novedadesAdmin({ bouncer }: HttpContextContract) {
+  public async mig_novedadesAdmin(ctx: HttpContextContract) {
+    const { bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_ADMIN);
       return Publicidad.traerPublicidades({ tipo: "novedadesadmin" });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_novedadesSearch({ request, bouncer }: HttpContextContract) {
+  public async mig_novedadesSearch(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.GET_NOVEDADES_SEARCH);
 
@@ -44,7 +48,8 @@ export default class PublicidadsController {
       });
       return publicidades;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
@@ -113,15 +118,12 @@ export default class PublicidadsController {
       return;
     } catch (error) {
       console.log(error);
-      throw new ExceptionHandler().handle(error, ctx);
+      return new ExceptionHandler().handle(error, ctx);
     }
   }
 
-  public async mig_update_novedad({
-    request,
-    bouncer,
-    auth,
-  }: HttpContextContract) {
+  public async mig_update_novedad(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.PUBLICIDADES_UPDATE);
       const usuario = await auth.authenticate();
@@ -166,8 +168,9 @@ export default class PublicidadsController {
       });
       publicidad.save();
       return publicidad;
-    } catch (error) {
-      throw new ExceptionHandler();
+    } catch (err) {
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }

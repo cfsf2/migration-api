@@ -1239,7 +1239,7 @@ export class ConfBuilder {
 
       return opciones;
     } catch (err) {
-      console.log(err);
+      console.log(Date.now(), err, ctx.auth.user?.id);
       throw new ExceptionHandler().handle(err, ctx);
     }
   };
