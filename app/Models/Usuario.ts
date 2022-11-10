@@ -1,9 +1,7 @@
 import { DateTime } from "luxon";
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import {
-  afterCreate,
   BaseModel,
-  beforeCreate,
   beforeSave,
   column,
   HasMany,
@@ -582,7 +580,9 @@ export default class Usuario extends BaseModel {
     try {
       if (!ctx.auth.isAuthenticated) return ctx.response.status(440);
 
-      const perfiles = await this.related("perfil").query().preload("permisos");
+      const perfiles = await this.related("perfil" as any)
+        .query()
+        .preload("permisos");
 
       let permisosUsuario: any = {};
 

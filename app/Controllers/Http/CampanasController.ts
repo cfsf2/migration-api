@@ -6,7 +6,6 @@ import CampanaRequerimiento from "App/Models/CampanaRequerimiento";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
-import CampanaCampanaAtributo from "App/Models/CampanaCampanaAtributo";
 
 export default class CampanasController {
   public async index() {

@@ -3,8 +3,6 @@ import SRc from "App/Models/SRc";
 import SRcDeta from "App/Models/SRcDeta";
 import axios from "axios";
 import { DateTime } from "luxon";
-import ExceptionHandler from "App/Exceptions/Handler";
-import TransferEmail from "App/Models/TransferEmail";
 
 export const cambiarKey = ({
   o,

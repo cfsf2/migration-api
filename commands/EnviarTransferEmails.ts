@@ -1,6 +1,6 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
 import Mail from "@ioc:Adonis/Addons/Mail";
-import { generarHtml, html_transfer } from "App/Helper/email";
+import { generarHtml } from "App/Helper/email";
 
 export default class EnviarTransferEmails extends BaseCommand {
   /**

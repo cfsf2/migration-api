@@ -36,13 +36,13 @@ export default class Pedido extends BaseModel {
       .leftJoin("tbl_estado_pedido", "id_estado_pedido", "tbl_estado_pedido.id")
       .select("tbl_estado_pedido.nombre as estado")
       .if(usuarioNombre, (query) => {
-        return query.where("tbl_pedido.username", usuarioNombre.toString());
+        return query.where("tbl_pedido.username", usuarioNombre as string);
       })
       .if(idFarmacia, (query) => {
-        return query.where("tbl_pedido.id_farmacia", idFarmacia);
+        return query.where("tbl_pedido.id_farmacia", idFarmacia as number);
       })
       .if(idPedido, (query) => {
-        return query.where("tbl_pedido.id", idPedido);
+        return query.where("tbl_pedido.id", idPedido as number);
       });
 
     const newPedido = await Promise.all(

@@ -354,7 +354,7 @@ export default class Farmacia extends BaseModel {
           });
         });
 
-        dbloques.forEach((b, i) => {
+        dbloques.forEach((b) => {
           let hMod = horarios.find((h) => h.dia.nombre === b.dia); // bloque a modificar
           if (!hMod) {
             const hModNuevo = new FarmaciaDia();
@@ -579,7 +579,7 @@ export default class Farmacia extends BaseModel {
     });
 
     await Promise.all(
-      data.instituciones.map((id_institucion: number, i: number) => {
+      data.instituciones.map((id_institucion: number) => {
         const encontrado = instituciones.find(
           (d) => d.$original.id_institucion === Number(id_institucion)
         );

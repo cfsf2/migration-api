@@ -24,6 +24,10 @@ const Database = Datab;
 let Update = U;
 let Eliminar = D;
 
+SComponente;
+Update;
+Eliminar;
+
 export class Insertar {
   constructor() {}
 

@@ -27,7 +27,7 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Apm from "./Apm";
-import ApmFarmacia from "./ApmFarmacia";
+
 import TransferEmail from "./TransferEmail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 
@@ -74,7 +74,7 @@ export default class Transfer extends BaseModel {
           .where("ttp.id_transfer", t.id);
 
         let counter = 0;
-
+        counter;
         if (productos.length === 0) {
           try {
             t.productos_solicitados = await JSON.parse(

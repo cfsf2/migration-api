@@ -4,7 +4,6 @@ import {
 } from "@ioc:Adonis/Lucid/Database";
 import { DateTime } from "luxon";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
-import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
@@ -165,6 +164,8 @@ const extraerElementos = ({
   datos?: any[];
   id?: number;
 }) => {
+  id;
+  datos;
   return Promise.all(
     sc_hijos
       .map(async (sconf: SConf) => {
@@ -373,11 +374,9 @@ const extraerElementos = ({
 const getLeftJoins = ({
   columnas,
   conf,
-  usuario,
 }: {
   columnas: SConf[];
   conf: SConf;
-  usuario?: Usuario;
 }): at[] => {
   return getFullAtributosById([conf, columnas], 11);
 };
@@ -478,6 +477,7 @@ const getGroupBy = ({
   conf: SConf;
   usuario?: Usuario;
 }): gp[] => {
+  usuario;
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
   confs?.forEach((confi) => {
@@ -532,9 +532,9 @@ const getFullAtributoById = ({ id, conf }: { id: number; conf: SConf }) => {
   return conf.valores.find((v) => v.atributo[0].id === id);
 };
 
-const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
-  return conf.valores.filter((v) => v.sql === "s");
-};
+// const getFullAtributosBySQL = ({ conf }: { conf: SConf }) => {
+//   return conf.valores.filter((v) => v.sql === "s");
+// };
 
 interface select {
   campo: string;
@@ -674,6 +674,7 @@ const aplicarFiltros = (
   filtros_e?: SConf[] // filtros para los que tiene permiso
 ) => {
   //aplica filtros obligatorios de configuracion
+  id;
   const where = getFullAtributo({ conf: configuracion, atributo: "where" });
 
   if (where && where.valor.trim() !== "") {
