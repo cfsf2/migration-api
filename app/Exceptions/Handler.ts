@@ -116,7 +116,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
       }
 
       if (error.code === "ER_NO_DEFAULT_FOR_FIELD") {
-        console.log("Error de no default for field");
+        // console.log("Error de no default for field");
         const field = error.sqlMessage.split("'")[1];
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle

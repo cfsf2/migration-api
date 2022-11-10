@@ -45,7 +45,7 @@ export default class FarmaciasController {
       });
 
       if (request.url().includes("login") && farmacia.length !== 0) {
-        console.log("actualizar ultimo acceso a ", farmacia.nombre);
+        //  console.log("actualizar ultimo acceso a ", farmacia.nombre);
 
         const farmaciaLogueada = await Farmacia.query()
           .where("id", farmacia.id)

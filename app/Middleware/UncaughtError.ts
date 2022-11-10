@@ -11,7 +11,7 @@ export default class UncaughtError {
       .on("uncaughtException", async (err) => {
         console.log("Error no Capturado a tiempo");
         try {
-          console.log(err);
+          //  console.log(err);
         } catch (err) {
           console.log(Date.now(), ctx.auth.user?.id, ctx.$_errores, err);
           return await new ExceptionHandler().handle(err, ctx);

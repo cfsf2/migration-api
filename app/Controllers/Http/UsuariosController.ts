@@ -29,7 +29,7 @@ export default class UsuariosController {
       // await bouncer.authorize("AccesoRuta", Permiso.USER_GET);
 
       const { usuarioNombre } = request.params();
-      console.log(usuarioNombre);
+      //  console.log(usuarioNombre);
 
       return Usuario.traerPerfilDeUsuario({ usuarioNombre });
     } catch (err) {

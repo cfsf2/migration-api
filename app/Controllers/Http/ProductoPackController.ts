@@ -137,7 +137,7 @@ export default class ProductoPackController {
       producto.merge({
         en_papelera: "s",
       });
-      console.log("directo a papelera...");
+      // console.log("directo a papelera...");
 
       guardarDatosAuditoria({
         objeto: producto,

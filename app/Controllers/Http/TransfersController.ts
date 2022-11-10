@@ -72,7 +72,7 @@ export default class TransfersController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_ADMIN);
 
-      console.log(request.body().id);
+      //  console.log(request.body().id);
       const transfer = await Transfer.findOrFail(request.body().id);
 
       return transfer.enviarMail(ctx);

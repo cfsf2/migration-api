@@ -507,8 +507,8 @@ export const getAtributo = ({
 
   return conf.valores.find((v) => {
     if (!v.atributo[0]) {
-      console.log(conf.id_a);
-      console.log("ACA DEBE HABER UN ERROR", v, v.atributo, atributo, atributo);
+      //  console.log(conf.id_a);
+      //  console.log("ACA DEBE HABER UN ERROR", v, v.atributo, atributo, atributo);
     }
     return v.atributo[0].nombre === atributo;
   })?.valor as string;
@@ -1228,7 +1228,7 @@ export class ConfBuilder {
           opciones[val.atributo[0].nombre] = copyVal;
         });
       } else {
-        console.log("conf_h sin valores", conf.id_a, conf.valores);
+        // console.log("conf_h sin valores", conf.id_a, conf.valores);
       }
 
       if (!conf) return opciones;
@@ -1239,7 +1239,7 @@ export class ConfBuilder {
 
       return opciones;
     } catch (err) {
-      console.log(Date.now(), err, ctx.auth.user?.id);
+      //  console.log(Date.now(), err, ctx.auth.user?.id);
       throw new ExceptionHandler().handle(err, ctx);
     }
   };

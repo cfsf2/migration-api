@@ -553,7 +553,7 @@ export class Update {
     id: number;
   }) {
     try {
-      console.log(id);
+      // console.log(id);
       const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
 
       const campo = getAtributo({ atributo: "update_campo", conf: conf });

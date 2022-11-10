@@ -56,7 +56,7 @@ export default class Transfer extends BaseModel {
       .leftJoin("tbl_estado_transfer as et", "t.id_transfer_estado", "et.id")
       .leftJoin("tbl_usuario as u", "t.id", "u.id")
       .if(id_farmacia, (query) => {
-        console.log(id_farmacia);
+        // console.log(id_farmacia);
         query.where("t.id_farmacia", id_farmacia as number);
       })
       .orderBy("id", "desc");
@@ -496,7 +496,7 @@ export default class Transfer extends BaseModel {
               .andWhere("administrador", "s")
               .first()) as any;
             if (!apm) {
-              console.log("no hay apms pero deberia");
+              //  console.log("no hay apms pero deberia");
               destinatarioProveedor = laboratorio.email;
               break;
             }
@@ -504,7 +504,7 @@ export default class Transfer extends BaseModel {
           }
           break;
         }
-        console.log("no hay apms");
+        // console.log("no hay apms");
         destinatarioProveedor = laboratorio.email;
         break;
       case "TC_DROGUERIA":
