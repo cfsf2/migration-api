@@ -6,7 +6,8 @@ import TransferProducto from "App/Models/TransferProducto";
 import TransferProductoInstitucion from "App/Models/TransferProductoInstitucion";
 
 export default class ProductosTransfersController {
-  public async mig_index({ bouncer }: HttpContextContract) {
+  public async mig_index(ctx: HttpContextContract) {
+    const { bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_PRODS);
 
@@ -16,11 +17,12 @@ export default class ProductosTransfersController {
       });
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_bylab({ request, bouncer }: HttpContextContract) {
+  public async mig_bylab(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABID);
 
@@ -35,13 +37,14 @@ export default class ProductosTransfersController {
       });
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
   //*****  CONTROLLERS ESTABLES */
 
-  public async bylab({ request, bouncer }: HttpContextContract) {
+  public async bylab(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABID);
 
@@ -66,11 +69,12 @@ export default class ProductosTransfersController {
         .groupBy("tbl_transfer_producto.id");
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_instituciones({ request, bouncer }: HttpContextContract) {
+  public async mig_instituciones(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_PROD);
       const res = await TransferProductoInstitucion.query().where(
@@ -82,22 +86,24 @@ export default class ProductosTransfersController {
       return instituciones;
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_add({ request, bouncer, auth }: HttpContextContract) {
+  public async mig_add(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_PROD);
       const usuario = await auth.authenticate();
 
       return await TransferProducto.agregar(request.body(), usuario);
     } catch (err) {
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_actualizar({ request, bouncer, auth }: HttpContextContract) {
+  public async mig_actualizar(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_UPDATE_PROD);
       const usuario = await auth.authenticate();
@@ -109,11 +115,12 @@ export default class ProductosTransfersController {
       );
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
-  public async mig_delete({ request, bouncer, auth }: HttpContextContract) {
+  public async mig_delete(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_DELETE_PROD);
       const usuario = await auth.authenticate();
@@ -130,7 +137,7 @@ export default class ProductosTransfersController {
       return prod;
     } catch (err) {
       console.log(err);
-      throw new ExceptionHandler();
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 }
