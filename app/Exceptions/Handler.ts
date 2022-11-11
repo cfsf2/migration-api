@@ -324,6 +324,15 @@ export default class ExceptionHandler extends HttpExceptionHandler {
 
         return { error: { message } };
       }
+
+      if (error.code === "E_CANNOT_WRITE_FILE") {
+        const message =
+          errorMensajeTraducido ??
+          "Hubo un error al subir el archivo: " + error;
+
+        return ctx.response.status(403).send({ error: { message } });
+        // return { error: { message } };
+      }
     }
     return ctx.response.badRequest({
       error: {
