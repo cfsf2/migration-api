@@ -1,5 +1,4 @@
-import { DateTime } from "luxon";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { column } from "@ioc:Adonis/Lucid/Orm";
 import Base from "./Base";
 
 export default class MenuItemTipo extends Base {

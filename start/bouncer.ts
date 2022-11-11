@@ -141,7 +141,7 @@ export const { actions } = Bouncer.define(
       .where("id", menu.id)
       .preload("Permiso", (query) => query.preload("permiso"))
       .firstOrFail();
-
+    if (!M.Permiso) return false;
     if (
       permisosUsuario.findIndex((p) => {
         return p.nombre === M.Permiso.permiso.nombre;
