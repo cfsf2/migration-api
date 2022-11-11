@@ -1,10 +1,7 @@
-import { DateTime } from "luxon";
 import {
-  BaseModel,
   BelongsTo,
   belongsTo,
   column,
-  computed,
   hasMany,
   HasMany,
   HasManyThrough,
