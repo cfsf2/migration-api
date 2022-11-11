@@ -11,3 +11,4 @@ coverage
 *.sh
 
 tmp
+*.config.js
