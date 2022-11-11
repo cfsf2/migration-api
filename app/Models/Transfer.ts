@@ -308,8 +308,8 @@ export default class Transfer extends BaseModel {
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
 
         envia_email_transfer_auto: laboratorio.envia_email_transfer_auto,
-        monto_minimo_transfer: laboratorio.monto_minimo_transfer,
-        unidades_minimas_transfer: laboratorio.unidades_minimas_transfer,
+        monto_minimo_transfer: laboratorio.monto_minimo_transfer ?? 0,
+        unidades_minimas_transfer: laboratorio.unidades_minimas_transfer ?? 0,
       });
 
       guardarDatosAuditoria({
