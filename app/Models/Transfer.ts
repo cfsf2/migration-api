@@ -393,7 +393,18 @@ export default class Transfer extends BaseModel {
     ];
 
     if (this.laboratorio.envia_email_transfer_auto === "s") {
-      destinatarios.push(await this.getDestinatario());
+      const nuevoEmailAuto = new TransferEmail();
+      guardarDatosAuditoria({
+        objeto: nuevoEmailAuto,
+        usuario: ctx.auth.user as Usuario,
+        accion: AccionCRUD.crear,
+      });
+      nuevoEmailAuto.merge({
+        id_transfer: this.id,
+        emails: await this.getDestinatario(),
+        enviado: "n",
+      });
+      nuevoEmailAuto.save();
     }
 
     nuevoEmail.merge({
