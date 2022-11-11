@@ -527,8 +527,8 @@ export class Insertar {
         conf,
       });
     } catch (err) {
-      console.log(err);
-      throw await new ExceptionHandler().handle(err, ctx);
+      console.log("Insertar", err);
+      throw err; //await new ExceptionHandler().handle(err, ctx);
     }
   }
 }
