@@ -112,7 +112,7 @@ export default class TransferProducto extends BaseModel {
 
         institucionPF.save();
       });
-      return;
+      return nuevoPF;
     } catch (err) {
       console.log(err);
       return err;
