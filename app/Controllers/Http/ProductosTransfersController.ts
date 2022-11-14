@@ -140,4 +140,34 @@ export default class ProductosTransfersController {
       return new ExceptionHandler().handle(err, ctx);
     }
   }
+
+  public async delete_by_lab(ctx: HttpContextContract) {
+    const { request, bouncer, auth } = ctx;
+    const { id } = request.params();
+
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_DELETE_PROD);
+      const usuario = await auth.authenticate();
+
+      const prods = await TransferProducto.query()
+        .if(id !== "undefined", (query) => query.where("id_laboratorio", id))
+        .andWhere("en_papelera", "n");
+
+      await Promise.all(
+        prods.map(async (prod) => {
+          prod.merge({ en_papelera: "s" });
+
+          guardarDatosAuditoria({
+            objeto: prod,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          await prod.save();
+        })
+      );
+      return ctx.response.status(209);
+    } catch (err) {
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
 }

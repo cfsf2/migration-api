@@ -24,3 +24,8 @@ Route.delete(
   "/productosTransfers/:id",
   "ProductosTransfersController.mig_delete"
 );
+
+Route.delete(
+  "/productosTransfers/laboratorio/:id",
+  "ProductosTransfersController.delete_by_lab"
+);
