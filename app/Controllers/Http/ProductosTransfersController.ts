@@ -165,6 +165,7 @@ export default class ProductosTransfersController {
           await prod.save();
         })
       );
+
       return ctx.response.status(209);
     } catch (err) {
       return new ExceptionHandler().handle(err, ctx);
