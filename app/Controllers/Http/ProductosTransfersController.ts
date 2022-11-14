@@ -166,7 +166,9 @@ export default class ProductosTransfersController {
         })
       );
 
-      return ctx.response.status(209);
+      return ctx.response
+        .status(209)
+        .send(`Se han enviado a papelera ${prods.length} productos.`);
     } catch (err) {
       return new ExceptionHandler().handle(err, ctx);
     }
