@@ -1,9 +1,9 @@
 
-POST http://localhost:3111/transfers/enviarTransfer HTTP/1.1
+POST http://localhost:3111/test/ HTTP/1.1
 content-type: application/json
 
 {
-  "id": 5403
+  "menu": "M_NAV_FARMACIA"
 }
 
 ####
