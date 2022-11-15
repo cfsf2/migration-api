@@ -20,7 +20,7 @@ import Database from "@ioc:Adonis/Lucid/Database";
 import TransferProducto from "./TransferProducto";
 import TransferTransferProducto from "./TransferTransferProducto";
 
-import { html_transfer, transferHtml } from "../Helper/email";
+import { html_transfer } from "../Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "../Helper/funciones";
 import Mail from "@ioc:Adonis/Addons/Mail";
 // import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
