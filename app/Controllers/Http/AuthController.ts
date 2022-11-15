@@ -67,7 +67,7 @@ export default class AuthController {
 
   public async checkToken(ctx: HttpContextContract) {
     try {
-      console.log("checking token");
+      //console.log("checking token");
       if (await ctx.auth.check()) {
         return ctx.response.accepted({
           authenticated: ctx.auth.isAuthenticated,

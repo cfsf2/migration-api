@@ -350,21 +350,6 @@ export default class Transfer extends BaseModel {
       // *** en Lugar de enviar el mail, se suma un registro a la tabla transfer_email para que el cron ejecute la funcion
 
       return await nuevoTransfer.generarColaEmail(ctx);
-      if (laboratorio.envia_email_transfer_auto === "s") {
-        return nuevoTransfer.enviarMailAutomatico();
-      }
-
-      return Mail.send((message) => {
-        message
-          .from(process.env.SMTP_USERNAME as string)
-          .to(farmacia.email as string)
-          .to(process.env.TRANSFER_EMAIL as string)
-          .to(process.env.TRANSFER_EMAIL2 as string)
-          .subject(
-            "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
-          )
-          .html(transferHtml({ transfer: data, farmacia: farmacia }));
-      });
     } catch (err) {
       console.log("MODELO", err);
       Mail.send((message) => {
