@@ -32,6 +32,5 @@ export default Env.rules({
   S3_REGION: Env.schema.string(),
   S3_ENDPOINT: Env.schema.string.optional(),
   TRANSFER_EMAIL: Env.schema.string(),
-  TRANSFER_EMAIL2: Env.schema.string(),
   GEOCODING_API: Env.schema.string(),
 });
