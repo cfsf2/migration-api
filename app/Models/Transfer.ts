@@ -389,6 +389,7 @@ export default class Transfer extends BaseModel {
         emails: await this.getDestinatario(),
         enviado: "n",
       });
+
       nuevoEmailAuto.save();
     }
 
@@ -486,18 +487,20 @@ export default class Transfer extends BaseModel {
             .where("af.id_farmacia", this.id_farmacia)
             .where("af.id_laboratorio", this.id_laboratorio)
             .first();
+
           if (!apm) {
             apm = (await Apm.query()
               .where("id_laboratorio", this.id_laboratorio)
               .andWhere("administrador", "s")
               .first()) as any;
+
             if (!apm) {
-              //  console.log("no hay apms pero deberia");
+              console.log("no hay apms pero deberia");
               destinatarioProveedor = laboratorio.email;
               break;
             }
-            destinatarioProveedor = apm.email;
           }
+          destinatarioProveedor = apm.email;
           break;
         }
         // console.log("no hay apms");
