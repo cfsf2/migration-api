@@ -109,9 +109,8 @@ export default class EnviarTransferEmails extends BaseCommand {
                     tep.transfer.id +
                     " no pudo ser enviado correctamente",
                   texto:
-                    "Los destinatarios " +
-                    err.rejected?.toString() +
-                    " rechazaron la recepcion del email de transfer." +
+                    "Destinatarios no alcanzados: " +
+                    tep.emails +
                     "<br/>" +
                     "El sistema no intentara enviar el email nuevamente." +
                     "<hr/>" +
