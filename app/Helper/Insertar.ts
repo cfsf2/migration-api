@@ -153,7 +153,7 @@ export class Insertar {
           });
 
           if (componente === "radio") {
-            console.log("radio");
+            //console.log("radio");
           }
 
           nuevoRegistro.merge({ [campo]: formData[id_a] });
