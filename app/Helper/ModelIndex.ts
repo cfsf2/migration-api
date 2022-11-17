@@ -95,6 +95,8 @@ import _STipo from "App/Models/STipo";
 import _STipoAtributo from "App/Models/STipoAtributo";
 import _STipoComponente from "App/Models/STipoComponente";
 
+import _TipoInformeTransfer from "App/Models/TipoInformeTransfer";
+
 export let RecuperoDiagnostico = RD;
 export let RecuperoEstadio = RE;
 export let RecuperoLineaTratamiento = RLT;
@@ -186,3 +188,4 @@ export let CampanaCampanaOrientado = _CampanaCampanaOrientado;
 export let CampanaCampanaAtributo = _CampanaCampanaAtributo;
 export let CampanaAtributo = _CampanaAtributo;
 export let Campana = _Campana;
+export let TipoInformeTransfer = _TipoInformeTransfer;
