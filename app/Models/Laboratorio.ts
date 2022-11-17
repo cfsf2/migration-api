@@ -17,7 +17,7 @@ import Drogueria from "./Drogueria";
 import Apm from "./Apm";
 import LaboratorioModalidadEntrega from "./LaboratorioModalidadEntrega";
 import LaboratorioTipoComunicacion from "./LaboratorioTipoComunicacion";
-import { TipoInformeTransfer } from "App/Helper/ModelIndex";
+import TipoInformeTransfer from "./TipoInformeTransfer";
 
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
