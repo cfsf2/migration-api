@@ -152,10 +152,11 @@ export class Insertar {
             conf: confCampo,
           });
 
-          if (componente === "radio")
-            // console.log("radio");
+          if (componente === "radio") {
+            //console.log("radio");
+          }
 
-            nuevoRegistro.merge({ [campo]: formData[id_a] });
+          nuevoRegistro.merge({ [campo]: formData[id_a] });
         })
       );
 
