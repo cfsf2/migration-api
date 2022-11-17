@@ -42,7 +42,8 @@ export default class EnviarTransferEmails extends BaseCommand {
           .preload("laboratorio")
           .preload("farmacia")
           .preload("drogueria")
-      );
+      )
+      .orderBy("ts_creacion", "asc");
     await Promise.all(
       transferEmailPendiente.map(async (tep) => {
         try {

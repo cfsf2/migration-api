@@ -573,6 +573,9 @@ export default class Transfer extends BaseModel {
   public id_farmacia: number;
 
   @column()
+  public numero_transfer: number;
+
+  @column()
   public matricula: number;
 
   @column.dateTime({ autoCreate: true })
