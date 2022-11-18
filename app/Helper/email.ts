@@ -357,7 +357,7 @@ export const transferHtml = ({ transfer, farmacia }) => {
                       </head>
                       <body>
                         <div>
-                          <p><b>Codigo: </b>${transfer.id} </p>
+                          <p><b>Id Farmageo: </b>${transfer.id} </p>
                           <p><b>Farmacia: </b>${farmacia.nombre} / <b>Cuit: </b>${farmacia.cuit}</p>
                           <p><b>Telefono: </b>${farmacia.telefono}</p>
                           <p><b>Nro Cufe: </b>${farmacia.cufe}</p>
@@ -420,7 +420,7 @@ export const html_transfer = (transfer) => {
                         </head>
                         <body>
                           <div>
-                            <p><b>Codigo: </b>${transfer.id} </p>
+                            <p><b>Id Farmageo: </b>${transfer.id} </p>
                             <p><b>Farmacia: </b>${
                               transfer.farmacia.nombre
                             } / <b>Cuit: </b>${transfer.farmacia.cuit}</p>
