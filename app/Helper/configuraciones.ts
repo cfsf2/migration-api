@@ -204,30 +204,6 @@ const extraerElementos = ({
             : undefined;
         }
 
-        // const condicionConf = getFullAtributo({
-        //   atributo: "condicionConf",
-        //   conf: c,
-        // });
-
-        // if (condicionConf) {
-        //   if (condicionConf.evaluar === "s") {
-        //     condicionConf.valor = eval(condicionConf.valor);
-        //   }
-
-        //   const resultadoCondicion =
-        //     datos[0]?.$extras[
-        //       getAtributo({ atributo: "condicionConf_alias", conf: c })
-        //     ];
-
-        //   if (!resultadoCondicion) return;
-
-        //   const sc = (await SConf.findByIda({
-        //     id_a: resultadoCondicion,
-        //   })) as SConf;
-
-        //   c = sc;
-        // }
-
         item["id_a"] = c.id_a;
         item["id"] = c.id;
 
@@ -235,12 +211,6 @@ const extraerElementos = ({
           c.valores.map(async (val) => {
             //console.log(val.atributo[0].nombre, val.valor);
             const atributoNombre = val.atributo[0].nombre;
-
-            // if (
-            //   atributoNombre.startsWith("update") &&
-            //   !atributoNombre.startsWith("update_id")
-            // )
-            //   return (item[atributoNombre] = undefined);
 
             if (val.evaluar === "s" && val.sql === "n") {
               val.valor = eval(val.valor);
@@ -593,6 +563,10 @@ const getSelect = (
         conf,
       });
 
+      if (v.atributo[0].nombre === "condicion_acceso") {
+        vselect.alias = conf.id_a + "_CONDICION_ACCESO";
+      }
+
       selects.push(vselect);
     });
 
@@ -819,7 +793,10 @@ export class ConfBuilder {
       });
 
       if (
-        getAtributo({ atributo: "configuracion_usuario_activo", conf: listado })
+        getAtributo({
+          atributo: "configuracion_usuario_activo",
+          conf: listado,
+        })?.trim() === "s"
       ) {
         const MenuConfiguracionDeListado = await M.SConf.query()
           .where("id_a", "CONTENEDOR_SISTEMA_CONFIGURACION_LST")
@@ -965,7 +942,7 @@ export class ConfBuilder {
         filtros,
         listadoBotones,
         opciones,
-        datos: datos,
+        datos: this.datosConComponenteCalculado({ datos, cabeceras }),
         sql: (await bouncer.allows("AccesoRuta", Permiso.GET_SQL))
           ? ctx.$_sql
           : undefined,
@@ -1031,6 +1008,13 @@ export class ConfBuilder {
           id,
         })
       ).filter((c) => c);
+
+      const _datosConComponenteCalculado = this.datosConComponenteCalculado({
+        datos: vistaFinal.datos,
+        cabeceras: vistaFinal.cabeceras,
+      });
+
+      vistaFinal.datos = _datosConComponenteCalculado;
 
       return vistaFinal;
     } catch (err) {
@@ -1158,7 +1142,7 @@ export class ConfBuilder {
     return {
       opciones,
       cabeceras,
-      datos,
+      datos: this.datosConComponenteCalculado({ datos, cabeceras }),
       sql,
       conf: arbolConf,
     };
@@ -1248,6 +1232,23 @@ export class ConfBuilder {
       //  console.log(Date.now(), err, ctx.auth.user?.id);
       throw new ExceptionHandler().handle(err, ctx);
     }
+  };
+
+  private static datosConComponenteCalculado = ({ datos, cabeceras }) => {
+    const colocarComponente = (d, cab) => {
+      cab.forEach((cab) => {
+        if (d[`${cab.id_a}_CONDICION_ACCESO`] !== 0) {
+          d[`${cab.id_a}_COMPONENTE`] = cab.componente ?? "columna_simple";
+        }
+        colocarComponente(d, cab.sc_hijos);
+      });
+    };
+    const datosCalculados = datos.map((d) => {
+      d = d.toJSON();
+      colocarComponente(d, cabeceras);
+      return d;
+    });
+    return datosCalculados;
   };
 
   private static getDatos = async (
