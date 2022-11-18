@@ -588,10 +588,11 @@ const getSelect = (
         confId: conf.id,
       };
 
-      vselect.alias = getAtributo({
-        atributo: v.atributo[0].nombre.concat("_alias"),
-        conf,
-      });
+      vselect.alias =
+        getAtributo({
+          atributo: v.atributo[0].nombre.concat("_alias"),
+          conf,
+        }) ?? conf.id_a + "_" + v.atributo[0].nombre;
 
       selects.push(vselect);
     });
