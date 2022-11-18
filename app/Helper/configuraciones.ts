@@ -558,10 +558,11 @@ const getSelect = (
         confId: conf.id,
       };
 
-      vselect.alias = getAtributo({
-        atributo: v.atributo[0].nombre.concat("_alias"),
-        conf,
-      });
+      vselect.alias =
+        getAtributo({
+          atributo: v.atributo[0].nombre.concat("_alias"),
+          conf,
+        }) ?? conf.id_a + "_" + v.atributo[0].nombre;
 
       if (v.atributo[0].nombre === "condicion_acceso") {
         vselect.alias = conf.id_a + "_CONDICION_ACCESO";
