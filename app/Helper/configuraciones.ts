@@ -624,6 +624,11 @@ const aplicaWhere = async (
     return query;
   }
 
+  if ((operador === "in" || operador === "IN") && valor) {
+    const valores = valor.split(",");
+    return query.whereIn(campo, valores);
+  }
+
   if (operador === "fecha" || operador === "fecha_hora") {
     const fechas = JSON.parse(valor);
 
