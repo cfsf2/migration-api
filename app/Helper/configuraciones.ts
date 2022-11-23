@@ -1232,6 +1232,9 @@ export class ConfBuilder {
   private static datosConComponenteCalculado = ({ datos, cabeceras }) => {
     const colocarComponente = (d, cab) => {
       cab.forEach((cab) => {
+        if (d[`${cab.id_a}_CONDICION_ACCESO`] === 0) {
+          d[`${cab.id_a}_COMPONENTE`] = "null";
+        }
         if (d[`${cab.id_a}_CONDICION_ACCESO`] !== 0) {
           d[`${cab.id_a}_COMPONENTE`] = cab.componente ?? "columna_simple";
         }
