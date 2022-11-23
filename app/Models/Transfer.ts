@@ -1,6 +1,7 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  beforeSave,
   belongsTo,
   BelongsTo,
   column,
@@ -574,6 +575,16 @@ export default class Transfer extends BaseModel {
 
   @column()
   public numero_transfer: number;
+
+  @beforeSave()
+  public static async checkinformado(transfer: Transfer) {
+    if (transfer.numero_transfer && transfer.numero_transfer > 0) {
+      transfer.transfer_envio_informado = "s";
+    }
+  }
+
+  @column()
+  public transfer_envio_informado: string;
 
   @column()
   public matricula: number;
