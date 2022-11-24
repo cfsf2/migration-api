@@ -8,6 +8,7 @@ import {
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Laboratorio from "App/Models/Laboratorio";
+import TransferCategoria from "App/Models/TransferCategoria";
 
 export default class LaboratoriosController {
   public async mig_index({ bouncer }) {
@@ -77,12 +78,32 @@ export default class LaboratoriosController {
   public async index({ bouncer }) {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LABS);
-      return await Laboratorio.query()
-        .where("habilitado", "s")
+      const labs = await Laboratorio.query()
         .preload("droguerias")
         .preload("apms")
         .preload("modalidad_entrega")
-        .preload("tipo_comunicacion");
+        .preload("tipo_comunicacion")
+        .preload("transfer_categoria")
+        .whereHas("transfer_categoria", (query) =>
+          query.where("habilitado", "s")
+        )
+        .where("tbl_laboratorio.habilitado", "s")
+        .union((query) =>
+          query
+            .from("tbl_laboratorio")
+            .where("transfer_farmageo", "n")
+            .where("habilitado", "s")
+        );
+
+      const categorias = await TransferCategoria.query().where(
+        "habilitado",
+        "s"
+      );
+
+      return {
+        categorias,
+        laboratorios: labs,
+      };
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler();
@@ -96,7 +117,8 @@ export default class LaboratoriosController {
         .preload("droguerias")
         .preload("apms")
         .preload("modalidad_entrega")
-        .preload("tipo_comunicacion");
+        .preload("tipo_comunicacion")
+        .preload("transfer_categoria");
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler();
@@ -112,6 +134,7 @@ export default class LaboratoriosController {
         .preload("apms")
         .preload("modalidad_entrega")
         .preload("tipo_comunicacion")
+        .preload("transfer_categoria")
         .andWhere("id", request.params().id)
         .firstOrFail();
     } catch (err) {

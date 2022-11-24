@@ -1,6 +1,8 @@
 import { DateTime } from "luxon";
 import {
   BaseModel,
+  BelongsTo,
+  belongsTo,
   column,
   hasMany,
   HasMany,
@@ -18,6 +20,7 @@ import Apm from "./Apm";
 import LaboratorioModalidadEntrega from "./LaboratorioModalidadEntrega";
 import LaboratorioTipoComunicacion from "./LaboratorioTipoComunicacion";
 import TipoInformeTransfer from "./TipoInformeTransfer";
+import TransferCategoria from "./TransferCategoria";
 
 export default class Laboratorio extends BaseModel {
   static async traerLaboratorios({ id }: { id?: number }) {
@@ -86,14 +89,20 @@ export default class Laboratorio extends BaseModel {
   @column()
   public id_tipo_informe_transfer: number;
 
-  @column()
-  public id_transfer_categoria: number;
-
   @hasOne(() => TipoInformeTransfer, {
     foreignKey: "id",
     localKey: "id_tipo_informe_transfer",
   })
   public tipo_informe_transfer: HasOne<typeof TipoInformeTransfer>;
+
+  @column()
+  public id_transfer_categoria: number;
+
+  @belongsTo(() => TransferCategoria, {
+    foreignKey: "id_transfer_categoria",
+    localKey: "id",
+  })
+  public transfer_categoria: BelongsTo<typeof TransferCategoria>;
 
   @column()
   public id_tipo_comunicacion: number;
