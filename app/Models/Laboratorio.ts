@@ -86,6 +86,9 @@ export default class Laboratorio extends BaseModel {
   @column()
   public id_tipo_informe_transfer: number;
 
+  @column()
+  public id_transfer_categoria: number;
+
   @hasOne(() => TipoInformeTransfer, {
     foreignKey: "id",
     localKey: "id_tipo_informe_transfer",
