@@ -581,13 +581,13 @@ export default class Transfer extends BaseModel {
     if (transfer.numero_transfer && transfer.numero_transfer > 0) {
       transfer.transfer_envio_informado = "s";
     }
-    if (
-      (transfer.numero_transfer && transfer.numero_transfer === 0) ||
-      !transfer.numero_transfer
-    ) {
-      transfer.numero_transfer = null as unknown as number;
-      transfer.transfer_envio_informado = "n";
-    }
+    // if (
+    //   (transfer.numero_transfer && transfer.numero_transfer === 0) ||
+    //   !transfer.numero_transfer
+    // ) {
+    //   transfer.numero_transfer = null as unknown as number;
+    //   transfer.transfer_envio_informado = "n";
+    // }
   }
 
   @column()
