@@ -97,6 +97,19 @@ import _STipoComponente from "App/Models/STipoComponente";
 
 import _TipoInformeTransfer from "App/Models/TipoInformeTransfer";
 
+import _Menu from "App/Models/Menu";
+import _MenuItem from "App/Models/MenuItem";
+import _MenuItemCpsc from "App/Models/MenuItemCpsc";
+import _MenuItemInstitucion from "App/Models/MenuItemInstitucion";
+import _MenuItemPermiso from "App/Models/MenuItemPermiso";
+import _MenuItemTipo from "App/Models/MenuItemTipo";
+
+export let Menu = _Menu
+export let MenuItem = _MenuItem
+export let MenuItemCpsc = _MenuItemCpsc
+export let MenuItemPermiso= _MenuItemPermiso
+export let MenuItemTipo = _MenuItemTipo
+
 export let RecuperoDiagnostico = RD;
 export let RecuperoEstadio = RE;
 export let RecuperoLineaTratamiento = RLT;
