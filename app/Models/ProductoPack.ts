@@ -45,7 +45,7 @@ export default class ProductoPack extends BaseModel {
 
       return e;
     });
-    return arrNuevo.length > 0 ? arrNuevo : null;
+    return arrNuevo.length > 0 ? arrNuevo : [];
   }
 
   public static table = "tbl_producto_pack";
