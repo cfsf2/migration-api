@@ -39,9 +39,11 @@ export default class ProductoPackController {
 
   public async mig_producto({}: HttpContextContract) {
     try {
-      return await ProductoPack.traerProductosPacks({
+      const prods = await ProductoPack.traerProductosPacks({
         en_papelera: "n",
       });
+
+      return prods ?? [];
     } catch (err) {
       throw new ExceptionHandler();
     }
