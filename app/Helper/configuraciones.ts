@@ -739,7 +739,14 @@ export class ConfBuilder {
 
       if (!(await bouncer.allows("AccesoConf", listado))) return listadoVacio;
 
-      if (opciones.display_container === "n") return { opciones, datos };
+      if (opciones.display_container === "n")
+        return {
+          opciones,
+          datos,
+          cabeceras: [],
+          filtros: [],
+          listadoBotones: [],
+        };
 
       let configuracionDeUsuario = [] as any;
 
@@ -821,7 +828,7 @@ export class ConfBuilder {
       }
 
       //Chequear filtros obligatorios
-      if (solo_conf === "n") {
+      if (solo_conf === "n" /* iniciar_activo = "s" */) {
         const filtrosObligatorios = filtros_aplicables
           .filter(
             (f) => getAtributo({ atributo: "permite_null", conf: f }) === "n"
@@ -849,8 +856,8 @@ export class ConfBuilder {
 
           if (found) {
             filtros_obligatorios_insatisfechos =
-              filtros_obligatorios_insatisfechos.filter(
-                (f) => !filtrosOpcionalesNull.includes(f)
+              filtros_obligatorios_insatisfechos.filter((f) =>
+                filtrosOpcionalesNull.includes(f)
               ); // filtra todos los insatisfechos opcionales
           }
 
@@ -904,9 +911,8 @@ export class ConfBuilder {
             return res;
           }
         }
+        datos = await this.getDatos(ctx, listado, id);
       }
-
-      datos = await this.getDatos(ctx, listado, id);
 
       const cabeceras = await extraerElementos({
         ctx,
