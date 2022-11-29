@@ -96,6 +96,7 @@ import _STipoAtributo from "App/Models/STipoAtributo";
 import _STipoComponente from "App/Models/STipoComponente";
 
 import _TipoInformeTransfer from "App/Models/TipoInformeTransfer";
+import _TransferCategoria from "App/Models/TransferCategoria";
 
 export let RecuperoDiagnostico = RD;
 export let RecuperoEstadio = RE;
@@ -117,6 +118,7 @@ export let Transfer = T;
 export let TransferProducto = TP;
 export let TransferTransferProducto = TTP;
 export let TransferEmail = _TransferEmail;
+export let TransferCategoria = _TransferCategoria;
 
 export let Laboratorio = L;
 export let LaboratorioDrogueria = _LaboratorioDrogueria;
