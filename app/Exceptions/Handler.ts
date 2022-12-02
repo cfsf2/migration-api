@@ -337,7 +337,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
     return ctx.response.badRequest({
       error: {
         message:
-          errorMensajeTraducido?.detalle ?? error?.sqlMessage ?? error.message,
+          errorMensajeTraducido?.detalle ?? error?.sqlMessage ?? error?.message,
         error: error,
         errorSql: error?.sql,
       },
