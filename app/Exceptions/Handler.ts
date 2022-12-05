@@ -152,7 +152,27 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
+      }
+
+      if (error.code === "ER_PARSE_ERROR_") {
+        if (ctx) {
+          const message = errorMensajeTraducido
+            ? errorMensajeTraducido.detalle
+            : error.code + " : " + error.sql;
+
+          ctx.$_respuesta.error = { message, e: error, errorSql: error.sql };
+          ctx.$_respuesta.sql = (await ctx.bouncer.allows(
+            "AccesoRuta",
+            Permiso.GET_SQL
+          ))
+            ? ctx.$_sql
+            : undefined;
+          console.log(ctx.$_respuesta);
+          return ctx.response.status(422).send(ctx.$_respuesta);
+        }
       }
 
       if (error.code === "ER_BAD_FIELD_ERROR") {

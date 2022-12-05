@@ -343,19 +343,42 @@ const extraerElementos = ({
 };
 
 const getLeftJoins = ({
-  columnas,
   conf,
+  ctx,
 }: {
   columnas: SConf[];
   conf: SConf;
+  ctx: HttpContextContract;
 }): at[] => {
-  return getFullAtributosById([conf, columnas], 11);
+  console.log(conf.id_a);
+  let leftjoins: at[] = [];
+
+  const getleft = (c, cp) => {
+    const lj = getFullAtributoById({ id: 11, conf: c });
+    const orden = cp?.orden?.filter((f) => f.id_conf_h === c.id)?.pop().orden;
+
+    if (lj) {
+      leftjoins.push({
+        valor: lj.valor,
+        evaluar: lj.evaluar,
+        orden: orden ?? 0,
+      });
+    }
+
+    c.sub_conf.forEach((sc) => {
+      getleft(sc, c);
+    });
+  };
+  getleft(conf, {});
+
+  console.log(leftjoins);
+
+  return leftjoins;
 };
 
 interface at {
   valor: string;
-  sql: string;
-  subquery: string;
+  orden: number;
   evaluar: string;
 }
 
@@ -372,7 +395,7 @@ const getFullAtributosById = (
 
   let atributos: (at | at[])[] = [];
 
-  sc.forEach((conf) => {
+  sc.forEach((conf, i) => {
     let atributo = { valor: "", sql: "", evaluar: "", subquery: "" };
 
     atributo.valor = conf?.valores
@@ -643,13 +666,22 @@ const aplicaWhere = async (
     return query.whereRaw(radio_where_o[Number(valor)].trim());
   }
 
+  if (operador === "raw") {
+    //  console.log(conf.id_a);
+    const whereRaw = getAtributo({ atributo: "where", conf });
+    try {
+      if (whereRaw) {
+        //  console.log(whereRaw);
+        return query.whereRaw(eval("`" + whereRaw + "`"));
+      }
+    } catch (err) {
+      console.log(err);
+    }
+    return query;
+  }
+
   query.where(campo, operador ? operador : "=", valor);
 
-  const whereRaw = getAtributo({ atributo: "where", conf });
-  if (whereRaw) {
-    console.log(valor);
-    query.whereRaw(whereRaw);
-  }
   return query;
 };
 
@@ -829,7 +861,7 @@ export class ConfBuilder {
       }
 
       //Chequear filtros obligatorios
-      if (solo_conf === "n" /* iniciar_activo = "s" */ ) {
+      if (solo_conf === "n" /* iniciar_activo = "s" */) {
         const filtrosObligatorios = filtros_aplicables
           .filter(
             (f) => getAtributo({ atributo: "permite_null", conf: f }) === "n"
@@ -855,14 +887,13 @@ export class ConfBuilder {
             (r) => filtrosOpcionalesNull.indexOf(r) >= 0
           ); // si Algun filtro opcional esta satisfecho
 
-        
           if (found) {
             filtros_obligatorios_insatisfechos =
-            filtros_obligatorios_insatisfechos.filter(
-              (f) => filtrosOpcionalesNull.includes(f)
+              filtros_obligatorios_insatisfechos.filter((f) =>
+                filtrosOpcionalesNull.includes(f)
               ); // filtra todos los insatisfechos opcionales
-            }
-       
+          }
+
           if (filtros_obligatorios_insatisfechos.length > 0) {
             const error = `Los filtros ${filtros_obligatorios_insatisfechos
               .map((f) => f.id_a)
@@ -913,10 +944,8 @@ export class ConfBuilder {
             return res;
           }
         }
-        datos = await this.getDatos(ctx, listado, id);
-    
+        datos = (await this.getDatos(ctx, listado, id)) ?? [];
       }
-
 
       const cabeceras = await extraerElementos({
         ctx,
@@ -1004,7 +1033,7 @@ export class ConfBuilder {
           : undefined;
         // console.log("vista sql: ", vistaFinal.sql);
         // await query.paginate(1, 15);
-        vistaFinal.datos = await this.getDatos(ctx, vista, id);
+        vistaFinal.datos = (await this.getDatos(ctx, vista, id)) ?? [];
 
         ctx.$_datos = ctx.$_datos.concat(vistaFinal.datos);
       }
@@ -1139,7 +1168,7 @@ export class ConfBuilder {
     });
 
     if (ctx.request.body().id && abm.getAtributo({ atributo: "parametro" })) {
-      datos = await this.getDatos(ctx, abm, ctx.request.body().id);
+      datos = (await this.getDatos(ctx, abm, ctx.request.body().id)) ?? [];
     }
 
     const sql = (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
@@ -1279,7 +1308,12 @@ export class ConfBuilder {
     tabla;
 
     const campos = getSelect(ctx, [conf], 7);
-    const leftJoins = getLeftJoins({ columnas: conf.sub_conf, conf: conf });
+    const leftJoins = getLeftJoins({
+      columnas: conf.sub_conf,
+      conf: conf,
+      ctx,
+    });
+    console.log(leftJoins);
     const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
     const order = getOrder({ ctx, conf: conf });
 
@@ -1329,12 +1363,14 @@ export class ConfBuilder {
 
       // aplicarPreloads - left join
       if (leftJoins.length > 0) {
-        leftJoins.forEach((leftJoin) => {
-          if (leftJoin.evaluar === "s") {
-            return query.joinRaw(eval(leftJoin.valor));
-          }
-          query.joinRaw(leftJoin.valor);
-        });
+        leftJoins
+          .sort((a, b) => a.orden - b.orden)
+          .forEach((leftJoin) => {
+            if (leftJoin.evaluar === "s") {
+              return query.joinRaw(eval(leftJoin.valor));
+            }
+            query.joinRaw(leftJoin.valor);
+          });
       }
       // aplicar groupsBy
       if (groupsBy.length > 0) {
@@ -1384,6 +1420,10 @@ export class ConfBuilder {
           conf: conf.id_a,
           confId: conf.id,
           error: true,
+        });
+        ctx.$_errores.push({
+          error: { message: err.sqlMessage, continuar: false },
+          conf: conf.id_a,
         });
 
         return new ExceptionHandler().handle(err, ctx);
