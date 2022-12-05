@@ -171,6 +171,7 @@ const extraerElementos = ({
       .map(async (sconf: SConf) => {
         let c = sconf;
         let item = {};
+        let valor = ctx.request.qs()[c.id_a];
         // Verificar Orden designado por usuario
 
         const configuracionDeUsuario = (() => {
@@ -581,7 +582,8 @@ const getSelect = (
 const aplicaWhere = async (
   query: DatabaseQueryBuilderContract,
   valor: string,
-  conf: SConf
+  conf: SConf,
+  ctx: HttpContextContract
 ) => {
   const campo = getAtributoById({ id: 7, conf });
 
@@ -642,6 +644,12 @@ const aplicaWhere = async (
   }
 
   query.where(campo, operador ? operador : "=", valor);
+
+  const whereRaw = getAtributo({ atributo: "where", conf });
+  if (whereRaw) {
+    console.log(valor);
+    query.whereRaw(whereRaw);
+  }
   return query;
 };
 
@@ -692,7 +700,7 @@ const aplicarFiltros = (
 
       if (!valordefault) return;
 
-      aplicaWhere(query, valordefault, fd);
+      aplicaWhere(query, valordefault, fd, ctx);
     });
 
     //aplica filtros solicitados
@@ -714,7 +722,7 @@ const aplicarFiltros = (
 
       //  if (permiteNull === "n") throw new Error(`El ${id_a} es obligatorio`);
 
-      aplicaWhere(query, queryFiltros[id_a], filtro);
+      aplicaWhere(query, queryFiltros[id_a], filtro, ctx);
     });
   }
   return query;
