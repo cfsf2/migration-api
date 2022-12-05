@@ -217,27 +217,61 @@ const extraerElementos = ({
             }
 
             if (val.subquery === "s" && val.valor && val.valor.trim() !== "") {
-              try {
-                let lista = await Database.rawQuery(val.valor);
-
-                ctx.$_sql.push({
-                  sql: Database.rawQuery(val.valor).toQuery(),
-                  conf: c.id_a,
-                  confId: c.id,
+              let sinDependencia = true;
+              // Caso Select Esclavo
+              const maestroIda = getAtributo({
+                atributo: "select_depende_de",
+                conf: c,
+              });
+              if (maestroIda) {
+                sinDependencia = false;
+                const maestro = await SConf.findByIda({ id_a: maestroIda });
+                const query = val.valor;
+                val.valor = [] as unknown as string;
+                const id_a_maestro = getAtributo({
+                  atributo: "select_depende_de",
+                  conf: c,
                 });
 
-                val.valor = lista[0];
-              } catch (err) {
-                err.id_a = c.id_a;
+                const condicionValor = ctx.request.qs()[id_a_maestro];
 
-                ctx.$_sql.push({
-                  sql: Database.rawQuery(val.valor).toQuery(),
-                  conf: c.id_a,
-                  confId: c.id,
-                  error: true,
-                });
+                if (condicionValor && maestro) {
+                  const campoSelectMaestroWhere = getAtributo({
+                    atributo: "select_es_maestro_campo",
+                    conf: maestro,
+                  });
+                  val.valor =
+                    query +
+                    " where " +
+                    campoSelectMaestroWhere +
+                    "=" +
+                    condicionValor;
+                  sinDependencia = true;
+                }
+              }
+              if (sinDependencia) {
+                try {
+                  let lista = await Database.rawQuery(val.valor);
 
-                return new ExceptionHandler().handle(err, ctx);
+                  ctx.$_sql.push({
+                    sql: Database.rawQuery(val.valor).toQuery(),
+                    conf: c.id_a,
+                    confId: c.id,
+                  });
+
+                  val.valor = lista[0];
+                } catch (err) {
+                  err.id_a = c.id_a;
+
+                  ctx.$_sql.push({
+                    sql: Database.rawQuery(val.valor).toQuery(),
+                    conf: c.id_a,
+                    confId: c.id,
+                    error: true,
+                  });
+
+                  return new ExceptionHandler().handle(err, ctx);
+                }
               }
             }
 
