@@ -350,7 +350,6 @@ const getLeftJoins = ({
   conf: SConf;
   ctx: HttpContextContract;
 }): at[] => {
-  console.log(conf.id_a);
   let leftjoins: at[] = [];
 
   const getleft = (c, cp) => {
@@ -358,11 +357,14 @@ const getLeftJoins = ({
     const orden = cp?.orden?.filter((f) => f.id_conf_h === c.id)?.pop().orden;
 
     if (lj) {
-      leftjoins.push({
-        valor: lj.valor,
-        evaluar: lj.evaluar,
-        orden: orden ?? 0,
-      });
+      if ((c.id_tipo === 3 && ctx.request.qs()[c.id_a]) || c.id_tipo !== 3) {
+        // si es un filtro no se aplica el left join a menos que sea solicitado
+        leftjoins.push({
+          valor: lj.valor,
+          evaluar: lj.evaluar,
+          orden: orden ?? 0,
+        });
+      }
     }
 
     c.sub_conf.forEach((sc) => {
@@ -371,9 +373,7 @@ const getLeftJoins = ({
   };
   getleft(conf, {});
 
-  console.log(leftjoins);
-
-  return leftjoins;
+  return leftjoins.sort((a, b) => a.orden - b.orden);
 };
 
 interface at {
@@ -1363,14 +1363,12 @@ export class ConfBuilder {
 
       // aplicarPreloads - left join
       if (leftJoins.length > 0) {
-        leftJoins
-          .sort((a, b) => a.orden - b.orden)
-          .forEach((leftJoin) => {
-            if (leftJoin.evaluar === "s") {
-              return query.joinRaw(eval(leftJoin.valor));
-            }
-            query.joinRaw(leftJoin.valor);
-          });
+        leftJoins.forEach((leftJoin) => {
+          if (leftJoin.evaluar === "s") {
+            return query.joinRaw(eval(leftJoin.valor));
+          }
+          query.joinRaw(leftJoin.valor);
+        });
       }
       // aplicar groupsBy
       if (groupsBy.length > 0) {
