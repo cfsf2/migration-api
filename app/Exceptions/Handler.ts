@@ -64,6 +64,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -76,6 +78,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -88,6 +92,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -100,6 +106,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -112,6 +120,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -126,6 +136,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -139,6 +151,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -152,6 +166,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
@@ -164,6 +180,8 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           sql: (await ctx.bouncer.allows("AccesoRuta", Permiso.GET_SQL))
             ? ctx.$_sql
             : undefined,
+          configuraciones: [],
+          opciones: {},
         });
       }
 
