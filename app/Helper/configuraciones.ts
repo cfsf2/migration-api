@@ -397,6 +397,8 @@ const getLeftJoins = ({
           valor: lj.valor,
           evaluar: lj.evaluar,
           orden: orden ?? 0,
+          sql: lj.sql,
+          subquery: lj.subquery,
         });
       }
     }
@@ -414,6 +416,8 @@ interface at {
   valor: string;
   orden: number;
   evaluar: string;
+  subquery: string;
+  sql: string;
 }
 
 interface gp {
@@ -430,7 +434,7 @@ const getFullAtributosById = (
   let atributos: (at | at[])[] = [];
 
   sc.forEach((conf, i) => {
-    let atributo = { valor: "", sql: "", evaluar: "", subquery: "" };
+    let atributo = { valor: "", sql: "", evaluar: "", subquery: "", orden: 0 };
 
     atributo.valor = conf?.valores
       .find((v) => v.atributo[0].id === id)
