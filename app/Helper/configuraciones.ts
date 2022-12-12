@@ -1358,7 +1358,7 @@ export class ConfBuilder {
       conf: conf,
       ctx,
     });
-    console.log(leftJoins);
+
     const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
     const order = getOrder({ ctx, conf: conf });
 
