@@ -15,6 +15,7 @@ import MenuItemCpsc from "./MenuItemCpsc";
 import MenuItemTipo from "./MenuItemTipo";
 import MenuItemPermiso from "./MenuItemPermiso";
 import MenuItemInstitucion from "./MenuItemInstitucion";
+import SConf from "./SConf";
 
 export default class MenuItem extends Base {
   public static table = "tbl_menu_item";
@@ -39,6 +40,15 @@ export default class MenuItem extends Base {
 
   @column()
   public permiso: string;
+
+  @column()
+  public id_a_conf: string;
+
+  @hasOne(() => SConf, {
+    localKey: "id_a_conf",
+    foreignKey: "id_a",
+  })
+  public conf: HasOne<typeof SConf>;
 
   @column({ serializeAs: null })
   public id_menu_item_tipo: number;
