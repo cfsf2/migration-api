@@ -92,7 +92,12 @@ export const { actions } = Bouncer.define(
     "AccesoConf",
     async (usuario: Usuario, conf: SConf, accion?: acciones) => {
       accion;
+
+      conf = await SConf.findOrFail(conf.id);
+      await conf.load("conf_permiso", (c) => c.preload("permiso"));
+
       const clearanceLevel = conf.permiso;
+
       if (!clearanceLevel) {
         console.log(usuario.id, " sin clearance para ", conf.id_a);
         return false;
