@@ -172,6 +172,7 @@ const extraerElementos = ({
         let c = sconf;
         let item = {};
         let valor = ctx.request.qs()[c.id_a];
+        valor;
         // Verificar Orden designado por usuario
 
         const configuracionDeUsuario = (() => {
@@ -434,6 +435,7 @@ const getFullAtributosById = (
   let atributos: (at | at[])[] = [];
 
   sc.forEach((conf, i) => {
+    i;
     let atributo = { valor: "", sql: "", evaluar: "", subquery: "", orden: 0 };
 
     atributo.valor = conf?.valores
@@ -646,6 +648,7 @@ const aplicaWhere = async (
   conf: SConf,
   ctx: HttpContextContract
 ) => {
+  ctx;
   const campo = getAtributoById({ id: 7, conf });
 
   const operador = getAtributo({ atributo: "operador", conf });
