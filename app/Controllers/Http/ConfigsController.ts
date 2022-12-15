@@ -160,6 +160,11 @@ export default class ConfigsController {
       ) as SConf[];
       const vistas = conf.sub_conf.filter((sc) => sc.tipo.id === 6) as SConf[];
       const abms = conf.sub_conf.filter((sc) => sc.tipo.id === 9) as SConf[];
+
+      const artesanales = conf.sub_conf.filter(
+        (sc) => sc.tipo.id === 11
+      ) as SConf[];
+
       const contenedores = conf.sub_conf.filter(
         (sc) => sc.tipo.id === 7
       ) as SConf[];
@@ -208,6 +213,12 @@ export default class ConfigsController {
         })
       );
 
+      const artesanalesArmados = await Promise.all(
+        artesanales.map(async (art) => {
+          return ConfBuilder.armarArtesanal({ ctx, conf, art, id });
+        })
+      );
+
       ctx.$_respuesta.opciones = ConfBuilder.setOpciones(ctx, conf, conf, id);
 
       let configuraciones: any[] = [];
@@ -215,6 +226,7 @@ export default class ConfigsController {
       configuraciones = configuraciones.concat(vistasArmadas);
       configuraciones = configuraciones.concat(contenedoresArmadas);
       configuraciones = configuraciones.concat(abmsArmados);
+      configuraciones = configuraciones.concat(artesanalesArmados);
 
       ctx.$_respuesta.configuraciones = configuraciones.filter(
         (c) => c.opciones.tipo

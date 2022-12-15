@@ -1236,6 +1236,21 @@ export class ConfBuilder {
     };
   };
 
+  public static armarArtesanal = async ({ ctx, conf, art, id }) => {
+    if (!(await ctx.bouncer.allows("AccesoConf", art))) return vistaVacia;
+    const opciones = this.setOpciones(ctx, art, conf, id);
+    let datos: any[] | undefined = [];
+    // console.log("art", opciones.display_container, opciones.id_a);
+    if (opciones.display_container === "n") return { opciones, datos };
+
+    datos = await this.getDatos(ctx, conf, id);
+
+    return {
+      opciones,
+      datos,
+    };
+  };
+
   public static preloadRecursivo = (query) => {
     return query
       .preload("conf_permiso", (query) => query.preload("permiso"))
@@ -1264,7 +1279,8 @@ export class ConfBuilder {
       if (
         conf_h.tipo.id === 1 ||
         conf_h.tipo.id === 6 ||
-        conf_h.tipo.id === 7
+        conf_h.tipo.id === 7 ||
+        conf_h.tipo.id === 11
       ) {
         opciones["display_container"] = "s";
       }
@@ -1475,45 +1491,9 @@ export class ConfBuilder {
         return new ExceptionHandler().handle(err, ctx);
       }
     }
+
+    return [];
   };
-}
-
-const listadoVacio: listado = {
-  datos: [],
-  cabeceras: [],
-  filtros: [],
-  listadoBotones: [],
-  opciones: {},
-  sql: undefined,
-  error: { message: "" },
-};
-
-const vistaVacia = {
-  datos: [],
-  cabeceras: [],
-  opciones: {},
-  sql: "",
-  error: { message: "" },
-};
-
-export interface listado {
-  listadoBotones: ({} | undefined)[];
-  datos: any[];
-  cabeceras: any[];
-  filtros: any[];
-  opciones: {};
-  sql?: any;
-  conf?: SConf;
-  error?: { message: string };
-}
-
-export interface vista {
-  datos: any[];
-  cabeceras: any[];
-  opciones: {};
-  sql?: any;
-  conf?: SConf;
-  error?: { message: string };
 }
 
 export const modificar = async (
@@ -1574,3 +1554,41 @@ export const insertarABM = (ctx: HttpContextContract, formData: {}, conf) => {
     throw err;
   }
 };
+
+const listadoVacio: listado = {
+  datos: [],
+  cabeceras: [],
+  filtros: [],
+  listadoBotones: [],
+  opciones: {},
+  sql: undefined,
+  error: { message: "" },
+};
+
+const vistaVacia = {
+  datos: [],
+  cabeceras: [],
+  opciones: {},
+  sql: "",
+  error: { message: "" },
+};
+
+export interface listado {
+  listadoBotones: ({} | undefined)[];
+  datos: any[];
+  cabeceras: any[];
+  filtros: any[];
+  opciones: {};
+  sql?: any;
+  conf?: SConf;
+  error?: { message: string };
+}
+
+export interface vista {
+  datos: any[];
+  cabeceras: any[];
+  opciones: {};
+  sql?: any;
+  conf?: SConf;
+  error?: { message: string };
+}
