@@ -88,6 +88,7 @@ export default class LaboratoriosController {
           query.where("habilitado", "s")
         )
         .where("tbl_laboratorio.habilitado", "s")
+        .orderBy("nombre")
         .union((query) =>
           query
             .from("tbl_laboratorio")
