@@ -360,6 +360,8 @@ export class Insertar {
         await SCCU.save();
       }
 
+      await SConfConfDeta.query().where("id_conf_conf_usuario", SCCU.id).delete() // Limpiando filtros guardados viejos
+
       await Promise.all(
         Object.keys(valor).map(async (filtro) => {
           const filtroConf = (

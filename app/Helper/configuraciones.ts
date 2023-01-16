@@ -697,13 +697,12 @@ const aplicaWhere = async (
     return query;
   }
 
-  if (tipo === "radio") {
+  if (tipo === "radio" && valor) {
     const radio_where_a = conf.valores
       .find((v) => v.atributo[0].nombre === "radio_where")
       ?.valor.split("|");
 
     const radio_where_o = Object.assign({}, radio_where_a);
-
     return query.whereRaw(radio_where_o[Number(valor)].trim());
   }
 
