@@ -10,7 +10,7 @@ Route.get("/productospack/all/",
 
 Route.get(
    "/productospack/:idProducto",
-   "ProductoPackController.mig_producto"
+   "ProductoPackController.producto"
  ).where("idProducto", {
      match: /^[0-9]+$/,
      cast: (id) => Number(id),
