@@ -56,14 +56,14 @@ export default class ProductoPackController {
    
     try {
       const { idProducto } = request.params();
-      const prods = await ProductoPack.query()
+      const prods = await ProductoPack.query().preload("categoria").preload("entidad")
         .where("id", idProducto)
         .andWhere("en_papelera", "n")
         .andWhere("habilitado", "s");
 
       if (!prods) {
         const prodC = await ProductoCustom.query()
-          .where("id", idProducto)
+          .where("id", idProducto).preload("categoria")
           .andWhere("en_papelera", "n")
           .andWhere("habilitado", "s");
 
