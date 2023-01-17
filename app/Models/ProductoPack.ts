@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { BaseModel, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, BelongsTo, belongsTo, column, hasOne, HasOne } from "@ioc:Adonis/Lucid/Orm";
 import Usuario from "./Usuario";
 import Categoria from "./Categoria";
 import Entidad from "./Entidad";
@@ -98,17 +98,17 @@ export default class ProductoPack extends BaseModel {
   @column()
   public id_usuario_modificacion: number; //foreing key
 
-  @hasOne(() => Categoria, {
-    foreignKey: "id",
-    localKey: "categoria",
+  @belongsTo(() => Categoria, {
+    localKey: "id",
+    foreignKey: "id_categoria",
   })
-  public categoria: HasOne<typeof Categoria>;
+  public categoria: BelongsTo<typeof Categoria>;
 
-  @hasOne(() => Entidad, {
-    foreignKey: "id",
-    localKey: "entidad",
+  @belongsTo(() => Entidad, {
+    localKey: "id",
+    foreignKey: "id_entidad",
   })
-  public entidad: HasOne<typeof Entidad>;
+  public entidad: BelongsTo<typeof Entidad>;
 
   @hasOne(() => Usuario, {
     foreignKey: "id",

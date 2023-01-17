@@ -53,17 +53,19 @@ export default class ProductoPackController {
   }
 
   public async producto({ request }: HttpContextContract) {
-   
+    console.log("Holanda", request.params());
     try {
       const { idProducto } = request.params();
-      const prods = await ProductoPack.query().preload("categoria").preload("entidad")
+      const prods = await ProductoPack.query()
+        .preload("categoria")
+        .preload("entidad")
         .where("id", idProducto)
         .andWhere("en_papelera", "n")
         .andWhere("habilitado", "s");
 
-      if (!prods) {
+      if (prods.length === 0) {
         const prodC = await ProductoCustom.query()
-          .where("id", idProducto).preload("categoria")
+          .where("id", idProducto)
           .andWhere("en_papelera", "n")
           .andWhere("habilitado", "s");
 
