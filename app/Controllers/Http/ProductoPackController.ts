@@ -37,9 +37,12 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_producto({}: HttpContextContract) {
+  public async mig_producto({ request }: HttpContextContract) {
+    console.log(request.params());
     try {
+      const { idProducto } = request.params();
       const prods = await ProductoPack.traerProductosPacks({
+        producto: idProducto,
         en_papelera: "n",
       });
 

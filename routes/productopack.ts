@@ -7,13 +7,14 @@ Route.get(
 );
 Route.get("/productospack/all/",
 "ProductoPackController.mig_producto")
-// Route.get(
-//   "/productospack/:idProducto",
-//   "ProductoPackController.mig_producto"
-// ).where("idProducto", {
-//     match: /^[0-9]+$/,
-//     cast: (id) => Number(id),
-// });
+
+Route.get(
+   "/productospack/:idProducto",
+   "ProductoPackController.mig_producto"
+ ).where("idProducto", {
+     match: /^[0-9]+$/,
+     cast: (id) => Number(id),
+ });
 
 Route.get("/productospack/papelera/", "ProductoPackController.mig_papelera");
 
