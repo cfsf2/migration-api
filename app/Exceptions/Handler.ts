@@ -82,6 +82,14 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           opciones: {},
         });
       }
+      if (error.code === "FALTA_PERIODO") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El periodo no fue especificado";
+        return ctx.response.status(401).send({
+          error: { message, errorSql: error.sql },
+        });
+      }
 
       if (error.code === "E_VALIDATION_FAILURE") {
         const message = errorMensajeTraducido
