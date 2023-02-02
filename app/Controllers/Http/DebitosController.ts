@@ -166,19 +166,27 @@ export default class DebitosController {
       secretAccessKey: Env.get("S3_SECRET"),
     });
 
-    const listObjects = await s3
-      .listObjectsV2({
-        Bucket: Env.get("S3_BUCKET"),
-        Prefix: userFolder,
-        MaxKeys: 20000,
-      })
-      .promise();
+    let count = 0;
 
-    let files = listObjects.Contents ?? [];
+    async function contarBucket(c?: string | undefined) {
+      const listObjects = await s3
+        .listObjectsV2({
+          Bucket: Env.get("S3_BUCKET"),
+          Prefix: userFolder,
+          MaxKeys: 20000,
+          StartAfter: c,
+        })
+        .promise();
 
-    return `Archivos en ${Env.get("S3_BUCKET") + "/" + userFolder} = ${
-      files.length
-    }`;
+      let files = listObjects.Contents ?? [];
+      count += files.length;
+      if (listObjects.IsTruncated) {
+        await contarBucket(listObjects.Contents?.pop()?.Key);
+      }
+    }
+    await contarBucket();
+
+    return `Archivos en ${Env.get("S3_BUCKET") + "/" + userFolder} = ${count}`;
   }
 
   public async cargarDebitos(ctx: HttpContextContract) {
