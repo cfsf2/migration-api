@@ -143,13 +143,13 @@ export default class DebitosController {
     };
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
-    const files = fs.readdirSync(localPathToList);
-    const total = files.length;
-    let index = 0;
-    for (index; index < files.length; index++) {
-      uploadBucket(files[index]);
-    }
-    return ctx.response.send(`Archivos subidos : ${index} de ${total}`);
+    fs.readdir(localPathToList, (err, files)=>{
+      let index = 0;
+      for (index; index < files.length; index++) {
+        uploadBucket(files[index]);
+      }
+      return ctx.response.send(`Archivos subidos : ${index}`);
+    });
   }
 
   public async cargarDebitos(ctx: HttpContextContract) {
