@@ -7,7 +7,6 @@ import fs from "fs";
 import AWS from "aws-sdk";
 import Env from "@ioc:Adonis/Core/Env";
 import { Debitofarmacia } from "App/Helper/ModelIndex";
-import util from "util";
 
 export default class DebitosController {
   public async debitos({ request, bouncer }: HttpContextContract) {
