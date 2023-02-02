@@ -122,14 +122,12 @@ export default class DebitosController {
     let userFolder = Env.get("S3_BUCKET") + "/debitos/" + periodo;
 
     const s3 = new AWS.S3({
-      params: {
-        accessKeyId: Env.get("S3_KEY"),
-        secretAccessKey: Env.get("S3_SECRET"),
-        Bucket: Env.get("S3_BUCKET"),
-      },
+      accessKeyId: Env.get("S3_KEY"),
+      secretAccessKey: Env.get("S3_SECRET"),
+     // Bucket: Env.get("S3_BUCKET"),
     });
 
-    const uploadBucket = (nombreArchivo) => {
+    const uploadBucket =async  (nombreArchivo) => {
       const stream = fs.createReadStream(localPathToList + "/" + nombreArchivo);
       var params = {
         Bucket: userFolder,
@@ -137,7 +135,8 @@ export default class DebitosController {
         ACL: "public-read",
         Body: stream,
       };
-      let subido = s3.upload(params).promise();
+      let subido = await s3.upload(params).promise();
+     
       return subido;
     };
 
@@ -148,9 +147,10 @@ export default class DebitosController {
         uploadBucket(files[index]);
       }
 
-      return { msg: "Archivos subidos : " + files.length };
+      return '{ msg: "Archivos subidos : " + files.length }'
     });
   }
+
   public async cargarDebitos(ctx: HttpContextContract) {
     const { request } = ctx;
     const periodo = request.params().periodo;
