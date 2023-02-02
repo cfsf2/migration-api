@@ -115,7 +115,7 @@ export default class DebitosController {
   }
 
   public async subirDigital(ctx: HttpContextContract) {
-    const { request, response } = ctx;
+    const { request  } = ctx;
     const periodo = request.params().periodo;
 
     if (!periodo)
