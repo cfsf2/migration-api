@@ -7,6 +7,7 @@ import fs from "fs";
 import AWS from "aws-sdk";
 import Env from "@ioc:Adonis/Core/Env";
 import { Debitofarmacia } from "App/Helper/ModelIndex";
+import util from "util";
 
 export default class DebitosController {
   public async debitos({ request, bouncer }: HttpContextContract) {
@@ -115,7 +116,7 @@ export default class DebitosController {
   }
 
   public async subirDigital(ctx: HttpContextContract) {
-    const { request  } = ctx;
+    const { request } = ctx;
     const periodo = request.params().periodo;
 
     if (!periodo)
@@ -150,6 +151,35 @@ export default class DebitosController {
       await uploadBucket(files[index]);
     }
     return ctx.response.send(`Archivos subidos : ${index} de ${total}`);
+  }
+
+  public async contarDebitos(ctx: HttpContextContract) {
+    const { request } = ctx;
+    const periodo = request.params().periodo;
+
+    if (!periodo)
+      throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
+
+    let userFolder = "debitos/" + periodo;
+
+    const s3 = new AWS.S3({
+      accessKeyId: Env.get("S3_KEY"),
+      secretAccessKey: Env.get("S3_SECRET"),
+    });
+
+    const listObjects = await s3
+      .listObjectsV2({
+        Bucket: Env.get("S3_BUCKET"),
+        Prefix: userFolder,
+        MaxKeys: 20000,
+      })
+      .promise();
+
+    let files = listObjects.Contents ?? [];
+
+    return `Archivos en ${Env.get("S3_BUCKET") + "/" + userFolder} = ${
+      files.length
+    }`;
   }
 
   public async cargarDebitos(ctx: HttpContextContract) {
