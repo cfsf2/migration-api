@@ -144,6 +144,9 @@ export default class DebitosController {
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
     fs.readdir(localPathToList, (err, files)=>{
+      if (err) {
+        console.log(err);
+      }
       let index = 0;
       for (index; index < files.length; index++) {
         uploadBucket(files[index]);
