@@ -90,7 +90,7 @@ export default class DebitosController {
         );
       });
 
-      return mensaje;
+      return ctx.response.send(mensaje);
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler().handle(err, ctx);
@@ -105,18 +105,17 @@ export default class DebitosController {
       throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
+    let count = 0;
 
-    return fs.readdir(localPathToList, async (err, files) => {
-      if(err){
-        console.log(err)
-      }
-      let count = typeof files === "undefined" ? 0 : files.length;
-      return "Archivos subidos: " + count;
-    });
+    const files = fs.readdirSync(localPathToList);
+
+    count = (files as string[]) ? files.length : 0;
+
+    return `Archivos subidos:  ${count}`;
   }
 
   public async subirDigital(ctx: HttpContextContract) {
-    const { request } = ctx;
+    const { request, response } = ctx;
     const periodo = request.params().periodo;
 
     if (!periodo)
@@ -127,10 +126,10 @@ export default class DebitosController {
     const s3 = new AWS.S3({
       accessKeyId: Env.get("S3_KEY"),
       secretAccessKey: Env.get("S3_SECRET"),
-     // Bucket: Env.get("S3_BUCKET"),
+      // Bucket: Env.get("S3_BUCKET"),
     });
 
-    const uploadBucket =async  (nombreArchivo) => {
+    const uploadBucket = async (nombreArchivo) => {
       const stream = fs.createReadStream(localPathToList + "/" + nombreArchivo);
       var params = {
         Bucket: userFolder,
@@ -139,22 +138,18 @@ export default class DebitosController {
         Body: stream,
       };
       let subido = await s3.upload(params).promise();
-     
+
       return subido;
     };
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
-
-    return fs.readdir(localPathToList, async (err, files) => {
-      if(err){
-        console.log(err)
-      }
-      for (let index = 0; index < files.length; index++) {
-        uploadBucket(files[index]);
-      }
-
-      return '{ msg: "Archivos subidos : " + files.length }'
-    });
+    const files = fs.readdirSync(localPathToList);
+    const total = files.length;
+    let index = 0;
+    for (index; index < files.length; index++) {
+      uploadBucket(files[index]);
+    }
+    return ctx.response.send(`Archivos subidos : ${index} de ${total}`);
   }
 
   public async cargarDebitos(ctx: HttpContextContract) {
@@ -168,8 +163,8 @@ export default class DebitosController {
 
     // Busca los débitos de la Farmacia
     fs.readdir(localPathToList, async (err, files) => {
-      if(err){
-        console.log(err)
+      if (err) {
+        console.log(err);
       }
       for (let index = 0; index < files.length; index++) {
         let nombre = files[index];
