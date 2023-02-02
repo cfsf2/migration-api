@@ -107,6 +107,9 @@ export default class DebitosController {
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
     return fs.readdir(localPathToList, async (err, files) => {
+      if(err){
+        console.log(err)
+      }
       let count = typeof files === "undefined" ? 0 : files.length;
       return "Archivos subidos: " + count;
     });
@@ -143,6 +146,9 @@ export default class DebitosController {
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
     return fs.readdir(localPathToList, async (err, files) => {
+      if(err){
+        console.log(err)
+      }
       for (let index = 0; index < files.length; index++) {
         uploadBucket(files[index]);
       }
@@ -162,6 +168,9 @@ export default class DebitosController {
 
     // Busca los débitos de la Farmacia
     fs.readdir(localPathToList, async (err, files) => {
+      if(err){
+        console.log(err)
+      }
       for (let index = 0; index < files.length; index++) {
         let nombre = files[index];
         let archivo = nombre.split("_");
