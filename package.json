@@ -25,6 +25,8 @@
     "@adonisjs/mail": "^7.2.5",
     "@adonisjs/repl": "^3.1.9",
     "@adonisjs/session": "^6.1.4",
+    "async": "^3.2.4",
+    "aws-sdk": "^2.656.0",
     "axios": "^0.26.1",
     "ftp-client": "^0.2.0",
     "install": "^0.13.0",

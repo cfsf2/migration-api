@@ -4,6 +4,9 @@ import { Permiso } from "App/Helper/permisos";
 import DebitoFarmacia from "App/Models/Debitofarmacia";
 import ftpClient from "ftp-client";
 import fs from "fs";
+import AWS from "aws-sdk";
+import Env from "@ioc:Adonis/Core/Env";
+import { Debitofarmacia } from "App/Helper/ModelIndex";
 
 export default class DebitosController {
   public async debitos({ request, bouncer }: HttpContextContract) {
@@ -34,18 +37,19 @@ export default class DebitosController {
     try {
       let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
+      // Comprueba la carpeta destino
+      if (!fs.existsSync(localPathToList)) {
+        fs.mkdir(localPathToList, (err) => {
+          if (err) console.log(err);
+        });
+      }
+
       let remotePath1 =
         "/col2dasfe/PAMI/" + periodo + "/01 102_colegio_de_santa_fe_2da.circ";
       let remotePath2 =
         "/col2dasfe/PAMI/" + periodo + "/02 102_colegio_de_santa_fe_2da.circ";
 
       let mensaje;
-
-      // Comprueba la carpeta destino
-
-      if (!fs.existsSync(localPathToList)) {
-        fs.mkdir(localPathToList, (err) => {});
-      }
 
       // SOURCE FTP CONNECTION SETTINGS
       var srcFTP = {
@@ -107,43 +111,22 @@ export default class DebitosController {
       return "Archivos subidos: " + count;
     });
   }
-}
 
-//// DEBITOS PAMI
+  public async subirDigital(ctx: HttpContextContract) {
+    const { request } = ctx;
+    const periodo = request.params().periodo;
 
-router.get(
-  "/revisar-carpeta/:periodo",
-  //validar de otra forma
-  async function (req, res, next) {
-    //FARMACIA_DEBITOPAMI
-    if (!req.params.periodo) {
-      res.json(util.getErrorMsg({ message: "Falta periodo" }));
-    }
-    let periodo = req.params.periodo;
-    let localPathToList = process.cwd() + "/public/debitos/" + periodo;
-    console.log(localPathToList);
-    fs.readdir(localPathToList, async (err, files) => {
-      let count = typeof files === "undefined" ? 0 : files.length;
-      res.json(util.getSuccessMsg({ msg: "Archivos subidos : " + count }));
-    });
-  }
-);
+    if (!periodo)
+      throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
 
-router.get(
-  "/subir-digital/:periodo",
-  //validar de otra forma
-  async function (req, res, next) {
-    //FARMACIA_DEBITOPAMI
-    if (!req.params.periodo) {
-      res.json(util.getErrorMsg({ message: "Falta periodo" }));
-    }
-    let periodo = req.params.periodo;
-    let userFolder = config.BUCKET_NAME + "/debitos/" + periodo;
+    let userFolder = Env.get("S3_BUCKET") + "/debitos/" + periodo;
 
     const s3 = new AWS.S3({
-      accessKeyId: config.S3_KEY,
-      secretAccessKey: config.S3_SECRET,
-      Bucket: userFolder,
+      params: {
+        accessKeyId: Env.get("S3_KEY"),
+        secretAccessKey: Env.get("S3_SECRET"),
+        Bucket: Env.get("S3_BUCKET"),
+      },
     });
 
     const uploadBucket = (nombreArchivo) => {
@@ -165,23 +148,15 @@ router.get(
         uploadBucket(files[index]);
       }
 
-      res.json(
-        util.getSuccessMsg({ msg: "Archivos subidos : " + files.length })
-      );
+      return { msg: "Archivos subidos : " + files.length };
     });
   }
-);
+  public async cargarDebitos(ctx: HttpContextContract) {
+    const { request } = ctx;
+    const periodo = request.params().periodo;
 
-router.get(
-  "/cargar-debitos-db/:periodo",
-  //validar de otra forma
-  async function (req, res, next) {
-    //FARMACIA_DEBITOPAMI
-    if (!req.params.periodo) {
-      res.json(util.getErrorMsg({ message: "Falta periodo" }));
-    }
-
-    let periodo = req.params.periodo;
+    if (!periodo)
+      throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
@@ -192,12 +167,14 @@ router.get(
         let archivo = nombre.split("_");
         let usuario = archivo[0];
 
-        let query = { archivo: files[index] };
+        const debitoSearch = await Debitofarmacia.query().where(
+          "archivo",
+          files[index]
+        );
 
-        const debitoSearch = await debitoFarmacia.find(query);
-
-        if (debitoSearch.length == 0) {
-          const debito = new debitoFarmacia({
+        if (debitoSearch?.length == 0) {
+          const debito = new Debitofarmacia();
+          debito.merge({
             usuario,
             periodo,
             archivo: files[index],
@@ -207,30 +184,6 @@ router.get(
       }
     });
 
-    res.json(
-      util.getSuccessMsg({
-        message: `Se inicia la carga de debitos periodo ${periodo} en la Base Datos`,
-      })
-    );
+    return `Se inicia la carga de debitos periodo ${periodo} en la Base Datos`;
   }
-);
-router.get(
-  "/debitos/:periodo/:usuario",
-  [validarToken, getPermisos, checkPermiso("FARMACIA_DEBITOPAMI")],
-  async function (req, res, next) {
-    //FARMACIA_DEBITOPAMI
-    let periodo = req.params.periodo;
-    let usuario = req.params.usuario;
-
-    let query = {
-      usuario,
-      periodo,
-    };
-
-    const debitoSearch = await debitoFarmacia.find(query);
-
-    return debitoSearch.length > 0
-      ? res.json(util.getSuccessMsg(debitoSearch))
-      : res.json(util.getErrorMsg({ message: "Debito no encontrado" }));
-  }
-);
+}

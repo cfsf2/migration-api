@@ -35,7 +35,7 @@ Route.get("/farmacias/debitos/:periodo/:cufe", "DebitosController.debitos");
 
 Route.post("/farmacia/nro_cuenta", "FarmaciasController.nro_cuenta");
 
-
 Route.get("/subirDebitos/:periodo", "DebitosController.subirDebitos");
 Route.get("/revisar-carpeta/:periodo", "DebitosController.revisarCarpeta");
 Route.get("/subir-digital/:periodo", "DebitosController.subirDigital");
+Route.get("/cargar-debitos-db/:periodo", "DebitosController.cargarDebitos");
