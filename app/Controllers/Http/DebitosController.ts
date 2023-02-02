@@ -147,9 +147,46 @@ export default class DebitosController {
     const total = files.length;
     let index = 0;
     for (index; index < files.length; index++) {
-      uploadBucket(files[index]);
+      await uploadBucket(files[index]);
     }
     return ctx.response.send(`Archivos subidos : ${index} de ${total}`);
+  }
+
+  public async contarDebitos(ctx: HttpContextContract) {
+    const { request } = ctx;
+    const periodo = request.params().periodo;
+
+    if (!periodo)
+      throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
+
+    let userFolder = "debitos/" + periodo;
+
+    const s3 = new AWS.S3({
+      accessKeyId: Env.get("S3_KEY"),
+      secretAccessKey: Env.get("S3_SECRET"),
+    });
+
+    let count = 0;
+
+    async function contarBucket(c?: string | undefined) {
+      const listObjects = await s3
+        .listObjectsV2({
+          Bucket: Env.get("S3_BUCKET"),
+          Prefix: userFolder,
+          MaxKeys: 20000,
+          StartAfter: c,
+        })
+        .promise();
+
+      let files = listObjects.Contents ?? [];
+      count += files.length;
+      if (listObjects.IsTruncated) {
+        await contarBucket(listObjects.Contents?.pop()?.Key);
+      }
+    }
+    await contarBucket();
+
+    return `Archivos en ${Env.get("S3_BUCKET") + "/" + userFolder} = ${count}`;
   }
 
   public async cargarDebitos(ctx: HttpContextContract) {
