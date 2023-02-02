@@ -106,7 +106,7 @@ export default class DebitosController {
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
-    fs.readdir(localPathToList, async (err, files) => {
+    return fs.readdir(localPathToList, async (err, files) => {
       let count = typeof files === "undefined" ? 0 : files.length;
       return "Archivos subidos: " + count;
     });
@@ -142,7 +142,7 @@ export default class DebitosController {
 
     let localPathToList = process.cwd() + "/public/debitos/" + periodo;
 
-    fs.readdir(localPathToList, async (err, files) => {
+    return fs.readdir(localPathToList, async (err, files) => {
       for (let index = 0; index < files.length; index++) {
         uploadBucket(files[index]);
       }
