@@ -19,6 +19,9 @@ export default class FarmaciaDrogueria extends BaseModel {
   public nro_cuenta: number;
 
   @column()
+  public descuento: number;
+
+  @column()
   public id_usuario_creacion: number;
 
   @column.dateTime({ autoCreate: true })

@@ -84,6 +84,9 @@ export default class Laboratorio extends BaseModel {
   public envia_email_transfer_auto: string;
 
   @column()
+  public calcular_precio: string;
+
+  @column()
   public id_usuario: number;
 
   @column()
