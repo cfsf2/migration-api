@@ -91,10 +91,15 @@ export default class FarmaciasController {
         data: request.body(),
       });
 
+      const destinatarios = request
+        .body()
+        .destinatario.split(";")
+        .map((destinatario) => destinatario.trim());
+
       const t = await Mail.send((message) => {
         message
           .from(Env.get("FARMAGEO_EMAIL"))
-          .to(request.body().destinatario)
+          .to(destinatarios)
           .subject(request.body().asunto)
           .html(
             generarHtml({
