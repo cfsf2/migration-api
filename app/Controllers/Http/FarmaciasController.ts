@@ -1,5 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Mail from "@ioc:Adonis/Addons/Mail";
+import Env from "@ioc:Adonis/Core/Env";
 import { generarHtml } from "../../Helper/email";
 
 import Farmacia from "../../Models/Farmacia";
@@ -91,7 +92,7 @@ export default class FarmaciasController {
 
       Mail.send((message) => {
         message
-          .from("farmageoapp@gmail.com")
+          .from(Env.get("FARMAGEO_EMAIL"))
           .to(request.body().destinatario)
           .subject(request.body().asunto)
           .html(
