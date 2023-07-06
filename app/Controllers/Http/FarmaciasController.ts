@@ -96,7 +96,7 @@ export default class FarmaciasController {
           .subject(request.body().asunto)
           .html(
             generarHtml({
-              titulo: "Nueva solicitud de registro de farmacia",
+              titulo: request.body().titulo,
               // imagen: '',
               texto: `${request.body().html}`,
             })
