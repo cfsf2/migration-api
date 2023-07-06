@@ -9,7 +9,7 @@ import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
 
-import { schema,  validator } from "@ioc:Adonis/Core/Validator";
+import { schema, validator } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
 import {
   FarmaciaDrogueria,
@@ -86,12 +86,12 @@ export default class FarmaciasController {
     try {
       await validator.validate({
         schema: schema.create({
-        //  destinatario: schema.string({ trim: true }, [rules.email()]),
+          //  destinatario: schema.string({ trim: true }, [rules.email()]),
         }),
         data: request.body(),
       });
 
-      Mail.send((message) => {
+      const t = await Mail.send((message) => {
         message
           .from(Env.get("FARMAGEO_EMAIL"))
           .to(request.body().destinatario)
@@ -104,7 +104,7 @@ export default class FarmaciasController {
             })
           );
       });
-      return 
+      return t;
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(err, ctx);
