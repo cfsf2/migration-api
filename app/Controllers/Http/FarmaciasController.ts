@@ -86,7 +86,7 @@ export default class FarmaciasController {
     try {
       await validator.validate({
         schema: schema.create({
-          destinatario: schema.string({ trim: true }, [rules.email()]),
+        //  destinatario: schema.string({ trim: true }, [rules.email()]),
         }),
         data: request.body(),
       });
@@ -104,6 +104,7 @@ export default class FarmaciasController {
             })
           );
       });
+      return 
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(err, ctx);
