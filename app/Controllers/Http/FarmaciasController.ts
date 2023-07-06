@@ -81,7 +81,8 @@ export default class FarmaciasController {
     return await Farmacia.traerFarmacias({ matricula });
   }
 
-  public async mig_mail({ request }: HttpContextContract) {
+  public async mig_mail(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
       await validator.validate({
         schema: schema.create({
@@ -104,7 +105,8 @@ export default class FarmaciasController {
           );
       });
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 
