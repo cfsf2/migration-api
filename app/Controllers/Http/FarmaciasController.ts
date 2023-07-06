@@ -96,7 +96,7 @@ export default class FarmaciasController {
         .destinatario.split(";")
 
       const t = await Mail.send((message) => {
-        message.from(Env.get("FARMAGEO_EMAIL")).to(destinatarios);
+        message.from(Env.get("FARMAGEO_EMAIL"))
 
         for (const destinatario of destinatarios) {
           message.to(destinatario.trim());
