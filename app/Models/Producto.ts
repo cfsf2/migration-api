@@ -10,6 +10,12 @@ export default class Producto extends BaseModel {
   @column()
   public precio: string;
 
+  @column()
+  public nombre: string;
+
+  @column()
+  public presentacion: string;
+
   static get computed() {
     return ["precio"];
   }
