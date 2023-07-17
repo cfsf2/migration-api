@@ -31,7 +31,6 @@ import Apm from "./Apm";
 
 import TransferEmail from "./TransferEmail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
-import Producto from "./Producto";
 import { FarmaciaDrogueria } from "App/Helper/ModelIndex";
 
 export default class Transfer extends BaseModel {
@@ -169,7 +168,7 @@ export default class Transfer extends BaseModel {
       await nuevoTransfer.load("farmacia" as any);
       await nuevoTransfer.load("laboratorio" as any);
       await nuevoTransfer.load("drogueria" as any);
-
+      const htmlTransfer = await html_transfer(nuevoTransfer);
       Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
@@ -179,7 +178,7 @@ export default class Transfer extends BaseModel {
           .subject(
             "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
           )
-          .html(html_transfer(nuevoTransfer));
+          .html(htmlTransfer);
       });
     } catch (err) {
       console.log(err);
