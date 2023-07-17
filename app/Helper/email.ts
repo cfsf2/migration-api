@@ -1,5 +1,4 @@
 import Laboratorio from "App/Models/Laboratorio";
-import Transfer from "App/Models/Transfer";
 import { DateTime } from "luxon";
 
 const imagen_path = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/imagenes/`;
