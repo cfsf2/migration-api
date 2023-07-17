@@ -500,19 +500,21 @@ export default class Transfer extends BaseModel {
       .firstOrFail();
 
     if (laboratorio.envia_email_transfer_auto !== "s") {
-      return Mail.send((message) => {
+      const htmlTransfer = await html_transfer(this);
+      return Mail.send(async (message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(this.farmacia.email as string)
           .to(process.env.TRANSFER_EMAIL as string)
           .to(process.env.TRANSFER_EMAIL2 as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-          .html(html_transfer(this));
+          .html(htmlTransfer);
       });
     }
 
     let destinatarioProveedor = await this.getDestinatario();
 
+    const htmlTransfer = await html_transfer(this);
     const mail = await Mail.send((message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
@@ -521,7 +523,7 @@ export default class Transfer extends BaseModel {
         .to(process.env.TRANSFER_EMAIL as string)
         .to(process.env.TRANSFER_EMAIL2 as string)
         .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-        .html(html_transfer(this));
+        .html(htmlTransfer);
     });
 
     return mail;
@@ -609,13 +611,13 @@ export default class Transfer extends BaseModel {
       await this.load("farmacia" as any);
       await this.load("laboratorio" as any);
       await this.load("drogueria" as any);
-
+      const htmlTransfer = await html_transfer(this);
       return await Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(email as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-          .html(html_transfer(this));
+          .html(htmlTransfer);
       });
     } catch (err) {
       console.log(err);
