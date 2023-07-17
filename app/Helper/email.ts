@@ -1,3 +1,5 @@
+import Laboratorio from "App/Models/Laboratorio";
+import Transfer from "App/Models/Transfer";
 import { DateTime } from "luxon";
 
 const imagen_path = `https://${process.env.S3_BUCKET}.s3.amazonaws.com/imagenes/`;
@@ -387,8 +389,17 @@ export const transferHtml = ({ transfer, farmacia }) => {
   });
 };
 
-export const html_transfer = (transfer) => {
+export const html_transfer = async (transfer) => {
   try {
+    const laboratorio = await Laboratorio.findOrFail(transfer.id_laboratorio);
+    const calcularPrecio = laboratorio.calcular_precio === "s";
+    let total = 0;
+    let ahorro = 0;
+    if (calcularPrecio) {
+      total = await transfer.getTotal();
+      ahorro = await transfer.getAhorro();
+    }
+
     let stringTable = transfer.ttp.map((p) => {
       return `<tr>
                               <td>${p.transfer_producto.codigo ?? ""}</td>
@@ -447,6 +458,13 @@ export const html_transfer = (transfer) => {
                             <p><b>Fecha: </b> ${DateTime.fromISO(
                               transfer.ts_creacion
                             ).toFormat("dd/MM/yyyy  hh:mm:ss")}</p>
+                            ${
+                              calcularPrecio
+                                ? ` <p><b>Total: </b>${total}</p>
+                            <p><b>Ahorro Aproximado: </b>${ahorro}</p>`
+                                : ""
+                            }
+                           
                           </div>
                         <table>
                             <tr>

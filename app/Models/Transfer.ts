@@ -31,6 +31,8 @@ import Apm from "./Apm";
 
 import TransferEmail from "./TransferEmail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+import Producto from "./Producto";
+import { FarmaciaDrogueria } from "App/Helper/ModelIndex";
 
 export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";
@@ -307,7 +309,6 @@ export default class Transfer extends BaseModel {
             ? "tbl_laboratorio"
             : "tbl_drogueria",
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-
         envia_email_transfer_auto: laboratorio.envia_email_transfer_auto,
         monto_minimo_transfer: laboratorio.monto_minimo_transfer ?? 0,
         unidades_minimas_transfer: laboratorio.unidades_minimas_transfer ?? 0,
@@ -364,6 +365,60 @@ export default class Transfer extends BaseModel {
     }
   }
 
+  public async calcularPrecio() {
+    // const laboratorio = await Laboratorio.query()
+    //   .where("id", this.id_laboratorio)
+    //   .firstOrFail();
+    const drogueria = await Drogueria.query()
+      .where("id", this.id_drogueria)
+      .firstOrFail();
+    const farmacia = await Farmacia.query()
+      .where("id", this.id_farmacia)
+      .firstOrFail();
+    const farmDrogueria = await FarmaciaDrogueria.query()
+      .where("id_drogueria", drogueria.id)
+      .where("id_farmacia", farmacia.id)
+      .first();
+    const tpps = this.ttp;
+    let total = 0;
+    let ahorro = 0;
+
+    const productos = await Promise.all(
+      tpps.map(async (p) => {
+        const transfer_producto = await TransferProducto.query()
+          .where("id", p.id_transfer_producto)
+          .preload("producto")
+          .firstOrFail();
+        return { transfer_producto, cantidad: p.cantidad };
+      })
+    );
+
+    total = productos.reduce((accumulator, p) => {
+      const cantidad = p.cantidad;
+      const descuento = p.transfer_producto.descuento_porcentaje / 100;
+      const pvp = Number(p.transfer_producto.producto.precio);
+      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
+
+      return accumulator + precioFinal * cantidad;
+    }, 0);
+
+    ahorro = productos.reduce((accumulator, p) => {
+      const cantidad = p.cantidad;
+      const descuento = p.transfer_producto.descuento_porcentaje / 100;
+      const pvp = Number(p.transfer_producto.producto.precio);
+      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
+
+      return accumulator + (pvp - precioFinal) * cantidad;
+    }, 0);
+
+    return {
+      total: Number(total.toFixed(2)),
+      ahorro: Number(ahorro.toFixed(2)),
+    };
+  }
+
   public async generarColaEmail(ctx: HttpContextContract) {
     const nuevoEmail = new TransferEmail();
     guardarDatosAuditoria({
@@ -400,6 +455,20 @@ export default class Transfer extends BaseModel {
       enviado: "n",
     });
     return await nuevoEmail.save();
+  }
+
+  static get computed() {
+    return ["total", "ahorro"];
+  }
+
+  async getAhorro() {
+    const { ahorro } = await this.calcularPrecio();
+    return ahorro;
+  }
+
+  async getTotal() {
+    const { total } = await this.calcularPrecio();
+    return total;
   }
 
   public async generarColaEmailUnico(ctx: HttpContextContract, email) {
@@ -616,6 +685,12 @@ export default class Transfer extends BaseModel {
 
   @column()
   public monto_minimo_transfer: number;
+
+  @column()
+  public total: number;
+
+  @column()
+  public ahorro: number;
 
   @column()
   public unidades_minimas_transfer: number;
