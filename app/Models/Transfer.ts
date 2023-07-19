@@ -407,9 +407,9 @@ export default class Transfer extends BaseModel {
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = Number(p.transfer_producto.producto.precio);
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
-      const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
+      const ahorropvp = pvp * (1 - descuentoDrogueria) *  descuento
 
-      return accumulator + (pvp - precioFinal) * cantidad;
+      return accumulator + ahorropvp * cantidad;
     }, 0);
 
     return {
