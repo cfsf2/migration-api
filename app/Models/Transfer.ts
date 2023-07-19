@@ -393,6 +393,7 @@ export default class Transfer extends BaseModel {
     );
 
     total = productos.reduce((accumulator, p) => {
+      if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = Number(p.transfer_producto.producto.precio);
@@ -403,11 +404,12 @@ export default class Transfer extends BaseModel {
     }, 0);
 
     ahorro = productos.reduce((accumulator, p) => {
+      if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = Number(p.transfer_producto.producto.precio);
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
-      const ahorropvp = pvp * (1 - descuentoDrogueria) *  descuento
+      const ahorropvp = pvp * (1 - descuentoDrogueria) * descuento;
 
       return accumulator + ahorropvp * cantidad;
     }, 0);
