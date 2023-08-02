@@ -22,7 +22,6 @@ export default class TransferEmail extends Base {
   public async Enviar() {
     const htmlTransfer = await html_transfer(this.transfer);
 
-    return console.log(await this.transfer.calcularPrecio());
     return Mail.send(async (message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
