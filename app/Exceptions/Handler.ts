@@ -91,6 +91,15 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         });
       }
 
+      if (error.code === "lab_inhabilitado") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Laboratorio no habilitado";
+        return ctx.response.status(306).send({
+          error: { message, errorSql: error.sql },
+        });
+      }
+
       if (error.code === "E_VALIDATION_FAILURE") {
         const message = errorMensajeTraducido
           ? errorMensajeTraducido.detalle

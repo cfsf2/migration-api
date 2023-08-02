@@ -8,6 +8,7 @@ import {
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Laboratorio from "App/Models/Laboratorio";
+import SParametro from "App/Models/SParametro";
 import TransferCategoria from "App/Models/TransferCategoria";
 
 export default class LaboratoriosController {
@@ -126,11 +127,11 @@ export default class LaboratoriosController {
     }
   }
 
-  public async transfers({ request, bouncer }: HttpContextContract) {
+  public async transfers(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
-      return await Laboratorio.query()
-        .where("habilitado", "s")
+      const lab = await Laboratorio.query()
         .preload("droguerias")
         .preload("apms")
         .preload("modalidad_entrega")
@@ -138,6 +139,31 @@ export default class LaboratoriosController {
         .preload("transfer_categoria")
         .andWhere("id", request.params().id)
         .firstOrFail();
+      if (lab.habilitado === "n") throw { code: "lab_inhabilitado" };
+      return lab;
+    } catch (err) {
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
+  public async lab_des({ request, bouncer }: HttpContextContract) {
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
+      const lab = await Laboratorio.query()
+        .preload("droguerias")
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
+        .preload("transfer_categoria")
+        .andWhere("id", request.params().id)
+        .firstOrFail();
+
+      const mensaje = await SParametro.query()
+        .where("id_a", "MENSAJE_TRANFERS:DESHABILITADO")
+        .first();
+
+      return { lab, mensaje };
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler();
