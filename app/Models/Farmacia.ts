@@ -89,8 +89,8 @@ export default class Farmacia extends BaseModel {
       GROUP BY f.id`);
 
     let servicios =
-      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia  FROM tbl_farmacia_servicio AS fs
-    LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s"`);
+      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia, fs.habilitado  FROM tbl_farmacia_servicio AS fs
+    LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s" and fs.habilitado = "s"`);
 
     let dias = await Database.rawQuery(
       `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia 
@@ -167,6 +167,7 @@ export default class Farmacia extends BaseModel {
         AND fpc.en_papelera = 's'`);
 
         f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
+
         f.mediospagos = f.mediospagos ? f.mediospagos.split(",") : [];
         f.instituciones = f.instituciones ? f.instituciones.split(",") : [];
         f.horarios = dameloshorarios(f, dias[0]);
