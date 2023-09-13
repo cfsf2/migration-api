@@ -6,6 +6,14 @@ Route.get("/users/logout", "AuthController.logout");
 
 Route.get("/users/:usuarioNombre", "UsuariosController.mig_perfilUsuario");
 
+Route.post("/usuario_invitado/", "UsuariosController.usuario_invitado");
+Route.post("/usuario_invitado/add", "UsuariosController.usuario_invitado_add");
+Route.post(
+  "/usuario_invitado/delete",
+  "UsuariosController.usuario_invitado_delete"
+);
+Route.post("/usuario_invitado/evento", "UsuariosController.evento");
+
 Route.post("/users/loginwp", "AuthController.mig_loginwp");
 Route.get("/permisos/perfiles", "AuthController.mig_perfiles");
 

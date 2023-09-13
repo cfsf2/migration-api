@@ -8,6 +8,9 @@ import UsuarioPerfil from "App/Models/UsuarioPerfil";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Database from "@ioc:Adonis/Lucid/Database";
+import Farmacia from "App/Models/Farmacia";
+import EventoParticipante from "App/Models/EventoParticipante";
 
 export default class UsuariosController {
   public async index({ bouncer }: HttpContextContract) {
@@ -248,5 +251,109 @@ export default class UsuariosController {
     } catch (err) {
       throw new ExceptionHandler();
     }
+  }
+
+  public async usuario_invitado(ctx: HttpContextContract) {
+    const { usuario } = ctx.request.body();
+    if (usuario.matricula && usuario.cuit) {
+      const usuario_invitado_query = Farmacia.query()
+        .where("matricula", usuario.matricula)
+        .andWhere("cuit", usuario.cuit)
+        .preload("usuario")
+        .preload("invitados")
+        .first();
+      const usuario_invitado = await usuario_invitado_query;
+
+      return usuario_invitado;
+    }
+    if (usuario.token) {
+      const evento_participante = await EventoParticipante.query()
+        .where("token", usuario.token)
+        .first();
+
+      if (!evento_participante) return {};
+
+      const usuario_invitado_query = Farmacia.query()
+        .where("id", evento_participante.id_farmacia)
+        .preload("usuario")
+        .preload("invitados")
+        .first();
+      const usuario_invitado = await usuario_invitado_query;
+
+      return usuario_invitado;
+    }
+    if (!!usuario.confirmo_asistencia && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        const invitados = await EventoParticipante.query().where(
+          "id_farmacia",
+          evento_participante.id_farmacia
+        );
+
+        await Promise.all(
+          invitados.map(async (i) => {
+            return await i
+              .merge({ confirmo_asistencia: usuario.confirmo_asistencia })
+              .save();
+          })
+        );
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
+  }
+
+  public async usuario_invitado_add(ctx: HttpContextContract) {
+    const { usuario, farmacia } = ctx.request.body();
+    const farmacia_ = await Farmacia.query()
+      .where("id", farmacia.id)
+      .preload("invitados")
+      .firstOrFail();
+    const nuevoInvitado = new EventoParticipante();
+
+    const titular = farmacia_.invitados.filter((i) => i.titular === "s").pop();
+
+    if (!titular) return { error: "no hay titular" };
+
+    nuevoInvitado.merge({
+      nombre: usuario.nombre,
+      documento: usuario.documento,
+      token: usuario.token,
+      id_farmacia: farmacia_.id,
+      id_evento: titular.id_evento,
+      id_evento_premio: titular.id_evento_premio,
+      id_evento_forma_pago: titular.id_evento_forma_pago,
+      confirmo_asistencia: titular.confirmo_asistencia,
+      titular: "n",
+      bonificada: "n",
+      mesa: titular.mesa,
+    });
+    await nuevoInvitado.save();
+    return nuevoInvitado;
+  }
+
+  public async usuario_invitado_delete(ctx: HttpContextContract) {
+    const { usuario } = ctx.request.body();
+
+    const ep = await EventoParticipante.findByOrFail("token", usuario.token);
+    await ep.delete();
+
+    return "eliminado";
+  }
+
+  public async evento(ctx: HttpContextContract) {
+    const evento = await Database.query()
+      .from("tbl_evento")
+      .where("id", 1)
+      .firstOrFail();
+    const formaPago = await Database.query().from("tbl_evento_forma_pago");
+
+    return { evento, formaPago };
   }
 }

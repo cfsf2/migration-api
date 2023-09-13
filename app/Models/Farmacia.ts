@@ -36,6 +36,7 @@ import FarmaciaInstitucion from "./FarmaciaInstitucion";
 import UsuarioPerfil from "./UsuarioPerfil";
 import FarmaciaDrogueria from "./FarmaciaDrogueria";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+import EventoParticipante from "./EventoParticipante";
 
 export default class Farmacia extends BaseModel {
   public static table = "tbl_farmacia";
@@ -871,6 +872,12 @@ export default class Farmacia extends BaseModel {
     foreignKey: "id_farmacia",
   })
   public nro_cuenta_laboratorio: HasMany<typeof FarmaciaLaboratorio>;
+
+  @hasMany(() => EventoParticipante, {
+    foreignKey: "id_farmacia",
+    localKey: "id",
+  })
+  public invitados: HasMany<typeof EventoParticipante>;
 
   // public serializeExtras = true;
 
