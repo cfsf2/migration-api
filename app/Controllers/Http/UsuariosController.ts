@@ -268,6 +268,7 @@ export default class UsuariosController {
     }
     if (usuario.token) {
       const evento_participante = await EventoParticipante.query()
+        .preload("evento")
         .where("token", usuario.token)
         .first();
 
@@ -285,13 +286,13 @@ export default class UsuariosController {
     if (!!usuario.confirmo_asistencia && !!usuario.id) {
       try {
         const evento_participante = await EventoParticipante.query()
+          .preload("evento")
           .where("id", usuario.id)
           .firstOrFail();
 
-        const invitados = await EventoParticipante.query().where(
-          "id_farmacia",
-          evento_participante.id_farmacia
-        );
+        const invitados = await EventoParticipante.query()
+          .preload("evento")
+          .where("id_farmacia", evento_participante.id_farmacia);
 
         await Promise.all(
           invitados.map(async (i) => {
@@ -300,6 +301,23 @@ export default class UsuariosController {
               .save();
           })
         );
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
+    if (!!usuario.id_evento_forma_pago && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .preload("evento")
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        await evento_participante
+          .merge({ id_evento_forma_pago: usuario.id_evento_forma_pago })
+          .save();
 
         return evento_participante;
       } catch (err) {
@@ -332,6 +350,7 @@ export default class UsuariosController {
       confirmo_asistencia: titular.confirmo_asistencia,
       titular: "n",
       bonificada: "n",
+      menor: usuario.menor,
       mesa: titular.mesa,
     });
     await nuevoInvitado.save();
@@ -347,7 +366,7 @@ export default class UsuariosController {
     return "eliminado";
   }
 
-  public async evento(ctx: HttpContextContract) {
+  public async evento(_ctx: HttpContextContract) {
     const evento = await Database.query()
       .from("tbl_evento")
       .where("id", 1)
