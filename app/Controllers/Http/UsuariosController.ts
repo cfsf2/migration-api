@@ -256,15 +256,23 @@ export default class UsuariosController {
   public async usuario_invitado(ctx: HttpContextContract) {
     const { usuario } = ctx.request.body();
     if (usuario.matricula && usuario.cuit) {
-      const usuario_invitado_query = Farmacia.query()
-        .where("matricula", usuario.matricula)
-        .andWhere("cuit", usuario.cuit)
-        .preload("usuario")
-        .preload("invitados")
-        .first();
-      const usuario_invitado = await usuario_invitado_query;
+      try {
+        const usuario_invitado_query = Farmacia.query()
+          .where("matricula", usuario.matricula)
+          .andWhere("cuit", usuario.cuit)
+          .preload("usuario")
+          .preload("invitados")
+          .first();
 
-      return usuario_invitado;
+        const usuario_invitado = await usuario_invitado_query;
+        if (!usuario_invitado) {
+          throw { code: "Usuario no encontrado. Verifique sus datos." };
+        }
+
+        return usuario_invitado;
+      } catch (err) {
+        return ctx.response.status(440).send({ error: err, message: err.code });
+      }
     }
     if (usuario.token) {
       const evento_participante = await EventoParticipante.query()
@@ -306,6 +314,38 @@ export default class UsuariosController {
       } catch (err) {
         console.log(err);
         return err;
+      }
+    }
+    if (!!usuario.telefono && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .preload("evento")
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        const invitados = await EventoParticipante.query()
+          .preload("evento")
+          .where("id_farmacia", evento_participante.id_farmacia);
+
+        const patron = /^\d{10}$/;
+        const esCelular = patron.test(usuario.telefono);
+
+        if (!esCelular) {
+          throw { code: "No es un numero valido" };
+        }
+
+        await Promise.all(
+          invitados.map(async (i) => {
+            return await i.merge({ telefono: Number(usuario.telefono) }).save();
+          })
+        );
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return ctx.response
+          .status(441)
+          .send({ error: err, message: err.code ?? err.sqlMessage });
       }
     }
     if (!!usuario.id_evento_forma_pago && !!usuario.id) {
