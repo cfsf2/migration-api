@@ -62,9 +62,7 @@ export default class ProductosTransfersController {
           "tbl_transfer_producto.id",
           "tbl_transfer_producto_institucion.id_transfer_producto"
         )
-        .if("tbl_laboratorio.calcular_precio = 's", (query) => {
-          query.preload("producto")
-        })
+        .preload("producto")
         .whereIn(
           "tbl_transfer_producto_institucion.id_institucion",
           instituciones
