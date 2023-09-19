@@ -257,10 +257,9 @@ export default class UsuariosController {
     const { usuario } = ctx.request.body();
     if (usuario.matricula && usuario.cuit) {
       try {
-        const usuario_invitado_query = Farmacia.query()
+        const usuario_invitado_query = EventoParticipante.query()
           .where("matricula", usuario.matricula)
-          .andWhere("cuit", usuario.cuit)
-          .preload("usuario")
+          .andWhere("documento", usuario.cuit)
           .preload("invitados")
           .first();
 

@@ -1,7 +1,9 @@
 import {
+  HasMany,
   HasOne,
   column,
   computed,
+  hasMany,
   hasOne,
 } from "@ioc:Adonis/Lucid/Orm";
 import Base from "./Base";
@@ -43,6 +45,8 @@ export default class EventoParticipante extends Base {
   @column()
   public id_evento_premio: number;
   @column()
+  public matricula: number;
+  @column()
   public token: string;
 
   @hasOne(() => Evento, {
@@ -50,6 +54,12 @@ export default class EventoParticipante extends Base {
     localKey: "id_evento",
   })
   public evento: HasOne<typeof Evento>;
+
+  @hasMany(() => EventoParticipante, {
+    foreignKey: "id_farmacia",
+    localKey: "id_farmacia",
+  })
+  public invitados: HasMany<typeof EventoParticipante>;
 
   @computed({ serializeAs: "costo" })
   public get costo() {
