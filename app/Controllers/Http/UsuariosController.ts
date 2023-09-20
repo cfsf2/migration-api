@@ -365,10 +365,10 @@ export default class UsuariosController {
   }
 
   public async usuario_invitado_add(ctx: HttpContextContract) {
-
     const { usuario, titular } = ctx.request.body();
     const _titular = await EventoParticipante.query()
       .where("id", titular.id)
+      .andWhere("titular", "s")
       .preload("invitados")
       .firstOrFail();
     const nuevoInvitado = new EventoParticipante();
