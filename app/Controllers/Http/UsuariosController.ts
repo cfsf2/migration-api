@@ -297,7 +297,7 @@ export default class UsuariosController {
 
         const invitados = await EventoParticipante.query()
           .preload("evento")
-          .where("id_farmacia", evento_participante.id_farmacia);
+          .where("id_titular", evento_participante.id);
 
         await Promise.all(
           invitados.map(async (i) => {
@@ -306,6 +306,10 @@ export default class UsuariosController {
               .save();
           })
         );
+
+        await evento_participante.merge({
+          confirmo_asistencia: usuario.confirmo_asistencia
+        }).save()
 
         return evento_participante;
       } catch (err) {
@@ -320,9 +324,9 @@ export default class UsuariosController {
           .where("id", usuario.id)
           .firstOrFail();
 
-        const invitados = await EventoParticipante.query()
-          .preload("evento")
-          .where("id_farmacia", evento_participante.id_farmacia);
+        // const invitados = await EventoParticipante.query()
+        //   .preload("evento")
+        //   .where("id_titular", evento_participante.id);
 
         const patron = /^\d{10}$/;
         const esCelular = patron.test(usuario.telefono);
@@ -331,11 +335,16 @@ export default class UsuariosController {
           throw { code: "No es un numero valido" };
         }
 
-        await Promise.all(
-          invitados.map(async (i) => {
-            return await i.merge({ telefono: Number(usuario.telefono) }).save();
+        // await Promise.all(
+        //   invitados.map(async (i) => {
+        //     return await i.merge({ telefono: Number(usuario.telefono) }).save();
+        //   })
+        // );
+        await evento_participante
+          .merge({
+            telefono: Number(usuario.telefono),
           })
-        );
+          .save();
 
         return evento_participante;
       } catch (err) {
