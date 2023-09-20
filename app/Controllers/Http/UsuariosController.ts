@@ -9,7 +9,6 @@ import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Database from "@ioc:Adonis/Lucid/Database";
-import Farmacia from "App/Models/Farmacia";
 import EventoParticipante from "App/Models/EventoParticipante";
 
 export default class UsuariosController {
