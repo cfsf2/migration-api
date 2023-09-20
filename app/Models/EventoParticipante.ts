@@ -1,6 +1,7 @@
 import {
   HasMany,
   HasOne,
+  beforeCreate,
   column,
   computed,
   hasMany,
@@ -8,10 +9,11 @@ import {
 } from "@ioc:Adonis/Lucid/Orm";
 import Base from "./Base";
 import Evento from "./Evento";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 export default class EventoParticipante extends Base {
   public static table = "tbl_evento_participante";
-  
+
   @column()
   public id_evento: number;
   @column()
@@ -63,10 +65,18 @@ export default class EventoParticipante extends Base {
   })
   public invitados: HasMany<typeof EventoParticipante>;
 
+  @beforeCreate()
+  public static async giveToken(invitado: EventoParticipante) {
+    if (!invitado.$dirty.token) {
+      const token = await Database.rawQuery("select uuid() as token");
+      invitado.token = token[0][0].token;
+    }
+  }
+
   @computed({ serializeAs: "costo" })
   public get costo() {
     const precio = 45000;
-    
+
     if (this.bonificada === "s") return precio / 2;
     if (this.gratis === "s") return 0;
     if (this.menor === "s") return precio / 2;
