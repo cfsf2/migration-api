@@ -48,6 +48,8 @@ export default class EventoParticipante extends Base {
   public matricula: number;
   @column()
   public token: string;
+  @column()
+  public id_titular: number;
 
   @hasOne(() => Evento, {
     foreignKey: "id",
@@ -56,8 +58,8 @@ export default class EventoParticipante extends Base {
   public evento: HasOne<typeof Evento>;
 
   @hasMany(() => EventoParticipante, {
-    foreignKey: "id_farmacia",
-    localKey: "id_farmacia",
+    foreignKey: "id_titular",
+    localKey: "id",
   })
   public invitados: HasMany<typeof EventoParticipante>;
 

@@ -259,7 +259,7 @@ export default class UsuariosController {
       try {
         const usuario_invitado_query = EventoParticipante.query()
           .where("matricula", usuario.matricula)
-          .andWhere("documento", usuario.cuit)
+          .andWhere("documento", "like", usuario.cuit)
           .preload("invitados")
           .first();
 
@@ -267,9 +267,9 @@ export default class UsuariosController {
         if (!usuario_invitado) {
           throw { code: "Usuario no encontrado. Verifique sus datos." };
         }
-
         return usuario_invitado;
       } catch (err) {
+        console.log(err);
         return ctx.response.status(440).send({ error: err, message: err.code });
       }
     }
@@ -281,9 +281,8 @@ export default class UsuariosController {
 
       if (!evento_participante) return {};
 
-      const usuario_invitado_query = Farmacia.query()
-        .where("id", evento_participante.id_farmacia)
-        .preload("usuario")
+      const usuario_invitado_query = EventoParticipante.query()
+        .where("id", evento_participante.id)
         .preload("invitados")
         .first();
       const usuario_invitado = await usuario_invitado_query;
@@ -367,30 +366,30 @@ export default class UsuariosController {
   }
 
   public async usuario_invitado_add(ctx: HttpContextContract) {
-    const { usuario, farmacia } = ctx.request.body();
-    const farmacia_ = await Farmacia.query()
-      .where("id", farmacia.id)
+
+    const { usuario, titular } = ctx.request.body();
+    const _titular = await EventoParticipante.query()
+      .where("id", titular.id)
       .preload("invitados")
       .firstOrFail();
     const nuevoInvitado = new EventoParticipante();
 
-    const titular = farmacia_.invitados.filter((i) => i.titular === "s").pop();
-
-    if (!titular) return { error: "no hay titular" };
+    if (!_titular) return { error: "no hay titular" };
 
     nuevoInvitado.merge({
       nombre: usuario.nombre,
       documento: usuario.documento,
       token: usuario.token,
-      id_farmacia: farmacia_.id,
-      id_evento: titular.id_evento,
-      id_evento_premio: titular.id_evento_premio,
-      id_evento_forma_pago: titular.id_evento_forma_pago,
-      confirmo_asistencia: titular.confirmo_asistencia,
+      id_farmacia: _titular.id_farmacia,
+      id_titular: _titular.id,
+      id_evento: _titular.id_evento,
+      id_evento_premio: _titular.id_evento_premio,
+      id_evento_forma_pago: _titular.id_evento_forma_pago,
+      confirmo_asistencia: _titular.confirmo_asistencia,
       titular: "n",
       bonificada: "n",
       menor: usuario.menor,
-      mesa: titular.mesa,
+      mesa: _titular.mesa,
     });
     await nuevoInvitado.save();
     return nuevoInvitado;
