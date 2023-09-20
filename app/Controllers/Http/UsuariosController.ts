@@ -307,9 +307,11 @@ export default class UsuariosController {
           })
         );
 
-        await evento_participante.merge({
-          confirmo_asistencia: usuario.confirmo_asistencia
-        }).save()
+        await evento_participante
+          .merge({
+            confirmo_asistencia: usuario.confirmo_asistencia,
+          })
+          .save();
 
         return evento_participante;
       } catch (err) {
@@ -407,6 +409,8 @@ export default class UsuariosController {
     const { usuario } = ctx.request.body();
 
     const ep = await EventoParticipante.findByOrFail("token", usuario.token);
+
+    if (ep.pagado === "s") return "Ya esta pago, no es posible eliminar";
     await ep.delete();
 
     return "eliminado";
