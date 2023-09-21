@@ -1,6 +1,7 @@
 import {
   HasMany,
   HasOne,
+  afterFind,
   beforeCreate,
   beforeSave,
   column,
@@ -82,6 +83,13 @@ export default class EventoParticipante extends Base {
       if (invitado.$original.pagado === "s") {
         invitado.pagado = 's'
       }
+    }
+  }
+
+  @afterFind()
+  public static afterFindHook (invitado: EventoParticipante) {
+    if(invitado.gratis === 's'){
+      invitado.pagado = 's'
     }
   }
 
