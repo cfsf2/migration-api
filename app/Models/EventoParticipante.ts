@@ -88,9 +88,9 @@ export default class EventoParticipante extends Base {
 
   @afterFind()
   public static afterFindHook (invitado: EventoParticipante) {
-    if(invitado.gratis === 's'){
-      invitado.pagado = 's'
-    }
+    // if(invitado.gratis === 's'){
+    //   invitado.pagado = 's'
+    // }
   }
 
   @computed({ serializeAs: "costo" })
