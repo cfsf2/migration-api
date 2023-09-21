@@ -52,6 +52,8 @@ export default class EventoParticipante extends Base {
   public token: string;
   @column()
   public id_titular: number;
+  @column()
+  public observaciones: string;
 
   @hasOne(() => Evento, {
     foreignKey: "id",
