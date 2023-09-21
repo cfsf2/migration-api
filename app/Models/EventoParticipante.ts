@@ -2,6 +2,7 @@ import {
   HasMany,
   HasOne,
   beforeCreate,
+  beforeSave,
   column,
   computed,
   hasMany,
@@ -72,6 +73,15 @@ export default class EventoParticipante extends Base {
     if (!invitado.$dirty.token) {
       const token = await Database.rawQuery("select uuid() as token");
       invitado.token = token[0][0].token;
+    }
+  }
+
+  @beforeSave()
+  public static async verpagado(invitado: EventoParticipante) {
+    if (invitado.$dirty.pagado) {
+      if (invitado.$original.pagado === "s") {
+        invitado.pagado = 's'
+      }
     }
   }
 
