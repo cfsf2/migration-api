@@ -103,12 +103,16 @@ export default class CampanaRequerimiento extends BaseModel {
 
   @column()
   public codigo_promo: string;
+  @column()
+  public nombre: string;
 
   @column()
   public texto_mensaje: string;
 
   @column()
   public id_campana: number;
+  @column()
+  public documento: number;
 
   @column()
   public id_usuario: number;
