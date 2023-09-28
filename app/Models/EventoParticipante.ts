@@ -81,11 +81,11 @@ export default class EventoParticipante extends Base {
 
   @beforeSave()
   public static async verpagado(invitado: EventoParticipante) {
-    if (invitado.$dirty.pagado) {
-      if (invitado.$original.pagado === "s") {
-        invitado.pagado = 's'
-      }
-    }
+    // if (invitado.$dirty.pagado) {
+    //   if (invitado.$original.pagado === "s") {
+    //     invitado.pagado = 's'
+    //   }
+    // }
   }
 
   @afterFind()
