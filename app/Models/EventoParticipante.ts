@@ -80,10 +80,10 @@ export default class EventoParticipante extends Base {
   }
 
   @beforeSave()
-  public static async verpagado(invitado: EventoParticipante) {
-    // if (invitado.$dirty.pagado) {
-    //   if (invitado.$original.pagado === "s") {
-    //     invitado.pagado = 's'
+  public static async verpagado(_invitado: EventoParticipante) {
+    // if (_invitado.$dirty.pagado) {
+    //   if (_invitado.$original.pagado === "s") {
+    //     _invitado.pagado = 's'
     //   }
     // }
   }
