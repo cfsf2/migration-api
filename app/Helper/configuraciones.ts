@@ -809,7 +809,8 @@ export class ConfBuilder {
     queryFiltros: any,
     id: number,
     usuario?: Usuario,
-    solo_conf?: string
+    solo_conf?: string,
+    excel?: boolean
   ) => {
     try {
       let opciones = this.setOpciones(ctx, listado, conf, id);
@@ -879,6 +880,15 @@ export class ConfBuilder {
         bouncer,
         tipoId: 8,
       });
+
+      if (excel) {
+        // si solo tiene que calcular excel busca unicamente la columna de configuracion de excel
+        columnas = [
+          columnas.find((c) =>
+            c.valores.find((v) => v.atributo[0].nombre === "excel_export")
+          ),
+        ];
+      }
 
       if (
         getAtributo({
@@ -1049,7 +1059,8 @@ export class ConfBuilder {
     id: number,
     conf: SConf,
     bouncer: any,
-    usuario?: Usuario
+    usuario?: Usuario,
+    excel?: boolean
   ): Promise<vista> => {
     if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
@@ -1068,6 +1079,14 @@ export class ConfBuilder {
     if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
+    if (excel) {
+      // si solo tiene que calcular excel busca unicamente la columna de configuracion de excel
+      columnas = [
+        columnas.find((c) =>
+          c.valores.find((v) => v.atributo[0].nombre === "excel_export")
+        ) as SConf,
+      ];
+    }
     const campos = getSelect(ctx, [columnas], 7, usuario);
 
     try {

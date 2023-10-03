@@ -13,3 +13,5 @@ Route.post("insertar", "ConfigsController.Insert");
 Route.post("eliminar", "ConfigsController.Delete");
 
 Route.post("menu", "ConfigsController.Menu");
+
+Route.post("excel", "ConfigsController.Excel");

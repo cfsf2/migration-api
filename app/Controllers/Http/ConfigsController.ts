@@ -13,6 +13,10 @@ import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Menu from "App/Models/Menu";
 
+import fs from "fs";
+import path from "path";
+import _ from "lodash";
+
 const preloadRecursivo = (query) => {
   return query
     .preload("conf_permiso", (query) => query.preload("permiso"))
@@ -471,4 +475,227 @@ export default class ConfigsController {
       return new ExceptionHandler().handle(err, ctx);
     }
   }
+
+  public async Excel(ctx: HttpContextContract) {
+    const { request: req } = ctx;
+
+    const { conf: id_a, filtros, id } = req.body();
+    const conf = await getConf(id_a);
+
+    let confArmada: any = {};
+
+    try {
+
+      switch (conf.id_tipo) {
+        case 2:
+          confArmada = await ConfBuilder.armarListado(
+            ctx,
+            conf,
+            conf,
+            ctx.bouncer,
+            filtros,
+            id,
+            ctx.auth.user,
+            "n",
+            true // excel
+          );
+          break;
+        case 6:
+          confArmada = await ConfBuilder.armarVista(
+            ctx,
+            conf,
+            id,
+            conf,
+            ctx.bouncer,
+            ctx.auth.user,
+            true
+          );
+          break;
+      }
+
+      const excelExport = confArmada.cabeceras
+        .filter((c) => c.excel_export === "s")
+        .pop();
+      const csvData = confArmada.datos.map((d) => {
+        //console.log(d[excelExport.id_a + "_excel_export_formato"]);
+
+        return d[excelExport.id_a + "_excel_export_formato"];
+      });
+
+      // Cabeceras de csv
+      let csvCabeceras = [];
+      if (excelExport.excel_con_cabecera === "s") {
+        if (confArmada.datos[0][excelExport.id_a + "_excel_export_cabeceras"]) {
+          csvCabeceras =
+            confArmada.datos[0][
+              excelExport.id_a + "_excel_export_cabeceras"
+            ].split(",");
+        }
+
+        if (
+          !confArmada.datos[0][excelExport.id_a + "_excel_export_cabeceras"] &&
+          excelExport.excel_export_cabeceras
+        ) {
+          csvCabeceras = excelExport.excel_export_cabeceras.split(",");
+        }
+        if (
+          !confArmada.datos[0][excelExport.id_a + "_excel_export_cabeceras"] &&
+          !excelExport.excel_export_cabeceras
+        ) {
+          csvCabeceras = csvData[0].split(",").map((_d, i) => "Col " + (i + 1));
+        }
+      }
+
+      //extension de archivo
+      const ext = ".".concat(
+        confArmada.datos[0][excelExport.id_a + "_excel_export_ext"] ??
+          excelExport.excel_export_ext ??
+          "csv"
+      );
+
+      //separador de csv
+      let separador = excelExport.excel_export_separador;
+      if (separador == "TAB") separador = "\t";
+
+      // nombre de archivo
+      let nombre =
+        confArmada.datos[0][excelExport.id_a + "_excel_export_nombre"] ??
+        excelExport.excel_export_nombre ??
+        id_a;
+
+      // Escribir archivo
+      const filePath = await writeLog(
+        csvData,
+        csvCabeceras,
+        nombre,
+        ext,
+        separador,
+        ctx
+      );
+      // Leer el archivo
+      const file = await fs.promises.readFile(filePath);
+
+      // Codificar el archivo en Base64
+      const file64 = file.toString("base64");
+
+      //elimina el archivo
+      fs.unlink(filePath, () => {});
+
+      return ctx.response.type("application/json").send({
+        conf: confArmada,
+        excel: {
+          archivo: file64,
+          nombre: nombre + ext,
+        },
+      });
+    } catch (err) {
+      console.log(err);
+      return new ExceptionHandler().handle(ctx, err);
+    }
+  }
 }
+
+export const getConf = async (id_a: string, tipo?: number) => {
+  const conf_sin_valores = await SConf.query()
+    .where("id_a", id_a)
+    .if(tipo, (query) => query.andWhere("id_tipo", tipo as any))
+    .preload("conf_permiso", (query) => query.preload("permiso"))
+    .preload("tipo")
+    .preload("componente")
+    .preload("orden")
+    .preload("permiso_string")
+    // .preload("valores", async (query) => {
+    //   query.orderBy("id_conf_cpsc", "desc");
+    //   query.preload("atributo");
+    // })
+    .preload("sub_conf", async (query) => {
+      // query.select("id");
+      preloadRecursivo(query);
+    })
+    .firstOrFail();
+
+  await getValores(conf_sin_valores, null);
+  return conf_sin_valores;
+};
+
+export const getValores = async (conf, orden) => {
+  await conf.load("valores", (query) => {
+    const id_conf_cpsc = orden?.filter((c) => c.id_conf_h === conf.id).pop().id;
+
+    query.preload("atributo");
+    query
+      .if(id_conf_cpsc, (query) =>
+        query.whereRaw(
+          `id_conf = ${conf.id} and ((id_conf_cpsc IS NULL and id_tipo_atributo not in ( select id_tipo_atributo from s_conf_tipo_atributo_valor where id_conf = ${conf.id} and id_conf_cpsc = ${id_conf_cpsc} )) or id_conf_cpsc = ${id_conf_cpsc})`
+        )
+      )
+      .if(!id_conf_cpsc, (query) =>
+        query.whereRaw(`id_conf = ${conf.id} and id_conf_cpsc IS NULL`)
+      );
+    return query;
+  });
+
+  if (conf.sub_conf.length > 0) {
+    await Promise.all(
+      conf.sub_conf.map(async (sc) => {
+        await getValores(sc, conf.orden);
+      })
+    );
+  }
+  return conf;
+};
+
+const writeLog = async (
+  data: string[],
+  cabeceras: string[],
+  name: string,
+  ext: string,
+  separador: string,
+  ctx: HttpContextContract
+) => {
+  const folderPath = path.join(__dirname, "log");
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath);
+  }
+
+  const filePath = path.join(folderPath, name + ext);
+
+  try {
+    function appendLogToCsv(filePath, data, cabeceras) {
+      return new Promise<void>((resolve, reject) => {
+        const stream = fs.createWriteStream(filePath);
+
+        if (cabeceras.length > 0) {
+          let cabecerasString = cabeceras.toString();
+          if (separador)
+            cabecerasString = cabecerasString.replace(/,/g, separador);
+          stream.write(cabecerasString + "\n");
+        }
+
+        data.forEach((l: string) => {
+          let linea = l;
+          if (separador) linea = l.replace(/,/g, separador);
+          stream.write(linea + "\n");
+        });
+
+        stream.end();
+
+        stream.on("finish", () => {
+          resolve();
+        });
+
+        stream.on("error", (error) => {
+          reject(error);
+        });
+      });
+    }
+    await appendLogToCsv(filePath, data, cabeceras);
+    return filePath;
+  } catch (err) {
+    console.log(err);
+    return await new ExceptionHandler().handle(err, ctx);
+  }
+};
+
+
