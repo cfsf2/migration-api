@@ -485,7 +485,6 @@ export default class ConfigsController {
     let confArmada: any = {};
 
     try {
-
       switch (conf.id_tipo) {
         case 2:
           confArmada = await ConfBuilder.armarListado(
@@ -517,10 +516,11 @@ export default class ConfigsController {
         .filter((c) => c.excel_export === "s")
         .pop();
       const csvData = confArmada.datos.map((d) => {
-        //console.log(d[excelExport.id_a + "_excel_export_formato"]);
-
         return d[excelExport.id_a + "_excel_export_formato"];
       });
+
+      let separador = excelExport.excel_export_separador;
+      if (separador == "TAB") separador = "\t";
 
       // Cabeceras de csv
       let csvCabeceras = [];
@@ -542,7 +542,7 @@ export default class ConfigsController {
           !confArmada.datos[0][excelExport.id_a + "_excel_export_cabeceras"] &&
           !excelExport.excel_export_cabeceras
         ) {
-          csvCabeceras = csvData[0].split(",").map((_d, i) => "Col " + (i + 1));
+          csvCabeceras = csvData[0].split(separador).map((_d, i) => "Col " + (i + 1));
         }
       }
 
@@ -554,8 +554,7 @@ export default class ConfigsController {
       );
 
       //separador de csv
-      let separador = excelExport.excel_export_separador;
-      if (separador == "TAB") separador = "\t";
+   
 
       // nombre de archivo
       let nombre =
@@ -618,20 +617,20 @@ export const getConf = async (id_a: string, tipo?: number) => {
   return conf_sin_valores;
 };
 
-export const getValores = async (conf, orden) => {
+export const getValores = async (conf, _orden) => {
   await conf.load("valores", (query) => {
-    const id_conf_cpsc = orden?.filter((c) => c.id_conf_h === conf.id).pop().id;
+    // const id_conf_cpsc = _orden?.filter((c) => c.id_conf_h === conf.id).pop().id;
 
     query.preload("atributo");
-    query
-      .if(id_conf_cpsc, (query) =>
-        query.whereRaw(
-          `id_conf = ${conf.id} and ((id_conf_cpsc IS NULL and id_tipo_atributo not in ( select id_tipo_atributo from s_conf_tipo_atributo_valor where id_conf = ${conf.id} and id_conf_cpsc = ${id_conf_cpsc} )) or id_conf_cpsc = ${id_conf_cpsc})`
-        )
-      )
-      .if(!id_conf_cpsc, (query) =>
-        query.whereRaw(`id_conf = ${conf.id} and id_conf_cpsc IS NULL`)
-      );
+    // query
+    //   .if(id_conf_cpsc, (query) =>
+    //     query.whereRaw(
+    //       `id_conf = ${conf.id} and ((id_conf_cpsc IS NULL and id_tipo_atributo not in ( select id_tipo_atributo from s_conf_tipo_atributo_valor where id_conf = ${conf.id} and id_conf_cpsc = ${id_conf_cpsc} )) or id_conf_cpsc = ${id_conf_cpsc})`
+    //     )
+    //   )
+    //   .if(!id_conf_cpsc, (query) =>
+    //     query.whereRaw(`id_conf = ${conf.id} and id_conf_cpsc IS NULL`)
+    //   );
     return query;
   });
 
@@ -697,5 +696,3 @@ const writeLog = async (
     return await new ExceptionHandler().handle(err, ctx);
   }
 };
-
-

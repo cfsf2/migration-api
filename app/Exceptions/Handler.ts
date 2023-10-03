@@ -41,7 +41,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           error?.code
         );
       }
-      console.log(Date(), "Error Handler:", await error);
+     // console.log(Date(), "Error Handler:", await error);
 
       if (error.sqlMessage) {
         errorKey = error.sqlMessage
@@ -369,7 +369,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         // return { error: { message } };
       }
     }
-    return ctx.response.badRequest({
+    return ctx?.response.badRequest({
       error: {
         message:
           errorMensajeTraducido?.detalle ?? error?.sqlMessage ?? error?.message,
