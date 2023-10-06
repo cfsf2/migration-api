@@ -326,68 +326,6 @@ export const generarHtml = ({
         `;
 };
 
-export const transferHtml = ({ transfer, farmacia }) => {
-  let stringTable = transfer.productos_solicitados.map((p) => {
-    return `<tr>
-                            <td>${p.codigo ? p.codigo : ""}</td>
-                            <td>${p.nombre}</td>
-                            <td>${p.presentacion}</td>
-                            <td>${p.cantidad}</td>
-                            <td>${p.observacion ? p.observacion : ""}</td>
-                        </tr>`;
-  });
-  let emailBody = `<head>
-                        <style>
-                          table {
-                            font-family: arial, sans-serif;
-                            border-collapse: collapse;
-                            width: 100%;
-                          }
-                          
-                          td, th {
-                            border: 1px solid #dddddd;
-                            text-align: left;
-                            padding: 8px;
-                          }
-                          
-                          tr:nth-child(even) {
-                            background-color: #dddddd;
-                          }
-
-                        </style>
-                      </head>
-                      <body>
-                        <div>
-                          <p><b>Id Farmageo: </b>${transfer.id} </p>
-                          <p><b>Farmacia: </b>${farmacia.nombre} / <b>Cuit: </b>${farmacia.cuit}</p>
-                          <p><b>Telefono: </b>${farmacia.telefono}</p>
-                          <p><b>Nro Cufe: </b>${farmacia.cufe}</p>
-                          <p><b>Nro Cuenta de Droguería: </b>${transfer.nro_cuenta_drogueria}</p> 
-                          <p><b>Droguería: </b>${transfer.drogueria_id}</p>
-                          <p><b>Laboratorio elegido: </b>${transfer.laboratorio_id}</p>
-                          <p><b>Dirección: </b>${farmacia.direccioncompleta}</p>
-                          
-                        </div>
-                      <table>
-                          <tr>
-                            <th>Código</th>
-                            <th>Producto</th>
-                            <th>Presentación</th>
-                            <th>Cantidad</th>
-                            <th>Observaciones</th>
-                          </tr>
-                        <tbody>
-                        ${stringTable}                    
-                        </tbody>
-                      </table>
-                    </body>`;
-
-  return generarHtml({
-    titulo: "Pedido de Transfer",
-    texto: emailBody,
-  });
-};
-
 export const html_transfer = async (transfer) => {
   try {
     const laboratorio = await Laboratorio.findOrFail(transfer.id_laboratorio);
@@ -399,15 +337,24 @@ export const html_transfer = async (transfer) => {
       ahorro = await transfer.getAhorro();
     }
 
-    let stringTable = transfer.ttp.map((p) => {
-      return `<tr>
+    let stringTable = await Promise.all(
+      transfer.ttp.map(async (p) => {
+        let presentacion = p.transfer_producto.presentacion;
+        if (calcularPrecio) {
+          await p.transfer_producto.load("producto");
+          presentacion = p.transfer_producto.producto?.presentacion ?? " - ";
+        }
+        const fila = `<tr>
                               <td>${p.transfer_producto.codigo ?? ""}</td>
                               <td>${p.transfer_producto.nombre}</td>
-                              <td>${p.transfer_producto.presentacion}</td>
+                              <td>${presentacion}</td>
                               <td>${p.cantidad}</td>
                               <td>${p.observaciones ?? ""}</td>
                           </tr>`;
-    });
+        console.log(fila);
+        return fila;
+      })
+    );
     let emailBody = `<head>
                           <style>
                             table {
