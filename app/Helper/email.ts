@@ -351,7 +351,6 @@ export const html_transfer = async (transfer) => {
                               <td>${p.cantidad}</td>
                               <td>${p.observaciones ?? ""}</td>
                           </tr>`;
-        console.log(fila);
         return fila;
       })
     );
