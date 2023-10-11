@@ -396,7 +396,10 @@ export default class Transfer extends BaseModel {
       if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
-      const pvp = Number(p.transfer_producto.producto.precioDividido);
+      const pvp =
+        Number(p.transfer_producto?.producto?.precioDividido) ??
+        Number(p.transfer_producto.precio) ??
+        0;
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
       const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
 
@@ -407,14 +410,15 @@ export default class Transfer extends BaseModel {
       if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
-      const pvp = Number(p.transfer_producto.producto.precioDividido);
+      const pvp =
+        Number(p.transfer_producto?.producto?.precioDividido) ??
+        Number(p.transfer_producto.precio) ??
+        0;
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
       const ahorropvp = pvp * (1 - descuentoDrogueria) * descuento;
 
       return accumulator + ahorropvp * cantidad;
     }, 0);
-
-    
 
     return {
       total: Number(total.toFixed(2)),
