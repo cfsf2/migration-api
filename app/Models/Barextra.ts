@@ -6,6 +6,8 @@ export default class Barextra extends BaseModel {
   @column({ isPrimary: true })
   public id: number;
 
+  public static table = "barextra";
+
   @column()
   public nro_registro_prod: number;
 
