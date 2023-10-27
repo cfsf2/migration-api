@@ -1462,7 +1462,7 @@ export class ConfBuilder {
       if (groupsBy.length > 0) {
         groupsBy.forEach(({ groupBy, having }) => {
           query.groupBy(groupBy);
-          if (having) query.having(having as unknown as RawQuery); // ??
+          if (having) query.havingRaw(having as unknown as RawQuery); // ??
         });
       }
       // aplicar order del listado
