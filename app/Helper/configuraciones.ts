@@ -708,8 +708,20 @@ const aplicaWhere = async (
       .find((v) => v.atributo[0].nombre === "radio_where")
       ?.valor.split("|");
 
+    const radio_having_a = conf.valores
+      .find((v) => v.atributo[0].nombre === "having")
+      ?.valor.split("|");
+
     const radio_where_o = Object.assign({}, radio_where_a);
-    return query.whereRaw(radio_where_o[Number(valor)].trim());
+    const radio_having_o = Object.assign({}, radio_having_a);
+
+    if (radio_where_o[Number(valor)] && radio_where_o[Number(valor)].trim() != "") {
+      query.whereRaw(radio_where_o[Number(valor)].trim());
+    }
+    if (radio_having_o[Number(valor)] && radio_having_o[Number(valor)]?.trim() != "") {
+      query.havingRaw(radio_having_o[Number(valor)].trim());
+    }
+    return query;
   }
 
   if (operador === "raw") {
