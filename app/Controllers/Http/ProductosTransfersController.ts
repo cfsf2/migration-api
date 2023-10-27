@@ -71,7 +71,7 @@ export default class ProductosTransfersController {
       //   .groupBy("tbl_transfer_producto.id");
 
       const tpqd = Database.rawQuery(
-        `select tbl_transfer_producto.*, IF(tbl_laboratorio.calcular_precio = 's',ROUND( IFNULL(productos.precio, p.precio)/100,2), tbl_transfer_producto.precio) as precio from tbl_transfer_producto 
+        `select tbl_transfer_producto.*, IF(tbl_laboratorio.calcular_precio = 's',ROUND( IFNULL(productos.precio, p.precio)/100,2), tbl_transfer_producto.precio) as precio,IF(tbl_laboratorio.calcular_precio = 's',IFNULL(productos.presentacion, p.presentacion), tbl_transfer_producto.presentacion) as presentacion from tbl_transfer_producto 
         left join tbl_laboratorio on tbl_laboratorio.id = tbl_transfer_producto.id_laboratorio
         left join tbl_transfer_producto_institucion on tbl_transfer_producto.id = tbl_transfer_producto_institucion.id_transfer_producto 
         left join productos on productos.cod_barras = tbl_transfer_producto.codigo 

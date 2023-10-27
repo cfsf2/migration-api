@@ -514,6 +514,12 @@ const getGroupBy = ({
   usuario;
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
+
+  let gp: gp = { groupBy: "", having: "" };
+  gp.groupBy = getAtributoById({ id: 23, conf: conf });
+  gp.having = getAtributoById({ id: 24, conf: conf }) as string | undefined;
+  groupsBy.push(gp);
+
   confs?.forEach((confi) => {
     let gp: gp = { groupBy: "", having: "" };
     gp.groupBy = getAtributoById({ id: 23, conf: confi });
