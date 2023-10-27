@@ -8,6 +8,9 @@ export default class Producto extends BaseModel {
   public cod_barras: string;
 
   @column()
+  public nro_registro: number;
+
+  @column()
   public precio: string;
 
   @column()

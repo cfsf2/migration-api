@@ -269,9 +269,9 @@ export default class TransferProducto extends BaseModel {
 
   @hasManyThrough([() => Producto, () => Barextra], {
     localKey: "codigo",
-    foreignKey: "id_transfer_producto",
-    throughLocalKey: "id_institucion",
-    throughForeignKey: "id",
+    foreignKey: "cod_barras",
+    throughLocalKey: "nro_registro_prod",
+    throughForeignKey: "nro_registro",
   })
   public barextra_producto: HasManyThrough<typeof Producto>;
 
