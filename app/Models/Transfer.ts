@@ -382,11 +382,21 @@ export default class Transfer extends BaseModel {
     let total = 0;
     let ahorro = 0;
 
+    const _pvp = (tp: TransferProducto) => {
+      return (
+        Number(tp?.producto?.precioDividido) ??
+        Number(tp?.barextra_producto[0].precioDividido) ??
+        Number(tp.precio) ??
+        0
+      );
+    };
+
     const productos = await Promise.all(
       tpps.map(async (p) => {
         const transfer_producto = await TransferProducto.query()
           .where("id", p.id_transfer_producto)
           .preload("producto")
+          .preload("barextra_producto")
           .firstOrFail();
         return { transfer_producto, cantidad: p.cantidad };
       })
@@ -396,10 +406,7 @@ export default class Transfer extends BaseModel {
       if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
-      const pvp =
-        Number(p.transfer_producto?.producto?.precioDividido) ??
-        Number(p.transfer_producto.precio) ??
-        0;
+      const pvp = _pvp(p.transfer_producto);
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
       const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
 
@@ -410,10 +417,7 @@ export default class Transfer extends BaseModel {
       if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
-      const pvp =
-        Number(p.transfer_producto?.producto?.precioDividido) ??
-        Number(p.transfer_producto.precio) ??
-        0;
+      const pvp = _pvp(p.transfer_producto);
       const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
       const ahorropvp = pvp * (1 - descuentoDrogueria) * descuento;
 

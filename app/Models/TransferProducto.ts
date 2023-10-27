@@ -21,6 +21,7 @@ import {
 } from "App/Helper/funciones";
 import Institucion from "./Institucion";
 import Producto from "./Producto";
+import Barextra from "./Barextra";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -265,6 +266,14 @@ export default class TransferProducto extends BaseModel {
     foreignKey: "cod_barras",
   })
   public producto: HasOne<typeof Producto>;
+
+  @hasManyThrough([() => Producto, () => Barextra], {
+    localKey: "codigo",
+    foreignKey: "id_transfer_producto",
+    throughLocalKey: "id_institucion",
+    throughForeignKey: "id",
+  })
+  public barextra_producto: HasManyThrough<typeof Producto>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
