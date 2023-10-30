@@ -63,68 +63,68 @@ export default class EnviarTransferEmails extends BaseCommand {
           });
 
           if (emailRes.rejected.length > 0) {
-            // await Mail.send((message) => {
-            //   message
-            //     .from(process.env.SMTP_USERNAME as string)
-            //     .to(process.env.TRANSFER_EMAIL as string)
-            //     .subject(
-            //       "El transfer con Id" +
-            //         " " +
-            //         tep.transfer.id +
-            //         " no pudo ser enviado correctamente"
-            //     )
-            //     .html(
-            //       generarHtml({
-            //         titulo:
-            //           "Transfer " +
-            //           tep.transfer.id +
-            //           " no pudo ser enviado correctamente",
-            //         texto:
-            //           "Los destinatarios " +
-            //           emailRes.rejected?.toString() +
-            //           " rechazaron la recepcion del email de transfer." +
-            //           "<br/>" +
-            //           "El sistema no intentara enviar el email nuevamente." +
-            //           "<hr/>" +
-            //           "<code>" +
-            //           emailRes.rejectedErrors.toString() +
-            //           "</code>",
-            //       })
-            //     );
-            // });
+            await Mail.send((message) => {
+              message
+                .from(process.env.SMTP_USERNAME as string)
+                .to(process.env.TRANSFER_EMAIL as string)
+                .subject(
+                  "El transfer con Id" +
+                    " " +
+                    tep.transfer.id +
+                    " no pudo ser enviado correctamente"
+                )
+                .html(
+                  generarHtml({
+                    titulo:
+                      "Transfer " +
+                      tep.transfer.id +
+                      " no pudo ser enviado correctamente",
+                    texto:
+                      "Los destinatarios " +
+                      emailRes.rejected?.toString() +
+                      " rechazaron la recepcion del email de transfer." +
+                      "<br/>" +
+                      "El sistema no intentara enviar el email nuevamente." +
+                      "<hr/>" +
+                      "<code>" +
+                      emailRes.rejectedErrors.toString() +
+                      "</code>",
+                  })
+                );
+            });
           }
 
           await tep.save();
           return emailRes;
         } catch (err) {
-          // await Mail.send((message) => {
-          //   message
-          //     .from(process.env.SMTP_USERNAME as string)
-          //     .to(process.env.TRANSFER_EMAIL as string)
-          //     .subject(
-          //       "El transfer con Id" +
-          //         " " +
-          //         tep.transfer.id +
-          //         " no pudo ser enviado correctamente"
-          //     )
-          //     .html(
-          //       generarHtml({
-          //         titulo:
-          //           "Transfer " +
-          //           tep.transfer.id +
-          //           " no pudo ser enviado correctamente",
-          //         texto:
-          //           "Destinatarios no alcanzados: " +
-          //           tep.emails +
-          //           "<br/>" +
-          //           "El sistema no intentara enviar el email nuevamente." +
-          //           "<hr/>" +
-          //           "<code>" +
-          //           err.toString() +
-          //           "</code>",
-          //       })
-          //     );
-         // });
+          await Mail.send((message) => {
+            message
+              .from(process.env.SMTP_USERNAME as string)
+              .to(process.env.TRANSFER_EMAIL as string)
+              .subject(
+                "El transfer con Id" +
+                  " " +
+                  tep.transfer.id +
+                  " no pudo ser enviado correctamente"
+              )
+              .html(
+                generarHtml({
+                  titulo:
+                    "Transfer " +
+                    tep.transfer.id +
+                    " no pudo ser enviado correctamente",
+                  texto:
+                    "Destinatarios no alcanzados: " +
+                    tep.emails +
+                    "<br/>" +
+                    "El sistema no intentara enviar el email nuevamente." +
+                    "<hr/>" +
+                    "<code>" +
+                    err.toString() +
+                    "</code>",
+                })
+              );
+          });
 
           await tep
             .merge({

@@ -383,12 +383,33 @@ export default class Transfer extends BaseModel {
     let ahorro = 0;
 
     const _pvp = (tp: TransferProducto) => {
-      return (
-        Number(tp?.producto?.precioDividido) ??
-        Number(tp?.barextra_producto[0].precioDividido) ??
-        Number(tp.precio) ??
-        0
-      );
+      function obtenerPrecio(valor) {
+        if (typeof valor === "number" && !isNaN(valor)) {
+          return valor;
+        } else if (
+          tp.producto &&
+          typeof tp.producto.precioDividido === "number" &&
+          !isNaN(tp.producto.precioDividido)
+        ) {
+          return tp.producto.precioDividido;
+        } else if (
+          tp.barextra_producto &&
+          tp.barextra_producto[0] &&
+          typeof tp.barextra_producto[0].precioDividido === "number" &&
+          !isNaN(tp.barextra_producto[0].precioDividido)
+        ) {
+          return tp.barextra_producto[0].precioDividido;
+        } else if (
+          tp.precio &&
+          typeof tp.precio === "number" &&
+          !isNaN(tp.precio)
+        ) {
+          return tp.precio;
+        } else {
+          return 0;
+        }
+      }
+      return obtenerPrecio(tp);
     };
 
     const productos = await Promise.all(
@@ -403,7 +424,6 @@ export default class Transfer extends BaseModel {
     );
 
     total = productos.reduce((accumulator, p) => {
-      if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = _pvp(p.transfer_producto);
@@ -414,7 +434,6 @@ export default class Transfer extends BaseModel {
     }, 0);
 
     ahorro = productos.reduce((accumulator, p) => {
-      if (!p.transfer_producto.producto) return accumulator;
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = _pvp(p.transfer_producto);

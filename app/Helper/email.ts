@@ -345,15 +345,19 @@ export const html_transfer = async (transfer) => {
         if (calcularPrecio) {
           await p.transfer_producto.load("producto");
           await p.transfer_producto.load("barextra_producto");
+
           codigo =
-            p.transfer_producto.producto.cod_barras ??
-            p.transfer_producto.barextra_producto.cod_barras;
+            p.transfer_producto.producto?.cod_barras ??
+            p.transfer_producto.barextra_producto[0]?.cod_barras ??
+            codigo;
           presentacion =
-            p.transfer_producto.producto.presentacion ??
-            p.transfer_producto.barextra_producto.presentacion;
+            p.transfer_producto.producto?.presentacion ??
+            p.transfer_producto.barextra_producto[0]?.presentacion ??
+            presentacion;
           nombre =
-            p.transfer_producto.producto.nombre ??
-            p.transfer_producto.barextra_producto.nombre;
+            p.transfer_producto.producto?.nombre ??
+            p.transfer_producto.barextra_producto[0]?.nombre ??
+            nombre;
         }
 
         const fila = `<tr>
