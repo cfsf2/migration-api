@@ -340,13 +340,25 @@ export const html_transfer = async (transfer) => {
     let stringTable = await Promise.all(
       transfer.ttp.map(async (p) => {
         let presentacion = p.transfer_producto.presentacion;
+        let codigo = p.transfer_producto.codigo;
+        let nombre = p.transfer_producto.nombre;
         if (calcularPrecio) {
           await p.transfer_producto.load("producto");
-          presentacion = p.transfer_producto.producto?.presentacion ?? " - ";
+          await p.transfer_producto.load("barextra_producto");
+          codigo =
+            p.transfer_producto.producto.cod_barras ??
+            p.transfer_producto.barextra_producto.cod_barras;
+          presentacion =
+            p.transfer_producto.producto.presentacion ??
+            p.transfer_producto.barextra_producto.presentacion;
+          nombre =
+            p.transfer_producto.producto.nombre ??
+            p.transfer_producto.barextra_producto.nombre;
         }
+
         const fila = `<tr>
-                              <td>${p.transfer_producto.codigo ?? ""}</td>
-                              <td>${p.transfer_producto.nombre}</td>
+                              <td>${codigo}</td>
+                              <td>${nombre}</td>
                               <td>${presentacion}</td>
                               <td>${p.cantidad}</td>
                               <td>${p.observaciones ?? ""}</td>

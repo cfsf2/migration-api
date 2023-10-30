@@ -20,20 +20,27 @@ export default class TransferEmail extends Base {
   public enviado: string;
 
   public async Enviar() {
-    const htmlTransfer = await html_transfer(this.transfer);
+    let htmlTransfer;
+    try {
+      htmlTransfer = await html_transfer(this.transfer);
+      console.log(htmlTransfer)
+    } catch (err) {
+      console.log(err);
+    }
+    // console.log(htmlTransfer)
+    // return Mail.send(async (message) => {
+    //   message
+    //     .from(process.env.SMTP_USERNAME as string)
+    //     .subject("Confirmacion de pedido de Transfer" + " " + this.transfer.id)
+    //     .html(htmlTransfer);
 
-    return Mail.send(async (message) => {
-      message
-        .from(process.env.SMTP_USERNAME as string)
-        .subject("Confirmacion de pedido de Transfer" + " " + this.transfer.id)
-        .html(htmlTransfer);
-
-      this.emails
-        .replace(/;/g, ",")
-        .replace(/:/g, ",")
-        .split(",")
-        .forEach((destinatario) => message.to(destinatario));
-    });
+    //   this.emails
+    //     .replace(/;/g, ",")
+    //     .replace(/:/g, ",")
+    //     .split(",")
+    //     .forEach((destinatario) => message.to(destinatario));
+    // });
+    return htmlTransfer;
   }
 
   @belongsTo(() => Transfer, {
