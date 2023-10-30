@@ -80,7 +80,6 @@ export default class ProductosTransfersController {
         and tbl_transfer_producto.id_laboratorio = "${labid}" 
         and tbl_transfer_producto_institucion.id_institucion in (${instituciones.toString()}) group by tbl_transfer_producto.id`
       );
-      console.log(tpqd.toQuery());
       const tpd = await tpqd;
 
       return tpd[0];
