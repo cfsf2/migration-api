@@ -1,5 +1,6 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
 import { html_transfer } from "../app/Helper/email";
+import Mail from "@ioc:Adonis/Addons/Mail";
 
 export default class TestTransferEmail extends BaseCommand {
   /**
@@ -64,9 +65,24 @@ export default class TestTransferEmail extends BaseCommand {
             );
 
             const htmlTransfer = await html_transfer(tep.transfer);
-            console.log(htmlTransfer);
+            return Mail.send(async (message) => {
+              message
+                .from(process.env.SISTEMAS_EMAIL as string)
+                .subject(
+                  "Confirmacion de pedido de Transfer" + " " + tep.transfer.id
+                )
+                .html(htmlTransfer);
+            });
           } catch (err) {
             console.log("testrasferemail", err);
+            return Mail.send(async (message) => {
+              message
+                .from(process.env.SISTEMAS_EMAIL as string)
+                .subject(
+                  "Confirmacion de pedido de Transfer" + " " + tep.transfer.id
+                )
+                .html(err);
+            });
           }
           tep.merge({
             enviado: "s",
