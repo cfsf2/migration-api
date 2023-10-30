@@ -64,7 +64,7 @@ export default class TestTransferEmail extends BaseCommand {
             );
 
             const htmlTransfer = await html_transfer(tep.transfer);
-            // console.log(htmlTransfer);
+            console.log(htmlTransfer);
           } catch (err) {
             console.log("testrasferemail", err);
           }
