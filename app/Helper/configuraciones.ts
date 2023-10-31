@@ -686,20 +686,20 @@ const aplicaWhere = async (
       .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
       .toSQL();
 
-    query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
-    //  .orderBy(campo, "desc");
-    //  .whereNotNull(campo);
+    if (desde && desde !== "Invalid DateTime") {
+      query.whereRaw(`${campo} >= ${desde}`);
+    }
+    if (hasta && hasta !== "Invalid DateTime") {
+      query.whereRaw(`${campo} <= ${hasta}`);
+    }
 
     return query;
   }
 
   if (tipo === "fecha_simple") {
-    // const fechas = valor.split(",");
 
     const fecha = DateTime.fromISO(valor).toSQL();
     query.where(campo, operador ? operador : "=", fecha);
-    //.orderBy(campo, "desc");
-    //.whereNotNull(campo);
     return query;
   }
 
