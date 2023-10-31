@@ -679,25 +679,24 @@ const aplicaWhere = async (
   if (operador === "fecha" || operador === "fecha_hora") {
     const fechas = JSON.parse(valor);
 
-    if (fechas.length !== 2) return;
-
     const desde = DateTime.fromISO(fechas[0]).toSQL();
     const hasta = DateTime.fromISO(fechas[1])
-      .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
+      .set(
+        operador === "fecha_hora" ? {} : { hour: 23, minute: 59, second: 59 }
+      )
       .toSQL();
 
     if (desde && desde !== "Invalid DateTime") {
-      query.whereRaw(`${campo} >= ${desde}`);
+      query.whereRaw(`${campo} >= '${desde}'`);
     }
     if (hasta && hasta !== "Invalid DateTime") {
-      query.whereRaw(`${campo} <= ${hasta}`);
+      query.whereRaw(`${campo} <= '${hasta}'`);
     }
 
     return query;
   }
 
   if (tipo === "fecha_simple") {
-
     const fecha = DateTime.fromISO(valor).toSQL();
     query.where(campo, operador ? operador : "=", fecha);
     return query;
@@ -715,10 +714,16 @@ const aplicaWhere = async (
     const radio_where_o = Object.assign({}, radio_where_a);
     const radio_having_o = Object.assign({}, radio_having_a);
 
-    if (radio_where_o[Number(valor)] && radio_where_o[Number(valor)].trim() != "") {
+    if (
+      radio_where_o[Number(valor)] &&
+      radio_where_o[Number(valor)].trim() != ""
+    ) {
       query.whereRaw(radio_where_o[Number(valor)].trim());
     }
-    if (radio_having_o[Number(valor)] && radio_having_o[Number(valor)]?.trim() != "") {
+    if (
+      radio_having_o[Number(valor)] &&
+      radio_having_o[Number(valor)]?.trim() != ""
+    ) {
       query.havingRaw(radio_having_o[Number(valor)].trim());
     }
     return query;
