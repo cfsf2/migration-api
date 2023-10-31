@@ -326,6 +326,18 @@ export const generarHtml = ({
         `;
 };
 
+function validarValor(valor) {
+  if (
+    valor === null ||
+    valor === undefined ||
+    (typeof valor === "string" && valor.trim() === "")
+  ) {
+    return null;
+  } else {
+    return valor;
+  }
+}
+
 export const html_transfer = async (transfer) => {
   try {
     const laboratorio = await Laboratorio.findOrFail(transfer.id_laboratorio);
@@ -347,16 +359,20 @@ export const html_transfer = async (transfer) => {
           await p.transfer_producto.load("barextra_producto");
 
           codigo =
-            p.transfer_producto.producto?.cod_barras ??
-            p.transfer_producto.barextra_producto[0]?.cod_barras ??
+            validarValor(p.transfer_producto.producto?.cod_barras) ??
+            validarValor(
+              p.transfer_producto.barextra_producto[0]?.cod_barras
+            ) ??
             codigo;
           presentacion =
-            p.transfer_producto.producto?.presentacion ??
-            p.transfer_producto.barextra_producto[0]?.presentacion ??
+            validarValor(p.transfer_producto.producto?.presentacion) ??
+            validarValor(
+              p.transfer_producto.barextra_producto[0]?.presentacion
+            ) ??
             presentacion;
           nombre =
-            p.transfer_producto.producto?.nombre ??
-            p.transfer_producto.barextra_producto[0]?.nombre ??
+            validarValor(p.transfer_producto.producto?.nombre) ??
+            validarValor(p.transfer_producto.barextra_producto[0]?.nombre) ??
             nombre;
         }
 

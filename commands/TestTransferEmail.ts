@@ -49,25 +49,25 @@ export default class TestTransferEmail extends BaseCommand {
     return await Promise.all(
       transferEmailPendiente.map(async (tep) => {
         try {
-          let emailRes;
-          try {
-            await tep.load("transfer", (q) =>
-              q
-                .preload("ttp", (q) =>
-                  q.preload("transfer_producto", (q) =>
-                    q.preload("barextra_producto").preload("producto")
-                  )
+          await tep.load("transfer", (q) =>
+            q
+              .preload("ttp", (q) =>
+                q.preload("transfer_producto", (q) =>
+                  q.preload("barextra_producto").preload("producto")
                 )
-                .preload("productos")
-                .preload("farmacia")
-                .preload("drogueria")
-                .preload("laboratorio")
-            );
+              )
+              .preload("productos")
+              .preload("farmacia")
+              .preload("drogueria")
+              .preload("laboratorio")
+          );
 
-            const htmlTransfer = await html_transfer(tep.transfer);
+          const htmlTransfer = await html_transfer(tep.transfer);
+          console.log(htmlTransfer);
+          try {
             return Mail.send(async (message) => {
               message
-                .from(process.env.SISTEMAS_EMAIL as string)
+                .to(process.env.SISTEMAS_EMAIL as string)
                 .subject(
                   "Confirmacion de pedido de Transfer" + " " + tep.transfer.id
                 )
@@ -75,22 +75,16 @@ export default class TestTransferEmail extends BaseCommand {
             });
           } catch (err) {
             console.log("testrasferemail", err);
+
             return Mail.send(async (message) => {
               message
-                .from(process.env.SISTEMAS_EMAIL as string)
+                .to(process.env.SISTEMAS_EMAIL as string)
                 .subject(
                   "Confirmacion de pedido de Transfer" + " " + tep.transfer.id
                 )
                 .html(err);
             });
           }
-          tep.merge({
-            enviado: "s",
-            // emails: emailRes.envelope.to.toString(),
-            // emails_rechazados: emailRes.rejected.length > 0 ? emailRes.rejected.toString() : null,
-          });
-          // console.log(tep.toObject());
-          return emailRes;
         } catch (err) {
           console.log(err);
           return err;
