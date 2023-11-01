@@ -44,31 +44,29 @@ export default class FarmaciasController {
       const farmacia = await Farmacia.traerFarmacias({
         usuario: request.params().usuario,
       });
+      
+      const farmaciaLogueada = await Farmacia.query()
+        .where("id", farmacia.id)
+        .preload("nro_cuenta_drogueria", (query) => query.preload("drogueria"))
+        .preload("nro_cuenta_laboratorio", (query) =>
+          query.preload("laboratorio", (q) =>
+            q.preload("modalidad_entrega").preload("tipo_comunicacion")
+          )
+        )
+        .firstOrFail();
 
       if (request.url().includes("login") && farmacia.length !== 0) {
-        //  console.log("actualizar ultimo acceso a ", farmacia.nombre);
-
-        const farmaciaLogueada = await Farmacia.query()
-          .where("id", farmacia.id)
-          .preload("nro_cuenta_drogueria", (query) =>
-            query.preload("drogueria")
-          )
-          .preload("nro_cuenta_laboratorio", (query) =>
-            query.preload("laboratorio")
-          )
-          .firstOrFail();
-
         farmaciaLogueada.f_ultimo_acceso = DateTime.now()
           .setLocale("es-Ar")
           .toFormat("yyyy-MM-dd hh:mm:ss");
 
         await farmaciaLogueada.save();
-
-        farmacia.nro_cuenta_drogueria =
-          farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
-        farmacia.nro_cuenta_laboratorio =
-          farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
       }
+
+      farmacia.nro_cuenta_drogueria =
+        farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
+      farmacia.nro_cuenta_laboratorio =
+        farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
       return farmacia;
     } catch (err) {
       console.log(err);
@@ -91,12 +89,10 @@ export default class FarmaciasController {
         data: request.body(),
       });
 
-      const destinatarios = request
-        .body()
-        .destinatario.split(";")
+      const destinatarios = request.body().destinatario.split(";");
 
       const t = await Mail.send((message) => {
-        message.from(Env.get("FARMAGEO_EMAIL"))
+        message.from(Env.get("FARMAGEO_EMAIL"));
 
         for (const destinatario of destinatarios) {
           message.to(destinatario.trim());
