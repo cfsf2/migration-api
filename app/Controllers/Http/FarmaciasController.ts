@@ -41,33 +41,42 @@ export default class FarmaciasController {
   public async mig_perfil(ctx: HttpContextContract) {
     const { request } = ctx;
     try {
-      const farmacia = await Farmacia.traerFarmacias({
-        usuario: request.params().usuario,
-      });
-      
-      const farmaciaLogueada = await Farmacia.query()
-        .where("id", farmacia.id)
-        .preload("nro_cuenta_drogueria", (query) => query.preload("drogueria"))
-        .preload("nro_cuenta_laboratorio", (query) =>
-          query.preload("laboratorio", (q) =>
-            q.preload("modalidad_entrega").preload("tipo_comunicacion")
+      const usuario = await Usuario.findByOrFail(
+        "usuario",
+        request.params().usuario
+      );
+      if (usuario.esfarmacia === "s") {
+        const farmacia = await Farmacia.traerFarmacias({
+          usuario: request.params().usuario,
+        });
+
+        const farmaciaLogueada = await Farmacia.query()
+          .where("id", farmacia.id)
+          .preload("nro_cuenta_drogueria", (query) =>
+            query.preload("drogueria")
           )
-        )
-        .firstOrFail();
+          .preload("nro_cuenta_laboratorio", (query) =>
+            query.preload("laboratorio", (q) =>
+              q.preload("modalidad_entrega").preload("tipo_comunicacion")
+            )
+          )
+          .firstOrFail();
 
-      if (request.url().includes("login") && farmacia.length !== 0) {
-        farmaciaLogueada.f_ultimo_acceso = DateTime.now()
-          .setLocale("es-Ar")
-          .toFormat("yyyy-MM-dd hh:mm:ss");
+        if (request.url().includes("login") && farmacia.length !== 0) {
+          farmaciaLogueada.f_ultimo_acceso = DateTime.now()
+            .setLocale("es-Ar")
+            .toFormat("yyyy-MM-dd hh:mm:ss");
 
-        await farmaciaLogueada.save();
+          await farmaciaLogueada.save();
+        }
+
+        farmacia.nro_cuenta_drogueria =
+          farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
+        farmacia.nro_cuenta_laboratorio =
+          farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
+        return farmacia;
       }
-
-      farmacia.nro_cuenta_drogueria =
-        farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
-      farmacia.nro_cuenta_laboratorio =
-        farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
-      return farmacia;
+      return usuario;
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler().handle(err, ctx);
