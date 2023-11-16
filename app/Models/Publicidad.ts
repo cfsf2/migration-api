@@ -90,15 +90,15 @@ export default class Publicidad extends BaseModel {
           .if(vigencia === "true", (query) => {
             //console.log("fecha de", hoy);
             query
-              .where("fecha_inicio", "<=", hoy)
-              .where("fecha_fin", ">=", hoy);
+              .where("fecha_inicio", "<=", hoy as any)
+              .where("fecha_fin", ">=", hoy as any);
           })
 
           .if(vigencia === "false", (query) =>
             query.andWhere((query) =>
               query
-                .orWhere("fecha_inicio", ">", hoy)
-                .orWhere("fecha_fin", "<", hoy)
+                .orWhere("fecha_inicio", ">", hoy as any)
+                .orWhere("fecha_fin", "<", hoy as any)
             )
           );
       });
@@ -140,8 +140,8 @@ export default class Publicidad extends BaseModel {
         .where("f.id", id_farmacia)
         .where("p.id_publicidad_tipo", 1)
         .where("p.habilitado", "s")
-        .where("p.fecha_inicio", "<", DateTime.now().toSQL())
-        .where("p.fecha_fin", ">", DateTime.now().toSQL())
+        .where("p.fecha_inicio", "<", DateTime.now().toSQL() as any)
+        .where("p.fecha_fin", ">", DateTime.now().toSQL() as any)
         .groupBy("p.id")
         .orderBy("fecha_alta", "desc");
 

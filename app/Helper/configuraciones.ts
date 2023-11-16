@@ -698,7 +698,7 @@ const aplicaWhere = async (
 
   if (tipo === "fecha_simple") {
     const fecha = DateTime.fromISO(valor).toSQL();
-    query.where(campo, operador ? operador : "=", fecha);
+    query.where(campo, operador ? operador : "=", fecha as any);
     return query;
   }
 
