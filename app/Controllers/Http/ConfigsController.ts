@@ -12,6 +12,7 @@ import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Menu from "App/Models/Menu";
+import { generarQR } from "App/Helper/generarQR";
 
 import fs from "fs";
 import path from "path";
@@ -542,7 +543,9 @@ export default class ConfigsController {
           !confArmada.datos[0][excelExport.id_a + "_excel_export_cabeceras"] &&
           !excelExport.excel_export_cabeceras
         ) {
-          csvCabeceras = csvData[0].split(separador).map((_d, i) => "Col " + (i + 1));
+          csvCabeceras = csvData[0]
+            .split(separador)
+            .map((_d, i) => "Col " + (i + 1));
         }
       }
 
@@ -554,7 +557,6 @@ export default class ConfigsController {
       );
 
       //separador de csv
-   
 
       // nombre de archivo
       let nombre =
@@ -587,6 +589,43 @@ export default class ConfigsController {
           nombre: nombre + ext,
         },
       });
+    } catch (err) {
+      console.log(err);
+      return new ExceptionHandler().handle(ctx, err);
+    }
+  }
+
+  public async generarQR(ctx: HttpContextContract) {
+    const { request: req, response } = ctx;
+
+    const { id, sup, inf, link } = req.body().data;
+
+    try {
+      const imagenBuffer = await generarQR(link, sup, inf);
+      // Crear un nombre de archivo único, por ejemplo, usando un timestamp
+      const nombreArchivo = `qr_${Date.now()}.png`;
+
+      // Ruta completa al archivo
+      const rutaCompleta = path.join(__dirname, nombreArchivo);
+
+      // Escribir el buffer en el archivo
+      fs.writeFileSync(rutaCompleta, imagenBuffer);
+
+      // Establecer las cabeceras de respuesta para la descarga
+      response.header(
+        "content-disposition",
+        `attachment; filename=QR_ID_${id}`
+      );
+      response.type("image/png");
+
+      // Enviar el archivo como respuesta
+      response.send(imagenBuffer);
+
+      // Eliminar el archivo después de enviarlo
+      fs.unlinkSync(rutaCompleta);
+      // Responde con el buffer de la imagen
+      
+      return ctx.response.type("image/png").send(imagenBuffer);
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(ctx, err);

@@ -6,6 +6,8 @@ Route.post("pantalla/:pantalla", "ConfigsController.ConfigPantalla");
 
 Route.put("config/:config", "ConfigsController.ABM_put");
 
+Route.post("generarQR", "ConfigsController.generarQR");
+
 Route.post("guardar", "ConfigsController.Update");
 
 Route.post("insertar", "ConfigsController.Insert");
