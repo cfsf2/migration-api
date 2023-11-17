@@ -7,9 +7,11 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
+
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
+import _Env from "@ioc:Adonis/Core/Env";
 
 import * as M from "./ModelIndex";
 import Datab from "@ioc:Adonis/Lucid/Database";
@@ -23,7 +25,8 @@ const Database = Datab;
 let Update = U;
 let Insertar = I;
 let Eliminar = D;
-
+let Env = _Env;
+Env;
 const verificarPermisos = async ({
   ctx,
   conf,
@@ -661,12 +664,21 @@ const aplicaWhere = async (
 
   const tipo = getAtributo({ atributo: "componente", conf });
 
-  if (campo?.includes(`if(`)) {
+  if (campo?.toLowerCase().includes(`if(`)) {
     if ((operador === "in" || operador === "IN") && valor) {
       query.whereRaw(`${campo} ${operador ?? "="} (${valor})`);
       return query;
     }
-    query.whereRaw(`${campo} ${operador ?? "="} ${valor}`);
+    if (operador === "like" && valor) {
+      const valores = valor.split(" ");
+      
+      valores.forEach((v) => {
+        const $like = "%".concat(v + "%");
+        query.whereRaw(`${campo} ${operador ?? "="} '${$like}'`);
+      });
+      return query
+    }
+    query.whereRaw(`${campo} ${operador ?? "="} '${valor}'`);
     return query;
   }
 
