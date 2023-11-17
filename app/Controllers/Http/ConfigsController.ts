@@ -12,8 +12,7 @@ import SConf from "App/Models/SConf";
 import { acciones, Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Menu from "App/Models/Menu";
-import { generarQR } from "App/Helper/generarQR";
-
+import generarQR from "App/Helper/qrjimp";
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
@@ -601,7 +600,12 @@ export default class ConfigsController {
     const { id, sup, inf, link } = req.body().data;
 
     try {
-      const imagenBuffer = await generarQR(link, sup, inf);
+      const imagenBuffer = await generarQR(
+        link,
+        sup.toUpperCase(),
+        inf.toUpperCase(),
+        "./public/Logo-pointer.png"
+      );
       // Crear un nombre de archivo único, por ejemplo, usando un timestamp
       const nombreArchivo = `qr_${Date.now()}.png`;
 
@@ -624,7 +628,7 @@ export default class ConfigsController {
       // Eliminar el archivo después de enviarlo
       fs.unlinkSync(rutaCompleta);
       // Responde con el buffer de la imagen
-      
+
       return ctx.response.type("image/png").send(imagenBuffer);
     } catch (err) {
       console.log(err);
