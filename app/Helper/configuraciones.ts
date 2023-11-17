@@ -661,6 +661,15 @@ const aplicaWhere = async (
 
   const tipo = getAtributo({ atributo: "componente", conf });
 
+  if (campo?.includes(`if(`)) {
+    if ((operador === "in" || operador === "IN") && valor) {
+      query.whereRaw(`${campo} ${operador ?? "="} (${valor})`);
+      return query;
+    }
+    query.whereRaw(`${campo} ${operador ?? "="} ${valor}`);
+    return query;
+  }
+
   if (operador === "like" && valor) {
     const valores = valor.split(" ");
 
