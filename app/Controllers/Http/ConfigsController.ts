@@ -604,7 +604,7 @@ export default class ConfigsController {
         link,
         sup.toUpperCase(),
         inf.toUpperCase(),
-        "./public/logocfsf2-1.png"
+        "./public/logocfsf2-1-v.png"
       );
       // Crear un nombre de archivo único, por ejemplo, usando un timestamp
       const nombreArchivo = `qr_${Date.now()}.png`;
