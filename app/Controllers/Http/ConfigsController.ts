@@ -598,7 +598,7 @@ export default class ConfigsController {
     const { request: req, response } = ctx;
 
     const { id, sup, inf, link, file_name } = req.body().data;
-
+    id;
     try {
       const imagenBuffer = await generarQR(
         link,
