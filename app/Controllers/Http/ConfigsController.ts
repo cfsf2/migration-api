@@ -597,7 +597,7 @@ export default class ConfigsController {
   public async generarQR(ctx: HttpContextContract) {
     const { request: req, response } = ctx;
 
-    const { id, sup, inf, link } = req.body().data;
+    const { id, sup, inf, link, file_name } = req.body().data;
 
     try {
       const imagenBuffer = await generarQR(
@@ -618,7 +618,7 @@ export default class ConfigsController {
       // Establecer las cabeceras de respuesta para la descarga
       response.header(
         "content-disposition",
-        `attachment; filename=QR_ID_${id}`
+        `attachment; filename=QR_${file_name}`
       );
       response.type("image/png");
 
