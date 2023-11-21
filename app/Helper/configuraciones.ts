@@ -218,6 +218,7 @@ const extraerElementos = ({
             const atributoNombre = val.atributo[0].nombre;
 
             if (val.evaluar === "s" && val.sql === "n") {
+             // console.log(val.valor)
               val.valor = eval(val.valor);
             }
 
