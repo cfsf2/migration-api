@@ -7,7 +7,6 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
-
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
@@ -218,7 +217,7 @@ const extraerElementos = ({
             const atributoNombre = val.atributo[0].nombre;
 
             if (val.evaluar === "s" && val.sql === "n") {
-             // console.log(val.valor)
+              // console.log(val.valor)
               val.valor = eval(val.valor);
             }
 
@@ -672,12 +671,12 @@ const aplicaWhere = async (
     }
     if (operador === "like" && valor) {
       const valores = valor.split(" ");
-      
+
       valores.forEach((v) => {
         const $like = "%".concat(v + "%");
         query.whereRaw(`${campo} ${operador ?? "="} '${$like}'`);
       });
-      return query
+      return query;
     }
     query.whereRaw(`${campo} ${operador ?? "="} '${valor}'`);
     return query;
@@ -793,10 +792,25 @@ const aplicarFiltros = (
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
     //aplica filtros por defecto
     const filtros_solicitados = Object.keys(queryFiltros);
-    const filtros_default = filtros_e.filter((filtro_d) => {
+    let filtros_default = filtros_e.filter((filtro_d) => {
       return !filtros_solicitados.includes(filtro_d.id_a);
     });
 
+    // Si no es el primer request ignora los valores por defecto de los filtros que no sean hidden.
+
+    if (!ctx.primer_request) {
+      filtros_default = filtros_default.filter((f) => {
+        const esHidden = f.valores?.filter((v) => {
+          if (v.atributo[0].nombre === "componente") {
+            return v.valor === "hidden";
+          }
+          return false;
+        });
+        return esHidden.length > 0;
+      });
+    }
+    //////////////////////////////
+    
     filtros_default.forEach((fd) => {
       let valordefault = fd?.valores.find((v) => {
         return v.atributo[0].nombre === "default";
@@ -816,7 +830,7 @@ const aplicarFiltros = (
       }
 
       if (!valordefault) return;
-
+      console.log(valordefault, "1323trgf");
       aplicaWhere(query, valordefault, fd, ctx);
     });
 

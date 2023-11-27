@@ -124,6 +124,7 @@ export default class ConfigsController {
   public async ConfigPantalla(ctx: HttpContextContract) {
     try {
       const { request, bouncer, auth } = ctx;
+      ctx.primer_request = true;
       const config = request.params().pantalla;
       const usuario = await auth.authenticate();
 
