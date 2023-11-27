@@ -25,6 +25,8 @@ export default class EventoParticipante extends Base {
   @column()
   public titular: string;
   @column()
+  public habilitado_sorteo: string;
+  @column()
   public nombre: string;
   @column()
   public documento: number;
