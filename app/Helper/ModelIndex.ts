@@ -105,6 +105,12 @@ import _MenuItemInstitucion from "App/Models/MenuItemInstitucion";
 import _MenuItemPermiso from "App/Models/MenuItemPermiso";
 import _MenuItemTipo from "App/Models/MenuItemTipo";
 
+import _EventoParticipante from "App/Models/EventoParticipante";
+import _Evento from "App/Models/Evento";
+
+export let EventoParticipante = _EventoParticipante;
+export let Evento = _Evento;
+
 export let Menu = _Menu;
 export let MenuItem = _MenuItem;
 export let MenuItemCpsc = _MenuItemCpsc;

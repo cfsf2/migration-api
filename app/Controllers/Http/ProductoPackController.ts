@@ -6,6 +6,7 @@ import {
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
+import ProductoCustom from "App/Models/ProductoCustom";
 import ProductoPack from "App/Models/ProductoPack";
 
 export default class ProductoPackController {
@@ -37,11 +38,39 @@ export default class ProductoPackController {
     }
   }
 
-  public async mig_producto({}: HttpContextContract) {
+  public async mig_producto({ request }: HttpContextContract) {
     try {
+      const { idProducto } = request.params();
       const prods = await ProductoPack.traerProductosPacks({
+        producto: idProducto,
         en_papelera: "n",
       });
+
+      return prods ?? [];
+    } catch (err) {
+      throw new ExceptionHandler();
+    }
+  }
+
+  public async producto({ request }: HttpContextContract) {
+    console.log("Holanda", request.params());
+    try {
+      const { idProducto } = request.params();
+      const prods = await ProductoPack.query()
+        .preload("categoria")
+        .preload("entidad")
+        .where("id", idProducto)
+        .andWhere("en_papelera", "n")
+        .andWhere("habilitado", "s");
+
+      if (prods.length === 0) {
+        const prodC = await ProductoCustom.query()
+          .where("id", idProducto)
+          .andWhere("en_papelera", "n")
+          .andWhere("habilitado", "s");
+
+        return prodC ?? [];
+      }
 
       return prods ?? [];
     } catch (err) {

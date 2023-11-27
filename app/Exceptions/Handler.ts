@@ -41,7 +41,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
           error?.code
         );
       }
-      console.log(Date(), "Error Handler:", await error);
+     // console.log(Date(), "Error Handler:", await error);
 
       if (error.sqlMessage) {
         errorKey = error.sqlMessage
@@ -80,6 +80,23 @@ export default class ExceptionHandler extends HttpExceptionHandler {
             : undefined,
           configuraciones: [],
           opciones: {},
+        });
+      }
+      if (error.code === "FALTA_PERIODO") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "El periodo no fue especificado";
+        return ctx.response.status(401).send({
+          error: { message, errorSql: error.sql },
+        });
+      }
+
+      if (error.code === "lab_inhabilitado") {
+        const message = errorMensajeTraducido
+          ? errorMensajeTraducido.detalle
+          : "Laboratorio no habilitado";
+        return ctx.response.status(306).send({
+          error: { message, errorSql: error.sql },
         });
       }
 
@@ -352,7 +369,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         // return { error: { message } };
       }
     }
-    return ctx.response.badRequest({
+    return ctx?.response.badRequest({
       error: {
         message:
           errorMensajeTraducido?.detalle ?? error?.sqlMessage ?? error?.message,

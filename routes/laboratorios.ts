@@ -10,3 +10,5 @@ Route.get("/laboratorios/:id", "LaboratoriosController.transfers");
 Route.post("/laboratorios", "LaboratoriosController.mig_add");
 
 Route.put("/laboratorios", "LaboratoriosController.mig_update");
+
+Route.get("/laboratorio_des/:id", "LaboratoriosController.lab_des");

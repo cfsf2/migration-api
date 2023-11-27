@@ -20,11 +20,17 @@ export default class TransferEmail extends Base {
   public enviado: string;
 
   public async Enviar() {
-    return Mail.send((message) => {
+    let htmlTransfer;
+    try {
+      htmlTransfer = await html_transfer(this.transfer);
+    } catch (err) {
+      console.log(err);
+    }
+    return Mail.send(async (message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
         .subject("Confirmacion de pedido de Transfer" + " " + this.transfer.id)
-        .html(html_transfer(this.transfer));
+        .html(htmlTransfer);
 
       this.emails
         .replace(/;/g, ",")
@@ -32,6 +38,7 @@ export default class TransferEmail extends Base {
         .split(",")
         .forEach((destinatario) => message.to(destinatario));
     });
+    return htmlTransfer;
   }
 
   @belongsTo(() => Transfer, {

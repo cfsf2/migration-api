@@ -1,5 +1,6 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Mail from "@ioc:Adonis/Addons/Mail";
+import Env from "@ioc:Adonis/Core/Env";
 import { generarHtml } from "../../Helper/email";
 
 import Farmacia from "../../Models/Farmacia";
@@ -8,7 +9,7 @@ import Usuario from "App/Models/Usuario";
 import Database from "@ioc:Adonis/Lucid/Database";
 import { Permiso } from "App/Helper/permisos";
 
-import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
+import { schema, validator } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
 import {
   FarmaciaDrogueria,
@@ -40,12 +41,14 @@ export default class FarmaciasController {
   public async mig_perfil(ctx: HttpContextContract) {
     const { request } = ctx;
     try {
-      const farmacia = await Farmacia.traerFarmacias({
-        usuario: request.params().usuario,
-      });
-
-      if (request.url().includes("login") && farmacia.length !== 0) {
-        //  console.log("actualizar ultimo acceso a ", farmacia.nombre);
+      const usuario = await Usuario.findByOrFail(
+        "usuario",
+        request.params().usuario
+      );
+      if (usuario.esfarmacia === "s") {
+        const farmacia = await Farmacia.traerFarmacias({
+          usuario: request.params().usuario,
+        });
 
         const farmaciaLogueada = await Farmacia.query()
           .where("id", farmacia.id)
@@ -53,22 +56,27 @@ export default class FarmaciasController {
             query.preload("drogueria")
           )
           .preload("nro_cuenta_laboratorio", (query) =>
-            query.preload("laboratorio")
+            query.preload("laboratorio", (q) =>
+              q.preload("modalidad_entrega").preload("tipo_comunicacion")
+            )
           )
           .firstOrFail();
 
-        farmaciaLogueada.f_ultimo_acceso = DateTime.now()
-          .setLocale("es-Ar")
-          .toFormat("yyyy-MM-dd hh:mm:ss");
+        if (request.url().includes("login") && farmacia.length !== 0) {
+          farmaciaLogueada.f_ultimo_acceso = DateTime.now()
+            .setLocale("es-Ar")
+            .toFormat("yyyy-MM-dd hh:mm:ss");
 
-        await farmaciaLogueada.save();
+          await farmaciaLogueada.save();
+        }
 
         farmacia.nro_cuenta_drogueria =
           farmaciaLogueada.$preloaded.nro_cuenta_drogueria;
         farmacia.nro_cuenta_laboratorio =
           farmaciaLogueada.$preloaded.nro_cuenta_laboratorio;
+        return farmacia;
       }
-      return farmacia;
+      return usuario;
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler().handle(err, ctx);
@@ -80,30 +88,37 @@ export default class FarmaciasController {
     return await Farmacia.traerFarmacias({ matricula });
   }
 
-  public async mig_mail({ request }: HttpContextContract) {
+  public async mig_mail(ctx: HttpContextContract) {
+    const { request } = ctx;
     try {
       await validator.validate({
         schema: schema.create({
-          destinatario: schema.string({ trim: true }, [rules.email()]),
+          //  destinatario: schema.string({ trim: true }, [rules.email()]),
         }),
         data: request.body(),
       });
 
-      Mail.send((message) => {
-        message
-          .from("farmageoapp@gmail.com")
-          .to(request.body().destinatario)
-          .subject(request.body().asunto)
-          .html(
-            generarHtml({
-              titulo: "Nueva solicitud de registro de farmacia",
-              // imagen: '',
-              texto: `${request.body().html}`,
-            })
-          );
+      const destinatarios = request.body().destinatario.split(";");
+
+      const t = await Mail.send((message) => {
+        message.from(Env.get("FARMAGEO_EMAIL"));
+
+        for (const destinatario of destinatarios) {
+          message.to(destinatario.trim());
+        }
+
+        message.subject(request.body().asunto).html(
+          generarHtml({
+            titulo: request.body().titulo,
+            // imagen: '',
+            texto: `${request.body().html}`,
+          })
+        );
       });
+      return t;
     } catch (err) {
-      throw new ExceptionHandler();
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
     }
   }
 

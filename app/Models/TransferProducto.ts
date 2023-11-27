@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import {
   BaseModel,
   column,
+  // HasMany,
+  // hasMany,
   hasManyThrough,
   HasManyThrough,
   hasOne,
@@ -18,6 +20,8 @@ import {
   guardarDatosAuditoria,
 } from "App/Helper/funciones";
 import Institucion from "./Institucion";
+import Producto from "./Producto";
+import Barextra from "./Barextra";
 
 export default class TransferProducto extends BaseModel {
   static async traerTrasferProducto({
@@ -256,6 +260,20 @@ export default class TransferProducto extends BaseModel {
     throughForeignKey: "id",
   })
   public instituciones: HasManyThrough<typeof Institucion>;
+
+  @hasOne(() => Producto, {
+    localKey: "codigo",
+    foreignKey: "cod_barras",
+  })
+  public producto: HasOne<typeof Producto>;
+
+  @hasManyThrough([() => Producto, () => Barextra], {
+    localKey: "codigo",
+    foreignKey: "cod_barras",
+    throughLocalKey: "nro_registro_prod",
+    throughForeignKey: "nro_registro",
+  })
+  public barextra_producto: HasManyThrough<typeof Producto>;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

@@ -25,7 +25,8 @@ declare module "@ioc:Adonis/Core/HttpContext" {
       buscarPadreData: (id_a: string) => string | undefined;
       getIDA: (id: number, estructura?: SConf) => string | undefined;
     };
-
+    globales: {};
+    primer_request: boolean;
     usuario: any;
   }
 }

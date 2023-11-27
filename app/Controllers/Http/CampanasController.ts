@@ -62,10 +62,13 @@ export default class CampanasController {
   public async mig_nuevoReq(ctx: HttpContextContract) {
     const { request, response } = ctx;
     try {
+   
       const requerimientoSchema = schema.create({
         id_campana: schema.number(),
-        id_usuario: schema.number.nullable(),
-        id_farmacia: schema.number.nullable(),
+        id_usuario: schema.number.nullableAndOptional(),
+        id_farmacia: schema.number.nullableAndOptional(),
+        nombre: schema.string.nullableAndOptional(),
+        documento: schema.number.nullableAndOptional(),
         celular: schema.string({}, [rules.minLength(10)]),
       });
 
@@ -91,6 +94,7 @@ export default class CampanasController {
       });
     } catch (error) {
       console.log(error);
+      console.log(error.messages.errors)
       throw new ExceptionHandler().handle(error, ctx);
     }
   }

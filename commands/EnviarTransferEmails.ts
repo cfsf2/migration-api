@@ -47,8 +47,12 @@ export default class EnviarTransferEmails extends BaseCommand {
     await Promise.all(
       transferEmailPendiente.map(async (tep) => {
         try {
-          const emailRes = await tep.Enviar();
-
+          let emailRes;
+          try {
+            emailRes = await tep.Enviar();
+          } catch (err) {
+            console.log(err);
+          }
           tep.merge({
             enviado: "s",
             emails: emailRes.envelope.to.toString(),

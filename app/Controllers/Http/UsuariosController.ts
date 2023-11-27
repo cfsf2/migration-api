@@ -8,6 +8,8 @@ import UsuarioPerfil from "App/Models/UsuarioPerfil";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Database from "@ioc:Adonis/Lucid/Database";
+import EventoParticipante from "App/Models/EventoParticipante";
 
 export default class UsuariosController {
   public async index({ bouncer }: HttpContextContract) {
@@ -248,5 +250,179 @@ export default class UsuariosController {
     } catch (err) {
       throw new ExceptionHandler();
     }
+  }
+
+  public async usuario_invitado(ctx: HttpContextContract) {
+    const { usuario } = ctx.request.body();
+    if (usuario.matricula && usuario.cuit) {
+      try {
+        const usuario_invitado_query = EventoParticipante.query()
+          .where("matricula", usuario.matricula)
+          .andWhere("documento", "like", usuario.cuit)
+          .preload("invitados")
+          .first();
+
+        const usuario_invitado = await usuario_invitado_query;
+        if (!usuario_invitado) {
+          throw { code: "Usuario no encontrado. Verifique sus datos." };
+        }
+        return usuario_invitado;
+      } catch (err) {
+        console.log(err);
+        return ctx.response.status(440).send({ error: err, message: err.code });
+      }
+    }
+    if (usuario.token) {
+      const evento_participante = await EventoParticipante.query()
+        .preload("evento")
+        .where("token", usuario.token)
+        .first();
+
+      if (!evento_participante) return {};
+
+      const usuario_invitado_query = EventoParticipante.query()
+        .where("id", evento_participante.id)
+        .preload("invitados")
+        .first();
+      const usuario_invitado = await usuario_invitado_query;
+
+      return usuario_invitado;
+    }
+    if (!!usuario.confirmo_asistencia && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .preload("evento")
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        const invitados = await EventoParticipante.query()
+          .preload("evento")
+          .where("id_titular", evento_participante.id);
+
+        await Promise.all(
+          invitados.map(async (i) => {
+            return await i
+              .merge({ confirmo_asistencia: usuario.confirmo_asistencia })
+              .save();
+          })
+        );
+
+        await evento_participante
+          .merge({
+            confirmo_asistencia: usuario.confirmo_asistencia,
+          })
+          .save();
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
+    if (!!usuario.telefono && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .preload("evento")
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        // const invitados = await EventoParticipante.query()
+        //   .preload("evento")
+        //   .where("id_titular", evento_participante.id);
+
+        const patron = /^\d{10}$/;
+        const esCelular = patron.test(usuario.telefono);
+
+        if (!esCelular) {
+          throw { code: "No es un numero valido" };
+        }
+
+        // await Promise.all(
+        //   invitados.map(async (i) => {
+        //     return await i.merge({ telefono: Number(usuario.telefono) }).save();
+        //   })
+        // );
+        await evento_participante
+          .merge({
+            telefono: Number(usuario.telefono),
+          })
+          .save();
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return ctx.response
+          .status(441)
+          .send({ error: err, message: err.code ?? err.sqlMessage });
+      }
+    }
+    if (!!usuario.id_evento_forma_pago && !!usuario.id) {
+      try {
+        const evento_participante = await EventoParticipante.query()
+          .preload("evento")
+          .where("id", usuario.id)
+          .firstOrFail();
+
+        await evento_participante
+          .merge({ id_evento_forma_pago: usuario.id_evento_forma_pago })
+          .save();
+
+        return evento_participante;
+      } catch (err) {
+        console.log(err);
+        return err;
+      }
+    }
+  }
+
+  public async usuario_invitado_add(ctx: HttpContextContract) {
+    const { usuario, titular } = ctx.request.body();
+    const _titular = await EventoParticipante.query()
+      .where("id", titular.id)
+      .andWhere("titular", "s")
+      .preload("invitados")
+      .firstOrFail();
+    const nuevoInvitado = new EventoParticipante();
+
+    if (!_titular) return { error: "no hay titular" };
+
+    nuevoInvitado.merge({
+      nombre: usuario.nombre,
+      documento: usuario.documento,
+      token: usuario.token,
+      id_farmacia: _titular.id_farmacia,
+      id_titular: _titular.id,
+      id_evento: _titular.id_evento,
+      id_evento_premio: _titular.id_evento_premio,
+      id_evento_forma_pago: _titular.id_evento_forma_pago,
+      confirmo_asistencia: _titular.confirmo_asistencia,
+      titular: "n",
+      bonificada: "n",
+      menor: usuario.menor,
+      mesa: _titular.mesa,
+    });
+    await nuevoInvitado.save();
+    return nuevoInvitado;
+  }
+
+  public async usuario_invitado_delete(ctx: HttpContextContract) {
+    const { usuario } = ctx.request.body();
+
+    const ep = await EventoParticipante.findByOrFail("token", usuario.token);
+
+    if (ep.pagado === "s") return "Ya esta pago, no es posible eliminar";
+    await ep.delete();
+
+    return "eliminado";
+  }
+
+  public async evento(_ctx: HttpContextContract) {
+    const evento = await Database.query()
+      .from("tbl_evento")
+      .where("id", 1)
+      .firstOrFail();
+    const formaPago = await Database.query().from("tbl_evento_forma_pago");
+
+    return { evento, formaPago };
   }
 }

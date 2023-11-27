@@ -39,7 +39,7 @@ export default class Repoo extends BaseModel {
       const repos = await Repoo.query();
       const repo = repos.pop();
       repo?.merge({
-        oossInactivas: JSON.stringify(oossInactivas),
+        oossInactivas: oossInactivas ? Array.isArray(oossInactivas) ? JSON.stringify(oossInactivas) : JSON.stringify([oossInactivas]) : JSON.stringify([]),
         alert: alert,
       });
       guardarDatosAuditoria({

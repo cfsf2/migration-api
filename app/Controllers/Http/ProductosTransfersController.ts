@@ -1,4 +1,5 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Database from "@ioc:Adonis/Lucid/Database";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
@@ -51,22 +52,32 @@ export default class ProductosTransfersController {
       const { instituciones } = request.qs();
       const labid = request.params().id;
 
-      return await TransferProducto.query()
-        .preload("instituciones")
-        .select("tbl_transfer_producto.*")
-        .where("en_papelera", "n")
-        .andWhere("habilitado", "s")
-        .andWhere("id_laboratorio", labid)
-        .leftJoin(
-          "tbl_transfer_producto_institucion",
-          "tbl_transfer_producto.id",
-          "tbl_transfer_producto_institucion.id_transfer_producto"
-        )
-        .whereIn(
-          "tbl_transfer_producto_institucion.id_institucion",
-          instituciones
-        )
-        .groupBy("tbl_transfer_producto.id");
+      const tpqd = Database.rawQuery(
+        `select tbl_transfer_producto.*, 
+          IF(tbl_laboratorio.calcular_precio = 's',ROUND( 
+              IFNULL(
+                IFNULL(productos.precio, p.precio)/100
+              , tbl_transfer_producto.precio),2)
+            ,tbl_transfer_producto.precio
+          ) as precio,
+          IF(tbl_laboratorio.calcular_precio = 's',
+            IFNULL(
+                IFNULL(productos.presentacion, p.presentacion)
+                ,tbl_transfer_producto.presentacion)
+            ,tbl_transfer_producto.presentacion
+          ) as presentacion 
+        from tbl_transfer_producto 
+        left join tbl_laboratorio on tbl_laboratorio.id = tbl_transfer_producto.id_laboratorio
+        left join tbl_transfer_producto_institucion on tbl_transfer_producto.id = tbl_transfer_producto_institucion.id_transfer_producto 
+        left join productos on productos.cod_barras = tbl_transfer_producto.codigo 
+        left join barextra on barextra.cod_barras = tbl_transfer_producto.codigo left join productos as p on barextra.nro_registro_prod = p.nro_registro 
+        where en_papelera = "n" and tbl_transfer_producto.habilitado = "s" 
+        and tbl_transfer_producto.id_laboratorio = "${labid}" 
+        and tbl_transfer_producto_institucion.id_institucion in (${instituciones.toString()}) group by tbl_transfer_producto.id`
+      );
+      const tpd = await tpqd;
+      // console.log(tpqd.toQuery());
+      return tpd[0];
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(err, ctx);

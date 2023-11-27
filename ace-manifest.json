@@ -43,6 +43,18 @@
       "aliases": [],
       "flags": []
     },
+    "test:transfer_email": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/TestTransferEmail",
+      "commandName": "test:transfer_email",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "dump:rcfile": {
       "settings": {},
       "commandPath": "@adonisjs/core/build/commands/DumpRc",

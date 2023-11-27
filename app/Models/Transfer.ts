@@ -31,6 +31,7 @@ import Apm from "./Apm";
 
 import TransferEmail from "./TransferEmail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
+import { FarmaciaDrogueria } from "App/Helper/ModelIndex";
 
 export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";
@@ -167,7 +168,7 @@ export default class Transfer extends BaseModel {
       await nuevoTransfer.load("farmacia" as any);
       await nuevoTransfer.load("laboratorio" as any);
       await nuevoTransfer.load("drogueria" as any);
-
+      const htmlTransfer = await html_transfer(nuevoTransfer);
       Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
@@ -177,7 +178,7 @@ export default class Transfer extends BaseModel {
           .subject(
             "Confirmacion de pedido de Transfer" + " " + nuevoTransfer.id
           )
-          .html(html_transfer(nuevoTransfer));
+          .html(htmlTransfer);
       });
     } catch (err) {
       console.log(err);
@@ -307,7 +308,6 @@ export default class Transfer extends BaseModel {
             ? "tbl_laboratorio"
             : "tbl_drogueria",
         id_usuario_creacion: usuario.id, // cambiar por dato de sesion
-
         envia_email_transfer_auto: laboratorio.envia_email_transfer_auto,
         monto_minimo_transfer: laboratorio.monto_minimo_transfer ?? 0,
         unidades_minimas_transfer: laboratorio.unidades_minimas_transfer ?? 0,
@@ -364,6 +364,91 @@ export default class Transfer extends BaseModel {
     }
   }
 
+  public async calcularPrecio() {
+    // const laboratorio = await Laboratorio.query()
+    //   .where("id", this.id_laboratorio)
+    //   .firstOrFail();
+    const drogueria = await Drogueria.query()
+      .where("id", this.id_drogueria)
+      .firstOrFail();
+    const farmacia = await Farmacia.query()
+      .where("id", this.id_farmacia)
+      .firstOrFail();
+    const farmDrogueria = await FarmaciaDrogueria.query()
+      .where("id_drogueria", drogueria.id)
+      .where("id_farmacia", farmacia.id)
+      .first();
+    const tpps = this.ttp;
+    let total = 0;
+    let ahorro = 0;
+
+    const _pvp = (tp: TransferProducto) => {
+      function obtenerPrecio(valor) {
+        if (typeof valor === "number" && !isNaN(valor)) {
+          return valor;
+        } else if (
+          tp.producto &&
+          typeof tp.producto.precioDividido === "number" &&
+          !isNaN(tp.producto.precioDividido)
+        ) {
+          return tp.producto.precioDividido;
+        } else if (
+          tp.barextra_producto &&
+          tp.barextra_producto[0] &&
+          typeof tp.barextra_producto[0].precioDividido === "number" &&
+          !isNaN(tp.barextra_producto[0].precioDividido)
+        ) {
+          return tp.barextra_producto[0].precioDividido;
+        } else if (
+          tp.precio &&
+          typeof tp.precio === "number" &&
+          !isNaN(tp.precio)
+        ) {
+          return tp.precio;
+        } else {
+          return 0;
+        }
+      }
+      return obtenerPrecio(tp);
+    };
+
+    const productos = await Promise.all(
+      tpps.map(async (p) => {
+        const transfer_producto = await TransferProducto.query()
+          .where("id", p.id_transfer_producto)
+          .preload("producto")
+          .preload("barextra_producto")
+          .firstOrFail();
+        return { transfer_producto, cantidad: p.cantidad };
+      })
+    );
+
+    total = productos.reduce((accumulator, p) => {
+      const cantidad = p.cantidad;
+      const descuento = p.transfer_producto.descuento_porcentaje / 100;
+      const pvp = _pvp(p.transfer_producto);
+      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
+
+      return accumulator + precioFinal * cantidad;
+    }, 0);
+
+    ahorro = productos.reduce((accumulator, p) => {
+      const cantidad = p.cantidad;
+      const descuento = p.transfer_producto.descuento_porcentaje / 100;
+      const pvp = _pvp(p.transfer_producto);
+      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const ahorropvp = pvp * (1 - descuentoDrogueria) * descuento;
+
+      return accumulator + ahorropvp * cantidad;
+    }, 0);
+
+    return {
+      total: Number(total.toFixed(2)),
+      ahorro: Number(ahorro.toFixed(2)),
+    };
+  }
+
   public async generarColaEmail(ctx: HttpContextContract) {
     const nuevoEmail = new TransferEmail();
     guardarDatosAuditoria({
@@ -402,6 +487,20 @@ export default class Transfer extends BaseModel {
     return await nuevoEmail.save();
   }
 
+  static get computed() {
+    return ["total", "ahorro"];
+  }
+
+  async getAhorro() {
+    const { ahorro } = await this.calcularPrecio();
+    return ahorro;
+  }
+
+  async getTotal() {
+    const { total } = await this.calcularPrecio();
+    return total;
+  }
+
   public async generarColaEmailUnico(ctx: HttpContextContract, email) {
     const nuevoEmail = new TransferEmail();
 
@@ -431,19 +530,21 @@ export default class Transfer extends BaseModel {
       .firstOrFail();
 
     if (laboratorio.envia_email_transfer_auto !== "s") {
-      return Mail.send((message) => {
+      const htmlTransfer = await html_transfer(this);
+      return Mail.send(async (message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(this.farmacia.email as string)
           .to(process.env.TRANSFER_EMAIL as string)
           .to(process.env.TRANSFER_EMAIL2 as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-          .html(html_transfer(this));
+          .html(htmlTransfer);
       });
     }
 
     let destinatarioProveedor = await this.getDestinatario();
 
+    const htmlTransfer = await html_transfer(this);
     const mail = await Mail.send((message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
@@ -452,7 +553,7 @@ export default class Transfer extends BaseModel {
         .to(process.env.TRANSFER_EMAIL as string)
         .to(process.env.TRANSFER_EMAIL2 as string)
         .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-        .html(html_transfer(this));
+        .html(htmlTransfer);
     });
 
     return mail;
@@ -540,13 +641,13 @@ export default class Transfer extends BaseModel {
       await this.load("farmacia" as any);
       await this.load("laboratorio" as any);
       await this.load("drogueria" as any);
-
+      const htmlTransfer = await html_transfer(this);
       return await Mail.send((message) => {
         message
           .from(process.env.SMTP_USERNAME as string)
           .to(email as string)
           .subject("Confirmacion de pedido de Transfer" + " " + this.id)
-          .html(html_transfer(this));
+          .html(htmlTransfer);
       });
     } catch (err) {
       console.log(err);
@@ -616,6 +717,12 @@ export default class Transfer extends BaseModel {
 
   @column()
   public monto_minimo_transfer: number;
+
+  @column()
+  public total: number;
+
+  @column()
+  public ahorro: number;
 
   @column()
   public unidades_minimas_transfer: number;

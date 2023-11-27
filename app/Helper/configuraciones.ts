@@ -10,6 +10,7 @@ import { Permiso } from "./permisos";
 import U from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
+import _Env from "@ioc:Adonis/Core/Env";
 
 import * as M from "./ModelIndex";
 import Datab from "@ioc:Adonis/Lucid/Database";
@@ -23,7 +24,8 @@ const Database = Datab;
 let Update = U;
 let Insertar = I;
 let Eliminar = D;
-
+let Env = _Env;
+Env;
 const verificarPermisos = async ({
   ctx,
   conf,
@@ -215,6 +217,7 @@ const extraerElementos = ({
             const atributoNombre = val.atributo[0].nombre;
 
             if (val.evaluar === "s" && val.sql === "n") {
+              // console.log(val.valor)
               val.valor = eval(val.valor);
             }
 
@@ -514,6 +517,12 @@ const getGroupBy = ({
   usuario;
   let groupsBy: gp[] = [];
   const confs = columnas.concat(conf);
+
+  let gp: gp = { groupBy: "", having: "" };
+  gp.groupBy = getAtributoById({ id: 23, conf: conf });
+  gp.having = getAtributoById({ id: 24, conf: conf }) as string | undefined;
+  groupsBy.push(gp);
+
   confs?.forEach((confi) => {
     let gp: gp = { groupBy: "", having: "" };
     gp.groupBy = getAtributoById({ id: 23, conf: confi });
@@ -655,6 +664,24 @@ const aplicaWhere = async (
 
   const tipo = getAtributo({ atributo: "componente", conf });
 
+  if (campo?.toLowerCase().includes(`if(`)) {
+    if ((operador === "in" || operador === "IN") && valor) {
+      query.whereRaw(`${campo} ${operador ?? "="} (${valor})`);
+      return query;
+    }
+    if (operador === "like" && valor) {
+      const valores = valor.split(" ");
+
+      valores.forEach((v) => {
+        const $like = "%".concat(v + "%");
+        query.whereRaw(`${campo} ${operador ?? "="} '${$like}'`);
+      });
+      return query;
+    }
+    query.whereRaw(`${campo} ${operador ?? "="} '${valor}'`);
+    return query;
+  }
+
   if (operador === "like" && valor) {
     const valores = valor.split(" ");
 
@@ -673,27 +700,26 @@ const aplicaWhere = async (
   if (operador === "fecha" || operador === "fecha_hora") {
     const fechas = JSON.parse(valor);
 
-    if (fechas.length !== 2) return;
-
     const desde = DateTime.fromISO(fechas[0]).toSQL();
     const hasta = DateTime.fromISO(fechas[1])
-      .set(operador === "fecha_hora" ? {} : { hour: 23, minute: 59 })
+      .set(
+        operador === "fecha_hora" ? {} : { hour: 23, minute: 59, second: 59 }
+      )
       .toSQL();
 
-    query.where(campo, ">=", desde).andWhere(campo, "<=", hasta);
-    //  .orderBy(campo, "desc");
-    //  .whereNotNull(campo);
+    if (desde && desde !== "Invalid DateTime") {
+      query.whereRaw(`${campo} >= '${desde}'`);
+    }
+    if (hasta && hasta !== "Invalid DateTime") {
+      query.whereRaw(`${campo} <= '${hasta}'`);
+    }
 
     return query;
   }
 
   if (tipo === "fecha_simple") {
-    // const fechas = valor.split(",");
-
     const fecha = DateTime.fromISO(valor).toSQL();
-    query.where(campo, operador ? operador : "=", fecha);
-    //.orderBy(campo, "desc");
-    //.whereNotNull(campo);
+    query.where(campo, operador ? operador : "=", fecha as any);
     return query;
   }
 
@@ -702,8 +728,26 @@ const aplicaWhere = async (
       .find((v) => v.atributo[0].nombre === "radio_where")
       ?.valor.split("|");
 
+    const radio_having_a = conf.valores
+      .find((v) => v.atributo[0].nombre === "having")
+      ?.valor.split("|");
+
     const radio_where_o = Object.assign({}, radio_where_a);
-    return query.whereRaw(radio_where_o[Number(valor)].trim());
+    const radio_having_o = Object.assign({}, radio_having_a);
+
+    if (
+      radio_where_o[Number(valor)] &&
+      radio_where_o[Number(valor)].trim() != ""
+    ) {
+      query.whereRaw(radio_where_o[Number(valor)].trim());
+    }
+    if (
+      radio_having_o[Number(valor)] &&
+      radio_having_o[Number(valor)]?.trim() != ""
+    ) {
+      query.havingRaw(radio_having_o[Number(valor)].trim());
+    }
+    return query;
   }
 
   if (operador === "raw") {
@@ -748,10 +792,25 @@ const aplicarFiltros = (
   if (typeof queryFiltros !== "undefined" && typeof filtros_e !== "undefined") {
     //aplica filtros por defecto
     const filtros_solicitados = Object.keys(queryFiltros);
-    const filtros_default = filtros_e.filter((filtro_d) => {
+    let filtros_default = filtros_e.filter((filtro_d) => {
       return !filtros_solicitados.includes(filtro_d.id_a);
     });
 
+    // Si no es el primer request ignora los valores por defecto de los filtros que no sean hidden.
+
+    if (!ctx.primer_request) {
+      filtros_default = filtros_default.filter((f) => {
+        const esHidden = f.valores?.filter((v) => {
+          if (v.atributo[0].nombre === "componente") {
+            return v.valor === "hidden";
+          }
+          return false;
+        });
+        return esHidden.length > 0;
+      });
+    }
+    //////////////////////////////
+    
     filtros_default.forEach((fd) => {
       let valordefault = fd?.valores.find((v) => {
         return v.atributo[0].nombre === "default";
@@ -771,7 +830,7 @@ const aplicarFiltros = (
       }
 
       if (!valordefault) return;
-
+      console.log(valordefault, "1323trgf");
       aplicaWhere(query, valordefault, fd, ctx);
     });
 
@@ -809,7 +868,8 @@ export class ConfBuilder {
     queryFiltros: any,
     id: number,
     usuario?: Usuario,
-    solo_conf?: string
+    solo_conf?: string,
+    excel?: boolean
   ) => {
     try {
       let opciones = this.setOpciones(ctx, listado, conf, id);
@@ -879,6 +939,15 @@ export class ConfBuilder {
         bouncer,
         tipoId: 8,
       });
+
+      if (excel) {
+        // si solo tiene que calcular excel busca unicamente la columna de configuracion de excel
+        columnas = [
+          columnas.find((c) =>
+            c.valores.find((v) => v.atributo[0].nombre === "excel_export")
+          ),
+        ];
+      }
 
       if (
         getAtributo({
@@ -1049,7 +1118,8 @@ export class ConfBuilder {
     id: number,
     conf: SConf,
     bouncer: any,
-    usuario?: Usuario
+    usuario?: Usuario,
+    excel?: boolean
   ): Promise<vista> => {
     if (!(await bouncer.allows("AccesoConf", vista))) return vistaVacia;
 
@@ -1068,6 +1138,14 @@ export class ConfBuilder {
     if (opciones.display_container === "n") return vistaFinal;
 
     let columnas = await verificarPermisosHijos({ ctx, conf: vista, bouncer });
+    if (excel) {
+      // si solo tiene que calcular excel busca unicamente la columna de configuracion de excel
+      columnas = [
+        columnas.find((c) =>
+          c.valores.find((v) => v.atributo[0].nombre === "excel_export")
+        ) as SConf,
+      ];
+    }
     const campos = getSelect(ctx, [columnas], 7, usuario);
 
     try {
@@ -1437,7 +1515,7 @@ export class ConfBuilder {
       if (groupsBy.length > 0) {
         groupsBy.forEach(({ groupBy, having }) => {
           query.groupBy(groupBy);
-          if (having) query.having(having as unknown as RawQuery); // ??
+          if (having) query.havingRaw(having as unknown as RawQuery); // ??
         });
       }
       // aplicar order del listado
