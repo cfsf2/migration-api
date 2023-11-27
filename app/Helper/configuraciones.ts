@@ -363,6 +363,14 @@ const extraerElementos = ({
                 configuracionDeUsuario[atributoNombre]);
             }
             item[atributoNombre] = val.valor;
+            // enviar el valor de formulario como default cuando no sea el primer request
+            if (
+              atributoNombre === "default" &&
+              !ctx.primer_request &&
+              c.tipo.id === 3
+            ) {
+              item["default"] = ctx.$_filtros.solicitados[c.id_a];
+            }
           })
         );
 
