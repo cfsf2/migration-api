@@ -85,6 +85,9 @@ export default class Laboratorio extends BaseModel {
 
   @column()
   public calcular_precio: string;
+  
+  @column()
+  public calcular_porcentaje_descuento: string;
 
   @column()
   public id_usuario: number;

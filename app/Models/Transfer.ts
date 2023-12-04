@@ -365,9 +365,9 @@ export default class Transfer extends BaseModel {
   }
 
   public async calcularPrecio() {
-    // const laboratorio = await Laboratorio.query()
-    //   .where("id", this.id_laboratorio)
-    //   .firstOrFail();
+    const laboratorio = await Laboratorio.query()
+      .where("id", this.id_laboratorio)
+      .firstOrFail();
     const drogueria = await Drogueria.query()
       .where("id", this.id_drogueria)
       .firstOrFail();
@@ -381,6 +381,9 @@ export default class Transfer extends BaseModel {
     const tpps = this.ttp;
     let total = 0;
     let ahorro = 0;
+
+    const usar_descuento_drogueria =
+      laboratorio.calcular_porcentaje_descuento === "s";
 
     const _pvp = (tp: TransferProducto) => {
       function obtenerPrecio(valor) {
@@ -427,7 +430,9 @@ export default class Transfer extends BaseModel {
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = _pvp(p.transfer_producto);
-      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const descuentoDrogueria = usar_descuento_drogueria
+        ? (farmDrogueria?.descuento ?? 31.03) / 100
+        : 0;
       const precioFinal = pvp * (1 - descuentoDrogueria) * (1 - descuento);
 
       return accumulator + precioFinal * cantidad;
@@ -437,7 +442,9 @@ export default class Transfer extends BaseModel {
       const cantidad = p.cantidad;
       const descuento = p.transfer_producto.descuento_porcentaje / 100;
       const pvp = _pvp(p.transfer_producto);
-      const descuentoDrogueria = (farmDrogueria?.descuento ?? 31.03) / 100;
+      const descuentoDrogueria = usar_descuento_drogueria
+        ? (farmDrogueria?.descuento ?? 31.03) / 100
+        : 0;
       const ahorropvp = pvp * (1 - descuentoDrogueria) * descuento;
 
       return accumulator + ahorropvp * cantidad;

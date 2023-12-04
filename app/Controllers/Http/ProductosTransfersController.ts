@@ -106,7 +106,6 @@ export default class ProductosTransfersController {
     try {
       await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_CREATE_PROD);
       const usuario = await auth.authenticate();
-
       const pf = await TransferProducto.agregar(request.body(), usuario);
       return ctx.response.status(209).send(pf);
     } catch (err) {

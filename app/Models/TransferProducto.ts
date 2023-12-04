@@ -87,7 +87,6 @@ export default class TransferProducto extends BaseModel {
     const instituciones = data.instituciones;
 
     delete data.instituciones;
-
     try {
       nuevoPF.merge({
         id_laboratorio: data.laboratorioid,
@@ -96,9 +95,9 @@ export default class TransferProducto extends BaseModel {
         presentacion: data.presentacion,
         imagen: data.imagen,
         cantidad_minima: data.cantidad_minima,
-        descuento_porcentaje: data.descuento_porcentaje,
+        descuento_porcentaje: data.descuento_porcentaje.replace(/[^0-9.,]/g, ''),
         precio: data.precio,
-        codigo: data.codigo,
+        codigo: data.codigo.substring(0, 15),
       });
       guardarDatosAuditoria({
         objeto: nuevoPF,
@@ -118,7 +117,7 @@ export default class TransferProducto extends BaseModel {
       });
       return nuevoPF;
     } catch (err) {
-      console.log(err);
+      console.log(err, "TransferProducto.agregar");
       return err;
     }
   }
@@ -138,9 +137,10 @@ export default class TransferProducto extends BaseModel {
       presentacion: data.productosTransfers.presentacion,
       imagen: data.productosTransfers.imagen,
       cantidad_minima: data.productosTransfers.cantidad_minima,
-      descuento_porcentaje: data.productosTransfers.descuento_porcentaje,
+      descuento_porcentaje:
+        data.productosTransfers.descuento_porcentaje.replace(/[^0-9.,]/g, ''),
       precio: data.productosTransfers.precio,
-      codigo: data.productosTransfers.codigo,
+      codigo: data.productosTransfers.codigo.substring(0, 15),
       en_papelera:
         typeof data.productosTransfers.en_papelera !== "undefined"
           ? data.productosTransfers.en_papelera
@@ -184,7 +184,7 @@ export default class TransferProducto extends BaseModel {
       }
       return;
     } catch (err) {
-      console.log(err);
+      console.log(err, "TransferProducto.actualizar");
       return err;
     }
   }
