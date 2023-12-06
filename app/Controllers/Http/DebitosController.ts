@@ -53,9 +53,11 @@ export default class DebitosController {
 
       // SOURCE FTP CONNECTION SETTINGS
       var srcFTP = {
-        host: "200.69.207.130",
-        user: "col2dasfeC",
-        password: "Hg83722$e",
+        // host: "200.69.207.130",
+        // user: "col2dasfeC",
+        host: "intercambio.observer.com.ar",
+        user: "col2dasfe",
+        password: "95wHKJ8a5c",
         port: 21,
         connTimeout: 60000,
         pasvTimeout: 60000,
