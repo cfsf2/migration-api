@@ -16,6 +16,19 @@ export default class TransfersController {
     }
   }
 
+  public async verificartodos(ctx: HttpContextContract) {
+    const data = ctx.request.body().data;
+
+    await Promise.all(
+      data.map(async (t) => {
+        const transfer = await Transfer.findOrFail(t[0]);
+        transfer.merge({ envio_email_verificado: "s" });
+        await transfer.save();
+      })
+    );
+    return data;
+  }
+
   public async mig_byFarmacia(ctx: HttpContextContract) {
     const { request, bouncer } = ctx;
     try {

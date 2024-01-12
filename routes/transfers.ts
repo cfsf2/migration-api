@@ -8,6 +8,8 @@ Route.get("/transfers/farmacia/:id", "TransfersController.mig_byFarmacia");
 
 Route.post("/transfers", "TransfersController.add");
 
+Route.post("/transfers/verificartodos", "TransfersController.verificartodos");
+
 Route.post("/transfers/enviarTransfer", "TransfersController.sendTransfer");
 
 Route.post(
