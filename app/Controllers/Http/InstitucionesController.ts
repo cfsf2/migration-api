@@ -3,6 +3,7 @@ import ExceptionHandler from "App/Exceptions/Handler";
 import { guardarDatosAuditoria, AccionCRUD } from "App/Helper/funciones";
 import { Permiso } from "App/Helper/permisos";
 import Institucion from "App/Models/Institucion";
+import Usuario from "App/Models/Usuario";
 
 export default class InstitucionesController {
   public async mig_instituciones(ctx: HttpContextContract) {
@@ -14,32 +15,60 @@ export default class InstitucionesController {
         Permiso.INSTITUCIONES_SEARCH,
       ]);
 
+      // const instituciones = await Institucion.query()
+      //   .select("tbl_institucion.id as _id", "tbl_institucion.*")
+      //   .preload("institucion_madre");
+
       const {
         limit = 1000,
         search,
         habilitada: habilitado,
         id_institucion_madre,
+        usuario,
       } = request.qs();
+
+      if (usuario) {
+        const _usuario = await Usuario.query()
+          .where("tbl_usuario.id", ctx.usuario.id)
+          .preload("instituciones", async (q) => {
+            await q
+              .where("habilitado", "s")
+              .if(search, (query) => {
+                query.where("nombre", "LIKE", `${search}%`);
+              })
+              .if(habilitado === "true" || habilitado === "false", (query) => {
+                const condicional = habilitado === "true" ? "s" : "n";
+                query.where("habilitado", condicional);
+              })
+              .if(id_institucion_madre, (query) => {
+                query.where("id_institucion_madre", id_institucion_madre);
+              })
+              .if(limit, (query) => {
+                query.limit(limit);
+              });
+          })
+          .firstOrFail();
+
+        return _usuario.instituciones;
+      }
 
       const instituciones = await Institucion.query()
         .select("tbl_institucion.id as _id", "tbl_institucion.*")
-        .preload("institucion_madre")
+        .where("habilitado", "s")
         .if(search, (query) => {
           query.where("nombre", "LIKE", `${search}%`);
         })
-
         .if(habilitado === "true" || habilitado === "false", (query) => {
           const condicional = habilitado === "true" ? "s" : "n";
           query.where("habilitado", condicional);
         })
-
         .if(id_institucion_madre, (query) => {
           query.where("id_institucion_madre", id_institucion_madre);
         })
-
         .if(limit, (query) => {
           query.limit(limit);
         });
+
       return instituciones;
     } catch (err) {
       console.log(err);

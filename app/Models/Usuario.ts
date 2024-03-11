@@ -27,6 +27,8 @@ import {
 import Database from "@ioc:Adonis/Lucid/Database";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
+import Institucion from "./Institucion";
+import UsuarioInstitucion from "./UsuarioInstitucion";
 
 export default class Usuario extends BaseModel {
   public Permisos: {};
@@ -544,6 +546,14 @@ export default class Usuario extends BaseModel {
     throughForeignKey: "id",
   })
   public perfil: HasManyThrough<typeof Perfil>;
+
+  @hasManyThrough([() => Institucion, () => UsuarioInstitucion], {
+    localKey: "id",
+    foreignKey: "id_usuario",
+    throughLocalKey: "id_institucion",
+    throughForeignKey: "id",
+  })
+  public instituciones: HasManyThrough<typeof Institucion>;
 
   @hasOne(() => Localidad, {
     foreignKey: "id",

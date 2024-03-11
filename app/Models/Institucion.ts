@@ -18,6 +18,9 @@ export default class Institucion extends BaseModel {
   @column()
   public nombre: string;
 
+  @column({ columnName: "id" })
+  public _id: number;
+
   @column()
   public habilitado: string;
 
