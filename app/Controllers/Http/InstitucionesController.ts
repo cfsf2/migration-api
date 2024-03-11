@@ -24,11 +24,13 @@ export default class InstitucionesController {
         search,
         habilitada: habilitado,
         id_institucion_madre,
-        usuario,
       } = request.qs();
+      const usuario =
+        request.qs().usuario && ctx.usuario.Permisos.ADMINISTRADOR_INSTITUCION;
 
       if (usuario) {
         const _usuario = await Usuario.query()
+
           .where("tbl_usuario.id", ctx.usuario.id)
           .preload("instituciones", async (q) => {
             await q
