@@ -16,6 +16,7 @@ import {
   FarmaciaLaboratorio,
   Laboratorio,
 } from "App/Helper/ModelIndex";
+import Servicio from "App/Models/Servicio";
 
 export default class FarmaciasController {
   public async index() {
@@ -297,5 +298,11 @@ export default class FarmaciasController {
     } catch (err) {
       throw new ExceptionHandler();
     }
+  }
+
+  public async servicios() {
+    const servicios = await Servicio.query().where("habilitado", "s");
+
+    return servicios;
   }
 }

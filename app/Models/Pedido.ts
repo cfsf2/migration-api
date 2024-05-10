@@ -47,6 +47,7 @@ export default class Pedido extends BaseModel {
 
     const newPedido = await Promise.all(
       datos.map(async (p) => {
+    
         const pedidosSolicitado = await Database.from(
           "tbl_pedido_producto_pack as ppp"
         )

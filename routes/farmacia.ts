@@ -25,6 +25,8 @@ Route.post(
   "FarmaciasController.mig_admin_passwords"
 );
 
+Route.post("/farmacias/servicios/", "FarmaciasController.servicios")
+
 Route.post("/farmacias/register-try", "FarmaciasController.mig_mail");
 Route.post("/farmacias", "FarmaciasController.mig_create");
 
