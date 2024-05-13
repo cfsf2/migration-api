@@ -90,7 +90,7 @@ export default class Farmacia extends BaseModel {
       GROUP BY f.id`);
 
     let servicios =
-      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia, fs.habilitado  FROM tbl_farmacia_servicio AS fs
+      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia, fs.habilitado, s.auto_asignable, s.orden_web  FROM tbl_farmacia_servicio AS fs
     LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s" and fs.habilitado = "s"`);
 
     let dias = await Database.rawQuery(

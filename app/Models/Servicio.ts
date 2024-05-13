@@ -19,6 +19,12 @@ export default class Servicio extends BaseModel {
 
   @column()
   public nombre_corto: string;
+  
+  @column()
+  public auto_asignable: string;
+
+  @column()
+  public orden_web: string;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
