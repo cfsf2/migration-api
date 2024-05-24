@@ -55,8 +55,9 @@ export default class InstitucionesController {
       }
 
       const instituciones = await Institucion.query()
-        .select("tbl_institucion.id as _id", "tbl_institucion.*")
-        .where("habilitado", "s")
+        .select("tbl_institucion.id", "tbl_institucion.nombre", "tbl_institucion.habilitado", "tbl_institucion.id_institucion_madre", "institucionMadre.nombre as institucionMadreNombre")
+        .leftJoin('tbl_institucion as institucionMadre', 'tbl_institucion.id_institucion_madre', 'institucionMadre.id')
+        .where("tbl_institucion.habilitado", "s")
         .if(search, (query) => {
           query.where("nombre", "LIKE", `${search}%`);
         })
@@ -70,8 +71,19 @@ export default class InstitucionesController {
         .if(limit, (query) => {
           query.limit(limit);
         });
-
-      return instituciones;
+        
+        
+        const institucionesFormatted = instituciones.map((inst) => {
+          console.log('Institución:', inst, 'inst madreee: ', inst.$extras.institucionMadreNombre)
+          return {
+            nombre: `${inst._id} - ${inst.nombre}`,
+            id_institucion_madre: inst.id_institucion_madre ? `${inst.id_institucion_madre} - ${inst.$extras.institucionMadreNombre}` : 'N/A',
+            habilitado: inst.habilitado === 's' ? 'Si' : 'No',
+          };
+        });
+    
+        return institucionesFormatted;
+        
     } catch (err) {
       console.log(err);
       throw new ExceptionHandler().handle(err, ctx);
