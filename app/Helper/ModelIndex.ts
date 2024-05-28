@@ -67,6 +67,8 @@ import _FarmaciaProductoCustom from "App/Models/FarmaciaProductoCustom";
 import _FarmaciaProductoPack from "App/Models/FarmaciaProductoPack";
 
 import _Institucion from "App/Models/Institucion";
+import _Qr from "App/Models/Qr";
+import _QrInstitucion from "App/Models/QrInstitucion";
 import _Inventario from "App/Models/Inventario";
 import _LaboratorioModalidadEntrega from "App/Models/LaboratorioModalidadEntrega";
 import _LaboratorioTipoComunicacion from "App/Models/LaboratorioTipoComunicacion";
@@ -188,6 +190,8 @@ export let LaboratorioTipoComunicacion = _LaboratorioTipoComunicacion;
 export let LaboratorioModalidadEntrega = _LaboratorioModalidadEntrega;
 export let Inventario = _Inventario;
 export let Institucion = _Institucion;
+export let Qr = _Qr;
+export let QrInstitucion = _QrInstitucion;
 export let FarmaciaProductoPack = _FarmaciaProductoPack;
 export let FarmaciaProductoCustom = _FarmaciaProductoCustom;
 export let FarmaciaMedioDePago = _FarmaciaMedioDePago;
