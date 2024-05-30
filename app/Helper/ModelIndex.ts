@@ -216,3 +216,9 @@ export let CampanaCampanaAtributo = _CampanaCampanaAtributo;
 export let CampanaAtributo = _CampanaAtributo;
 export let Campana = _Campana;
 export let TipoInformeTransfer = _TipoInformeTransfer;
+
+import _InstitucionQr from "App/Models/InstitucionQr";
+import _FarmaciaQr from "App/Models/FarmaciaQr";
+
+export let InstitucionQr = _InstitucionQr;
+export let FarmaciaQr = _FarmaciaQr;
