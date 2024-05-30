@@ -53,36 +53,45 @@ export default class InstitucionesController {
 
         return _usuario.instituciones;
       }
-
       const instituciones = await Institucion.query()
-        .select("tbl_institucion.id", "tbl_institucion.nombre", "tbl_institucion.habilitado", "tbl_institucion.id_institucion_madre", "institucionMadre.nombre as institucionMadreNombre")
-        .leftJoin('tbl_institucion as institucionMadre', 'tbl_institucion.id_institucion_madre', 'institucionMadre.id')
-        .where("tbl_institucion.habilitado", "s")
-        .if(search, (query) => {
-          query.where("nombre", "LIKE", `${search}%`);
-        })
-        .if(habilitado === "true" || habilitado === "false", (query) => {
-          const condicional = habilitado === "true" ? "s" : "n";
-          query.where("habilitado", condicional);
-        })
-        .if(id_institucion_madre, (query) => {
-          query.where("id_institucion_madre", id_institucion_madre);
-        })
-        .if(limit, (query) => {
-          query.limit(limit);
-        });
-        
-        
-        const institucionesFormatted = instituciones.map((inst) => {
-          console.log('Institución:', inst, 'inst madreee: ', inst.$extras.institucionMadreNombre)
-          return {
-            nombre: `${inst._id} - ${inst.nombre}`,
-            id_institucion_madre: inst.id_institucion_madre ? `${inst.id_institucion_madre} - ${inst.$extras.institucionMadreNombre}` : 'N/A',
-            habilitado: inst.habilitado === 's' ? 'Si' : 'No',
-          };
-        });
+      .select(
+        "tbl_institucion.id as _id", 
+        "tbl_institucion.*",
+        "institucionMadre.id as institucionMadre_id", 
+        "institucionMadre.nombre as institucionMadreNombre"
+      )
+      .leftJoin("tbl_institucion as institucionMadre", "tbl_institucion.id_institucion_madre", "institucionMadre.id")
+      .where("tbl_institucion.habilitado", "s")
+      .if(search, (query) => {
+        query.where("tbl_institucion.nombre", "LIKE", `${search}%`);
+      })
+      .if(habilitado === "true" || habilitado === "false", (query) => {
+        const condicional = habilitado === "true" ? "s" : "n";
+        query.where("tbl_institucion.habilitado", condicional);
+      })
+      .if(id_institucion_madre, (query) => {
+        query.where("tbl_institucion.id_institucion_madre", id_institucion_madre);
+      })
+      .if(limit, (query) => {
+        query.limit(limit);
+      });
+
+    const institucionesFormatted = instituciones.map(inst => {
+      return {
+        ...inst.$attributes, // Incluye todas las propiedades originales del objeto inst en $attributes
+        ...inst.$extras, // Incluye todas las propiedades adicionales del objeto inst en $extras
+        id_nombre_institucion: `${inst.$attributes._id} - ${inst.$attributes.nombre}`,
+        id_nombre_institucion_madre: inst.$extras.institucionMadre_id && inst.$extras.institucionMadreNombre 
+          ? `${inst.$extras.institucionMadre_id} - ${inst.$extras.institucionMadreNombre}` 
+          : 'N/A',
+        inst_habilitada: inst.$attributes.habilitado === 's' ? 'Si' : 'No',
+      };
+    });
     
-        return institucionesFormatted;
+    console.log('instituciones', institucionesFormatted);
+    
+    return institucionesFormatted;
+    
         
     } catch (err) {
       console.log(err);
