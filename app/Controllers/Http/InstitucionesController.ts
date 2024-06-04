@@ -34,7 +34,6 @@ export default class InstitucionesController {
           .where("tbl_usuario.id", ctx.usuario.id)
           .preload("instituciones", async (q) => {
             await q
-              .where("habilitado", "s")
               .if(search, (query) => {
                 query.where("nombre", "LIKE", `${search}%`);
               })
@@ -61,7 +60,6 @@ export default class InstitucionesController {
         "institucionMadre.nombre as institucionMadreNombre"
       )
       .leftJoin("tbl_institucion as institucionMadre", "tbl_institucion.id_institucion_madre", "institucionMadre.id")
-      .where("tbl_institucion.habilitado", "s")
       .if(search, (query) => {
         query.where("tbl_institucion.nombre", "LIKE", `${search}%`);
       })
