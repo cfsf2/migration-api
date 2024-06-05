@@ -818,7 +818,7 @@ const aplicarFiltros = (
       });
     }
     //////////////////////////////
-    
+
     filtros_default.forEach((fd) => {
       let valordefault = fd?.valores.find((v) => {
         return v.atributo[0].nombre === "default";
@@ -1378,6 +1378,7 @@ export class ConfBuilder {
         conf_h?.valores.map(async (val) => {
           let copyVal = val.valor;
           if (val.evaluar === "s") {
+            //  console.log("setopciones: ", val.valor)
             copyVal = eval(val.valor);
           }
           if (val.subquery === "s") {
@@ -1557,6 +1558,7 @@ export class ConfBuilder {
           conf: conf.id_a,
           confId: conf.id,
         });
+        // console.log("QUERY: ", query.toQuery());
         const datos = await query;
         ctx.$_datos = ctx.$_datos.concat(datos);
 
