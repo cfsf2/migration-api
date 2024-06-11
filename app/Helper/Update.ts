@@ -104,11 +104,12 @@ export class Update {
             valorAnterior,
           },
         });
+        console.log(registro)
         await registro.save();
 
         return { registroModificado: registro, modificado: true };
       } catch (err) {
-        console.log("update error", err);
+        console.log("111 update error", err);
         throw await new ExceptionHandler().handle(err, ctx);
       }
     }
@@ -126,6 +127,7 @@ export class Update {
         );
         return { registroModificado: registro, modificado: true };
       } catch (err) {
+        console.log("Update.update: ", err)
         throw await new ExceptionHandler().handle(err, ctx);
       }
     }
@@ -375,7 +377,7 @@ export class Update {
         await registro.save();
         return { registroModificado: registro.toJSON(), modificado: true };
       } catch (err) {
-        console.log("update error", err);
+        console.log("379 update error", err);
         throw await new ExceptionHandler().handle(err, ctx);
       }
     }
@@ -527,7 +529,7 @@ export class Update {
         await registro.save();
         return { registroModificado: registro.toJSON(), modificado: true };
       } catch (err) {
-        console.log("update error", err);
+        console.log("531 update error", err);
         throw await new ExceptionHandler().handle(err, ctx);
       }
     }

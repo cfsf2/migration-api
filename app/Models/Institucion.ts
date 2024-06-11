@@ -18,8 +18,8 @@ export default class Institucion extends BaseModel {
   @column()
   public nombre: string;
 
-  @column({ columnName: "id" })
-  public _id: number;
+  // @column({ columnName: "id" })
+  // public _id: number;
 
   @column()
   public habilitado: string;
@@ -65,6 +65,7 @@ export default class Institucion extends BaseModel {
       if (k === "_id") return (extras[k] = this.$extras[k].toString());
       extras[k] = this.$extras[k];
     });
+    extras["_id"] = this.id;
     return extras;
   }
 }

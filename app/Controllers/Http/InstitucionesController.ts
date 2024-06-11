@@ -76,8 +76,8 @@ export default class InstitucionesController {
 
     const institucionesFormatted = instituciones.map(inst => {
       return {
-        id:inst._id,
-        _id:inst._id,
+        id:inst.id,
+        _id:inst.id,
         ...inst.$attributes, // Incluye todas las propiedades originales del objeto inst en $attributes
         ...inst.$extras, // Incluye todas las propiedades adicionales del objeto inst en $extras
         id_nombre_institucion: `${inst.$attributes._id} - ${inst.$attributes.nombre}`,
