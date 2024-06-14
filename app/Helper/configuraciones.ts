@@ -777,6 +777,25 @@ const aplicaWhere = async (
   return query;
 };
 
+function aplicaHaving(
+  query: DatabaseQueryBuilderContract<
+    import("@ioc:Adonis/Lucid/Database").Dictionary<any, string>
+  >,
+  valor: any,
+  filtro: SConf,
+  ctx: HttpContextContract
+): any {
+  try {
+    ctx;
+    if (!valor || valor === "") return query;
+    const campo = getAtributo({ atributo: "campo", conf: filtro });
+    const operador = getAtributo({ atributo: "operador", conf: filtro }) ?? "=";
+    return query.having(campo, operador, valor);
+  } catch (err) {
+    throw err;
+  }
+}
+
 const aplicarFiltros = (
   ctx: HttpContextContract,
   query: DatabaseQueryBuilderContract,
@@ -853,6 +872,22 @@ const aplicarFiltros = (
       const filtro = filtros_e.find((fil) => fil.id_a === id_a);
 
       if (!filtro) return;
+
+      const having_solo =
+        filtro.valores.find((a) => a.atributo[0].nombre === "having_solo")
+          ?.valor === "s";
+
+      const where_desactivado =
+        filtro.valores.find((a) => a.atributo[0].nombre === "where_desactivado")
+          ?.valor === "s";
+
+      if (having_solo) {
+        return aplicaHaving(query, queryFiltros[id_a], filtro, ctx);
+      }
+
+      if (where_desactivado) {
+        return query;
+      }
 
       // const permiteNull = getAtributo({
       //   atributo: "permite_null",

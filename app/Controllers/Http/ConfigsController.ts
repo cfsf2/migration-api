@@ -598,14 +598,24 @@ export default class ConfigsController {
   public async generarQR(ctx: HttpContextContract) {
     const { request: req, response } = ctx;
 
-    const { id, sup, inf, link, file_name } = req.body().data;
+    const {
+      id,
+      sup,
+      inf,
+      link,
+      file_name,
+      fondo = "negro",
+      cantidad = 1,
+    } = req.body().data;
     id;
     try {
       const imagenBuffer = await generarQR(
         link,
         sup.toUpperCase(),
         inf.toUpperCase(),
-        "./public/logocfsf2-1-v.png"
+        "./public/logocfsf2-1-v.png",
+        fondo,
+        cantidad
       );
       // Crear un nombre de archivo único, por ejemplo, usando un timestamp
       const nombreArchivo = `qr_${Date.now()}.png`;
