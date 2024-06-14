@@ -87,6 +87,7 @@ import { toDataURL } from "qrcode";
 const A4_WIDTH = 2480; // Ancho en pixeles de una hoja A4 a 300 dpi
 const A4_HEIGHT = 3508; // Alto en pixeles de una hoja A4 a 300 dpi
 
+
 async function generarQR(texto, textoSuperior, textoInferior, logo, fondo, cantidad) {
   if (!logo) {
     logo = "./Logo-pointer.png";
@@ -177,9 +178,17 @@ async function generarQR(texto, textoSuperior, textoInferior, logo, fondo, canti
   // Calcular el tamaño y la disposición de los QR
   const cols = Math.ceil(Math.sqrt(cantidad));
   const rows = Math.ceil(cantidad / cols);
-  const qrWidth = canvas.bitmap.width;
-  const qrHeight = canvas.bitmap.height;
 
+  // Calcular el tamaño de las celdas y el tamaño de los QR
+  const cellWidth = A4_WIDTH / cols;
+  // const cellHeight = A4_HEIGHT / rows;
+  const qrWidth = cellWidth //* 0.8;
+  const qrHeight = cellWidth // * 0.8;
+
+  // Redimensionar el QR para ocupar el 80% de la celda
+  canvas.resize(qrWidth, qrHeight);
+
+  // Calcular el espaciado entre las celdas
   const spacingX = (A4_WIDTH - (cols * qrWidth)) / (cols + 1);
   const spacingY = (A4_HEIGHT - (rows * qrHeight)) / (rows + 1);
 
