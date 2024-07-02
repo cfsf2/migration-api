@@ -821,6 +821,9 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public id_usuario: number;
+  
+  @column()
+  public id_comisionista_facturacion: number;
 
   public usuarioUsuario: string;
 
