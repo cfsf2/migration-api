@@ -222,3 +222,7 @@ import _FarmaciaQr from "App/Models/FarmaciaQr";
 
 export let InstitucionQr = _InstitucionQr;
 export let FarmaciaQr = _FarmaciaQr;
+
+import _Comisionista from "App/Models/Comisionista";
+
+export let Comisionista = _Comisionista;
