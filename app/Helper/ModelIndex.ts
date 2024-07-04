@@ -224,5 +224,7 @@ export let InstitucionQr = _InstitucionQr;
 export let FarmaciaQr = _FarmaciaQr;
 
 import _Comisionista from "App/Models/Comisionista";
+import _QrPresentacion from "App/Models/QrPresentacion";
 
 export let Comisionista = _Comisionista;
+export let QrPresentacion = _QrPresentacion;
