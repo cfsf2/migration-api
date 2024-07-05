@@ -104,7 +104,7 @@ export class Update {
             valorAnterior,
           },
         });
-        console.log(registro)
+        //  console.log("update registro",registro)
         await registro.save();
 
         return { registroModificado: registro, modificado: true };
@@ -127,7 +127,7 @@ export class Update {
         );
         return { registroModificado: registro, modificado: true };
       } catch (err) {
-        console.log("Update.update: ", err)
+        console.log("Update.update: ", err);
         throw await new ExceptionHandler().handle(err, ctx);
       }
     }
