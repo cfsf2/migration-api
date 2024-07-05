@@ -1,4 +1,6 @@
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
+import { DateTime } from "luxon";
 
 export default class QrPresentacion extends BaseModel {
   public static table = "tbl_qr_presentacion";
@@ -10,10 +12,22 @@ export default class QrPresentacion extends BaseModel {
   public id_presentacion: number;
 
   @column()
-  public id_qr: number;
+  public id_qr_farmacia: number;
 
   @column()
-  public habilitado: string;
+  public observaciones: string;
+
+  @column.dateTime({ autoCreate: true })
+  public ts_creacion: DateTime;
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  public ts_modificacion: DateTime;
+
+  @column()
+  public id_usuario_modificacion: number;
+
+  @column()
+  public id_usuario_creacion: number;
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
@@ -23,5 +37,25 @@ export default class QrPresentacion extends BaseModel {
     });
     return extras;
   }
-}
 
+  public static async nuevo({ ctx }) {
+    const { id, INPUT_SELECT_FECHA_PRESENTACION } = ctx.request.body();
+
+    const nqp = new QrPresentacion();
+    nqp.merge({
+      id_qr_farmacia: id,
+      id_presentacion: INPUT_SELECT_FECHA_PRESENTACION,
+      observaciones: "",
+    });
+
+    await guardarDatosAuditoria({
+      usuario: ctx.usuario,
+      objeto: nqp,
+      accion: AccionCRUD.crear,
+      registroCambios: { registrarCambios: "n" },
+    });
+
+    await nqp.save();
+    return { registroModificado: nqp.toJSON(), creado: true };
+  }
+}
