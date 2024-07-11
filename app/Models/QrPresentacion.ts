@@ -1,6 +1,14 @@
+import Mail from "@ioc:Adonis/Addons/Mail";
+import Env from "@ioc:Adonis/Core/Env";
 import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { generarHtml } from "App/Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { DateTime } from "luxon";
+import QrFarmacia from "./QrFarmacia";
+import Farmacia from "./Farmacia";
+import Qr from "./Qr";
+import SParametro from "./SParametro";
+import Presentacion from "./Presentacion";
 
 export default class QrPresentacion extends BaseModel {
   public static table = "tbl_qr_presentacion";
@@ -54,8 +62,42 @@ export default class QrPresentacion extends BaseModel {
       accion: AccionCRUD.crear,
       registroCambios: { registrarCambios: "n" },
     });
-
     await nqp.save();
+
+    const qr_farmacia = await QrFarmacia.findOrFail(id);
+    const farmacia = await Farmacia.findOrFail(qr_farmacia.id_farmacia);
+    const qr = await Qr.findOrFail(qr_farmacia.id_qr);
+    const presentacion = await Presentacion.findOrFail(nqp.id_presentacion);
+    const ts_creacion_presentacion = DateTime.fromISO(
+      nqp.ts_creacion as any
+    ).toFormat("dd/MM/yyyy");
+
+    qr;
+    presentacion;
+    ts_creacion_presentacion;
+
+    if (farmacia.email && farmacia.email != "") {
+      const mensaje_parametro = await SParametro.findByOrFail(
+        "id_a",
+        "MENSAJE_QR_INGRESADO"
+      );
+
+      const html = `<div>${eval("`" + mensaje_parametro.valor + "`")}</div>`;
+      await Mail.send((message) => {
+        message.from(Env.get("FARMAGEO_EMAIL"));
+
+        message.to(farmacia.email);
+
+        message.subject("Aviso QR farmacia ingresado").html(
+          generarHtml({
+            titulo: `Aviso QR farmacia ingresado`,
+            // imagen: '',
+            texto: `${html}`,
+          })
+        );
+      });
+    }
+
     return { registroModificado: nqp.toJSON(), creado: true };
   }
 }
