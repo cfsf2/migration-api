@@ -34,4 +34,7 @@ export default Env.rules({
   TRANSFER_EMAIL: Env.schema.string(),
   FARMAGEO_EMAIL: Env.schema.string(),
   GEOCODING_API: Env.schema.string(),
+  DEBITOS_FTP_SERVER: Env.schema.string(),
+  DEBITOS_FTP_USER: Env.schema.string(),
+  DEBITOS_FTP_PASSWORD: Env.schema.string(),
 });

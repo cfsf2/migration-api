@@ -55,9 +55,9 @@ export default class DebitosController {
       var srcFTP = {
         // host: "200.69.207.130",
         // user: "col2dasfeC",
-        host: "intercambio.observer.com.ar",
-        user: "col2dasfe",
-        password: "95wHKJ8a5c",
+        host: Env.get("DEBITOS_FTP_SERVER"), //"intercambio.observer.com.ar",
+        user: Env.get("DEBITOS_FTP_USER"), //"col2dasfe",
+        password: Env.get("DEBITOS_FTP_PASSWORD"), //"95wHKJ8a5c",
         port: 21,
         connTimeout: 60000,
         pasvTimeout: 60000,
