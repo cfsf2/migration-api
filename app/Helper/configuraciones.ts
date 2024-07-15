@@ -362,8 +362,12 @@ const extraerElementos = ({
               return (item[atributoNombre] =
                 configuracionDeUsuario[atributoNombre]);
             }
+            if (atributoNombre === "default" && val.valor.length > 0) {
+              val.valor = Object.values(val.valor[0])[0];
+            }
             item[atributoNombre] = val.valor;
             // enviar el valor de formulario como default cuando no sea el primer request
+
             if (
               atributoNombre === "default" &&
               !ctx.primer_request &&
