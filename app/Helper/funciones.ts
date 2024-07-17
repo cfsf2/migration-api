@@ -3,6 +3,7 @@ import SRc from "App/Models/SRc";
 import SRcDeta from "App/Models/SRcDeta";
 import axios from "axios";
 import { DateTime } from "luxon";
+import * as fs from "fs";
 
 export const cambiarKey = ({
   o,
@@ -203,3 +204,8 @@ export const arrayPermisos = async (usuario) => {
   });
   return permisosUsuario;
 };
+
+export function _log(fileName: string, data: any): void {
+  const dataString = JSON.stringify(data);
+  fs.writeFileSync("log/"+fileName, dataString, "utf8");
+}

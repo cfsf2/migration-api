@@ -1,6 +1,8 @@
 import { BaseCommand } from "@adonisjs/core/build/standalone";
 import Mail from "@ioc:Adonis/Addons/Mail";
 import { generarHtml } from "App/Helper/email";
+import { _log } from "App/Helper/funciones";
+import { DateTime } from "luxon";
 
 export default class EnviarTransferEmails extends BaseCommand {
   /**
@@ -94,6 +96,10 @@ export default class EnviarTransferEmails extends BaseCommand {
             });
           }
 
+          const now = DateTime.now().toFormat("dd/MM/yyyy ss:mm:HH");
+
+          _log(`Transfer Emails Enviados`, { now, transferEmailPendiente });
+
           await tep.save();
           return emailRes;
         } catch (err) {
@@ -132,6 +138,10 @@ export default class EnviarTransferEmails extends BaseCommand {
               emails_rechazados: err.rejected?.toString(),
             })
             .save();
+
+          const now = DateTime.now().toFormat("dd/MM/yyyy ss:mm:HH");
+
+          _log(`Transfer Emails Error`, { now, err });
 
           return err;
         }
