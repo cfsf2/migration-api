@@ -35,8 +35,7 @@ export default class EnviarTransferEmails extends BaseCommand {
   public async run() {
     const { default: TransferEmail } = await import("App/Models/TransferEmail");
 
-    const teps: any[] = [];
-    const teps_error: any[] = [];
+
 
     const transferEmailPendiente = await TransferEmail.query()
       .where("enviado", "n")
@@ -48,6 +47,7 @@ export default class EnviarTransferEmails extends BaseCommand {
           .preload("farmacia")
           .preload("drogueria")
       )
+      .limit(25)
       .orderBy("ts_creacion", "asc");
     await Promise.all(
       transferEmailPendiente.map(async (tep) => {
@@ -100,12 +100,6 @@ export default class EnviarTransferEmails extends BaseCommand {
           }
 
           const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
-
-          teps.push({
-            id: tep.id,
-            transfer_id: tep.id_transfer,
-            email: tep.emails,
-          });
 
           try {
             await _log(
@@ -176,8 +170,6 @@ export default class EnviarTransferEmails extends BaseCommand {
               emails_rechazados: err.rejected?.toString(),
             })
             .save();
-
-         
 
           return err;
         }
