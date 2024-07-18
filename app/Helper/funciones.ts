@@ -5,6 +5,8 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import * as fs from "fs";
 
+import { promises as fsPromises } from 'fs';
+
 export const cambiarKey = ({
   o,
   oldKey,
@@ -205,7 +207,14 @@ export const arrayPermisos = async (usuario) => {
   return permisosUsuario;
 };
 
-export function _log(fileName: string, data: any): void {
+export async function _log(fileName: string, data: any): Promise<void> {
+  const logDir = 'log';
+
+  // Verifica si la carpeta 'log' existe, si no, la crea
+  if (!fs.existsSync(logDir)) {
+    await fsPromises.mkdir(logDir);
+  }
+
   const dataString = JSON.stringify(data);
-  fs.writeFileSync("log/"+fileName, dataString, "utf8");
+  await fsPromises.writeFile(`${logDir}/${fileName}`, dataString, 'utf8');
 }

@@ -96,9 +96,22 @@ export default class EnviarTransferEmails extends BaseCommand {
             });
           }
 
-          const now = DateTime.now().toFormat("dd/MM/yyyy ss:mm:HH");
+          const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
 
-          _log(`Transfer Emails Enviados`, { now, transferEmailPendiente });
+          try {
+            await _log(`Transfer Emails Enviados ${now}`, {
+              now,
+              transfer_email_enviados: transferEmailPendiente.map((t) => {
+                return {
+                  id: t.id,
+                  transfer_id: t.id_transfer,
+                  email: t.emails,
+                };
+              }),
+            });
+          } catch (err) {
+            console.log("error de escritura", err);
+          }
 
           await tep.save();
           return emailRes;
@@ -139,9 +152,9 @@ export default class EnviarTransferEmails extends BaseCommand {
             })
             .save();
 
-          const now = DateTime.now().toFormat("dd/MM/yyyy ss:mm:HH");
+          const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
 
-          _log(`Transfer Emails Error`, { now, err });
+          await _log(`Transfer Emails Error ${now}`, { now, err });
 
           return err;
         }

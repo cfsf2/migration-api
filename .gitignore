@@ -12,3 +12,4 @@ coverage
 
 tmp
 *.config.js
+log/*
