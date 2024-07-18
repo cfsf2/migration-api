@@ -35,6 +35,9 @@ export default class EnviarTransferEmails extends BaseCommand {
   public async run() {
     const { default: TransferEmail } = await import("App/Models/TransferEmail");
 
+    const teps: any[] = [];
+    const teps_error: any[] = [];
+
     const transferEmailPendiente = await TransferEmail.query()
       .where("enviado", "n")
       .preload("transfer", (query) =>
@@ -98,17 +101,26 @@ export default class EnviarTransferEmails extends BaseCommand {
 
           const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
 
+          teps.push({
+            id: tep.id,
+            transfer_id: tep.id_transfer,
+            email: tep.emails,
+          });
+
           try {
-            await _log(`Transfer Emails Enviados ${now}`, {
-              now,
-              transfer_email_enviados: transferEmailPendiente.map((t) => {
-                return {
-                  id: t.id,
-                  transfer_id: t.id_transfer,
-                  email: t.emails,
-                };
-              }),
-            });
+            await _log(
+              `Transfer Emails Enviados ${DateTime.now().toFormat(
+                "dd-MM-yyyy"
+              )}`,
+              {
+                now,
+                transfer_email_enviado: {
+                  id: tep.id,
+                  transfer_id: tep.id_transfer,
+                  email: tep.emails,
+                },
+              }
+            );
           } catch (err) {
             console.log("error de escritura", err);
           }
@@ -116,6 +128,19 @@ export default class EnviarTransferEmails extends BaseCommand {
           await tep.save();
           return emailRes;
         } catch (err) {
+          const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
+          await _log(
+            `Transfer Emails Error $${DateTime.now().toFormat("dd-MM-yyyy")}`,
+            {
+              now,
+              err,
+              transfer_email_error: {
+                id: tep.id,
+                transfer_id: tep.id_transfer,
+                email: tep.emails,
+              },
+            }
+          );
           await Mail.send((message) => {
             message
               .from(process.env.SMTP_USERNAME as string)
@@ -152,9 +177,7 @@ export default class EnviarTransferEmails extends BaseCommand {
             })
             .save();
 
-          const now = DateTime.now().toFormat("dd-MM-yyyy HH-mm-ss");
-
-          await _log(`Transfer Emails Error ${now}`, { now, err });
+         
 
           return err;
         }

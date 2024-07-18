@@ -215,6 +215,6 @@ export async function _log(fileName: string, data: any): Promise<void> {
     await fsPromises.mkdir(logDir);
   }
 
-  const dataString = JSON.stringify(data);
-  await fsPromises.writeFile(`${logDir}/${fileName}`, dataString, 'utf8');
+  const dataString = JSON.stringify(data) + '\n';
+  await fsPromises.appendFile(`${logDir}/${fileName}`, dataString, 'utf8');
 }
