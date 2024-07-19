@@ -5,7 +5,7 @@ import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { DateTime } from "luxon";
 import QrFarmacia from "./QrFarmacia";
-import Farmacia from "./Farmacia";
+// import Farmacia from "./Farmacia";
 import Qr from "./Qr";
 //import SParametro from "./SParametro";
 import Presentacion from "./Presentacion";
