@@ -33,8 +33,8 @@ export default class FarmaciaAux extends Farmacia {
       esfarmacia: "s",
     });
     await usuario.save();
-    const asignarPerfil = new UsuarioPerfil();
-    await asignarPerfil.merge({ id_usuario: usuario.id, id_perfil: 2 }).save();
+    // const asignarPerfil = new UsuarioPerfil();
+    // await asignarPerfil.merge({ id_usuario: usuario.id, id_perfil: 2 }).save();
 
     registro.merge({ id_usuario: usuario.id });
 
