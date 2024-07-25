@@ -4,7 +4,6 @@ import { getConf } from "App/Controllers/Http/ConfigsController";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import Insertar from "App/Helper/Insertar";
 import Usuario from "./Usuario";
-import UsuarioPerfil from "./UsuarioPerfil";
 
 export default class FarmaciaAux extends Farmacia {
   public static async insertNuevaFarmaciaConUsuario({
