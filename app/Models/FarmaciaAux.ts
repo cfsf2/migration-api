@@ -17,7 +17,7 @@ export default class FarmaciaAux extends Farmacia {
       formData: ctx.request.body(),
       conf: await getConf(ctx.request.body().id_a),
     });
-    
+
     await guardarDatosAuditoria({
       usuario: ctx.usuario,
       objeto: registro,
@@ -36,6 +36,6 @@ export default class FarmaciaAux extends Farmacia {
     registro.merge({ id_usuario: usuario.id });
 
     await registro.save();
-    return;
+    return { registroCreado: registro, creado: true }
   }
 }
