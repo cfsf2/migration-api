@@ -167,6 +167,71 @@ export class Insertar {
       throw await new ExceptionHandler().handle(err, ctx);
     }
   }
+  public static async _insertarABM({
+    ctx,
+    formData,
+    conf,
+  }: {
+    ctx: HttpContextContract;
+    formData: { id?: number };
+    conf: SConf;
+  }) {
+    try {
+      let tabla = conf.getAtributo({ atributo: "tabla" });
+      tabla;
+      let Modelo = M[
+        getAtributo({ atributo: "modelo", conf })
+      ] as typeof BaseModel;
+
+      if (formData.id) {
+        return await U.updateABM({ ctx, formData, conf });
+      }
+
+      // console.log(formData);
+
+      const nuevoRegistro = new Modelo();
+
+      await Promise.all(
+        Object.keys(formData).map(async (id_a) => {
+          const confCampo = await SConf.findByIda({ id_a });
+
+          if (!confCampo)
+            return { message: `Error no encuentro esta configuracion ${id_a}` };
+
+          const campo = getAtributo({
+            atributo: "update_campo",
+            conf: confCampo,
+          });
+
+          const insert_campos = getAtributo({
+            atributo: "insert_campos",
+            conf: confCampo,
+          });
+
+          insert_campos?.split("|").forEach((i) => {
+            nuevoRegistro.merge({ [i]: formData[i] });
+          });
+
+          const componente = getAtributo({
+            atributo: "componente",
+            conf: confCampo,
+          });
+
+          if (componente === "radio") {
+            //console.log("radio");
+          }
+
+          if (!campo || !formData[id_a]) return;
+          nuevoRegistro.merge({ [campo]: formData[id_a] });
+        })
+      );
+
+      return nuevoRegistro;
+    } catch (err) {
+      console.log(err);
+      throw await new ExceptionHandler().handle(err, ctx);
+    }
+  }
 
   public static async insertarSConfConfDeta({
     ctx,
@@ -360,7 +425,9 @@ export class Insertar {
         await SCCU.save();
       }
 
-      await SConfConfDeta.query().where("id_conf_conf_usuario", SCCU.id).delete() // Limpiando filtros guardados viejos
+      await SConfConfDeta.query()
+        .where("id_conf_conf_usuario", SCCU.id)
+        .delete(); // Limpiando filtros guardados viejos
 
       await Promise.all(
         Object.keys(valor).map(async (filtro) => {

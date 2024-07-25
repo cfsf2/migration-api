@@ -230,3 +230,6 @@ import _UsuarioPresentacion from "App/Models/UsuarioPresentacion";
 export let Comisionista = _Comisionista;
 export let QrPresentacion = _QrPresentacion;
 export let UsuarioPresentacion = _UsuarioPresentacion;
+
+import _FarmaciaAux from "App/Models/FarmaciaAux";
+export let FarmaciaAux = _FarmaciaAux;
