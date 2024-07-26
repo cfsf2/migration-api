@@ -96,47 +96,65 @@ export const { actions } = Bouncer.define(
       conf = await SConf.findOrFail(conf.id);
       await conf.load("conf_permiso", (c) => c.preload("permiso"));
 
-      const clearanceLevel = conf.permiso;
+      const tienePermiso = async (conf) => {
+        await conf.load("permiso_string");
+        const permisosUsuario = (await arrayPermisos(usuario)).map(
+          (u) => u.nombre
+        );
+        const confPermisos = conf.permiso_string.map((p) => {
+          return { nombre: p.nombre, id: p.id };
+        });
 
-      if (!clearanceLevel) {
-        console.log(usuario.id, " sin clearance para ", conf.id_a);
-        return false;
-      }
-      switch (clearanceLevel) {
-        case undefined:
-          return false;
-        case "t":
-          if (usuario) {
-            usuario.configuracionesPermitidas =
-              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
-          }
-          return true;
-        case "u":
-          if (usuario) {
-            usuario.configuracionesPermitidas =
-              usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+        switch (conf.permiso) {
+          case undefined:
+            return false;
+          case "t":
+            if (usuario) {
+              usuario.configuracionesPermitidas =
+                usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+            }
             return true;
-          }
-          return false;
-        case "n":
-          return false;
-        case "p":
-          const permisosUsuario = await arrayPermisos(usuario);
+          case "u":
+            if (usuario) {
+              usuario.configuracionesPermitidas =
+                usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+              return true;
+            }
+            return false;
+          case "n":
+            return false;
+          case "p":
+            if (confPermisos.length === 0) {
+              throw {
+                code: "conf_permiso_null",
+                mensaje: `Configuracion no tiene permisos pero conf.permiso = p. ${conf.id_a}`,
+              };
+            }
+            if (
+              confPermisos.some((item) => permisosUsuario.includes(item.nombre))
+            ) {
+              usuario.configuracionesPermitidas =
+                usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
+              return true;
+            }
 
-          if (
-            permisosUsuario.findIndex((p: { nombre: string }) => {
-              return p.nombre === conf.conf_permiso.permiso.nombre;
-            }) !== -1
-          ) {
+            return false;
+          case "sp":
+            if (
+              confPermisos.some((item) => permisosUsuario.includes(item.nombre))
+            ) {
+              return false;
+            }
             usuario.configuracionesPermitidas =
               usuario.configuracionesPermitidas.concat(`,"${conf.id_a}"`);
-            return true;
-          }
 
-          return false;
-        default:
-          return false;
-      }
+            return true;
+          default:
+            return false;
+        }
+      };
+
+      return tienePermiso(conf);
     },
     { allowGuest: true }
   )
@@ -144,18 +162,15 @@ export const { actions } = Bouncer.define(
     const permisosUsuario = await arrayPermisos(usuario);
     const M = await MenuItem.query()
       .where("id", menu.id)
-      .preload("Permiso", (query) => query.preload("permiso"))
+      .preload("permisos")
       .firstOrFail();
-    if (!M.Permiso) return false;
-    if (
-      permisosUsuario.findIndex((p) => {
-        return p.nombre === M.Permiso.permiso.nombre;
-      }) !== -1
-    ) {
-      return true;
-    }
+    if (!M.permisos || M.permisos.length === 0) return false;
+    // Verificar que el usuario tenga al menos uno de los permisos del menú
+    const tieneAlMenosUnPermiso = M.permisos.some((permiso) =>
+      permisosUsuario.some((p) => p.id === permiso.id)
+    );
 
-    return false;
+    return tieneAlMenosUnPermiso;
   });
 
 /*

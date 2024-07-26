@@ -197,9 +197,9 @@ export const guardarDatosAuditoria = async ({
 };
 
 export const arrayPermisos = async (usuario) => {
-  const perfiles = await usuario.related("perfil").query().preload("permisos");
-
   let permisosUsuario: any = [];
+  if (!usuario) return permisosUsuario;
+  const perfiles = await usuario.related("perfil").query().preload("permisos");
 
   perfiles.forEach((perfil) => {
     perfil.permisos.forEach((permiso) => permisosUsuario.push(permiso));
