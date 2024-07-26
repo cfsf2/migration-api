@@ -1,7 +1,9 @@
 import { DateTime } from "luxon";
 
 import {
+  afterSave,
   BaseModel,
+  beforeSave,
   column,
   HasMany,
   hasMany,
@@ -821,7 +823,7 @@ export default class Farmacia extends BaseModel {
 
   @column()
   public id_usuario: number;
-  
+
   @column()
   public id_comisionista_facturacion: number;
 
@@ -883,6 +885,14 @@ export default class Farmacia extends BaseModel {
   public invitados: HasMany<typeof EventoParticipante>;
 
   // public serializeExtras = true;
+
+  @beforeSave()
+  public static async hashPassword(farmacia: Farmacia) {
+    if (farmacia.$dirty.password && farmacia.id_usuario) {
+      const usuario = await Usuario.findOrFail(farmacia.id_usuario);
+      await usuario.merge({ password: farmacia.$dirty.password }).save();
+    }
+  }
 
   public serializeExtras() {
     const keys = Object.keys(this.$extras);

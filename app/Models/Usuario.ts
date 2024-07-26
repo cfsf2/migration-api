@@ -1,8 +1,10 @@
 import { DateTime } from "luxon";
 import { schema, rules, validator } from "@ioc:Adonis/Core/Validator";
 import {
+  afterUpdate,
   BaseModel,
   beforeSave,
+  beforeUpdate,
   column,
   HasMany,
   hasMany,
@@ -29,6 +31,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import Institucion from "./Institucion";
 import UsuarioInstitucion from "./UsuarioInstitucion";
+import Farmacia from "./Farmacia";
 
 export default class Usuario extends BaseModel {
   public Permisos: {};
@@ -577,6 +580,15 @@ export default class Usuario extends BaseModel {
   public static async hashPasswordSave(user: Usuario) {
     if (user.$dirty.password) {
       user.password = await Hash.make(user.password);
+    }
+  }
+
+  @afterUpdate()
+  public static async farmaciaPasswordSave(user: Usuario) {
+    if (user.esfarmacia === "s") {
+      const farmacia = await Farmacia.findBy("id_usuario", user.id);
+      if (!farmacia) return;
+      await farmacia.merge({ password: user.$dirty.password }).save();
     }
   }
 
