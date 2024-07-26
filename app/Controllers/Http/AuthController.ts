@@ -18,6 +18,7 @@ export default class AuthController {
         .attempt(username, password, { expiresIn: process.env.JWTEXPIRESIN });
 
       let response = log.user.toObject();
+
       response = enumaBool(response);
 
       const usuario = await Usuario.query()
@@ -31,6 +32,11 @@ export default class AuthController {
         .toFormat("yyyy-MM-dd hh:mm:ss");
       await usuario[0].save();
 
+      // PARA ACCEDER AL DASHBOARD DEBE TENER EL PERMISO DASHBOARD_FARMACIA
+      response.dashboard = usuario[0].perfil[0].permisos.some(
+        (p) => p.nombre === "DASHBOARD_FARMACIA"
+      );
+
       response.permisos = Array.from(
         new Set(usuario[0].perfil[0]?.permisos.map((p) => p.tipo))
       );
@@ -40,7 +46,6 @@ export default class AuthController {
       response.user_email = response.email;
 
       response.token = log.token;
-
       // await bouncer.authorize("esAdmin", usuario[0]);
       return response;
     } catch (error) {
