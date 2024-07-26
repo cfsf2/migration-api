@@ -4,7 +4,6 @@ import {
   afterUpdate,
   BaseModel,
   beforeSave,
-  beforeUpdate,
   column,
   HasMany,
   hasMany,
