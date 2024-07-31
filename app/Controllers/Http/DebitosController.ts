@@ -44,10 +44,10 @@ export default class DebitosController {
         });
       }
 
-      let remotePath1 =
-        "/col2dasfe/PAMI/" + periodo + "/01 102_colegio_de_santa_fe_2da.circ";
-      let remotePath2 =
-        "/col2dasfe/PAMI/" + periodo + "/02 102_colegio_de_santa_fe_2da.circ";
+      let remotePath1 = periodo + "01";
+      //"/col2dasfe/PAMI/" + periodo + "/01 102_colegio_de_santa_fe_2da.circ";
+      let remotePath2 = periodo + "02";
+      //"/col2dasfe/PAMI/" + periodo + "/02 102_colegio_de_santa_fe_2da.circ";
 
       let mensaje;
 
