@@ -47,7 +47,7 @@ export default class ExceptionHandler extends HttpExceptionHandler {
         errorKey = error.sqlMessage
           ?.split("key")
           .pop()
-          .replaceAll("'", "")
+          ?.replace(/'/g, "")
           .trim();
 
         errorMensajeTraducido = await SErrorMysql.query()
