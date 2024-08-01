@@ -536,11 +536,13 @@ const getGroupBy = ({
   groupsBy.push(gp);
 
   confs?.forEach((confi) => {
-    let gp: gp = { groupBy: "", having: "" };
-    gp.groupBy = getAtributoById({ id: 23, conf: confi });
-    gp.having = getAtributoById({ id: 24, conf: confi }) as string | undefined;
+    confi.sub_conf.forEach((sc) => {
+      let gp: gp = { groupBy: "", having: "" };
+      gp.groupBy = getAtributoById({ id: 23, conf: sc });
+      gp.having = getAtributoById({ id: 24, conf: sc }) as string | undefined;
 
-    groupsBy.push(gp);
+      groupsBy.push(gp);
+    });
   });
 
   return Array.from(new Set(groupsBy.filter((c) => c.groupBy)));
@@ -1560,9 +1562,12 @@ export class ConfBuilder {
         });
       }
       // aplicar groupsBy
+
       if (groupsBy.length > 0) {
         groupsBy.forEach(({ groupBy, having }) => {
-          query.groupBy(groupBy);
+          groupBy.split(",").forEach((gp) => {
+            query.groupBy(gp);
+          });
           if (having) query.havingRaw(having as unknown as RawQuery); // ??
         });
       }
