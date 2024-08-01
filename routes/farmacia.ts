@@ -26,6 +26,7 @@ Route.post(
 );
 
 Route.post("/farmacias/servicios/", "FarmaciasController.servicios")
+Route.post("/farmacias/presentacion/","FarmaciasController.presentar")
 
 Route.post("/farmacias/register-try", "FarmaciasController.mig_mail");
 Route.post("/farmacias", "FarmaciasController.mig_create");

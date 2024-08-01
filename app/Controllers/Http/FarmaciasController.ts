@@ -17,6 +17,7 @@ import {
   Laboratorio,
 } from "App/Helper/ModelIndex";
 import Servicio from "App/Models/Servicio";
+import QrPresentacion from "App/Models/QrPresentacion";
 
 export default class FarmaciasController {
   public async index() {
@@ -304,5 +305,23 @@ export default class FarmaciasController {
     const servicios = await Servicio.query().where("habilitado", "s");
 
     return servicios;
+  }
+
+  public async presentar(ctx: HttpContextContract) {
+    const { data } = ctx.request.body();
+
+    const res: any = [];
+    await Promise.all(
+      data.map(async (d) => {
+        const [id_qr_farmacia, id_presentacion] = d;
+        const nqrp = new QrPresentacion();
+        await nqrp
+          .merge({ id_presentacion, id_qr_farmacia, observaciones: "" })
+          .save();
+        res.push(nqrp);
+      })
+    );
+
+    return res;
   }
 }
