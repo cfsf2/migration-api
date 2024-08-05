@@ -316,7 +316,12 @@ export default class FarmaciasController {
         const [id_qr_farmacia, id_presentacion] = d;
         const nqrp = new QrPresentacion();
         await nqrp
-          .merge({ id_presentacion, id_qr_farmacia, observaciones: "" })
+          .merge({
+            id_presentacion,
+            id_qr_farmacia,
+            observaciones: "",
+            tipo_ingreso: "manual",
+          })
           .save();
         res.push(nqrp);
       })

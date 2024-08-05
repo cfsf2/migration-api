@@ -24,6 +24,9 @@ export default class QrPresentacion extends BaseModel {
 
   @column()
   public observaciones: string;
+  
+  @column()
+  public tipo_ingreso: string;
 
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
