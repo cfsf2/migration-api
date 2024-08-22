@@ -162,8 +162,6 @@ export default class PublicidadsController {
               .setLocale("es-Ar")
               .toFormat("yyyy-MM-dd hh:mm:ss");
 
-      console.log(request.body());
-
       let mergeObject: any = {
         fecha_inicio: fecha_inicio,
         fecha_fin: fecha_fin,
