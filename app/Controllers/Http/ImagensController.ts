@@ -10,7 +10,8 @@ export default class ImagensController {
       });
       if (file) {
         const timestamp = Date.now().toString();
-        const nombreArchivo = `A${timestamp}-${file.fileName}.${file.extname}`;
+        const fileClientName = file.clientName.split('.')[0]
+        const nombreArchivo = `A${timestamp}-${fileClientName}.${file.extname}`;
         const carpeta = "farmacias/";
         await file.moveToDisk(
           carpeta,
@@ -27,8 +28,9 @@ export default class ImagensController {
           Key: `${carpeta}${nombreArchivo}`,
         });
       }
-      return response.status(418).send("aloja MO niamgen NI NIGGA");
+      return response.status(418).send("Imagen subida");
     } catch (err) {
+      console.log(err)
       throw new ExceptionHandler();
     }
   }
