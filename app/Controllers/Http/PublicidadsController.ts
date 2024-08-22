@@ -141,16 +141,39 @@ export default class PublicidadsController {
         ? await PublicidadColor.findBy("nombre", request.body().color)
         : null;
 
+      const fechainicioRaw = request.body().fechainicio;
+      const fechafinRaw = request.body().fechafin;
+
+      const fecha_inicio =
+        !fechainicioRaw ||
+        fechainicioRaw === "0000-00-00" ||
+        !DateTime.fromISO(fechainicioRaw).isValid
+          ? undefined
+          : DateTime.fromISO(fechainicioRaw)
+              .setLocale("es-Ar")
+              .toFormat("yyyy-MM-dd hh:mm:ss");
+
+      const fecha_fin =
+        !fechafinRaw ||
+        fechafinRaw === "0000-00-00" ||
+        !DateTime.fromISO(fechafinRaw).isValid
+          ? undefined
+          : DateTime.fromISO(fechafinRaw)
+              .setLocale("es-Ar")
+              .toFormat("yyyy-MM-dd hh:mm:ss");
+
+      console.log(request.body());
+
       let mergeObject: any = {
-        fecha_inicio: DateTime.fromISO(request.body().fechainicio)
-          .setLocale("es-Ar")
-          .toFormat("yyyy-MM-dd hh:mm:ss"),
-        fecha_fin: DateTime.fromISO(request.body().fechafin)
-          .setLocale("es-Ar")
-          .toFormat("yyyy-MM-dd hh:mm:ss"),
+        fecha_inicio: fecha_inicio,
+        fecha_fin: fecha_fin,
         titulo: request.body().titulo,
         descripcion: request.body().descripcion,
-        habilitado: request.body().habilitado == "true" ? "s" : "n",
+        habilitado:
+          request.body().habilitado === true ||
+          request.body().habilitado === "true"
+            ? "s"
+            : "n",
         link: request.body().link,
         imagen: request.body().imagen,
         id_publicidad_tipo: tipo?.id,
