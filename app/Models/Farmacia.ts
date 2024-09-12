@@ -215,44 +215,48 @@ export default class Farmacia extends BaseModel {
     d: any;
     usuarioAuth: Usuario;
   }) {
+    
     try {
       //Guardar datos de geolocalizacion
       const localidad = await Database.query()
-        .from("tbl_localidad")
-        .select(
-          Database.raw(
-            "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
-          )
+      .from("tbl_localidad")
+      .select(
+        Database.raw(
+          "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
         )
-        .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
-        .andWhere(
-          "tbl_provincia.nombre",
-          "=",
-          d.provincia ? d.provincia : "Santa Fe"
-        )
-        .leftJoin(
-          "tbl_departamento",
-          "tbl_localidad.id_departamento",
-          "tbl_departamento.id"
-        )
+      )
+      .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
+      .andWhere(
+        "tbl_provincia.nombre",
+        "=",
+        d.provincia ? d.provincia : "Santa Fe"
+      )
+      .leftJoin(
+        "tbl_departamento",
+        "tbl_localidad.id_departamento",
+        "tbl_departamento.id"
+      )
         .leftJoin(
           "tbl_provincia",
           "tbl_departamento.id_provincia",
           "tbl_provincia.id"
         );
-
-      const provincia = d.provincia ? d.provincia : "Santa Fe";
-      const pais = "Argentina";
-      const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
-
-      
-      const { lat, lng: log } = await getCoordenadas({
-        calle: d.calle,
-        numero: d.numero,
-        localidad: localidad[0].nombre,
-      });
+        
+        const provincia = d.provincia ? d.provincia : "Santa Fe";
+        const pais = "Argentina";
+        const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
+        
+        
+        const { lat, lng: log } = await getCoordenadas({
+          calle: d.calle,
+          numero: d.numero,
+          localidad: localidad[0].nombre,
+          provincia,
+          pais
+        });
 
       //Guarda datos de farmacia
+     
       const farmacia = await Farmacia.query()
         .select("tbl_farmacia.*")
         .leftJoin("tbl_usuario as u", "id_usuario", "u.id")

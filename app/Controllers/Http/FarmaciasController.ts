@@ -47,6 +47,7 @@ export default class FarmaciasController {
         "usuario",
         request.params().usuario
       );
+      
       if (usuario.esfarmacia === "s") {
         const farmacia = await Farmacia.traerFarmacias({
           usuario: request.params().usuario,

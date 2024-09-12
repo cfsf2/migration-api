@@ -48,7 +48,7 @@ export const boolaEnumObj = (e) => {
   return e;
 };
 
-export const getCoordenadas = ({
+export const getCoordenadas = async ({
   calle,
   numero,
   localidad,
@@ -62,16 +62,19 @@ export const getCoordenadas = ({
   pais?: string;
 }): Promise<{ lat: string; lng: string }> => {
   try {
-    return new Promise(async (resolve) => {
-      const direccioncompleta = `${calle} ${numero}, ${localidad}, ${provincia}, ${pais}`;
-      const geocoding = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
-      );
+    let direccioncompleta = `${calle} ${numero}, ${localidad}, ${provincia}, ${pais}`;
 
-      resolve(geocoding.data.results[0].geometry.location);
-    });
+    direccioncompleta = direccioncompleta
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, ""); // Remover acentos y diacríticos no conformes con UTF8
+    direccioncompleta = encodeURIComponent(direccioncompleta);
+
+    const geocoding = await axios.get(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
+    );
+    return geocoding.data.results[0].geometry.location;
   } catch (err) {
-    console.log("error getCoordenadas");
+    console.log("error getCoordenadas", err);
     throw err;
   }
 };
