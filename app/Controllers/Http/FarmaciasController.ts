@@ -126,23 +126,21 @@ export default class FarmaciasController {
 
   public async mig_updatePerfil({
     request,
-    response,
     bouncer,
     auth,
   }: HttpContextContract) {
     try {
       const usuario = await auth.authenticate();
       await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
-
+    
       const { username } = request.qs();
-      return response.created(
-        await Farmacia.actualizarFarmacia({
-          usuario: username,
-          d: request.body(),
-          usuarioAuth: usuario,
-        })
-      );
+      return await Farmacia.actualizarFarmacia({
+        usuario: username,
+        d: request.body(),
+        usuarioAuth: usuario,
+      });
     } catch (err) {
+      console.log("mig_updatePerfil", err);
       throw new ExceptionHandler();
     }
   }

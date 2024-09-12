@@ -245,6 +245,7 @@ export default class Farmacia extends BaseModel {
       const pais = "Argentina";
       const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
 
+      
       const { lat, lng: log } = await getCoordenadas({
         calle: d.calle,
         numero: d.numero,
@@ -545,9 +546,9 @@ export default class Farmacia extends BaseModel {
       }
 
       //Actualizar productos Pack >:'(
-      return "Terminamos de actualizar papu";
+      return "Terminamos de actualizar";
     } catch (err) {
-      console.log(err);
+      console.log("actualizarFarmacia", err);
       return err;
     }
   }

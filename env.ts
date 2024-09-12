@@ -37,4 +37,5 @@ export default Env.rules({
   DEBITOS_FTP_SERVER: Env.schema.string(),
   DEBITOS_FTP_USER: Env.schema.string(),
   DEBITOS_FTP_PASSWORD: Env.schema.string(),
+  ENTORNO: Env.schema.string(),
 });

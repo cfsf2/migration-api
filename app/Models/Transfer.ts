@@ -33,6 +33,9 @@ import TransferEmail from "./TransferEmail";
 import FarmaciaLaboratorio from "./FarmaciaLaboratorio";
 import { FarmaciaDrogueria } from "App/Helper/ModelIndex";
 
+
+import Env from "@ioc:Adonis/Core/Env";
+
 export default class Transfer extends BaseModel {
   public static table = "tbl_transfer";
   static async traerTransfers({ id_farmacia }: { id_farmacia?: number }) {
@@ -457,6 +460,24 @@ export default class Transfer extends BaseModel {
   }
 
   public async generarColaEmail(ctx: HttpContextContract) {
+
+    if(Env.get("ENTORNO") !== "produccion"){
+      const nuevoEmailAuto = new TransferEmail();
+      guardarDatosAuditoria({
+        objeto: nuevoEmailAuto,
+        usuario: ctx.auth.user as Usuario,
+        accion: AccionCRUD.crear,
+      });
+      nuevoEmailAuto.merge({
+        id_transfer: this.id,
+        emails: this.farmacia.email,
+        enviado: "n",
+      });
+
+      nuevoEmailAuto.save();
+      return "TESTING: Solo email farmacia"
+    }
+
     const nuevoEmail = new TransferEmail();
     guardarDatosAuditoria({
       objeto: nuevoEmail,

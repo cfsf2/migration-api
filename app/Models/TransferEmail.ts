@@ -4,6 +4,8 @@ import Mail from "@ioc:Adonis/Addons/Mail";
 import Base from "./Base";
 import { html_transfer } from "App/Helper/email";
 
+import Env from "@ioc:Adonis/Core/Env";
+
 export default class TransferEmail extends Base {
   public static table = "tbl_transfer_email";
 
@@ -26,10 +28,17 @@ export default class TransferEmail extends Base {
     } catch (err) {
       console.log(err);
     }
+    const entorno = Env.get("ENTORNO") === "produccion";
+    const subject =
+      (entorno
+        ? "Confirmacion de pedido de Transfer"
+        : "TRANSFER FICTICIO DE PRUEBA Pedido de Transfer") +
+      " " +
+      this.transfer.id;
     return Mail.send(async (message) => {
       message
         .from(process.env.SMTP_USERNAME as string)
-        .subject("Confirmacion de pedido de Transfer" + " " + this.transfer.id)
+        .subject(subject)
         .html(htmlTransfer);
 
       this.emails

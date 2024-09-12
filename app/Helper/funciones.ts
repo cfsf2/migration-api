@@ -5,7 +5,7 @@ import axios from "axios";
 import { DateTime } from "luxon";
 import * as fs from "fs";
 
-import { promises as fsPromises } from 'fs';
+import { promises as fsPromises } from "fs";
 
 export const cambiarKey = ({
   o,
@@ -61,14 +61,19 @@ export const getCoordenadas = ({
   provincia?: string;
   pais?: string;
 }): Promise<{ lat: string; lng: string }> => {
-  return new Promise(async (resolve) => {
-    const direccioncompleta = `${calle} ${numero}, ${localidad}, ${provincia}, ${pais}`;
-    const geocoding = await axios.get(
-      `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
-    );
+  try {
+    return new Promise(async (resolve) => {
+      const direccioncompleta = `${calle} ${numero}, ${localidad}, ${provincia}, ${pais}`;
+      const geocoding = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${direccioncompleta}&key=${process.env.GEOCODING_API}`
+      );
 
-    resolve(geocoding.data.results[0].geometry.location);
-  });
+      resolve(geocoding.data.results[0].geometry.location);
+    });
+  } catch (err) {
+    console.log("error getCoordenadas");
+    throw err;
+  }
 };
 
 export const eliminarKeysVacios = (mergObject) =>
@@ -208,13 +213,13 @@ export const arrayPermisos = async (usuario) => {
 };
 
 export async function _log(fileName: string, data: any): Promise<void> {
-  const logDir = 'log';
+  const logDir = "log";
 
   // Verifica si la carpeta 'log' existe, si no, la crea
   if (!fs.existsSync(logDir)) {
     await fsPromises.mkdir(logDir);
   }
 
-  const dataString = JSON.stringify(data) + '\n';
-  await fsPromises.appendFile(`${logDir}/${fileName}`, dataString, 'utf8');
+  const dataString = JSON.stringify(data) + "\n";
+  await fsPromises.appendFile(`${logDir}/${fileName}`, dataString, "utf8");
 }
