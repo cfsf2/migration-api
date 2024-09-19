@@ -18,7 +18,6 @@ import {
 } from "App/Helper/ModelIndex";
 import Servicio from "App/Models/Servicio";
 import QrPresentacion from "App/Models/QrPresentacion";
-import Localidad from "App/Models/Localidad";
 
 export default class FarmaciasController {
   public async index() {
