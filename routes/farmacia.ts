@@ -38,6 +38,8 @@ Route.get("/farmacias/debitos/:periodo/:cufe", "DebitosController.debitos");
 
 Route.post("/farmacia/nro_cuenta", "FarmaciasController.nro_cuenta");
 
+Route.post("/farmacia/localidades", "FarmaciasController.localidades");
+
 Route.get("/farmacias/subirDebitos/:periodo", "DebitosController.subirDebitos");
 Route.get("/farmacias/revisar-carpeta/:periodo", "DebitosController.revisarCarpeta");
 Route.get("/farmacias/subir-digital/:periodo", "DebitosController.subirDigital");

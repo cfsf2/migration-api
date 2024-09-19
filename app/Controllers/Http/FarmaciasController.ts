@@ -18,6 +18,7 @@ import {
 } from "App/Helper/ModelIndex";
 import Servicio from "App/Models/Servicio";
 import QrPresentacion from "App/Models/QrPresentacion";
+import Localidad from "App/Models/Localidad";
 
 export default class FarmaciasController {
   public async index() {
@@ -47,7 +48,7 @@ export default class FarmaciasController {
         "usuario",
         request.params().usuario
       );
-      
+
       if (usuario.esfarmacia === "s") {
         const farmacia = await Farmacia.traerFarmacias({
           usuario: request.params().usuario,
@@ -133,7 +134,7 @@ export default class FarmaciasController {
     try {
       const usuario = await auth.authenticate();
       await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_UPDATE);
-    
+
       const { username } = request.qs();
       return await Farmacia.actualizarFarmacia({
         usuario: username,
@@ -327,5 +328,34 @@ export default class FarmaciasController {
     );
 
     return res;
+  }
+
+  public async localidades(ctx: HttpContextContract) {
+    const { id_provincia } = ctx.request.body();
+    const localidades = await Farmacia.query()
+      .select([
+        "tbl_localidad.id",
+        "tbl_localidad.nombre",
+        "tbl_localidad.centroide_lon",
+        "tbl_localidad.centroide_lat",
+      ])
+      .leftJoin(
+        "tbl_localidad",
+        "tbl_farmacia.id_localidad",
+        "tbl_localidad.id"
+      )
+      .leftJoin(
+        "tbl_departamento",
+        "tbl_departamento.id",
+        "tbl_localidad.id_departamento"
+      )
+      .leftJoin(
+        "tbl_provincia",
+        "tbl_provincia.id",
+        "tbl_departamento.id_provincia"
+      )
+      .if(id_provincia, (q) => q.where("tbl_provincia.id", id_provincia)).groupBy("tbl_localidad.id").orderBy("tbl_localidad.nombre","asc")
+
+    return localidades;
   }
 }
