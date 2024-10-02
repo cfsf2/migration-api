@@ -53,7 +53,7 @@ export default class ProductoPackController {
   }
 
   public async producto({ request }: HttpContextContract) {
-    console.log("Holanda", request.params());
+    // console.log("Holanda", request.params());
     try {
       const { idProducto } = request.params();
       const prods = await ProductoPack.query()

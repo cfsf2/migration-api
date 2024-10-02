@@ -81,7 +81,7 @@ export default class FarmaciasController {
       }
       return usuario;
     } catch (err) {
-      console.log(err);
+      console.log("MIG PERFIL ERROR: --------------- ", err);
       throw new ExceptionHandler().handle(err, ctx);
     }
   }
@@ -353,7 +353,9 @@ export default class FarmaciasController {
         "tbl_provincia.id",
         "tbl_departamento.id_provincia"
       )
-      .if(id_provincia, (q) => q.where("tbl_provincia.id", id_provincia)).groupBy("tbl_localidad.id").orderBy("tbl_localidad.nombre","asc")
+      .if(id_provincia, (q) => q.where("tbl_provincia.id", id_provincia))
+      .groupBy("tbl_localidad.id")
+      .orderBy("tbl_localidad.nombre", "asc");
 
     return localidades;
   }

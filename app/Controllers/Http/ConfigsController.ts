@@ -471,7 +471,7 @@ export default class ConfigsController {
 
       return MenuDefinitivo;
     } catch (err) {
-      console.log(Date.now(), err);
+      console.log("MENU ERROR: --------------------------", Date.now(), err);
 
       return new ExceptionHandler().handle(err, ctx);
     }

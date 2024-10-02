@@ -72,7 +72,8 @@ export default class Usuario extends BaseModel {
       )
       .if(usuarioNombre && usuarioNombre !== "", (query) => {
         return query.where("usuario", usuarioNombre);
-      });
+      })
+      .groupBy("tbl_usuario.id");
 
     if (usuarios.length === 0) return "Usuario no encontrado";
 
@@ -193,7 +194,6 @@ export default class Usuario extends BaseModel {
 
   public static async registrarUsuarioAdmin(data, usuarioAuth) {
     const usuario = new Usuario();
-    const usuarioPerfil = new UsuarioPerfil();
 
     try {
       const usuarioSchema = schema.create({
@@ -250,16 +250,19 @@ export default class Usuario extends BaseModel {
       });
       await usuario.save();
 
-      usuarioPerfil.merge({
-        id_usuario: usuario.id,
-        id_perfil: Number(data.perfil),
-      });
-      guardarDatosAuditoria({
-        objeto: usuarioPerfil,
-        usuario: usuarioAuth,
-        accion: AccionCRUD.crear,
-      });
-      await usuarioPerfil.save();
+      if (data.perfil) {
+        const usuarioPerfil = new UsuarioPerfil();
+        usuarioPerfil.merge({
+          id_usuario: usuario.id,
+          id_perfil: Number(data.perfil),
+        });
+        guardarDatosAuditoria({
+          objeto: usuarioPerfil,
+          usuario: usuarioAuth,
+          accion: AccionCRUD.crear,
+        });
+        await usuarioPerfil.save();
+      }
       return {
         body: {
           type: "success",

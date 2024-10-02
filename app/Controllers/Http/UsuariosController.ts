@@ -86,11 +86,11 @@ export default class UsuariosController {
     bouncer,
   }: HttpContextContract) {
     try {
+    
       await bouncer.authorize("AccesoRuta", Permiso.FARMACIA_CREATE);
       const usuario = await auth.authenticate();
       const body = request.body();
       const nuevoUsuario = new Usuario();
-      const nuevoPerfilUsuario = new UsuarioPerfil();
 
       nuevoUsuario.merge({
         usuario: body.username.toUpperCase(),
@@ -113,19 +113,21 @@ export default class UsuariosController {
         console.log(err);
         return err;
       }
-
-      nuevoPerfilUsuario.merge({
-        id_perfil: body.perfil,
-        id_usuario: nuevoUsuario.id,
-      });
-
+    
       try {
-        guardarDatosAuditoria({
-          objeto: nuevoPerfilUsuario,
-          usuario: usuario,
-          accion: AccionCRUD.crear,
-        });
-        await nuevoPerfilUsuario.save();
+        if (body.perfil && !Number.isNaN(body.perfil)) {
+          const nuevoPerfilUsuario = new UsuarioPerfil();
+          nuevoPerfilUsuario.merge({
+            id_perfil: body.perfil,
+            id_usuario: nuevoUsuario.id,
+          });
+          guardarDatosAuditoria({
+            objeto: nuevoPerfilUsuario,
+            usuario: usuario,
+            accion: AccionCRUD.crear,
+          });
+          await nuevoPerfilUsuario.save();
+        }
         response.status(201);
       } catch (err) {
         console.log(err);

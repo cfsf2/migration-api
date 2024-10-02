@@ -863,7 +863,7 @@ const aplicarFiltros = (
       }
 
       if (!valordefault) return;
-      console.log(valordefault, "1323trgf");
+      // console.log(valordefault, "1323trgf");
       aplicaWhere(query, valordefault, fd, ctx);
     });
 
