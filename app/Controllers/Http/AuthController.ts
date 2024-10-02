@@ -32,14 +32,16 @@ export default class AuthController {
         .toFormat("yyyy-MM-dd hh:mm:ss");
       await usuario[0].save();
 
-      // PARA ACCEDER AL DASHBOARD DEBE TENER EL PERMISO DASHBOARD_FARMACIA
-      response.dashboard = usuario[0].perfil[0].permisos.some(
-        (p) => p.nombre === "DASHBOARD_FARMACIA"
-      );
+      if (usuario[0].esfarmacia === "s" || usuario[0].admin === "s") {
+        // PARA ACCEDER AL DASHBOARD DEBE TENER EL PERMISO DASHBOARD_FARMACIA
+        response.dashboard = usuario[0].perfil[0].permisos.some(
+          (p) => p.nombre === "DASHBOARD_FARMACIA"
+        );
 
-      response.permisos = Array.from(
-        new Set(usuario[0].perfil[0]?.permisos.map((p) => p.tipo))
-      );
+        response.permisos = Array.from(
+          new Set(usuario[0].perfil[0]?.permisos.map((p) => p.tipo))
+        );
+      }
       response.user_display_name = usuario[0].give_user_display_name();
 
       response.user_rol = [usuario[0].perfil[0]?.tipo];
