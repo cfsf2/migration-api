@@ -55,7 +55,9 @@ export class Insertar {
 
       if (modelo && insert_idsArray.length > 0) {
         const objeto = {};
-        objeto[campo] = valor;
+        if (campo) {
+          objeto[campo] = valor;
+        }
 
         insert_idsArray.forEach((v, i) => (objeto[camposArray[i]] = v));
 
@@ -68,7 +70,6 @@ export class Insertar {
           objeto: registro,
           accion: AccionCRUD.crear,
         });
-
         await registro.save();
 
         return { registroCreado: registro, creado: true };
