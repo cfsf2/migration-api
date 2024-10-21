@@ -30,6 +30,7 @@ export default class FarmaciaAux extends Farmacia {
       usuario: ctx.request.body().usuario,
       password: ctx.request.body().password,
       esfarmacia: "s",
+      nombre: registro.nombre,
     });
     await usuario.save();
     // const asignarPerfil = new UsuarioPerfil();
