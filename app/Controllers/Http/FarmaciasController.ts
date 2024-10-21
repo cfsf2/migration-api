@@ -39,6 +39,17 @@ export default class FarmaciasController {
       throw new ExceptionHandler();
     }
   }
+  public async farmacias_plenas() {
+    try {
+      console.log("hola farmacia plena");
+      return await Farmacia.traerFarmacias({
+        where: "tbl_usuario_perfil.id_perfil = 2",
+      });
+    } catch (err) {
+      console.log("farmacias_plenas");
+      throw new ExceptionHandler();
+    }
+  }
 
   public async mig_perfil(ctx: HttpContextContract) {
     const { request } = ctx;

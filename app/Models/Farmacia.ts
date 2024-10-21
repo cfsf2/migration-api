@@ -47,14 +47,17 @@ export default class Farmacia extends BaseModel {
     matricula,
     id,
     admin,
+    where,
   }: {
     usuario?: string;
     matricula?: number;
     id?: number;
     admin?: boolean;
+    where?: string;
   }): Promise<any> {
-    let farmacias =
-      await Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
+    try {
+      let _farmacias =
+        Database.rawQuery(`SELECT f.id, f.id as _id, f.nombre, f.nombrefarmaceutico, 
       f.matricula, f.cufe, f.cuit, f.calle, f.numero, f.cp,
       f.direccioncompleta, f.longitud AS log, 
       f.latitud AS lat, f.costoenvio,
@@ -67,6 +70,7 @@ export default class Farmacia extends BaseModel {
       f.ts_creacion as fechaalta,
       f.id as farmaciaid,
       f.visita_comercial, f.telefonofijo, f.f_ultimo_acceso as ultimoacceso,
+     
       ${admin ? "f.*," : ""}
       l.nombre AS localidad, u.usuario AS usuario, 
       p.nombre AS provincia, pf.nombre AS perfil_farmageo, 
@@ -77,12 +81,15 @@ export default class Farmacia extends BaseModel {
       LEFT JOIN tbl_departamento AS d ON l.id_departamento = d.id
       LEFT JOIN tbl_provincia AS p ON d.id_provincia = p.id
       LEFT JOIN tbl_usuario AS u ON f.id_usuario = u.id
+      LEFT JOIN tbl_usuario_perfil on tbl_usuario_perfil.id_usuario = u.id
       LEFT JOIN tbl_perfil_farmageo AS pf ON pf.id = f.id_perfil_farmageo
       LEFT JOIN tbl_farmacia_mediodepago AS fmp ON f.id = fmp.id_farmacia AND fmp.habilitado = 's'
       LEFT JOIN tbl_mediodepago AS mp ON fmp.id_mediodepago = mp.id
       LEFT JOIN tbl_farmacia_institucion AS fi ON f.id = fi.id_farmacia AND fi.habilitado = 's'
       LEFT JOIN tbl_institucion AS i ON fi.id_institucion = i.id
       WHERE f.nombre IS NOT NULL 
+
+      ${where ? `AND ${where}` : ""}
       
      
       ${usuario ? `AND u.usuario = "${usuario}"` : ""} 
@@ -90,120 +97,132 @@ export default class Farmacia extends BaseModel {
       ${id ? `AND f.id = ${id}` : ""}
       GROUP BY f.id`);
 
-    let servicios =
-      await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia, fs.habilitado, s.auto_asignable, s.orden_web  FROM tbl_farmacia_servicio AS fs
+      // console.log(_farmacias.toQuery());
+
+      let farmacias = await _farmacias;
+
+      let servicios =
+        await Database.rawQuery(`SELECT s.nombre AS tipo, fs.id_farmacia, fs.habilitado, s.auto_asignable, s.orden_web  FROM tbl_farmacia_servicio AS fs
     LEFT JOIN tbl_servicio AS s ON fs.id_servicio = s.id WHERE s.habilitado = "s" and fs.habilitado = "s"`);
 
-    let dias = await Database.rawQuery(
-      `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia 
+      let dias = await Database.rawQuery(
+        `SELECT fd.id_farmacia, fd.inicio, fd.fin, fd.habilitado, d.nombre AS dia 
       FROM tbl_farmacia_dia AS fd 
       LEFT JOIN tbl_dia AS d ON fd.id_dia = d.id `
-    );
+      );
 
-    function dameloshorarios(f, horarios) {
-      const dias = horarios.filter((h) => h.id_farmacia === f.id);
+      function dameloshorarios(f, horarios) {
+        const dias = horarios.filter((h) => h.id_farmacia === f.id);
 
-      const semana = [
-        "lunes",
-        "martes",
-        "miercoles",
-        "jueves",
-        "viernes",
-        "sabado",
-        "domingo",
-      ];
-      interface bloque {
-        bloques: [];
-        habilitado: Boolean;
-        dia: String;
+        const semana = [
+          "lunes",
+          "martes",
+          "miercoles",
+          "jueves",
+          "viernes",
+          "sabado",
+          "domingo",
+        ];
+        interface bloque {
+          bloques: [];
+          habilitado: Boolean;
+          dia: String;
+        }
+        let bloqu: [bloque] = [] as unknown as [bloque];
+
+        semana.forEach((dia) => {
+          let d2 = dias.filter((d) => d.dia === dia);
+
+          const bloquecitos = d2.map(
+            (
+              bloque: { inicio: any; fin: any; habilitado: string },
+              i: number
+            ) => {
+              if (bloque.habilitado === "n" && i === 1) return null;
+              return {
+                desde: bloque.inicio,
+                hasta: bloque.fin,
+                bloq: i + 1,
+              };
+            }
+          );
+          const horarioFarmageo = {
+            bloques: bloquecitos.filter((b) => b !== null),
+            habilitado: d2.find((d) => d.dia === dia)
+              ? d2.find((d) => d.dia === dia).habilitado === "s"
+                ? true
+                : false
+              : false,
+            dia: dia,
+          };
+
+          if (horarioFarmageo.bloques.length === 0) return;
+          return bloqu.push(horarioFarmageo);
+        });
+
+        return bloqu;
       }
-      let bloqu: [bloque] = [] as unknown as [bloque];
 
-      semana.forEach((dia) => {
-        let d2 = dias.filter((d) => d.dia === dia);
-
-        const bloquecitos = d2.map(
-          (
-            bloque: { inicio: any; fin: any; habilitado: string },
-            i: number
-          ) => {
-            if (bloque.habilitado === "n" && i === 1) return null;
-            return {
-              desde: bloque.inicio,
-              hasta: bloque.fin,
-              bloq: i + 1,
-            };
-          }
-        );
-        const horarioFarmageo = {
-          bloques: bloquecitos.filter((b) => b !== null),
-          habilitado: d2.find((d) => d.dia === dia)
-            ? d2.find((d) => d.dia === dia).habilitado === "s"
-              ? true
-              : false
-            : false,
-          dia: dia,
-        };
-
-        if (horarioFarmageo.bloques.length === 0) return;
-        return bloqu.push(horarioFarmageo);
-      });
-
-      return bloqu;
-    }
-
-    farmacias = await Promise.all(
-      farmacias[0].map(async (f) => {
-        const productosCustom =
-          await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
+      farmacias = await Promise.all(
+        farmacias[0].map(async (f) => {
+          const productosCustom =
+            await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
         LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
         WHERE fpc.id_farmacia = ${f.id}
         AND fpc.habilitado = 's' 
         AND fpc.en_papelera = 'n'`);
 
-        const productosEnPapelera =
-          await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
+          const productosEnPapelera =
+            await Database.rawQuery(`SELECT pc.*, pc.id as _id FROM tbl_farmacia_producto_custom AS fpc 
         LEFT JOIN tbl_producto_custom AS pc ON fpc.id_producto_custom = pc.id  
         WHERE fpc.id_farmacia = ${f.id}
         AND fpc.habilitado = 's' 
         AND fpc.en_papelera = 's'`);
 
-        f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
+          f.servicios = servicios[0].filter((s) => s.id_farmacia === f.id);
 
-        f.mediospagos = f.mediospagos ? f.mediospagos.split(",") : [];
-        f.instituciones = f.instituciones ? f.instituciones.split(",") : [];
-        f.horarios = dameloshorarios(f, dias[0]);
-        f.productos = productosCustom[0].map((pc) => {
-          pc._id = pc._id.toString();
-          return enumaBool(pc);
-        });
-        f.direccioncompleta = `${f.calle} ${f.numero}, ${f.localidad}, ${f.provincia}`;
-        f.papeleraProductos = productosEnPapelera[0].map((pc) => {
-          pc._id = pc._id.toString();
-          return enumaBool(pc);
-        });
-        f.excepcionesProdFarmageo = [];
-        f.excepcionesEntidadesFarmageo = [];
-        f.imagen = f.imagen ? f.imagen : "";
+          f.mediospagos = f.mediospagos ? f.mediospagos.split(",") : [];
+          f.instituciones = f.instituciones ? f.instituciones.split(",") : [];
+          f.horarios = dameloshorarios(f, dias[0]);
+          f.productos = productosCustom[0].map((pc) => {
+            pc._id = pc._id.toString();
+            return enumaBool(pc);
+          });
+          f.direccioncompleta = `${f.calle} ${f.numero}, ${f.localidad}, ${f.provincia}`;
+          f.papeleraProductos = productosEnPapelera[0].map((pc) => {
+            pc._id = pc._id.toString();
+            return enumaBool(pc);
+          });
+          f.excepcionesProdFarmageo = [];
+          f.excepcionesEntidadesFarmageo = [];
+          f.imagen = f.imagen ? f.imagen : "";
+          
 
-        if (admin) {
-          let perfil = await UsuarioPerfil.query()
-            .preload("perfil")
-            .where("id_usuario", f.id_usuario);
-          f.id_perfil = perfil[0].perfil.id;
-          delete f.instagran;
-          delete f.facebook;
-          delete f.farmaciaid;
-        }
-        f = enumaBool(f);
-        return f;
-      })
-    );
-    if (farmacias.length === 1) {
-      return farmacias[0];
+          if (admin) {
+            let perfil = await UsuarioPerfil.query()
+              .preload("perfil")
+              .where("id_usuario", f.id_usuario)
+              .first();
+
+            if (!perfil) throw {};
+            f.id_perfil = perfil.perfil.id;
+            delete f.instagran;
+            delete f.facebook;
+            delete f.farmaciaid;
+          }
+          f = enumaBool(f);
+          return f;
+        })
+      );
+      if (farmacias.length === 1) {
+        return farmacias[0];
+      }
+
+      return farmacias;
+    } catch (err) {
+      console.log("traerFarmacias", err);
+      throw err;
     }
-
-    return farmacias;
   }
 
   static async actualizarFarmacia({
@@ -215,48 +234,46 @@ export default class Farmacia extends BaseModel {
     d: any;
     usuarioAuth: Usuario;
   }) {
-    
     try {
       //Guardar datos de geolocalizacion
       const localidad = await Database.query()
-      .from("tbl_localidad")
-      .select(
-        Database.raw(
-          "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
+        .from("tbl_localidad")
+        .select(
+          Database.raw(
+            "tbl_departamento.nombre as departamento, tbl_provincia.nombre as provincia, tbl_localidad.*"
+          )
         )
-      )
-      .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
-      .andWhere(
-        "tbl_provincia.nombre",
-        "=",
-        d.provincia ? d.provincia : "Santa Fe"
-      )
-      .leftJoin(
-        "tbl_departamento",
-        "tbl_localidad.id_departamento",
-        "tbl_departamento.id"
-      )
+        .where("tbl_localidad.nombre", "LIKE", `%${d.localidad}`)
+        .andWhere(
+          "tbl_provincia.nombre",
+          "=",
+          d.provincia ? d.provincia : "Santa Fe"
+        )
+        .leftJoin(
+          "tbl_departamento",
+          "tbl_localidad.id_departamento",
+          "tbl_departamento.id"
+        )
         .leftJoin(
           "tbl_provincia",
           "tbl_departamento.id_provincia",
           "tbl_provincia.id"
         );
-        
-        const provincia = d.provincia ? d.provincia : "Santa Fe";
-        const pais = "Argentina";
-        const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
-        
-        
-        const { lat, lng: log } = await getCoordenadas({
-          calle: d.calle,
-          numero: d.numero,
-          localidad: localidad[0].nombre,
-          provincia,
-          pais
-        });
+
+      const provincia = d.provincia ? d.provincia : "Santa Fe";
+      const pais = "Argentina";
+      const direccioncompleta = `${d.calle} ${d.numero}, ${localidad[0].nombre}, ${provincia}, ${pais}`;
+
+      const { lat, lng: log } = await getCoordenadas({
+        calle: d.calle,
+        numero: d.numero,
+        localidad: localidad[0].nombre,
+        provincia,
+        pais,
+      });
 
       //Guarda datos de farmacia
-     
+
       const farmacia = await Farmacia.query()
         .select("tbl_farmacia.*")
         .leftJoin("tbl_usuario as u", "id_usuario", "u.id")

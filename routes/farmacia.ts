@@ -1,6 +1,7 @@
 import Route from "@ioc:Adonis/Core/Route";
 
 Route.get("/farmacias", "FarmaciasController.mig_index");
+Route.get("/farmaciasPlenas", "FarmaciasController.farmacias_plenas");
 Route.get("/farmacias/usuario/:usuario", "FarmaciasController.existeUsuario");
 Route.get("/farmacias/:usuario", "FarmaciasController.mig_perfil");
 Route.get("/farmacias/login/:usuario", "FarmaciasController.mig_perfil");
