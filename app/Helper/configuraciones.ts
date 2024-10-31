@@ -177,6 +177,10 @@ const extraerElementos = ({
         valor;
         // Verificar Orden designado por usuario
 
+        const componente = sconf.valores.find(
+          (s) => s.atributo[0].nombre === "componente"
+        )?.valor;
+
         const configuracionDeUsuario = (() => {
           if (
             getAtributo({
@@ -198,6 +202,11 @@ const extraerElementos = ({
         item["mostrar"] = configuracionDeUsuario?.mostrar
           ? configuracionDeUsuario.mostrar
           : "s";
+
+        // componentes que no deben renderizarse en el front
+        if (componente === "hidden" || componente === "excel") {
+          item["mostrar"] = "n";
+        }
 
         if (
           ctx.usuario.configuracionesDeUsuario[sc_padre.id_a]
