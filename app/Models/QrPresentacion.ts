@@ -28,6 +28,12 @@ export default class QrPresentacion extends BaseModel {
   @column()
   public tipo_ingreso: string;
 
+  @column()
+  public id_comisionista: number;
+
+  @column()
+  public anulado: string;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
