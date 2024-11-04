@@ -1643,11 +1643,16 @@ export const modificar = async (
   conf: SConf,
   usuario: Usuario
 ) => {
-  const funcion = getAtributo({ atributo: "update_funcion", conf });
+  try {
+    const funcion = getAtributo({ atributo: "update_funcion", conf });
+    
+    if (!funcion) return Update.update({ ctx, usuario, id, valor, conf });
 
-  if (!funcion) return Update.update({ ctx, usuario, id, valor, conf });
-
-  return eval(funcion)({ ctx, usuario, id, valor, conf });
+    return eval(funcion)({ ctx, usuario, id, valor, conf });
+  } catch (err) {
+    console.log("modificar", err);
+    throw err;
+  }
 };
 
 export const insertar = (

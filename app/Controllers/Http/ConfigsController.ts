@@ -287,6 +287,7 @@ export default class ConfigsController {
   }
 
   public async Update(ctx: HttpContextContract) {
+
     const { request, response, bouncer, auth } = ctx;
     const { valor, update_id, id_a } = request.body();
 
@@ -313,6 +314,7 @@ export default class ConfigsController {
       if (res?.modificado) {
         return response.accepted(res?.registroModificado);
       }
+     
       return response.badRequest(res);
     } catch (err) {
       console.log("CONTROLLER", err);
