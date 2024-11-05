@@ -140,6 +140,7 @@ export class Update {
       throw err;
     }
   }
+  
   public static async update({
     ctx,
     usuario,
