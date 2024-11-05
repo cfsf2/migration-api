@@ -310,7 +310,7 @@ export default class ConfigsController {
         return "No tiene permisos para esta config";
 
       const res = await modificar(ctx, update_id, valor, config, usuario);
-
+console.log(res)
       if (res?.modificado) {
         return response.accepted(res?.registroModificado);
       }

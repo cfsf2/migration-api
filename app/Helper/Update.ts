@@ -53,6 +53,93 @@ Insertar;
 export class Update {
   constructor() {}
 
+  public static async _update({
+    ctx,
+    usuario,
+    id,
+    valor,
+    conf,
+    formData,
+  }: {
+    ctx: HttpContextContract;
+    usuario: Usuario;
+    id: any;
+    valor: string | number;
+    conf: SConf;
+    formData?: {};
+  }) {
+    try {
+      formData;
+      if (conf.tipo.id === 9)
+        return this.updateABM({ ctx, formData: ctx.request.body(), conf });
+
+      const tabla = getAtributo({ atributo: "update_tabla", conf: conf });
+      const modelo = getAtributo({ atributo: "update_modelo", conf: conf });
+      const campo = getAtributo({ atributo: "update_campo", conf: conf });
+      const columna = getAtributo({
+        atributo: "update_id_nombre",
+        conf: conf,
+      });
+      const registrarCambios = getAtributo({
+        atributo: "update_registro_cambios",
+        conf: conf,
+      });
+
+      if (modelo && campo) {
+        try {
+          const registro = await M[modelo].findOrFail(id);
+          const valorAnterior = registro[campo];
+
+          registro.merge({
+            [campo]: valor,
+          });
+
+          guardarDatosAuditoria({
+            usuario,
+            objeto: registro,
+            accion: AccionCRUD.editar,
+            registroCambios: {
+              registrarCambios,
+              tabla,
+              campo,
+              valorAnterior,
+            },
+          });
+          //  console.log("update registro",registro)
+          return registro;
+        } catch (err) {
+          console.log("111 update error", err);
+          throw await new ExceptionHandler().handle(err, ctx);
+        }
+      }
+
+      if (!modelo && tabla && campo && id) {
+        const s = "`";
+
+        try {
+          const registro = await Database.rawQuery(
+            `UPDATE ${tabla} SET ${s
+              .concat(campo)
+              .concat(s)} = '${valor}', id_usuario_modificacion = ${
+              usuario.id
+            } WHERE ${columna ? columna : "id"} = ${id}`
+          );
+          return { registroModificado: registro, modificado: true };
+        } catch (err) {
+          console.log("Update.update: ", err);
+          throw await new ExceptionHandler().handle(err, ctx);
+        }
+      }
+      throw {
+        code: "DATOS_INCOMPLETOS",
+        message:
+          "La configuracion no tiene update_campo o update_modelo fijado.",
+      };
+    } catch (err) {
+      console.log("Error Update.update ", err);
+      throw err;
+    }
+  }
   public static async update({
     ctx,
     usuario,
@@ -132,7 +219,11 @@ export class Update {
           throw await new ExceptionHandler().handle(err, ctx);
         }
       }
-      throw {code:"DATOS_INCOMPLETOS", message:"La configuracion no tiene update_campo o update_modelo fijado."}
+      throw {
+        code: "DATOS_INCOMPLETOS",
+        message:
+          "La configuracion no tiene update_campo o update_modelo fijado.",
+      };
     } catch (err) {
       console.log("Error Update.update ", err);
       throw err;

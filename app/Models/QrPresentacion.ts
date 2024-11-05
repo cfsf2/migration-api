@@ -9,6 +9,8 @@ import QrFarmacia from "./QrFarmacia";
 import Qr from "./Qr";
 //import SParametro from "./SParametro";
 import Presentacion from "./Presentacion";
+import Update from "App/Helper/Update";
+import Insertar from "App/Helper/Insertar";
 
 export default class QrPresentacion extends BaseModel {
   public static table = "tbl_qr_presentacion";
@@ -24,7 +26,7 @@ export default class QrPresentacion extends BaseModel {
 
   @column()
   public observaciones: string;
-  
+
   @column()
   public tipo_ingreso: string;
 
@@ -53,6 +55,37 @@ export default class QrPresentacion extends BaseModel {
       extras[k] = this.$extras[k];
     });
     return extras;
+  }
+
+  public static async updateAnulado({
+    ctx,
+    usuario,
+    id,
+    valor,
+    conf,
+    insert_ids,
+  }) {
+    const anulado = valor === "s" ? "n" : "s";
+
+    if (!id) {
+      return await Insertar.insertar({
+        conf,
+        ctx,
+        insert_ids,
+        usuario,
+        valor: anulado,
+      });
+    }
+
+    const registroModificado = await Update._update({
+      conf,
+      ctx,
+      id,
+      usuario,
+      valor: anulado,
+    });
+    await registroModificado.save();
+    return { registroModificado, modificado: true };
   }
 
   public static async nuevo({ ctx }) {
