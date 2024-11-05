@@ -77,13 +77,18 @@ export default class QrPresentacion extends BaseModel {
       });
     }
 
-    const registroModificado = await Update._update({
+    const registroModificado = (await Update._update({
       conf,
       ctx,
       id,
       usuario,
       valor: anulado,
+    })) as QrPresentacion;
+
+    registroModificado.merge({
+      tipo_ingreso: "manual",
     });
+    
     await registroModificado.save();
     return { registroModificado, modificado: true };
   }

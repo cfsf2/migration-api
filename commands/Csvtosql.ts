@@ -39,10 +39,10 @@ export default class Csvtosql extends BaseCommand {
       id_farmacia: number | null
     ): Promise<string> {
       return (
-        `INSERT INTO tbl_evento_participante (id_evento, id_farmacia, titular, nombre, matricula, documento, telefono, token, pagado) ` +
-        `VALUES (1, ${id_farmacia}, '${row.Apellido}', '${row.Nombre}', '${
+        `INSERT INTO tbl_evento_participante (id_evento, id_farmacia, titular, nombre, matricula, documento, telefono, token, pagado, gratis) ` +
+        `VALUES (1, ${id_farmacia}, 's', '${row.Nombre} ${row.Apellido}', '${
           row.Matricula
-        }', '${row.DNI}', '${row.Celular}', '${uuidv4()}','s');`
+        }', '${row.DNI}', '${row.Celular}', '${uuidv4()}','s', 's');`
       );
     }
 
