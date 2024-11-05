@@ -1,5 +1,17 @@
 {
   "commands": {
+    "csvtosql": {
+      "settings": {
+        "loadApp": true,
+        "stayAlive": false
+      },
+      "commandPath": "./commands/Csvtosql",
+      "commandName": "csvtosql",
+      "description": "",
+      "args": [],
+      "aliases": [],
+      "flags": []
+    },
     "enviar:transfer_emails": {
       "settings": {
         "loadApp": true,
