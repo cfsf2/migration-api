@@ -26,6 +26,27 @@ let Insertar = I;
 let Eliminar = D;
 let Env = _Env;
 Env;
+
+
+export const modificar = async (
+  ctx: HttpContextContract,
+  id: number,
+  valor: any,
+  conf: SConf,
+  usuario: Usuario
+) => {
+  try {
+    const funcion = getAtributo({ atributo: "update_funcion", conf });
+    
+    if (!funcion) return await Update.update({ ctx, usuario, id, valor, conf });
+
+    return eval(funcion)({ ctx, usuario, id, valor, conf });
+  } catch (err) {
+    console.log("modificar", err);
+    throw err;
+  }
+};
+
 const verificarPermisos = async ({
   ctx,
   conf,
@@ -1636,24 +1657,6 @@ export class ConfBuilder {
   };
 }
 
-export const modificar = async (
-  ctx: HttpContextContract,
-  id: number,
-  valor: any,
-  conf: SConf,
-  usuario: Usuario
-) => {
-  try {
-    const funcion = getAtributo({ atributo: "update_funcion", conf });
-    
-    if (!funcion) return Update.update({ ctx, usuario, id, valor, conf });
-
-    return eval(funcion)({ ctx, usuario, id, valor, conf });
-  } catch (err) {
-    console.log("modificar", err);
-    throw err;
-  }
-};
 
 export const insertar = (
   ctx: HttpContextContract,
