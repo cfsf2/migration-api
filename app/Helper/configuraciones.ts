@@ -22,9 +22,9 @@ import Usuario from "App/Models/Usuario";
 const Database = Datab;
 
 // let Update = U;
-let Insertar = I;
-let Eliminar = D;
-let Env = _Env;
+const Insertar = I;
+const Eliminar = D;
+const Env = _Env;
 Env;
 
 globalThis.Update = Update;  
@@ -36,14 +36,16 @@ export const modificar = async (
   conf: SConf,
   usuario: Usuario
 ) => {
+  const funcion = getAtributo({ atributo: "update_funcion", conf });
   try {
-    const funcion = getAtributo({ atributo: "update_funcion", conf });
     
     if (!funcion) return await Update.update({ ctx, usuario, id, valor, conf });
 
     return await eval(funcion)({ ctx, usuario, id, valor, conf });
   } catch (err) {
     console.log("modificar", err);
+    console.log("Class Update? funcion?")
+    console.log(Update, funcion)
     throw err;
   }
 };
