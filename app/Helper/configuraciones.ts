@@ -7,7 +7,7 @@ import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { Permiso } from "./permisos";
 
-import U from "./Update";
+import Update from "./Update";
 import I from "./Insertar";
 import D from "./Eliminar";
 import _Env from "@ioc:Adonis/Core/Env";
@@ -21,12 +21,13 @@ import Usuario from "App/Models/Usuario";
 
 const Database = Datab;
 
-let Update = U;
+// let Update = U;
 let Insertar = I;
 let Eliminar = D;
 let Env = _Env;
 Env;
 
+globalThis.Update = Update;  
 
 export const modificar = async (
   ctx: HttpContextContract,
@@ -40,7 +41,7 @@ export const modificar = async (
     
     if (!funcion) return await Update.update({ ctx, usuario, id, valor, conf });
 
-    return eval(funcion)({ ctx, usuario, id, valor, conf });
+    return await eval(funcion)({ ctx, usuario, id, valor, conf });
   } catch (err) {
     console.log("modificar", err);
     throw err;

@@ -35,9 +35,12 @@ export default class Csvtosql extends BaseCommand {
   public async run() {
     // Función para generar el SQL de inserción
     async function generateInsertSQL(
-      row: any,
+      _row: any,
       id_farmacia: number | null
     ): Promise<string> {
+      let row: any = {};
+      Object.keys(_row).forEach((k) => (row[k.trim()] = _row[k]));
+
       return (
         `INSERT INTO tbl_evento_participante (id_evento, id_farmacia, titular, nombre, matricula, documento, telefono, token, pagado, gratis) ` +
         `VALUES (1, ${id_farmacia}, 's', '${row.Nombre} ${row.Apellido}', '${
@@ -49,46 +52,48 @@ export default class Csvtosql extends BaseCommand {
     // Función principal para leer el CSV y generar los inserts
     async function generateSQLFromCSV(csvFile: string, outputFile: string) {
       const outputStream = fs.createWriteStream(outputFile, {
-        flags: 'w',
-        encoding: 'utf8',
-      })
+        flags: "w",
+        encoding: "utf8",
+      });
 
-      const rows: any[] = []
-      
+      const rows: any[] = [];
+
       return new Promise<void>((resolve, reject) => {
         fs.createReadStream(csvFile)
-          .pipe(csv({ separator: ';' }))
-          .on('data', (row: any) => rows.push(row))
-          .on('error', (error) => {
-            console.error(`Error al leer el archivo CSV: ${error.message}`)
-            reject(error)
+          .pipe(csv({ separator: ";" }))
+          .on("data", (row: any) => rows.push(row))
+          .on("error", (error) => {
+            console.error(`Error al leer el archivo CSV: ${error.message}`);
+            reject(error);
           })
-          .on('end', async () => {
-            console.log(`Se han leído ${rows.length} filas. Procesando...`)
-            
+          .on("end", async () => {
+            console.log(`Se han leído ${rows.length} filas. Procesando...`);
+
             for (const row of rows) {
               try {
                 const farmacia = await Farmacia.query()
-                  .where('matricula', row.Matricula)
-                  .first()
+                  .where("matricula", row.Matricula)
+                  .first();
 
-                const id_farmacia = farmacia ? farmacia.id : null
-                const sql = await generateInsertSQL(row, id_farmacia)
-                outputStream.write(sql + '\n')
+                const id_farmacia = farmacia ? farmacia.id : null;
+                const sql = await generateInsertSQL(row, id_farmacia);
+                outputStream.write(sql + "\n");
               } catch (error) {
                 console.error(
-                  `Error al procesar la fila con matrícula "${row.Matricula}": ${
-                    error instanceof Error ? error.message : 'Error desconocido'
+                  `Error al procesar la fila con matrícula "${
+                    row.Matricula
+                  }": ${
+                    error instanceof Error ? error.message : "Error desconocido"
                   }`
-                )
+                );
               }
             }
-            
-            console.log(`Archivo ${outputFile} generado exitosamente.`)
-            outputStream.end()
-            resolve()
-          })
-      })
+
+            console.log(`Archivo ${outputFile} generado exitosamente.`);
+            outputStream.end();
+            resolve();
+          });
+      });
     }
 
     // Archivos CSV de entrada y salida
