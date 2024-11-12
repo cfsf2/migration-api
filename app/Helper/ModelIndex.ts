@@ -226,10 +226,12 @@ export let FarmaciaQr = _FarmaciaQr;
 import _Comisionista from "App/Models/Comisionista";
 import _QrPresentacion from "App/Models/QrPresentacion";
 import _UsuarioPresentacion from "App/Models/UsuarioPresentacion";
+import _Presentacion from "App/Models/Presentacion";
 
 export let Comisionista = _Comisionista;
 export let QrPresentacion = _QrPresentacion;
 export let UsuarioPresentacion = _UsuarioPresentacion;
+export let Presentacion = _Presentacion;
 
 import _FarmaciaAux from "App/Models/FarmaciaAux";
 export let FarmaciaAux = _FarmaciaAux;
