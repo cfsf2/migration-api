@@ -11,6 +11,9 @@ export default class Presentacion extends BaseModel {
   @column()
   public fecha_inicio: string;
 
+  @column()
+  public habilitada_para_carga: string;
+
   @column.dateTime({ autoCreate: true })
   public ts_creacion: DateTime;
 
