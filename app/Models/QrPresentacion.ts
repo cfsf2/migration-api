@@ -88,13 +88,24 @@ export default class QrPresentacion extends BaseModel {
     registroModificado.merge({
       tipo_ingreso: "manual",
     });
-    
+
     await registroModificado.save();
     return { registroModificado, modificado: true };
   }
 
   public static async nuevo({ ctx }) {
     const { id, INPUT_SELECT_FECHA_PRESENTACION } = ctx.request.body();
+
+    if (!/^[+-]?\d+(\.\d+)?$/.test(INPUT_SELECT_FECHA_PRESENTACION)) {
+      console.log(
+        "INPUT_SELECT_FECHA_PRESENTACION",
+        INPUT_SELECT_FECHA_PRESENTACION
+      );
+      throw {
+        code: "NO_ES_NUMERICO",
+        message: "No hay presentacion seleccionada.",
+      };
+    }
 
     const nqp = new QrPresentacion();
     nqp.merge({
@@ -122,28 +133,6 @@ export default class QrPresentacion extends BaseModel {
     qr;
     presentacion;
     ts_creacion_presentacion;
-
-    // if (farmacia.email && farmacia.email != "") {
-    //   const mensaje_parametro = await SParametro.findByOrFail(
-    //     "id_a",
-    //     "MENSAJE_QR_INGRESADO"
-    //   );
-
-    //   const html = `<div>${eval("`" + mensaje_parametro.valor + "`")}</div>`;
-    //   await Mail.send((message) => {
-    //     message.from(Env.get("FARMAGEO_EMAIL"));
-
-    //     message.to(farmacia.email);
-
-    //     message.subject("Aviso QR farmacia ingresado").html(
-    //       generarHtml({
-    //         titulo: `Aviso QR farmacia ingresado`,
-    //         // imagen: '',
-    //         texto: `${html}`,
-    //       })
-    //     );
-    //   });
-    // }
 
     return { registroModificado: nqp.toJSON(), creado: true };
   }

@@ -13,7 +13,7 @@ export default class UncaughtError {
         try {
           //  console.log(err);
         } catch (err) {
-          console.log(Date.now(), ctx.auth.user?.id, ctx.$_errores, err);
+          // console.log(Date.now(), ctx.auth.user?.id, ctx.$_errores, err);
           return await new ExceptionHandler().handle(err, ctx);
         }
         // process.exit(1);
