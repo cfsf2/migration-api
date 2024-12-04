@@ -18,6 +18,7 @@ import Datab from "@ioc:Adonis/Lucid/Database";
 import SConf from "App/Models/SConf";
 
 import Usuario from "App/Models/Usuario";
+import { _log } from "./funciones";
 
 const Database = Datab;
 
@@ -27,7 +28,7 @@ const Eliminar = D;
 const Env = _Env;
 Env;
 
-globalThis.Update = Update;  
+globalThis.Update = Update;
 
 export const modificar = async (
   ctx: HttpContextContract,
@@ -38,14 +39,13 @@ export const modificar = async (
 ) => {
   const funcion = getAtributo({ atributo: "update_funcion", conf });
   try {
-    
     if (!funcion) return await Update.update({ ctx, usuario, id, valor, conf });
 
     return await eval(funcion)({ ctx, usuario, id, valor, conf });
   } catch (err) {
     console.log("modificar", err);
-    console.log("Class Update? funcion?")
-    console.log(Update, funcion)
+    console.log("Class Update? funcion?");
+    console.log(Update, funcion);
     throw err;
   }
 };
@@ -1518,148 +1518,159 @@ export class ConfBuilder {
     return datosCalculados;
   };
 
-  private static getDatos = async (
+  public static getDatos = async (
     ctx: HttpContextContract,
     conf: SConf,
-    id?: number
+    id?: number,
+    whereManual?: string
   ): Promise<any> => {
-    const modelo = conf.getAtributo({
-      atributo: "modelo",
-    }) as unknown as string;
-    const parametro = conf.getAtributo({ atributo: "parametro" });
+    try {
+      const modelo = conf.getAtributo({
+        atributo: "modelo",
+      }) as unknown as string;
+      const parametro = conf.getAtributo({ atributo: "parametro" });
 
-    const tabla = conf.getAtributo({ atributo: "tabla" });
-    tabla;
+      const tabla = conf.getAtributo({ atributo: "tabla" });
+      tabla;
 
-    const campos = getSelect(ctx, [conf], 7);
-    const leftJoins = getLeftJoins({
-      columnas: conf.sub_conf,
-      conf: conf,
-      ctx,
-    });
-
-    const groupsBy: gp[] = getGroupBy({ columnas: conf.sub_conf, conf: conf });
-    const order = getOrder({ ctx, conf: conf });
-
-    let filtros_aplicables = await verificarPermisos({
-      ctx,
-      conf,
-      bouncer: ctx.bouncer,
-      tipoId: 3,
-    });
-
-    if (modelo) {
-      const Modelo = M[modelo];
-
-      let query = Modelo.query() as DatabaseQueryBuilderContract;
-
-      campos.forEach(async (campo) => {
-        if (campo.evaluar === "s") {
-          campo.campo = eval(campo.campo);
-        }
-
-        if (campo.subquery === "s") {
-          try {
-            ctx.$_sql.push({
-              sql: Database.rawQuery(campo.campo).toQuery(),
-              conf: campo.id_a,
-              confId: campo.confId,
-            });
-            const subquery = await Database.rawQuery(campo.campo);
-            return query.select(`"${subquery[0]}"`);
-          } catch (err) {
-            err.id = campo.id_a;
-            ctx.$_sql.push({
-              sql: Database.rawQuery(campo.campo).toQuery(),
-              conf: campo.id_a,
-              confId: campo.confId,
-              error: true,
-            });
-            return await new ExceptionHandler().handle(err, ctx);
-          }
-        }
-        query.select(
-          Database.raw(
-            `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
-          )
-        );
+      const campos = getSelect(ctx, [conf], 7);
+      const leftJoins = getLeftJoins({
+        columnas: conf.sub_conf,
+        conf: conf,
+        ctx,
       });
 
-      // aplicarPreloads - left join
-      if (leftJoins.length > 0) {
-        leftJoins.forEach((leftJoin) => {
-          if (leftJoin.evaluar === "s") {
-            return query.joinRaw(eval(leftJoin.valor));
+      const groupsBy: gp[] = getGroupBy({
+        columnas: conf.sub_conf,
+        conf: conf,
+      });
+      const order = getOrder({ ctx, conf: conf });
+
+      let filtros_aplicables = await verificarPermisos({
+        ctx,
+        conf,
+        bouncer: ctx.bouncer,
+        tipoId: 3,
+      });
+
+      if (modelo) {
+        const Modelo = M[modelo];
+
+        let query = Modelo.query() as DatabaseQueryBuilderContract;
+
+        campos.forEach(async (campo) => {
+          if (campo.evaluar === "s") {
+            campo.campo = eval(campo.campo);
           }
-          query.joinRaw(leftJoin.valor);
-        });
-      }
-      // aplicar groupsBy
 
-      if (groupsBy.length > 0) {
-        groupsBy.forEach(({ groupBy, having }) => {
-          groupBy.split(",").forEach((gp) => {
-            query.groupBy(gp);
-          });
-          if (having) query.havingRaw(having as unknown as RawQuery); // ??
-        });
-      }
-      // aplicar order del listado
-      if (order.length > 0) {
-        order.forEach((order) => {
-          const orderValores = order.split(",");
-
-          query.orderBy(
-            orderValores[0],
-            orderValores[1] ? orderValores[1].trim() : "desc"
+          if (campo.subquery === "s") {
+            try {
+              ctx.$_sql.push({
+                sql: Database.rawQuery(campo.campo).toQuery(),
+                conf: campo.id_a,
+                confId: campo.confId,
+              });
+              const subquery = await Database.rawQuery(campo.campo);
+              return query.select(`"${subquery[0]}"`);
+            } catch (err) {
+              err.id = campo.id_a;
+              ctx.$_sql.push({
+                sql: Database.rawQuery(campo.campo).toQuery(),
+                conf: campo.id_a,
+                confId: campo.confId,
+                error: true,
+              });
+              return await new ExceptionHandler().handle(err, ctx);
+            }
+          }
+          query.select(
+            Database.raw(
+              `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
+            )
           );
         });
+
+        // aplicarPreloads - left join
+        if (leftJoins.length > 0) {
+          leftJoins.forEach((leftJoin) => {
+            if (leftJoin.evaluar === "s") {
+              return query.joinRaw(eval(leftJoin.valor));
+            }
+            query.joinRaw(leftJoin.valor);
+          });
+        }
+        // aplicar groupsBy
+
+        if (groupsBy.length > 0) {
+          groupsBy.forEach(({ groupBy, having }) => {
+            groupBy.split(",").forEach((gp) => {
+              query.groupBy(gp);
+            });
+            if (having) query.havingRaw(having as unknown as RawQuery); // ??
+          });
+        }
+        // aplicar order del listado
+        if (order.length > 0) {
+          order.forEach((order) => {
+            const orderValores = order.split(",");
+
+            query.orderBy(
+              orderValores[0],
+              orderValores[1] ? orderValores[1].trim() : "desc"
+            );
+          });
+        }
+
+        query = aplicarFiltros(
+          ctx,
+          query,
+          conf,
+          id,
+          ctx.request.qs(), // queryFiltros
+          filtros_aplicables
+        );
+
+        if (id && parametro) {
+          query.where(`${parametro}`, id);
+        }
+
+        if (whereManual) {
+          query.whereRaw(whereManual)
+        }
+        try {
+          ctx.$_sql.push({
+            sql: query.toQuery(),
+            conf: conf.id_a,
+            confId: conf.id,
+          });
+          // _log("QUERY.json", {query:query.toQuery()});
+          const datos = await query;
+          ctx.$_datos = ctx.$_datos.concat(datos);
+
+          return datos;
+        } catch (err) {
+          ctx.$_sql.push({
+            sql: query.toQuery(),
+            conf: conf.id_a,
+            confId: conf.id,
+            error: true,
+          });
+          ctx.$_errores.push({
+            error: { message: err.sqlMessage, continuar: false },
+            conf: conf.id_a,
+          });
+
+          return new ExceptionHandler().handle(err, ctx);
+        }
       }
 
-      query = aplicarFiltros(
-        ctx,
-        query,
-        conf,
-        id,
-        ctx.request.qs(), // queryFiltros
-        filtros_aplicables
-      );
-
-      if (id && parametro) {
-        query.where(`${parametro}`, id);
-      }
-
-      try {
-        ctx.$_sql.push({
-          sql: query.toQuery(),
-          conf: conf.id_a,
-          confId: conf.id,
-        });
-        // console.log("QUERY: ", query.toQuery());
-        const datos = await query;
-        ctx.$_datos = ctx.$_datos.concat(datos);
-
-        return datos;
-      } catch (err) {
-        ctx.$_sql.push({
-          sql: query.toQuery(),
-          conf: conf.id_a,
-          confId: conf.id,
-          error: true,
-        });
-        ctx.$_errores.push({
-          error: { message: err.sqlMessage, continuar: false },
-          conf: conf.id_a,
-        });
-
-        return new ExceptionHandler().handle(err, ctx);
-      }
+      return [];
+    } catch (err) {
+      console.log("error get datos", err);
+      throw err;
     }
-
-    return [];
   };
 }
-
 
 export const insertar = (
   ctx: HttpContextContract,

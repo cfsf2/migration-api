@@ -17,3 +17,5 @@ Route.post("eliminar", "ConfigsController.Delete");
 Route.post("menu", "ConfigsController.Menu");
 
 Route.post("excel", "ConfigsController.Excel");
+
+Route.post("pdf/:configuracion", "PdfController.makepdf");
