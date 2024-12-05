@@ -1522,7 +1522,11 @@ export class ConfBuilder {
     ctx: HttpContextContract,
     conf: SConf,
     id?: number,
-    whereManual?: string
+    sqlManual?: {
+      select?: string;
+      where?: string;
+      orderBy?: string;
+    }
   ): Promise<any> => {
     try {
       const modelo = conf.getAtributo({
@@ -1588,6 +1592,9 @@ export class ConfBuilder {
               `${campo.campo} ${campo.alias ? "as " + campo.alias : ""}`
             )
           );
+          if (sqlManual && sqlManual.select) {
+            query.select(Database.raw(sqlManual.select));
+          }
         });
 
         // aplicarPreloads - left join
@@ -1634,8 +1641,11 @@ export class ConfBuilder {
           query.where(`${parametro}`, id);
         }
 
-        if (whereManual) {
-          query.whereRaw(whereManual)
+        if (sqlManual && sqlManual.where) {
+          query.whereRaw(sqlManual.where);
+        }
+        if (sqlManual && sqlManual.orderBy) {
+          query.orderByRaw(sqlManual.orderBy);
         }
         try {
           ctx.$_sql.push({

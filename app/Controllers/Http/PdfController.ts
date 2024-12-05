@@ -14,12 +14,10 @@ export default class PdfsController {
       const conf = await getConf(request.params().configuracion);
 
       if (request.params().configuracion === "LISTADO_PRESENTACIONES_QR") {
-        const datos = await ConfBuilder.getDatos(
-          ctx,
-          conf,
-          request.body().id,
-          'tbl_qr_presentacion.anulado = "n"'
-        );
+        const datos = await ConfBuilder.getDatos(ctx, conf, request.body().id, {
+          where: 'tbl_qr_presentacion.anulado = "n"',
+          orderBy: "tbl_qr_presentacion.ts_creacion asc",
+        });
         return await this.comisionistaPresentacionQrPdf(ctx, datos);
       }
 
@@ -99,6 +97,9 @@ export default class PdfsController {
                     <h1>Detalle de Presentacion</h1>
                     <p><strong>Comisionista:</strong> ${comisionista}</p>
                     <p><strong>Presentacion:</strong> ${fechaEncabezado}</p>
+                    <p><strong>Fecha:</strong> ${DateTime.now().toFormat(
+                      "dd/MM/yyyy HH:mm"
+                    )}</p>
                     <table>
                       <thead>
                         <tr>
@@ -117,9 +118,9 @@ export default class PdfsController {
                               <td>${item.farmacia}</td>
                               <td>${item.localidad}</td>
                               <td>${item.qr}</td>
-                              <td>${DateTime.fromJSDate(item.fecha_ingreso).toFormat(
-                                "dd/MM/yyyy HH:mm"
-                              )} hs</td>
+                              <td>${DateTime.fromJSDate(
+                                item.fecha_ingreso
+                              ).toFormat("dd/MM/yyyy HH:mm")} hs</td>
                             </tr>
                           `;
                           })
