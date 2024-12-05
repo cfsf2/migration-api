@@ -16,7 +16,7 @@ export default class PdfsController {
       if (request.params().configuracion === "LISTADO_PRESENTACIONES_QR") {
         const datos = await ConfBuilder.getDatos(ctx, conf, request.body().id, {
           where: 'tbl_qr_presentacion.anulado = "n"',
-          orderBy: "tbl_qr_presentacion.ts_creacion asc",
+          orderBy: "tbl_farmacia.nombre asc, tbl_qr_presentacion.ts_creacion asc",
         });
         return await this.comisionistaPresentacionQrPdf(ctx, datos);
       }
