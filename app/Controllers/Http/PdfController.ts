@@ -94,7 +94,10 @@ export default class PdfsController {
       </html>
     `;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
+    });
+
     const page = await browser.newPage();
     await page.setContent(contenidoHTML);
 
