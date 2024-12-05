@@ -36,7 +36,7 @@ export default class PdfsController {
     // Convertir la imagen JPEG a Base64 (asegúrate de cargar la imagen desde tu sistema o servidor)
     const fs = require("fs");
     const path = require("path");
-    const membretePath = path.join(__dirname, "DOS.jpg"); // Ruta de la imagen
+    const membretePath = path.join(__dirname, "../../../public/DOS.jpeg"); // Ruta de la imagen
     const membreteBase64 = fs.readFileSync(membretePath, {
       encoding: "base64",
     });
@@ -52,7 +52,7 @@ export default class PdfsController {
                     <style>
                       body {
                         font-family: Arial, sans-serif;
-                        margin: 0;
+                        margin:0 1rem;
                         padding: 0;
                       }
                       header {
