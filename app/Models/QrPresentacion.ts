@@ -1,6 +1,6 @@
 //import Mail from "@ioc:Adonis/Addons/Mail";
 //import Env from "@ioc:Adonis/Core/Env";
-import { BaseModel, column } from "@ioc:Adonis/Lucid/Orm";
+import { BaseModel, column, HasOne, hasOne } from "@ioc:Adonis/Lucid/Orm";
 //import { generarHtml } from "App/Helper/email";
 import { AccionCRUD, guardarDatosAuditoria } from "App/Helper/funciones";
 import { DateTime } from "luxon";
@@ -11,6 +11,7 @@ import Qr from "./Qr";
 import Presentacion from "./Presentacion";
 import Update from "App/Helper/Update";
 import Insertar from "App/Helper/Insertar";
+import Farmacia from "./Farmacia";
 
 export default class QrPresentacion extends BaseModel {
   public static table = "tbl_qr_presentacion";
@@ -48,6 +49,12 @@ export default class QrPresentacion extends BaseModel {
   @column()
   public id_usuario_creacion: number;
 
+  @hasOne(() => QrFarmacia, {
+    foreignKey: "id",
+    localKey: "id_qr_farmacia",
+  })
+  public qrfarmacia: HasOne<typeof QrFarmacia>;
+
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
     const extras = {};
@@ -68,13 +75,23 @@ export default class QrPresentacion extends BaseModel {
     const anulado = valor === "s" ? "n" : "s";
 
     if (!id) {
-      return await Insertar.insertar({
+      const registroCreado = await Insertar.insertar({
         conf,
         ctx,
         insert_ids,
         usuario,
         valor: anulado,
       });
+      await registroCreado.load("qrfarmacia");
+      const f = await Farmacia.find(registroCreado.qrfarmacia.id_farmacia);
+      await registroCreado
+        .merge({
+          tipo_ingreso: "manual",
+          id_comisionista: f?.id_comisionista_facturacion,
+        })
+        .save();
+
+      return registroCreado;
     }
 
     const registroModificado = (await Update._update({
@@ -85,8 +102,12 @@ export default class QrPresentacion extends BaseModel {
       valor: anulado,
     })) as QrPresentacion;
 
+    await registroModificado.load("qrfarmacia");
+    const f = await Farmacia.find(registroModificado.qrfarmacia.id_farmacia);
+
     registroModificado.merge({
       tipo_ingreso: "manual",
+      id_comisionista: f?.id_comisionista_facturacion,
     });
 
     await registroModificado.save();
