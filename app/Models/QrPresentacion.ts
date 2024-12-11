@@ -75,19 +75,24 @@ export default class QrPresentacion extends BaseModel {
     const anulado = valor === "s" ? "n" : "s";
 
     if (!id) {
-      const registroCreado = await Insertar.insertar({
+      const registroCreado = (await Insertar.insertar({
         conf,
         ctx,
         insert_ids,
         usuario,
         valor: anulado,
-      });
-      await registroCreado.load("qrfarmacia");
-      const f = await Farmacia.find(registroCreado.qrfarmacia.id_farmacia);
-      await registroCreado
+      })) as { registroCreado: QrPresentacion };
+      await registroCreado.registroCreado.load("qrfarmacia");
+      const f = await Farmacia.find(
+        registroCreado.registroCreado.qrfarmacia.id_farmacia
+      );
+      await registroCreado.registroCreado
         .merge({
           tipo_ingreso: "manual",
-          id_comisionista: f?.id_comisionista_facturacion,
+          id_comisionista:
+            f?.id_comisionista_facturacion === 0
+              ? undefined
+              : f?.id_comisionista_facturacion,
         })
         .save();
 
