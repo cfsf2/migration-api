@@ -16,7 +16,8 @@ export default class PdfsController {
       if (request.params().configuracion === "LISTADO_PRESENTACIONES_QR") {
         const datos = await ConfBuilder.getDatos(ctx, conf, request.body().id, {
           where: 'tbl_qr_presentacion.anulado = "n"',
-          orderBy: "tbl_farmacia.nombre asc, tbl_qr_presentacion.ts_creacion asc",
+          orderBy:
+            "tbl_farmacia.nombre asc, tbl_qr_presentacion.ts_creacion asc",
         });
         return await this.comisionistaPresentacionQrPdf(ctx, datos);
       }
@@ -30,21 +31,22 @@ export default class PdfsController {
     }
   }
 
-  public async comisionistaPresentacionQrPdf(ctx, datos) {
-    // Convertir la imagen JPEG a Base64 (asegúrate de cargar la imagen desde tu sistema o servidor)
-    const fs = require("fs");
-    const path = require("path");
-    const membretePath = path.join(__dirname, "../../../public/DOS.jpeg"); // Ruta de la imagen
-    const membreteBase64 = fs.readFileSync(membretePath, {
-      encoding: "base64",
-    });
+  public async comisionistaPresentacionQrPdf(ctx:HttpContextContract, datos) {
+    try {
+      // Convertir la imagen JPEG a Base64 (asegúrate de cargar la imagen desde tu sistema o servidor)
+      const fs = require("fs");
+      const path = require("path");
+      const membretePath = path.join(__dirname, "../../../public/DOS.jpeg"); // Ruta de la imagen
+      const membreteBase64 = fs.readFileSync(membretePath, {
+        encoding: "base64",
+      });
 
-    const fechaEncabezado = DateTime.fromJSDate(
-      datos[0].toJSON().TBL_QR_PRESENTACION_FILTRO_TS_CREACION
-    ).toFormat("dd/MM/yyyy");
-    const comisionista = datos[0].toJSON().COMISIONISTA_NOMBRE;
+      const fechaEncabezado = DateTime.fromJSDate(
+        datos[0].toJSON().TBL_QR_PRESENTACION_FILTRO_TS_CREACION
+      ).toFormat("dd/MM/yyyy");
+      const comisionista = datos[0].toJSON().COMISIONISTA_NOMBRE;
 
-    const contenidoHTML = `
+      const contenidoHTML = `
                 <html>
                   <head>
                     <style>
@@ -130,23 +132,29 @@ export default class PdfsController {
                   </body>
                 </html>`;
 
-    const browser = await puppeteer.launch({
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
-    });
+      const browser = await puppeteer.launch({
+        args: ["--no-sandbox", "--disable-setuid-sandbox"], // Desactiva el sandbox
+      });
 
-    const page = await browser.newPage();
-    await page.setContent(contenidoHTML);
+      const page = await browser.newPage();
+      await page.setContent(contenidoHTML);
 
-    // Genera el PDF
-    const pdfBuffer = await page.pdf({ format: "a4" });
-    await browser.close();
+      // Genera el PDF
+      const pdfBuffer = await page.pdf({ format: "a4" });
+      await browser.close();
 
-    // Devuelve el PDF como respuesta
-    ctx.response.header("Content-Type", "application/pdf");
-    ctx.response.header(
-      "Content-Disposition",
-      `inline; filename=presentacion_qr_${comisionista}_${fechaEncabezado}.pdf`
-    );
-    return ctx.response.send(pdfBuffer);
+      // Devuelve el PDF como respuesta
+
+      ctx.response.header("Content-Type", "application/pdf");
+      ctx.response.header(
+        "Content-Disposition",
+        `inline;filename=presentacion_qr_${comisionista?.trim()}_${fechaEncabezado}.pdf`
+      );
+      console.log(ctx.response.getHeaders())
+      return ctx.response.send(pdfBuffer);
+    } catch (err) {
+      console.log("ERROR DE PDF",err);
+      throw err
+    }
   }
 }

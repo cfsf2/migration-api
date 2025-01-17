@@ -99,6 +99,78 @@ export default class DebitosController {
     }
   }
 
+  public async subirDebitosSkip(ctx: HttpContextContract) {
+    const { request } = ctx;
+    const periodo = request.params().periodo;
+
+    if (!periodo)
+      throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
+
+    try {
+      let localPathToList = process.cwd() + "/public/debitos/" + periodo;
+
+      // Comprueba la carpeta destino
+      if (!fs.existsSync(localPathToList)) {
+        fs.mkdir(localPathToList, (err) => {
+          if (err) console.log(err);
+        });
+      }
+
+      let remotePath1 = periodo + "01";
+      //"/col2dasfe/PAMI/" + periodo + "/01 102_colegio_de_santa_fe_2da.circ";
+      let remotePath2 = periodo + "02";
+      //"/col2dasfe/PAMI/" + periodo + "/02 102_colegio_de_santa_fe_2da.circ";
+
+      let mensaje;
+
+      // SOURCE FTP CONNECTION SETTINGS
+      var srcFTP = {
+        // host: "200.69.207.130",
+        // user: "col2dasfeC",
+        host: Env.get("DEBITOS_FTP_SERVER"), //"intercambio.observer.com.ar",
+        user: Env.get("DEBITOS_FTP_USER"), //"col2dasfe",
+        password: Env.get("DEBITOS_FTP_PASSWORD"), //"95wHKJ8a5c",
+        port: 21,
+        connTimeout: 60000,
+        pasvTimeout: 60000,
+      };
+
+      const options = {
+        logging: "basic",
+      };
+
+      const client = new ftpClient(srcFTP, options);
+
+      client.connect(function () {
+        client.download(
+          remotePath1,
+          localPathToList,
+          {
+            overwrite: "skip",
+          },
+          function (result) {
+            mensaje = result;
+          }
+        );
+        client.download(
+          remotePath2,
+          localPathToList,
+          {
+            overwrite: "skip",
+          },
+          function (result) {
+            mensaje = result;
+          }
+        );
+      });
+
+      return ctx.response.send(mensaje);
+    } catch (err) {
+      console.log(err);
+      throw new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
   public async revisarCarpeta(ctx: HttpContextContract) {
     const { request } = ctx;
     const periodo = request.params().periodo;
