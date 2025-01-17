@@ -188,6 +188,64 @@ export default class DebitosController {
     return `Archivos subidos:  ${count}`;
   }
 
+  public async contarArchivosEnFTP(ctx: HttpContextContract) {
+    try {
+      const { request } = ctx;
+      const periodo = request.params().periodo;
+  
+      if (!periodo) {
+        throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
+      }
+  
+      const remotePath1 = `${periodo}01`;
+      const remotePath2 = `${periodo}02`;
+  
+      const srcFTP = {
+        host: Env.get("DEBITOS_FTP_SERVER"),
+        user: Env.get("DEBITOS_FTP_USER"),
+        password: Env.get("DEBITOS_FTP_PASSWORD"),
+        port: 21,
+        connTimeout: 60000,
+        pasvTimeout: 60000,
+      };
+  
+      const options = {
+        logging: "basic",
+      };
+  
+      const client = new ftpClient(srcFTP, options);
+  
+      const contarArchivos = (remotePath: string): Promise<number> => {
+        return new Promise((resolve, reject) => {
+          client.list(remotePath, (err, list) => {
+            if (err) {
+              console.error(`Error al listar archivos en ${remotePath}:`, err);
+              reject(err);
+            } else {
+              const archivos = list.filter((item) => item.type === "-");
+              resolve(archivos.length);
+            }
+          });
+        });
+      };
+  
+      return new Promise<number>((resolve, reject) => {
+        client.connect(async () => {
+          try {
+            const count1 = await contarArchivos(remotePath1);
+            const count2 = await contarArchivos(remotePath2);
+            resolve(count1 + count2);
+          } catch (err) {
+            reject(err);
+          }
+        });
+      });
+    } catch (err) {
+      console.error("Error al contar archivos en FTP:", err);
+      throw new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
   public async subirDigital(ctx: HttpContextContract) {
     const { request } = ctx;
     const periodo = request.params().periodo;
