@@ -12,6 +12,9 @@ export default class Comisionista extends BaseModel {
   @column()
   public celular: number;
 
+  @column()
+  public deshabilitado: string;
+
   public serializeExtras() {
     const keys = Object.keys(this.$extras);
     const extras = {};
