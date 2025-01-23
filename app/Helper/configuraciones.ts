@@ -1656,7 +1656,7 @@ export class ConfBuilder {
           // _log("QUERY.json", {query:query.toQuery()});
           const datos = await query;
           ctx.$_datos = ctx.$_datos.concat(datos);
-
+          
           return datos;
         } catch (err) {
           ctx.$_sql.push({

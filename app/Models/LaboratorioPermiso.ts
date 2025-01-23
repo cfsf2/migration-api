@@ -1,6 +1,7 @@
-import { BaseModel, column } from '@ioc:Adonis/Lucid/Orm'
+import { column } from '@ioc:Adonis/Lucid/Orm'
+import Base from './Base';
 
-export default class LaboratorioPermiso extends BaseModel {
+export default class LaboratorioPermiso extends Base {
   public static table = "tbl_laboratorio_permiso";
 
   @column({ isPrimary: true })
