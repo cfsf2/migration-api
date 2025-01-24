@@ -2,6 +2,7 @@ import Route from "@ioc:Adonis/Core/Route";
 
 //Route.get("/laboratorios", "LaboratoriosController.mig_index");
 Route.get("/laboratorios", "LaboratoriosController.index");
+Route.get("/laboratoriosFarmacia", "LaboratoriosController.indexFarmacia");
 Route.get("/laboratorios_admin", "LaboratoriosController.index_admin");
 
 //Route.get("/laboratorios/:id", "LaboratoriosController.mig_transfers");

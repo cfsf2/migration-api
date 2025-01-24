@@ -623,6 +623,27 @@ export default class Usuario extends BaseModel {
     }
   }
 
+  public async _Perfiles(ctx: HttpContextContract) {
+    try {
+      if (!ctx.auth.isAuthenticated) return ctx.response.status(440);
+
+      const perfiles = await this.related("perfil" as any)
+        .query() as Perfil[]
+
+      let perfilesOb: any = {};
+
+      perfiles.forEach((perfil) => {
+        perfilesOb[perfil.id]=perfil.toObject();
+      });
+
+      return perfilesOb;
+    } catch (err) {
+      console.log("Permisos", err);
+
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
   @column()
   public user_display_name: string;
 

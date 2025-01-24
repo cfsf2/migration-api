@@ -86,6 +86,8 @@ export default class UsuarioPermiso {
     if (typeof ctx.auth.user !== "undefined") {
       ctx.auth.user.Permisos = await ctx.auth.user?._Permisos(ctx);
       ctx.usuario = ctx.auth.user;
+      ctx.usuario.permisos = await ctx.auth.user?._Permisos(ctx);
+      ctx.usuario.perfiles = await ctx.auth.user?._Perfiles(ctx);
       ctx.usuario.configuracionesDeUsuario = {};
       ctx.usuario.configuracionesPermitidas = `"INICIO"`;
 
