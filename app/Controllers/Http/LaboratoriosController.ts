@@ -224,8 +224,49 @@ export default class LaboratoriosController {
         .preload("modalidad_entrega")
         .preload("tipo_comunicacion")
         .preload("transfer_categoria")
-        .andWhere("id", request.params().id)
+        .where("id", request.params().id)
         .firstOrFail();
+      if (lab.habilitado === "n") throw { code: "lab_inhabilitado" };
+      return lab;
+    } catch (err) {
+      console.log(err);
+      return new ExceptionHandler().handle(err, ctx);
+    }
+  }
+  public async transfersFarmacia(ctx: HttpContextContract) {
+    const { request, bouncer } = ctx;
+    try {
+      await bouncer.authorize("AccesoRuta", Permiso.TRANSFER_GET_LAB);
+      const _lab = Laboratorio.query()
+        .select("tbl_laboratorio.*")
+        .leftJoin(
+          "tbl_laboratorio_permiso",
+          "tbl_laboratorio_permiso.id_laboratorio",
+          "tbl_laboratorio.id"
+        )
+        .leftJoin(
+          "tbl_permiso",
+          "tbl_laboratorio_permiso.id_permiso",
+          "tbl_permiso.id"
+        )
+        .preload("droguerias")
+        .preload("apms")
+        .preload("modalidad_entrega")
+        .preload("tipo_comunicacion")
+        .preload("transfer_categoria")
+        .where("tbl_laboratorio.id", request.params().id)
+        .andWhereRaw(
+          `(tbl_laboratorio.con_permiso = 'n' OR tbl_laboratorio.con_permiso = 's' and tbl_permiso.nombre in (${Object.keys(
+            ctx.usuario.permisos
+          )
+            .map((k) => `'${k}'`)
+            .join(",")}))`
+        );
+
+   
+
+      const lab = await _lab.firstOrFail();
+
       if (lab.habilitado === "n") throw { code: "lab_inhabilitado" };
       return lab;
     } catch (err) {
