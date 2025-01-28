@@ -140,7 +140,7 @@ export class Update {
       throw err;
     }
   }
-  
+
   public static async update({
     ctx,
     usuario,
@@ -767,6 +767,85 @@ export class Update {
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(err, ctx);
+    }
+  }
+
+  public static async insertOrDelete({ ctx, id, conf }) {
+    let db = getAtributo({ atributo: "db", conf });
+    if (!db) {
+      const modeloString =
+        getAtributo({ atributo: "insert_modelo", conf }) ??
+        getAtributo({ atributo: "update_modelo", conf });
+      const modelo = M[modeloString];
+      db = modelo.connection ?? "mysql";
+    }
+    const { update_id } = ctx.request.body();
+
+    const tabla =
+      getAtributo({ atributo: "insert_tabla", conf }) ??
+      getAtributo({ atributo: "update_tabla", conf });
+
+    const database = Database.connection(db);
+    const registroExiste = await database
+      .query()
+      .from(tabla)
+      .select(Database.raw(`count(*) as count`))
+      .where("id", id)
+      .first();
+
+    if (registroExiste.count === 0) {
+      return Insertar.insertarExplicito({ ctx, conf });
+    }
+
+    try {
+      const r = await database.rawQuery(
+        `delete from ${tabla} where id=${update_id}`
+      );
+
+      if (r[0].fieldCount === 0)
+        return {
+          registroModificado: { id },
+          modificado: false,
+          eliminado: false,
+        };
+      return { registroModificado: { id }, modificado: true, eliminado: true };
+    } catch (err) {
+      console.log("error en Update.eliminar");
+      throw err;
+    }
+  }
+
+  public static async eliminar({ ctx, id, conf }) {
+    let db = getAtributo({ atributo: "db", conf });
+    if (!db) {
+      const modeloString =
+        getAtributo({ atributo: "insert_modelo", conf }) ??
+        getAtributo({ atributo: "update_modelo", conf });
+      const modelo = M[modeloString];
+      db = modelo.connection ?? "mysql";
+    }
+    const { update_id } = ctx.request.body();
+
+    const tabla =
+      getAtributo({ atributo: "insert_tabla", conf }) ??
+      getAtributo({ atributo: "update_tabla", conf });
+
+    const database = Database.connection(db);
+    try {
+      const r = await database.rawQuery(
+        `delete from ${tabla} where id=${update_id}`
+      );
+
+      if (r[0].fieldCount === 0)
+        return {
+          registroModificado: { id },
+          modificado: false,
+          eliminado: false,
+        };
+      return { registroModificado: { id }, modificado: true, eliminado: true };
+    } catch (err) {
+      console.log("error en Update.eliminar");
+      throw err;
     }
   }
 }

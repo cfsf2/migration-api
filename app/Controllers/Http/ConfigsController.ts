@@ -310,7 +310,7 @@ export default class ConfigsController {
 
       const res = await modificar(ctx, update_id, valor, config, usuario);
 
-      if (res?.modificado) {
+      if ("modificado" in res) {
         return response.accepted(res?.registroModificado);
       }
 
@@ -344,10 +344,8 @@ export default class ConfigsController {
 
       const res = await insertar(ctx, valor, insert_ids, config, usuario);
 
-      if (res?.creado || res?.modificado) {
-        return response.accepted(
-          res.registroCreado ? res.registroCreado : res.registroModificado
-        );
+      if ("creado" in res || "modificado" in res) {
+        return response.accepted(res.registroCreado ?? res.registroModificado);
       }
       return response.badRequest(res);
     } catch (err) {

@@ -6,6 +6,10 @@ import Perfil from "./Perfil";
 export default class UsuarioPerfil extends BaseModel {
   public static table = "tbl_usuario_perfil";
 
+  public static get connection(){
+    return "mysql"
+  }
+
   @column({ isPrimary: true })
   public id: number;
 
