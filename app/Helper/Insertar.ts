@@ -32,7 +32,7 @@ export class Insertar {
   constructor() {}
 
   public static async insertarExplicito({ ctx, conf }) {
-    const { valor, insert_ids } = ctx.request.body();
+    const {  insert_ids } = ctx.request.body();
     let db = getAtributo({ atributo: "db", conf });
     if (!db) {
       const modeloString =
