@@ -1,4 +1,4 @@
-import { getAtributo } from "./configuraciones";
+import { getAtributo, insertar } from "./configuraciones";
 import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
 import { validator, schema, rules } from "@ioc:Adonis/Core/Validator";
 import ExceptionHandler from "App/Exceptions/Handler";
@@ -772,19 +772,20 @@ export class Update {
 
   public static async insertOrDelete({ ctx, id, conf }) {
     let db = getAtributo({ atributo: "db", conf });
+    const modeloString =
+      getAtributo({ atributo: "insert_modelo", conf }) ??
+      getAtributo({ atributo: "update_modelo", conf });
+    const modelo = M[modeloString];
     if (!db) {
-      const modeloString =
-        getAtributo({ atributo: "insert_modelo", conf }) ??
-        getAtributo({ atributo: "update_modelo", conf });
-      const modelo = M[modeloString];
       db = modelo.connection ?? "mysql";
     }
     const { update_id } = ctx.request.body();
 
-    const tabla =
+    let tabla =
       getAtributo({ atributo: "insert_tabla", conf }) ??
       getAtributo({ atributo: "update_tabla", conf });
-
+    if (!tabla) tabla = modelo.table;
+    
     const database = Database.connection(db);
     const registroExiste = await database
       .query()
@@ -794,7 +795,8 @@ export class Update {
       .first();
 
     if (registroExiste.count === 0) {
-      return Insertar.insertarExplicito({ ctx, conf });
+      const { valor, insert_ids } = ctx.request.body();
+      return await insertar(ctx, valor, insert_ids, conf, ctx.usuario);
     }
 
     try {
