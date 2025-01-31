@@ -235,3 +235,6 @@ export let Presentacion = _Presentacion;
 
 import _FarmaciaAux from "App/Models/FarmaciaAux";
 export let FarmaciaAux = _FarmaciaAux;
+
+import _LaboratorioPermiso from "App/Models/LaboratorioPermiso";
+export let LaboratorioPermiso = _LaboratorioPermiso;

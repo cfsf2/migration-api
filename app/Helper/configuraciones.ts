@@ -1456,9 +1456,10 @@ export class ConfBuilder {
             copyVal = eval(val.valor);
           }
           if (val.subquery === "s") {
+           
             try {
               const subquery = (await Database.rawQuery(copyVal))[0];
-
+             
               ctx.$_sql.push({
                 sql: Database.rawQuery(copyVal).toQuery(),
                 conf: conf_h.id_a,
@@ -1466,6 +1467,9 @@ export class ConfBuilder {
               });
 
               copyVal = subquery[0];
+              if (val.atributo[0].nombre === "enlace") {
+                copyVal = Object.values(copyVal)[0];
+              }
             } catch (err) {
               ctx.$_sql.push({
                 sql: Database.rawQuery(copyVal).toQuery(),
@@ -1479,6 +1483,7 @@ export class ConfBuilder {
           if (val.atributo[0].nombre === "display_container") {
             copyVal = Object.values(copyVal)[0];
           }
+         
           opciones[val.atributo[0].nombre] = copyVal;
         });
       } else {
@@ -1656,7 +1661,7 @@ export class ConfBuilder {
           // _log("QUERY.json", {query:query.toQuery()});
           const datos = await query;
           ctx.$_datos = ctx.$_datos.concat(datos);
-
+          
           return datos;
         } catch (err) {
           ctx.$_sql.push({

@@ -90,6 +90,9 @@ export default class Laboratorio extends BaseModel {
   public calcular_porcentaje_descuento: string;
 
   @column()
+  public con_permiso: string;
+
+  @column()
   public id_usuario: number;
 
   @column()

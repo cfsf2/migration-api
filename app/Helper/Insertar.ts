@@ -1,5 +1,5 @@
 import { getAtributo } from "./configuraciones";
-import { guardarDatosAuditoria, AccionCRUD } from "./funciones";
+import { guardarDatosAuditoria, AccionCRUD, _log } from "./funciones";
 import ExceptionHandler from "App/Exceptions/Handler";
 import { BaseModel } from "@ioc:Adonis/Lucid/Orm";
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
@@ -30,6 +30,50 @@ Eliminar;
 
 export class Insertar {
   constructor() {}
+
+  public static async insertarExplicito({ ctx, conf }) {
+    const {  insert_ids } = ctx.request.body();
+    let db = getAtributo({ atributo: "db", conf });
+    if (!db) {
+      const modeloString =
+        getAtributo({ atributo: "insert_modelo", conf }) ??
+        getAtributo({ atributo: "update_modelo", conf });
+      const modelo = M[modeloString];
+      db = modelo.connection ?? "mysql";
+    }
+
+    const insert_campos = getAtributo({
+      atributo: "insert_campos",
+      conf,
+    }).split("|");
+
+    const insert_values = insert_ids.split("|");
+
+    const tabla =
+      getAtributo({ atributo: "insert_tabla", conf }) ??
+      getAtributo({ atributo: "update_tabla", conf });
+
+    try {
+      const database = Database.connection(db);
+      let res = await database.rawQuery(
+        `insert into ${tabla} (${insert_campos.join(
+          ","
+        )}, id_usuario_creacion) VALUES (${insert_values.join(",")}, ${
+          ctx.usuario.id
+        })`
+      );
+
+      if (res.errno) throw res;
+
+      const registro = {
+        id: res[0].insertId,
+      };
+      return { registroModificado: registro, registroCreado: registro, creado: true, modificado: true };
+    } catch (err) {
+      console.log("error en insertarExplicito");
+      throw err;
+    }
+  }
 
   public static async insertar({ ctx, valor, insert_ids, conf, usuario }) {
     if (conf.tipo.id === 9)
