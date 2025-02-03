@@ -23,7 +23,7 @@ export default class PdfsController {
 
       // const datos = await ConfBuilder.getDatos(ctx, conf, request.body().id);
 
-      return "toma tu pdf";
+      return "pdf servido";
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(err, ctx);
@@ -127,6 +127,7 @@ export default class PdfsController {
                           .join("")}
                       </tbody>
                     </table>
+                    <p>El contenido de los paquetes recibidos se encuentra sujeto a revisión.</p>
                   </body>
                 </html>`;
 
