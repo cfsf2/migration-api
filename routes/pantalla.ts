@@ -19,3 +19,5 @@ Route.post("menu", "ConfigsController.Menu");
 Route.post("excel", "ConfigsController.Excel");
 
 Route.post("pdf/:configuracion", "PdfController.makepdf");
+
+Route.post("reiniciar", "ConfigsController.reboot");
