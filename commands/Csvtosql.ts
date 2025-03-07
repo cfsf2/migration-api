@@ -79,11 +79,11 @@ export default class Csvtosql extends BaseCommand {
           .on("end", async () => {
             console.log(`Se han leído ${rows.length} filas. Procesando...`);
 
-            for (const row of rows) {
+            for (const row of rows as any[]) {
               try {
                 console.log(row);
                 const farmacia = await Farmacia.query()
-                  .where("cuit", Object.values(row)[0])
+                  .where("cuit", Object.values(row)[0] as unknown as any)
                   .first();
 
                 const id_usuario = farmacia ? farmacia.id_usuario : null;
