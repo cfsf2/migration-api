@@ -2,7 +2,7 @@ import { BaseCommand } from "@adonisjs/core/build/standalone";
 
 import fs from "fs";
 import csv from "csv-parser";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import Farmacia from "App/Models/Farmacia";
 
 export default class Csvtosql extends BaseCommand {
