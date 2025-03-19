@@ -30,6 +30,7 @@ export default class DebitosController {
   public async subirDebitos(ctx: HttpContextContract) {
     const { request } = ctx;
     const periodo = request.params().periodo;
+    const overwriteOption = request.param("overwrite") ?? "all";
 
     if (!periodo)
       throw new ExceptionHandler().handle({ code: "FALTA_PERIODO" }, ctx);
@@ -74,7 +75,7 @@ export default class DebitosController {
           remotePath1,
           localPathToList,
           {
-            overwrite: "all",
+            overwrite: overwriteOption,
           },
           function (result) {
             mensaje = result;
@@ -84,7 +85,7 @@ export default class DebitosController {
           remotePath2,
           localPathToList,
           {
-            overwrite: "all",
+            overwrite: overwriteOption,
           },
           function (result) {
             mensaje = result;

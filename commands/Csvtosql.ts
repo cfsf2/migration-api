@@ -2,7 +2,7 @@ import { BaseCommand } from "@adonisjs/core/build/standalone";
 
 import fs from "fs";
 import csv from "csv-parser";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import Farmacia from "App/Models/Farmacia";
 
 export default class Csvtosql extends BaseCommand {
@@ -36,16 +36,17 @@ export default class Csvtosql extends BaseCommand {
     // Función para generar el SQL de inserción
     async function generateInsertSQL(
       _row: any,
-      id_farmacia: number | null
+      id_usuario: number | null,
+      cuit: number
     ): Promise<string> {
       let row: any = {};
       Object.keys(_row).forEach((k) => (row[k.trim()] = _row[k]));
-
+      if (!id_usuario) {
+        `-- ${cuit} not found \n`;
+      }
       return (
-        `INSERT INTO tbl_evento_participante (id_evento, id_farmacia, titular, nombre, matricula, documento, telefono, token, pagado, gratis) ` +
-        `VALUES (1, ${id_farmacia}, 's', '${row.Nombre} ${row.Apellido}', '${
-          row.Matricula
-        }', '${row.DNI}', '${row.Celular}', '${uuidv4()}','s', 's');`
+        `INSERT INTO tbl_usuario_permiso (id_usuario, id_permiso) ` +
+        `VALUES (${id_usuario}, '20');`
       );
     }
 
@@ -61,7 +62,16 @@ export default class Csvtosql extends BaseCommand {
       return new Promise<void>((resolve, reject) => {
         fs.createReadStream(csvFile)
           .pipe(csv({ separator: ";" }))
-          .on("data", (row: any) => rows.push(row))
+          .on("data", (row: any) => {
+            const normalizedRow: any = {};
+  
+            for (const key in row) {
+              const normalizedKey = key.trim(); // Eliminar espacios en los nombres de clave
+              normalizedRow[normalizedKey] = typeof row[key] === "string" ? row[key].trim() : row[key];
+            }
+          
+            rows.push(normalizedRow);
+          })
           .on("error", (error) => {
             console.error(`Error al leer el archivo CSV: ${error.message}`);
             reject(error);
@@ -69,23 +79,24 @@ export default class Csvtosql extends BaseCommand {
           .on("end", async () => {
             console.log(`Se han leído ${rows.length} filas. Procesando...`);
 
-            for (const row of rows) {
+            for (const row of rows as any[]) {
               try {
+                console.log(row);
                 const farmacia = await Farmacia.query()
-                  .where("matricula", row.Matricula)
+                  .where("cuit", Object.values(row)[0] as unknown as any)
                   .first();
 
-                const id_farmacia = farmacia ? farmacia.id : null;
-                const sql = await generateInsertSQL(row, id_farmacia);
+                const id_usuario = farmacia ? farmacia.id_usuario : null;
+                const sql = await generateInsertSQL(row, id_usuario, row.cuit);
                 outputStream.write(sql + "\n");
               } catch (error) {
                 console.error(
-                  `Error al procesar la fila con matrícula "${
-                    row.Matricula
-                  }": ${
+                  `Error al procesar la fila con cuit "${row.Matricula}": ${
                     error instanceof Error ? error.message : "Error desconocido"
                   }`
                 );
+
+                throw error;
               }
             }
 

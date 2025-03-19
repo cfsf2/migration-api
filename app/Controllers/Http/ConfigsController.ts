@@ -1,5 +1,7 @@
 import type { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
+import Database from "@ioc:Adonis/Lucid/Database";
 
+import { exec } from "child_process";
 import {
   listado,
   modificar,
@@ -643,6 +645,33 @@ export default class ConfigsController {
     } catch (err) {
       console.log(err);
       return new ExceptionHandler().handle(ctx, err);
+    }
+  }
+
+  public async reboot(ctx: HttpContextContract) {
+    const { auth } = ctx;
+    try {
+      const usuario = await auth.authenticate();
+      if (!usuario) throw "Usuario no identificado";
+
+      const comando = await Database.query()
+        .select("valor")
+        .from("s_parametro")
+        .where("id_a", "REINICIAR_SERVER")
+        .first();
+
+      return exec(comando.valor, (error, stdout, stderr) => {
+        if (error) {
+          console.log("ERROR", error);
+          return error;
+        }
+        console.log("STDOUT", stdout);
+        console.log("STDERR", stderr);
+        return stdout;
+      });
+    } catch (err) {
+      console.log(err);
+      return err;
     }
   }
 }
