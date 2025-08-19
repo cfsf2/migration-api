@@ -38,6 +38,7 @@ export default class Publicidad extends BaseModel {
         "p.titulo",
         "p.descripcion",
         "p.link",
+        "p.target",
         "p.habilitado",
         "p.imagen",
         "p.fecha_inicio as fechainicio",
@@ -165,6 +166,9 @@ export default class Publicidad extends BaseModel {
 
   @column()
   public link: string;
+
+  @column()
+  public target: string;
 
   @column()
   public imagen: string;
