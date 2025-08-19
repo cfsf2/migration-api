@@ -42,6 +42,11 @@ Route.post("/farmacia/nro_cuenta", "FarmaciasController.nro_cuenta");
 Route.post("/farmacia/localidades", "FarmaciasController.localidades");
 
 Route.get("/farmacias/subirDebitos/:periodo/:overwrite?", "DebitosController.subirDebitos");
+Route.get("/farmacias/subirDebitos/:periodo", "DebitosController.subirDebitos");
+
+Route.get("/farmacias/subirDebitos/p1/:periodo/", "DebitosController.subirDebitos1");
+Route.get("/farmacias/subirDebitos/p2/:periodo/", "DebitosController.subirDebitos2");
+
 Route.get("/farmacias/revisar-carpeta/:periodo", "DebitosController.revisarCarpeta");
 Route.get("/farmacias/subir-digital/:periodo", "DebitosController.subirDigital");
 Route.get("/farmacias/contarDebitos/:periodo", "DebitosController.contarDebitos");
