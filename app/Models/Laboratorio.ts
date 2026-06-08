@@ -63,6 +63,9 @@ export default class Laboratorio extends BaseModel {
   public transfer_farmageo: string;
 
   @column()
+  public es_bono_descuento: string;
+
+  @column()
   public url: string;
 
   @column()
