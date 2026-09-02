@@ -9,6 +9,45 @@ import Env from "@ioc:Adonis/Core/Env";
 import { Debitofarmacia } from "App/Helper/ModelIndex";
 
 export default class DebitosController {
+  private sanitizarLogFtp(mensaje: unknown): string {
+    return String(mensaje)
+      .replace(/(PASS\s+)[^'\r\n]*/gi, "$1********")
+      .replace(/(password["']?\s*[:=]\s*["']?)[^,"'\s}]+/gi, "$1********");
+  }
+
+  private contextoErrorFtp(client: any, error: any, etapa: string, carpetaRemota: string, ultimoPasv?: Record<string, unknown>) {
+    const control = client?.ftp?._socket;
+    const datos = client?.ftp?._pasvSocket;
+    const propiedadesError = error && typeof error === "object"
+      ? Object.fromEntries(Object.getOwnPropertyNames(error).map((clave) => [clave, error[clave]]))
+      : { message: String(error) };
+
+    return {
+      fecha: new Date().toISOString(),
+      etapa,
+      carpetaRemota,
+      ultimoPasv: ultimoPasv ?? "el servidor no llegó a anunciar un endpoint PASV",
+      comandoActual: client?.ftp?._curReq?.cmd,
+      colaPendiente: client?.ftp?._queue?.length,
+      control: control ? {
+        local: `${control.localAddress ?? "?"}:${control.localPort ?? "?"}`,
+        remoto: `${control.remoteAddress ?? "?"}:${control.remotePort ?? "?"}`,
+        conectado: client?.ftp?.connected,
+        readable: control.readable,
+        writable: control.writable,
+        destroyed: control.destroyed,
+      } : "socket no disponible",
+      datosPasivos: datos ? {
+        local: `${datos.localAddress ?? "?"}:${datos.localPort ?? "?"}`,
+        remoto: `${datos.remoteAddress ?? "?"}:${datos.remotePort ?? "?"}`,
+        readable: datos.readable,
+        writable: datos.writable,
+        destroyed: datos.destroyed,
+      } : "socket no establecido (ver respuesta PASV en el log de protocolo)",
+      error: propiedadesError,
+    };
+  }
+
   private escaparHtml(valor: unknown): string {
     return String(valor ?? "")
       .replace(/&/g, "&amp;")
@@ -43,7 +82,24 @@ export default class DebitosController {
   ): Promise<any> {
     return new Promise((resolve, reject) => {
       console.log(`[Débitos FTP] Iniciando conexión para recuperar ${carpetaRemota}`);
-      const client: any = new (ftpClient as any)(configuracion, { logging: "none" });
+      let etapa = "conexión de control";
+      let ultimoPasv: Record<string, unknown> | undefined;
+      const configuracionConDebug = {
+        ...configuracion,
+        debug: (mensaje: unknown) => {
+          const mensajeSeguro = this.sanitizarLogFtp(mensaje);
+          console.log(`[Débitos FTP][${carpetaRemota}][protocolo] ${mensajeSeguro}`);
+
+          const pasv = /\((\d+),(\d+),(\d+),(\d+),(\d+),(\d+)\)/.exec(mensajeSeguro);
+          if (pasv) {
+            const hostAnunciado = `${pasv[1]}.${pasv[2]}.${pasv[3]}.${pasv[4]}`;
+            const puertoAnunciado = Number(pasv[5]) * 256 + Number(pasv[6]);
+            ultimoPasv = { hostAnunciado, puertoAnunciado };
+            console.log(`[Débitos FTP][${carpetaRemota}][PASV] El servidor anunció la conexión de datos en ${hostAnunciado}:${puertoAnunciado}`);
+          }
+        },
+      };
+      const client: any = new (ftpClient as any)(configuracionConDebug, { logging: "none" });
       let terminado = false;
 
       const finalizar = (callback: (valor: any) => void, valor: any) => {
@@ -61,17 +117,40 @@ export default class DebitosController {
       // convertir el error de red/autenticación en una respuesta controlada.
       client.ftp.removeAllListeners("error");
       client.ftp.once("error", (error: Error) => {
-        console.error(`[Débitos FTP] Error de conexión/transferencia en ${carpetaRemota}`, error);
+        console.error(
+          `[Débitos FTP] Error de conexión/transferencia en ${carpetaRemota}`,
+          this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+        );
         finalizar(reject, error);
       });
       client.ftp.once("ready", () => {
+        etapa = "conexión de control establecida";
         console.log(`[Débitos FTP] Conectado. Verificando carpeta remota ${carpetaRemota}`);
         const listar = (carpeta: string): Promise<any[]> => new Promise((resolver, rechazar) => {
-          client.ftp.list(carpeta, (error: Error, lista: any[]) => error ? rechazar(error) : resolver(lista ?? []));
+          etapa = `LIST ${carpeta} (conexión pasiva de datos)`;
+          console.log(`[Débitos FTP][${carpetaRemota}] Solicitando listado remoto: ${carpeta}`);
+          client.ftp.list(carpeta, (error: Error, lista: any[]) => {
+            if (error) {
+              console.error(
+                `[Débitos FTP][${carpetaRemota}] Falló LIST ${carpeta}`,
+                this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+              );
+              return rechazar(error);
+            }
+            resolver(lista ?? []);
+          });
         });
         const obtener = (archivoRemoto: string, archivoLocal: string): Promise<void> => new Promise((resolver, rechazar) => {
+          etapa = `RETR ${archivoRemoto} (conexión pasiva de datos)`;
           client.ftp.get(archivoRemoto, (error: Error, stream: any) => {
-            if (error || !stream) return rechazar(error ?? new Error(`No se pudo abrir ${archivoRemoto}`));
+            if (error || !stream) {
+              const errorDescarga = error ?? new Error(`No se pudo abrir ${archivoRemoto}`);
+              console.error(
+                `[Débitos FTP][${carpetaRemota}] Falló RETR ${archivoRemoto}`,
+                this.contextoErrorFtp(client, errorDescarga, etapa, carpetaRemota, ultimoPasv)
+              );
+              return rechazar(errorDescarga);
+            }
             const salida = fs.createWriteStream(archivoLocal);
             stream.once("error", rechazar);
             salida.once("error", rechazar);
@@ -129,8 +208,13 @@ export default class DebitosController {
       });
 
       try {
-        client.ftp.connect(configuracion);
+        console.log(`[Débitos FTP][${carpetaRemota}] Destino de control: ${String(configuracion.host)}:${String(configuracion.port ?? 21)}; timeout control=${String(configuracion.connTimeout ?? "default")}ms; timeout PASV=${String(configuracion.pasvTimeout ?? "default")}ms`);
+        client.ftp.connect(configuracionConDebug);
       } catch (error) {
+        console.error(
+          `[Débitos FTP] Excepción síncrona al conectar con ${carpetaRemota}`,
+          this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+        );
         finalizar(reject, error);
       }
     });
