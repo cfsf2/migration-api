@@ -27,7 +27,9 @@ export default class DebitosController {
       etapa,
       carpetaRemota,
       ultimoPasv: ultimoPasv ?? "el servidor no llegó a anunciar un endpoint PASV",
-      comandoActual: client?.ftp?._curReq?.cmd,
+      comandoActual: client?.ftp?._curReq?.cmd
+        ? this.sanitizarLogFtp(client.ftp._curReq.cmd)
+        : "sin comando pendiente",
       colaPendiente: client?.ftp?._queue?.length,
       control: control ? {
         local: `${control.localAddress ?? "?"}:${control.localPort ?? "?"}`,
@@ -48,6 +50,12 @@ export default class DebitosController {
     };
   }
 
+  private adjuntarDiagnosticoFtp(error: any, diagnostico: Record<string, unknown>): Error {
+    const errorConDiagnostico = error instanceof Error ? error : new Error(String(error));
+    (errorConDiagnostico as any).diagnosticoFtp = diagnostico;
+    return errorConDiagnostico;
+  }
+
   private escaparHtml(valor: unknown): string {
     return String(valor ?? "")
       .replace(/&/g, "&amp;")
@@ -65,6 +73,7 @@ export default class DebitosController {
       codigo,
       mensaje,
       carpetaRemota,
+      diagnostico: error?.diagnosticoFtp,
       noExiste: Number(error?.code) === 550 || /\b550\b|does not exist|no such file|not found/i.test(mensaje),
     };
   }
@@ -117,11 +126,12 @@ export default class DebitosController {
       // convertir el error de red/autenticación en una respuesta controlada.
       client.ftp.removeAllListeners("error");
       client.ftp.once("error", (error: Error) => {
+        const diagnostico = this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv);
         console.error(
           `[Débitos FTP] Error de conexión/transferencia en ${carpetaRemota}`,
-          this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+          diagnostico
         );
-        finalizar(reject, error);
+        finalizar(reject, this.adjuntarDiagnosticoFtp(error, diagnostico));
       });
       client.ftp.once("ready", () => {
         etapa = "conexión de control establecida";
@@ -131,29 +141,31 @@ export default class DebitosController {
           console.log(`[Débitos FTP][${carpetaRemota}] Solicitando listado remoto: ${carpeta}`);
           client.ftp.list(carpeta, (error: Error, lista: any[]) => {
             if (error) {
+              const diagnostico = this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv);
               console.error(
                 `[Débitos FTP][${carpetaRemota}] Falló LIST ${carpeta}`,
-                this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+                diagnostico
               );
-              return rechazar(error);
+              return rechazar(this.adjuntarDiagnosticoFtp(error, diagnostico));
             }
             resolver(lista ?? []);
           });
         });
         const obtener = (archivoRemoto: string, archivoLocal: string): Promise<void> => new Promise((resolver, rechazar) => {
           etapa = `RETR ${archivoRemoto} (conexión pasiva de datos)`;
+          const rechazarConDiagnostico = (error: any) => {
+            const diagnostico = this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv);
+            console.error(`[Débitos FTP][${carpetaRemota}] Falló RETR ${archivoRemoto}`, diagnostico);
+            rechazar(this.adjuntarDiagnosticoFtp(error, diagnostico));
+          };
           client.ftp.get(archivoRemoto, (error: Error, stream: any) => {
             if (error || !stream) {
               const errorDescarga = error ?? new Error(`No se pudo abrir ${archivoRemoto}`);
-              console.error(
-                `[Débitos FTP][${carpetaRemota}] Falló RETR ${archivoRemoto}`,
-                this.contextoErrorFtp(client, errorDescarga, etapa, carpetaRemota, ultimoPasv)
-              );
-              return rechazar(errorDescarga);
+              return rechazarConDiagnostico(errorDescarga);
             }
             const salida = fs.createWriteStream(archivoLocal);
-            stream.once("error", rechazar);
-            salida.once("error", rechazar);
+            stream.once("error", rechazarConDiagnostico);
+            salida.once("error", rechazarConDiagnostico);
             stream.once("close", resolver);
             stream.pipe(salida);
           });
@@ -180,7 +192,7 @@ export default class DebitosController {
             await relevar(carpetaRemota, carpetaLocal);
             console.log(`[Débitos FTP] Carpeta verificada. Se encontraron ${archivos.length} archivo(s) en ${carpetaRemota}.`);
 
-            const resultado = { downloadedFiles: [] as string[], errors: {} as Record<string, string> };
+            const resultado = { downloadedFiles: [] as string[], errors: {} as Record<string, unknown> };
             for (let indice = 0; indice < archivos.length; indice++) {
               const archivo = archivos[indice];
               const existe = fs.existsSync(archivo.local);
@@ -195,7 +207,10 @@ export default class DebitosController {
                 await obtener(archivo.remoto, archivo.local);
                 resultado.downloadedFiles.push(archivo.remoto);
               } catch (error) {
-                resultado.errors[archivo.remoto] = error instanceof Error ? error.message : String(error);
+                resultado.errors[archivo.remoto] = {
+                  mensaje: error instanceof Error ? error.message : String(error),
+                  diagnostico: (error as any)?.diagnosticoFtp,
+                };
                 console.error(`[Débitos FTP] Error al descargar ${indice + 1}/${archivos.length}: ${archivo.remoto}`, error);
               }
             }
@@ -211,11 +226,12 @@ export default class DebitosController {
         console.log(`[Débitos FTP][${carpetaRemota}] Destino de control: ${String(configuracion.host)}:${String(configuracion.port ?? 21)}; timeout control=${String(configuracion.connTimeout ?? "default")}ms; timeout PASV=${String(configuracion.pasvTimeout ?? "default")}ms`);
         client.ftp.connect(configuracionConDebug);
       } catch (error) {
+        const diagnostico = this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv);
         console.error(
           `[Débitos FTP] Excepción síncrona al conectar con ${carpetaRemota}`,
-          this.contextoErrorFtp(client, error, etapa, carpetaRemota, ultimoPasv)
+          diagnostico
         );
-        finalizar(reject, error);
+        finalizar(reject, this.adjuntarDiagnosticoFtp(error, diagnostico));
       }
     });
   }
@@ -227,13 +243,18 @@ export default class DebitosController {
     detalle: Record<string, unknown>
   ) {
     const filas = Object.entries(detalle)
-      .map(([clave, valor]) => `<tr><th>${this.escaparHtml(clave)}</th><td>${this.escaparHtml(typeof valor === "object" ? JSON.stringify(valor) : valor)}</td></tr>`)
+      .map(([clave, valor]) => {
+        const contenido = typeof valor === "object" && valor !== null
+          ? `<pre>${this.escaparHtml(JSON.stringify(valor, null, 2))}</pre>`
+          : this.escaparHtml(valor);
+        return `<tr><th>${this.escaparHtml(clave)}</th><td>${contenido}</td></tr>`;
+      })
       .join("");
 
     return ctx.response
       .status(estado)
       .type("text/html")
-      .send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${this.escaparHtml(titulo)}</title><style>body{font-family:system-ui,sans-serif;margin:2rem;color:#1f2937}table{border-collapse:collapse;margin-top:1rem}th,td{border:1px solid #d1d5db;padding:.55rem;text-align:left;vertical-align:top}th{background:#f3f4f6} .error{color:#b91c1c}</style></head><body><h1 class="${estado >= 400 ? "error" : ""}">${this.escaparHtml(titulo)}</h1><table>${filas}</table></body></html>`);
+      .send(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${this.escaparHtml(titulo)}</title><style>body{font-family:system-ui,sans-serif;margin:2rem;color:#1f2937}table{border-collapse:collapse;margin-top:1rem;max-width:100%}th,td{border:1px solid #d1d5db;padding:.55rem;text-align:left;vertical-align:top}th{background:#f3f4f6}pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.error{color:#b91c1c}</style></head><body><h1 class="${estado >= 400 ? "error" : ""}">${this.escaparHtml(titulo)}</h1><table>${filas}</table></body></html>`);
   }
 
   private async descargarAmbasCarpetasDebitos(ctx: HttpContextContract, periodo: string, overwrite: string) {
@@ -270,6 +291,7 @@ export default class DebitosController {
             etapa: detalle.noExiste ? "Verificación de carpeta remota" : "Conexión o transferencia FTP",
             codigo: detalle.codigo,
             detalle: detalle.mensaje,
+            diagnosticoFtp: detalle.diagnostico ?? "Sin diagnóstico adicional",
           };
         }
       }
@@ -372,6 +394,7 @@ export default class DebitosController {
         carpetaRemota: detalle.carpetaRemota,
         codigo: detalle.codigo,
         detalle: detalle.mensaje,
+        diagnosticoFtp: detalle.diagnostico ?? "Sin diagnóstico adicional",
         sugerencia: detalle.noExiste ? "La carpeta no existe o el usuario FTP no tiene permiso para listarla." : "Verifique conectividad, modo pasivo, credenciales y permisos desde el servidor.",
       });
     }
@@ -415,6 +438,7 @@ export default class DebitosController {
         carpetaRemota: detalle.carpetaRemota,
         codigo: detalle.codigo,
         detalle: detalle.mensaje,
+        diagnosticoFtp: detalle.diagnostico ?? "Sin diagnóstico adicional",
         sugerencia: detalle.noExiste ? "La carpeta no existe o el usuario FTP no tiene permiso para listarla." : "Verifique conectividad, modo pasivo, credenciales y permisos desde el servidor.",
       });
     }
