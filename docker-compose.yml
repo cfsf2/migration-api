@@ -1,0 +1,66 @@
+version: "3.8"
+services:
+  webadminsql:
+    container_name: farmageosql-webadmin
+    restart: always
+    build:
+      context: ../migration-admin-fgeo/
+      dockerfile: ../migration-admin-fgeo/Dockerfile.prod
+    image: farmageoadminsql:latest
+    ports:
+      - "3150:80"
+    depends_on: -apifsql
+  apifsql:
+    build:
+      context: ./
+    image: apif
+    container_name: apifsql
+    ports:
+      - "3001:3111"
+    env_file:
+      - .env
+    volumes:
+      - type: bind
+        source: ./
+        target: /home/node/app
+        read_only: true
+      - node_modules:/home/node/app/node_modules
+    command: node ace serve --watch
+    depends_on:
+      - mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    expose:
+      - 80
+    ports:
+      - 8080:80
+    environment:
+      - PMA_HOST=mysql
+      - MAX_EXECUTION_TIME=12000
+      - MEMORY_LIMIT=4G
+      - UPLOAD_LIMIT=200M
+    depends_on:
+      - mysql
+
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    volumes:
+      - ../sql-data/db:/var/lib/mysql
+    ports:
+      - "3312:3306"
+    hostname: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: "farmageo"
+      MYSQL_ROOT_PASSWORD: "54h_f2FA"
+      MYSQL_USER: "dan"
+volumes:
+  node_modules: {}
+
+networks:
+  default:
+    name: fsqlnet
+    external: true

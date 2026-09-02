@@ -1,0 +1,943 @@
+[ info ]  building project...
+[ info ]  starting http server...
+[ info ]  watching file system for changes
+[1667994185103] [32mINFO[39m (apirest/635695 on vps2.farmageo.com): [36mstarted server on 0.0.0.0:3111[39m
+╭─────────────────────────────────────────────────╮
+│                                                 │
+│    Server address: http://127.0.0.1:3111        │
+│    Watching filesystem for changes: YES         │
+│                                                 │
+╰─────────────────────────────────────────────────╯
+actualizar ultimo acceso a  TORRESI
+actualizar ultimo acceso a  TORRESI
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+Wed Nov 09 2022 08:48:15 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+Wed Nov 09 2022 08:48:15 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+(node:635695) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 uncaughtException listeners added to [process]. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+Wed Nov 09 2022 08:48:15 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+Wed Nov 09 2022 08:48:15 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at runMicrotasks (<anonymous>)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+actualizar ultimo acceso a  TORRESI
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at LaboratoriosController.index (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/LaboratoriosController.ts:79:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:34 GMT-0300 (Argentina Standard Time) Error Handler: ExceptionHandler {
+  logger: Logger {
+    config: {
+      name: 'apirest',
+      enabled: true,
+      level: 'info',
+      prettyPrint: true
+    },
+    pino: EventEmitter {
+      levels: [Object],
+      silent: [Function: noop],
+      trace: [Function: noop],
+      debug: [Function: noop],
+      info: [Function: LOG],
+      warn: [Function: LOG],
+      error: [Function: LOG],
+      fatal: [Function (anonymous)],
+      [Symbol(pino.useOnlyCustomLevels)]: false,
+      [Symbol(pino.stream)]: [Object],
+      [Symbol(pino.time)]: [Function: epochTime],
+      [Symbol(pino.timeSliceIndex)]: 8,
+      [Symbol(pino.stringify)]: [Function: stringify],
+      [Symbol(pino.stringifiers)]: {},
+      [Symbol(pino.end)]: '}\n',
+      [Symbol(pino.formatOpts)]: [Object],
+      [Symbol(pino.messageKey)]: 'msg',
+      [Symbol(pino.nestedKey)]: null,
+      [Symbol(pino.serializers)]: [Object: null prototype],
+      [Symbol(pino.mixin)]: undefined,
+      [Symbol(pino.mixinMergeStrategy)]: undefined,
+      [Symbol(pino.chindings)]: ',"pid":635695,"hostname":"vps2.farmageo.com","name":"apirest"',
+      [Symbol(pino.formatters)]: [Object],
+      [Symbol(pino.hooks)]: [Object],
+      [Symbol(pino.lsCache)]: [Object],
+      [Symbol(pino.levelVal)]: 30,
+      [Symbol(pino.parsedChindings)]: [Object]
+    }
+  },
+  ignoreCodes: [],
+  ignoreStatuses: [ 400, 422, 401 ],
+  internalIgnoreCodes: [ 'E_ROUTE_NOT_FOUND' ],
+  statusPages: { '404': 'errors/not-found', '500..599': 'errors/server-error' },
+  disableStatusPagesInDevelopment: true
+}
+[1667994514518] [41mFATAL[49m (apirest/635695 on vps2.farmageo.com): [36mUnexpected exception raised from HTTP ExceptionHandler "report" method[39m
+    RangeError: Maximum call stack size exceeded
+        at Array.indexOf (<anonymous>)
+        at ExceptionHandler.shouldReport (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:66:49)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:135:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+[1667994514519] [33mWARN[39m (apirest/635695 on vps2.farmageo.com): [36mpino.final with prettyPrint does not support flushing[39m
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:34 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:34 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at LaboratoriosController.index (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/LaboratoriosController.ts:79:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:36 GMT-0300 (Argentina Standard Time) Error Handler: ExceptionHandler {
+  logger: Logger {
+    config: {
+      name: 'apirest',
+      enabled: true,
+      level: 'info',
+      prettyPrint: true
+    },
+    pino: EventEmitter {
+      levels: [Object],
+      silent: [Function: noop],
+      trace: [Function: noop],
+      debug: [Function: noop],
+      info: [Function: LOG],
+      warn: [Function: LOG],
+      error: [Function: LOG],
+      fatal: [Function (anonymous)],
+      [Symbol(pino.useOnlyCustomLevels)]: false,
+      [Symbol(pino.stream)]: [Object],
+      [Symbol(pino.time)]: [Function: epochTime],
+      [Symbol(pino.timeSliceIndex)]: 8,
+      [Symbol(pino.stringify)]: [Function: stringify],
+      [Symbol(pino.stringifiers)]: {},
+      [Symbol(pino.end)]: '}\n',
+      [Symbol(pino.formatOpts)]: [Object],
+      [Symbol(pino.messageKey)]: 'msg',
+      [Symbol(pino.nestedKey)]: null,
+      [Symbol(pino.serializers)]: [Object: null prototype],
+      [Symbol(pino.mixin)]: undefined,
+      [Symbol(pino.mixinMergeStrategy)]: undefined,
+      [Symbol(pino.chindings)]: ',"pid":635695,"hostname":"vps2.farmageo.com","name":"apirest"',
+      [Symbol(pino.formatters)]: [Object],
+      [Symbol(pino.hooks)]: [Object],
+      [Symbol(pino.lsCache)]: [Object],
+      [Symbol(pino.levelVal)]: 30,
+      [Symbol(pino.parsedChindings)]: [Object]
+    }
+  },
+  ignoreCodes: [],
+  ignoreStatuses: [ 400, 422, 401 ],
+  internalIgnoreCodes: [ 'E_ROUTE_NOT_FOUND' ],
+  statusPages: { '404': 'errors/not-found', '500..599': 'errors/server-error' },
+  disableStatusPagesInDevelopment: true
+}
+[1667994516488] [41mFATAL[49m (apirest/635695 on vps2.farmageo.com): [36mUnexpected exception raised from HTTP ExceptionHandler "report" method[39m
+    RangeError: Maximum call stack size exceeded
+        at Array.indexOf (<anonymous>)
+        at ExceptionHandler.shouldReport (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:66:49)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:135:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+ArmarListado TypeError: Cannot read properties of undefined (reading 'related')
+    at arrayPermisos (/home/farmageo/api.farmageo.com.ar/app/Helper/funciones.ts:199:34)
+    at exports.actions.Bouncer_1.default.define.define.define.define.define.allowGuest (/home/farmageo/api.farmageo.com.ar/start/bouncer.ts:117:54)
+    at AuthorizationProfiler.profileFunction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Profiler/index.js:23:20)
+    at ActionsAuthorizer.runAction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:83:41)
+    at ActionsAuthorizer.authorizeAction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:102:39)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at ActionsAuthorizer.allows (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:145:32)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:46:15
+    at async Promise.all (index 4)
+    at verificarPermisos (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:44:5)
+Wed Nov 09 2022 08:48:36 GMT-0300 (Argentina Standard Time) Error Handler: TypeError: Cannot read properties of undefined (reading 'related')
+    at arrayPermisos (/home/farmageo/api.farmageo.com.ar/app/Helper/funciones.ts:199:34)
+    at exports.actions.Bouncer_1.default.define.define.define.define.define.allowGuest (/home/farmageo/api.farmageo.com.ar/start/bouncer.ts:117:54)
+    at AuthorizationProfiler.profileFunction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Profiler/index.js:23:20)
+    at ActionsAuthorizer.runAction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:83:41)
+    at ActionsAuthorizer.authorizeAction (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:102:39)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at ActionsAuthorizer.allows (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:145:32)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:46:15
+    at async Promise.all (index 4)
+    at verificarPermisos (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:44:5)
+undefined
+[1667994516566] [41mFATAL[49m (apirest/635695 on vps2.farmageo.com): [36m"uncaughtException" detected[39m
+    TypeError: Cannot read properties of undefined (reading 'Permisos')
+        at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+        at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+        at Array.map (<anonymous>)
+        at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+        at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+        at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+        at Array.map (<anonymous>)
+        at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+        at processTicksAndRejections (node:internal/process/task_queues:96:5)
+        at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+Error no Capturado a tiempo
+TypeError: Cannot read properties of undefined (reading 'Permisos')
+    at eval (eval at <anonymous> (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23), <anonymous>:1:18)
+    at /home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1202:23
+    at Array.map (<anonymous>)
+    at Function.ConfBuilder.setOpciones (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:1199:25)
+    at Function.ConfBuilder.armarListado (/home/farmageo/api.farmageo.com.ar/app/Helper/configuraciones.ts:754:27)
+    at /home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:146:36
+    at Array.map (<anonymous>)
+    at ConfigsController.ConfigPantalla (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/ConfigsController.ts:141:18)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+actualizar ultimo acceso a  TORRESI
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:36 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:36 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+actualizar ultimo acceso a  TORRESI
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at LaboratoriosController.index (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/LaboratoriosController.ts:79:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: ExceptionHandler {
+  logger: Logger {
+    config: {
+      name: 'apirest',
+      enabled: true,
+      level: 'info',
+      prettyPrint: true
+    },
+    pino: EventEmitter {
+      levels: [Object],
+      silent: [Function: noop],
+      trace: [Function: noop],
+      debug: [Function: noop],
+      info: [Function: LOG],
+      warn: [Function: LOG],
+      error: [Function: LOG],
+      fatal: [Function (anonymous)],
+      [Symbol(pino.useOnlyCustomLevels)]: false,
+      [Symbol(pino.stream)]: [Object],
+      [Symbol(pino.time)]: [Function: epochTime],
+      [Symbol(pino.timeSliceIndex)]: 8,
+      [Symbol(pino.stringify)]: [Function: stringify],
+      [Symbol(pino.stringifiers)]: {},
+      [Symbol(pino.end)]: '}\n',
+      [Symbol(pino.formatOpts)]: [Object],
+      [Symbol(pino.messageKey)]: 'msg',
+      [Symbol(pino.nestedKey)]: null,
+      [Symbol(pino.serializers)]: [Object: null prototype],
+      [Symbol(pino.mixin)]: undefined,
+      [Symbol(pino.mixinMergeStrategy)]: undefined,
+      [Symbol(pino.chindings)]: ',"pid":635695,"hostname":"vps2.farmageo.com","name":"apirest"',
+      [Symbol(pino.formatters)]: [Object],
+      [Symbol(pino.hooks)]: [Object],
+      [Symbol(pino.lsCache)]: [Object],
+      [Symbol(pino.levelVal)]: 30,
+      [Symbol(pino.parsedChindings)]: [Object]
+    }
+  },
+  ignoreCodes: [],
+  ignoreStatuses: [ 400, 422, 401 ],
+  internalIgnoreCodes: [ 'E_ROUTE_NOT_FOUND' ],
+  statusPages: { '404': 'errors/not-found', '500..599': 'errors/server-error' },
+  disableStatusPagesInDevelopment: true
+}
+[1667994520394] [41mFATAL[49m (apirest/635695 on vps2.farmageo.com): [36mUnexpected exception raised from HTTP ExceptionHandler "report" method[39m
+    RangeError: Maximum call stack size exceeded
+        at ExceptionHandler.shouldReport (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:61:17)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:135:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+        at ExceptionHandler.report (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/core/build/src/HttpExceptionHandler/index.js:139:19)
+actualizar ultimo acceso a  TORRESI
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+actualizar ultimo acceso a  TORRESI
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+F1360603
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PedidoController.mig_farmacia_pedidos (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PedidoController.ts:41:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+Wed Nov 09 2022 08:48:40 GMT-0300 (Argentina Standard Time) Error Handler: AuthorizationException: E_AUTHORIZATION_FAILURE: Not authorized to perform this action
+    at Function.raise (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/Exceptions/AuthorizationException.js:15:16)
+    at ActionsAuthorizer.authorize (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/bouncer/build/src/ActionsAuthorizer/index.js:165:63)
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at PublicidadsController.mig_novedadesFarmacia (/home/farmageo/api.farmageo.com.ar/app/Controllers/Http/PublicidadsController.ts:54:7)
+    at Object.PreCompiler.runRouteHandler [as fn] (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/PreCompiler/index.js:47:31)
+    at UncaughtError.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/UncaughtError.ts:20:5)
+    at RegistradorDePista.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/RegistradorDePista.ts:36:5)
+    at UsuarioPermiso.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/ctxdata.ts:126:5)
+    at SilentAuthMiddleware.handle (/home/farmageo/api.farmageo.com.ar/app/Middleware/SilentAuth.ts:23:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13)
+[1667994774273] [33mWARN[39m (apirest/635695 on vps2.farmageo.com): [36mConnection Error: Error: read ECONNRESET[39m
+[1667994774274] [33mWARN[39m (apirest/635695 on vps2.farmageo.com): [36mConnection Error: Error: read ECONNRESET[39m
+Wed Nov 09 2022 08:52:54 GMT-0300 (Argentina Standard Time) Error Handler: HttpException: E_ROUTE_NOT_FOUND: Cannot GET:/favicon.ico
+    at Function.invoke (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Exceptions/HttpException.js:31:23)
+    at RequestHandler.findRoute (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/RequestHandler/index.js:49:49)
+    at RequestHandler.handle (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/RequestHandler/index.js:65:14)
+    at /home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:77:44
+    at processTicksAndRejections (node:internal/process/task_queues:96:5)
+    at Server.handleRequest (/home/farmageo/api.farmageo.com.ar/node_modules/@adonisjs/http-server/build/src/Server/index.js:108:13) {
+  body: 'E_ROUTE_NOT_FOUND: Cannot GET:/favicon.ico'
+}
+josemariagelabert@gmail.com ostin2006
+josemariagelabert@gmail.com
+coordinador@farmageo.com.ar coordinador2022
+checking token
+undefined
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'email',
+  valorAnterior: null
+}
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'condiciones_comerciales',
+  valorAnterior: 'ACTUALIZADO 04/10/22   ---   ///   ---     OFERTAS VÁLIDAS HASTA EL 30/10   ---   ///   ---  EL DESCUENTO ADICIONAL SE APLICA AL DE SU PROVEEDOOR'
+}
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'novedades',
+  valorAnterior: '---'
+}
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'email',
+  valorAnterior: ''
+}
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'envia_email_transfer_auto',
+  valorAnterior: 'n'
+}
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'habilitado',
+  valorAnterior: 'n'
+}
+[1667995040952] [33mWARN[39m (apirest/635695 on vps2.farmageo.com): [36mConnection Error: Error: read ECONNRESET[39m
+[1667995040953] [33mWARN[39m (apirest/635695 on vps2.farmageo.com): [36mConnection Error: Error: read ECONNRESET[39m
+2069 17 {
+  registrarCambios: 's',
+  tabla: 'tbl_laboratorio',
+  campo: 'condiciones_comerciales',
+  valorAnterior: 'ACTUALIZADO 09/11/22   ---   ///   ---     OFERTAS VÁLIDAS HASTA EL 30/10   ---   ///   ---  EL DESCUENTO ADICIONAL SE APLICA AL DE SU PROVEEDOOR'
+}
+undefined
+F0639804 ostin2006
+checking token
+actualizar ultimo acceso a  DONADO
+actualizar ultimo acceso a  DONADO
+actualizar ultimo acceso a  DONADO
+F0639804
+F0639804
+F0639804
+actualizar ultimo acceso a  DONADO
+F0639804
+UPDATE: app/Controllers/Http/ConfigsController.ts
+[ info ]  re-starting http server...
+UPDATE: app/Helper/configuraciones.ts
+[ info ]  re-starting http server...
+UPDATE: app/Middleware/UncaughtError.ts
+[ info ]  re-starting http server...
+[1667995100077] [32mINFO[39m (apirest/673786 on vps2.farmageo.com): [36mstarted server on 0.0.0.0:3111[39m
+╭─────────────────────────────────────────────────╮
+│                                                 │
+│    Server address: http://127.0.0.1:3111        │
+│    Watching filesystem for changes: YES         │
+│                                                 │
+╰─────────────────────────────────────────────────╯
